@@ -12,5 +12,5 @@ CEL stay in `implementations/python` and `implementations/typescript`.
 Composition merge ships in `packages/merge`.
 
 Nothing here is published to npm or PyPI. Consumers install a git
-subdirectory of `circuitmeridian/velocitron`. Each language
+subdirectory of `matthewryanscott/velocitron`. Each language
 README has the install snippet.

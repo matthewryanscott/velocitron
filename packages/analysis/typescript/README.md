@@ -3,11 +3,11 @@
 Read a Velocitron proof report. The Python distribution name is
 `velocitron-analysis` (import `velocitron_analysis`).
 
-This package is part of the [velocitron](https://github.com/circuitmeridian/velocitron)
+This package is part of the [velocitron](https://github.com/matthewryanscott/velocitron)
 monorepo. It is not published to npm. The package is marked `"private": true`
 so a workspace publish does not send it to the registry. Git subdirectory
 installs still resolve it. Downstream projects depend on a git revision of
-`circuitmeridian/velocitron` and the
+`matthewryanscott/velocitron` and the
 `packages/analysis/typescript` subdirectory.
 
 Version 0.1.0 is alpha software. The report reader may change without notice.
@@ -53,7 +53,7 @@ pnpm:
 ```json
 {
   "dependencies": {
-    "@velocitron/analysis": "git+https://github.com/circuitmeridian/velocitron.git#<ref>&path:/packages/analysis/typescript"
+    "@velocitron/analysis": "git+https://github.com/matthewryanscott/velocitron.git#<ref>&path:/packages/analysis/typescript"
   }
 }
 ```
@@ -63,7 +63,7 @@ npm accepts the same git URL, and also:
 ```json
 {
   "dependencies": {
-    "@velocitron/analysis": "github:circuitmeridian/velocitron#<ref>&path:packages/analysis/typescript"
+    "@velocitron/analysis": "github:matthewryanscott/velocitron#<ref>&path:packages/analysis/typescript"
   }
 }
 ```

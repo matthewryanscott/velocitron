@@ -3,9 +3,9 @@
 Compares two merged nets up to renaming. The import name is
 `velocitron_equiv`. The TypeScript package is `@velocitron/equiv`.
 
-This package is part of the [velocitron](https://github.com/circuitmeridian/velocitron)
+This package is part of the [velocitron](https://github.com/matthewryanscott/velocitron)
 monorepo. It is not published to PyPI. Downstream projects depend on a git
-revision of `circuitmeridian/velocitron` and the
+revision of `matthewryanscott/velocitron` and the
 `packages/equiv/python` subdirectory.
 
 Version 0.1.0 is alpha software. The comparison may change without notice.
@@ -50,7 +50,7 @@ installed the same way from their `packages/*/python` directories.
 ```toml
 [project]
 dependencies = [
-  "velocitron-equiv @ git+https://github.com/circuitmeridian/velocitron.git@<ref>#subdirectory=packages/equiv/python",
+  "velocitron-equiv @ git+https://github.com/matthewryanscott/velocitron.git@<ref>#subdirectory=packages/equiv/python",
 ]
 ```
 
@@ -58,7 +58,7 @@ With a uv source table:
 
 ```toml
 [tool.uv.sources]
-velocitron-equiv = { git = "https://github.com/circuitmeridian/velocitron.git", rev = "<ref>", subdirectory = "packages/equiv/python" }
+velocitron-equiv = { git = "https://github.com/matthewryanscott/velocitron.git", rev = "<ref>", subdirectory = "packages/equiv/python" }
 ```
 
 ```python

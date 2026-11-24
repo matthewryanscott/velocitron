@@ -3,9 +3,9 @@
 Renders a validated net as deterministic prose. The import name is
 `velocitron_explain`. The TypeScript package is `@velocitron/explain`.
 
-This package is part of the [velocitron](https://github.com/circuitmeridian/velocitron)
+This package is part of the [velocitron](https://github.com/matthewryanscott/velocitron)
 monorepo. It is not published to PyPI. Downstream projects depend on a git
-revision of `circuitmeridian/velocitron` and the
+revision of `matthewryanscott/velocitron` and the
 `packages/explain/python` subdirectory.
 
 Version 0.1.0 is alpha software. The renderer may change without notice.
@@ -45,7 +45,7 @@ installed the same way from their `packages/*/python` directories.
 ```toml
 [project]
 dependencies = [
-  "velocitron-explain @ git+https://github.com/circuitmeridian/velocitron.git@<ref>#subdirectory=packages/explain/python",
+  "velocitron-explain @ git+https://github.com/matthewryanscott/velocitron.git@<ref>#subdirectory=packages/explain/python",
 ]
 ```
 
@@ -53,7 +53,7 @@ With a uv source table:
 
 ```toml
 [tool.uv.sources]
-velocitron-explain = { git = "https://github.com/circuitmeridian/velocitron.git", rev = "<ref>", subdirectory = "packages/explain/python" }
+velocitron-explain = { git = "https://github.com/matthewryanscott/velocitron.git", rev = "<ref>", subdirectory = "packages/explain/python" }
 ```
 
 ```python

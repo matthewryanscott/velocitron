@@ -3,9 +3,9 @@
 Run a net asynchronously and evaluate intended waits. The import name is
 `velocitron_runtime`. The TypeScript package is `@velocitron/runtime`.
 
-This package is part of the [velocitron](https://github.com/circuitmeridian/velocitron)
+This package is part of the [velocitron](https://github.com/matthewryanscott/velocitron)
 monorepo. It is not published to PyPI. Downstream projects depend on a git
-revision of `circuitmeridian/velocitron` and the
+revision of `matthewryanscott/velocitron` and the
 `packages/runtime/python` subdirectory.
 
 Version 0.1.0 is alpha software. The runtime may change without notice.
@@ -62,7 +62,7 @@ installed the same way from `packages/engine/python` and
 ```toml
 [project]
 dependencies = [
-  "velocitron-runtime @ git+https://github.com/circuitmeridian/velocitron.git@<ref>#subdirectory=packages/runtime/python",
+  "velocitron-runtime @ git+https://github.com/matthewryanscott/velocitron.git@<ref>#subdirectory=packages/runtime/python",
 ]
 ```
 
@@ -70,7 +70,7 @@ With a uv source table:
 
 ```toml
 [tool.uv.sources]
-velocitron-runtime = { git = "https://github.com/circuitmeridian/velocitron.git", rev = "<ref>", subdirectory = "packages/runtime/python" }
+velocitron-runtime = { git = "https://github.com/matthewryanscott/velocitron.git", rev = "<ref>", subdirectory = "packages/runtime/python" }
 ```
 
 ```python

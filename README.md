@@ -243,7 +243,7 @@ these packages are available from a public package registry.
 Browse an example or model a small process of your own, then share what feels
 clear, awkward, missing, or misleading. Send broad reactions through an
 existing direct channel with the author. Report reproducible defects through
-[GitHub Issues](https://github.com/circuitmeridian/velocitron/issues).
+[GitHub Issues](https://github.com/matthewryanscott/velocitron/issues).
 
 External code contributions and pull requests are not accepted yet. These
 feedback routes do not create a commitment to review, merge, respond, provide

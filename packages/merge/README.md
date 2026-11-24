@@ -16,7 +16,7 @@ sibling packages are one word (`ir`, `grammar`, `cel`, `dsl`), and this is
 the only merge transform in the runtime.
 
 Nothing here is published to npm or PyPI. Consumers install a git
-subdirectory of `circuitmeridian/velocitron`. Each language
+subdirectory of `matthewryanscott/velocitron`. Each language
 README has the install snippet.
 
 `velocitron_petrinet` calls this package and then revalidates the merged

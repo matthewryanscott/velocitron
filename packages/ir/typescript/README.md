@@ -3,11 +3,11 @@
 Shape-only loader for Velocitron contribution IR. The Python distribution
 name is `velocitron-ir` (import `velocitron_ir`).
 
-This package is part of the [velocitron](https://github.com/circuitmeridian/velocitron)
+This package is part of the [velocitron](https://github.com/matthewryanscott/velocitron)
 monorepo. It is not published to npm. The package is marked `"private": true`
 so a workspace publish does not send it to the registry. Git subdirectory
 installs still resolve it. Downstream projects depend on a git revision of
-`circuitmeridian/velocitron` and the `packages/ir/typescript`
+`matthewryanscott/velocitron` and the `packages/ir/typescript`
 subdirectory.
 
 Version 0.1.0 is alpha software. The wire shape may change without notice.
@@ -57,7 +57,7 @@ pnpm:
 ```json
 {
   "dependencies": {
-    "@velocitron/ir": "git+https://github.com/circuitmeridian/velocitron.git#<ref>&path:/packages/ir/typescript"
+    "@velocitron/ir": "git+https://github.com/matthewryanscott/velocitron.git#<ref>&path:/packages/ir/typescript"
   }
 }
 ```
@@ -67,7 +67,7 @@ npm accepts the same git URL, and also:
 ```json
 {
   "dependencies": {
-    "@velocitron/ir": "github:circuitmeridian/velocitron#<ref>&path:packages/ir/typescript"
+    "@velocitron/ir": "github:matthewryanscott/velocitron#<ref>&path:packages/ir/typescript"
   }
 }
 ```

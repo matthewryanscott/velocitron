@@ -3,9 +3,9 @@
 Compile `.petrinet` text and contribution IR into canonical JSON. The import
 name is `velocitron_petrinet`. The TypeScript package is `@velocitron/petrinet`.
 
-This package is part of the [velocitron](https://github.com/circuitmeridian/velocitron)
+This package is part of the [velocitron](https://github.com/matthewryanscott/velocitron)
 monorepo. It is not published to PyPI. Downstream projects depend on a git
-revision of `circuitmeridian/velocitron` and the
+revision of `matthewryanscott/velocitron` and the
 `packages/petrinet/python` subdirectory.
 
 Version 0.1.0 is alpha software. The compiler may change without notice.
@@ -61,7 +61,7 @@ published. They point at this repository. Install the sibling packages the same 
 ```toml
 [project]
 dependencies = [
-  "velocitron-petrinet @ git+https://github.com/circuitmeridian/velocitron.git@<ref>#subdirectory=packages/petrinet/python",
+  "velocitron-petrinet @ git+https://github.com/matthewryanscott/velocitron.git@<ref>#subdirectory=packages/petrinet/python",
 ]
 ```
 
@@ -69,7 +69,7 @@ With a uv source table:
 
 ```toml
 [tool.uv.sources]
-velocitron-petrinet = { git = "https://github.com/circuitmeridian/velocitron.git", rev = "<ref>", subdirectory = "packages/petrinet/python" }
+velocitron-petrinet = { git = "https://github.com/matthewryanscott/velocitron.git", rev = "<ref>", subdirectory = "packages/petrinet/python" }
 ```
 
 ## License

@@ -14,7 +14,7 @@ _SCHEMA_VERSION = 3
 _HEX_40 = re.compile(r"[0-9a-f]{40}")
 _VERSION = re.compile(r"[0-9]+\.[0-9]+\.[0-9]+")
 _WORKFLOW_PATH = ".github/workflows/release-candidate.yml"
-_EXPECTED_REPOSITORY = "circuitmeridian/velocitron"
+_EXPECTED_REPOSITORY = "matthewryanscott/velocitron"
 _VERIFICATION_TOOL_PATHS = (
     "tools/release_identity.py",
     "tools/release_manifest.py",

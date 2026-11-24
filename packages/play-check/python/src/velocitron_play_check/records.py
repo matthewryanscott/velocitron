@@ -2,7 +2,7 @@
 
 The consumer: a save-as-play button. A recorded run's journal — the
 occurrence sequence of the net together with its environment
-([ADR 0059](https://github.com/circuitmeridian/velocitron/blob/main/docs/adr/0059-velocitron-spells-its-model-words-the-way-the-petri-net-books-do.md),
+([ADR 0059](https://github.com/matthewryanscott/velocitron/blob/main/docs/adr/0059-velocitron-spells-its-model-words-the-way-the-petri-net-books-do.md),
 item 3) — is a list of :class:`InjectionRecord` / :class:`FiringRecord`
 dicts; :func:`records_to_play` writes the play that passes
 :func:`check_play` and replays those records, one step per record:

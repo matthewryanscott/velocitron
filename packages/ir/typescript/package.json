@@ -1,7 +1,7 @@
 {
   "author": "Matthew R. Scott",
   "bugs": {
-    "url": "https://github.com/circuitmeridian/velocitron/issues"
+    "url": "https://github.com/matthewryanscott/velocitron/issues"
   },
   "dependencies": {
     "ajv": "8.20.0"
@@ -28,14 +28,14 @@
     "petrinet-contribution-ir.schema.json",
     "README.md"
   ],
-  "homepage": "https://github.com/circuitmeridian/velocitron",
+  "homepage": "https://github.com/matthewryanscott/velocitron",
   "license": "MIT",
   "name": "@velocitron/ir",
   "private": true,
   "repository": {
     "directory": "packages/ir/typescript",
     "type": "git",
-    "url": "git+https://github.com/circuitmeridian/velocitron.git"
+    "url": "git+https://github.com/matthewryanscott/velocitron.git"
   },
   "scripts": {
     "test": "node --test test/*.test.js",

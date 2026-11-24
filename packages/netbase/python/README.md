@@ -3,9 +3,9 @@
 `VelocitronNet`, the base every generated Python net extends. The import
 name is `velocitron_netbase`. The TypeScript package is `@velocitron/netbase`.
 
-This package is part of the [velocitron](https://github.com/circuitmeridian/velocitron)
+This package is part of the [velocitron](https://github.com/matthewryanscott/velocitron)
 monorepo. It is not published to PyPI. Downstream projects depend on a git
-revision of `circuitmeridian/velocitron` and the
+revision of `matthewryanscott/velocitron` and the
 `packages/netbase/python` subdirectory.
 
 Version 0.1.0 is alpha software. The registration contract may change
@@ -66,7 +66,7 @@ their `packages/*/python` directories.
 ```toml
 [project]
 dependencies = [
-  "velocitron-netbase @ git+https://github.com/circuitmeridian/velocitron.git@<ref>#subdirectory=packages/netbase/python",
+  "velocitron-netbase @ git+https://github.com/matthewryanscott/velocitron.git@<ref>#subdirectory=packages/netbase/python",
 ]
 ```
 
@@ -74,7 +74,7 @@ With a uv source table:
 
 ```toml
 [tool.uv.sources]
-velocitron-netbase = { git = "https://github.com/circuitmeridian/velocitron.git", rev = "<ref>", subdirectory = "packages/netbase/python" }
+velocitron-netbase = { git = "https://github.com/matthewryanscott/velocitron.git", rev = "<ref>", subdirectory = "packages/netbase/python" }
 ```
 
 ```python

@@ -15,7 +15,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  EXPECTED_REPOSITORY: circuitmeridian/velocitron
+  EXPECTED_REPOSITORY: matthewryanscott/velocitron
   NODE_VERSION: "24.15.0"
   PNPM_VERSION: "11.13.1"
   BASEDPYRIGHT_VERSION: "1.39.9"

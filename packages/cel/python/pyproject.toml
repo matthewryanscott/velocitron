@@ -32,9 +32,9 @@ cel-cpp = ["cel-expr-python>=0.1.3"]
 cel-rust = ["common-expression-language>=0.6.0", "typing_extensions>=4.12"]
 
 [project.urls]
-Homepage = "https://github.com/circuitmeridian/velocitron"
-Repository = "https://github.com/circuitmeridian/velocitron"
-Issues = "https://github.com/circuitmeridian/velocitron/issues"
+Homepage = "https://github.com/matthewryanscott/velocitron"
+Repository = "https://github.com/matthewryanscott/velocitron"
+Issues = "https://github.com/matthewryanscott/velocitron/issues"
 
 [dependency-groups]
 test = [

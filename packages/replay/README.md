@@ -13,7 +13,7 @@ The TypeScript package raises `ReplayUnavailableError` for those names. It
 does not replay a tape. ADR 0058 leaves a TypeScript runtime off the roadmap.
 
 Nothing here is published to npm or PyPI. Consumers install a git
-subdirectory of `circuitmeridian/velocitron`. Each language
+subdirectory of `matthewryanscott/velocitron`. Each language
 README has the install snippet.
 
 `velocitron.replay` re-exports this public seam. Generated `Replay<Net>`

@@ -1,7 +1,7 @@
 {
   "author": "Matthew R. Scott",
   "bugs": {
-    "url": "https://github.com/circuitmeridian/velocitron/issues"
+    "url": "https://github.com/matthewryanscott/velocitron/issues"
   },
   "dependencies": {
     "@velocitron/analysis": "workspace:*",
@@ -29,14 +29,14 @@
   "engines": {
     "node": ">=20.19.0"
   },
-  "homepage": "https://github.com/circuitmeridian/velocitron",
+  "homepage": "https://github.com/matthewryanscott/velocitron",
   "license": "MIT",
   "name": "@velocitron/typescript-tests",
   "private": true,
   "repository": {
     "directory": "implementations/typescript",
     "type": "git",
-    "url": "git+https://github.com/circuitmeridian/velocitron.git"
+    "url": "git+https://github.com/matthewryanscott/velocitron.git"
   },
   "scripts": {
     "audit:browser": "python3 ../../tools/release_checks.py --audit-source-browser-seam",

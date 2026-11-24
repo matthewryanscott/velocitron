@@ -3,11 +3,11 @@
 Append, read, and replay a Velocitron journal. The Python distribution name
 is `velocitron-journal` (import `velocitron_journal`).
 
-This package is part of the [velocitron](https://github.com/circuitmeridian/velocitron)
+This package is part of the [velocitron](https://github.com/matthewryanscott/velocitron)
 monorepo. It is not published to npm. The package is marked `"private": true`
 so a workspace publish does not send it to the registry. Git subdirectory
 installs still resolve it. Downstream projects depend on a git revision of
-`circuitmeridian/velocitron` and the
+`matthewryanscott/velocitron` and the
 `packages/journal/typescript` subdirectory.
 
 Version 0.1.0 is alpha software. The journal may change without notice.
@@ -63,7 +63,7 @@ pnpm:
 ```json
 {
   "dependencies": {
-    "@velocitron/journal": "git+https://github.com/circuitmeridian/velocitron.git#<ref>&path:/packages/journal/typescript"
+    "@velocitron/journal": "git+https://github.com/matthewryanscott/velocitron.git#<ref>&path:/packages/journal/typescript"
   }
 }
 ```
@@ -73,7 +73,7 @@ npm accepts the same git URL, and also:
 ```json
 {
   "dependencies": {
-    "@velocitron/journal": "github:circuitmeridian/velocitron#<ref>&path:packages/journal/typescript"
+    "@velocitron/journal": "github:matthewryanscott/velocitron#<ref>&path:packages/journal/typescript"
   }
 }
 ```

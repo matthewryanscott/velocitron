@@ -3,9 +3,9 @@
 Append, read, and replay a Velocitron journal. The import name is
 `velocitron_journal`. The TypeScript package is `@velocitron/journal`.
 
-This package is part of the [velocitron](https://github.com/circuitmeridian/velocitron)
+This package is part of the [velocitron](https://github.com/matthewryanscott/velocitron)
 monorepo. It is not published to PyPI. Downstream projects depend on a git
-revision of `circuitmeridian/velocitron` and the
+revision of `matthewryanscott/velocitron` and the
 `packages/journal/python` subdirectory.
 
 Version 0.1.0 is alpha software. The journal may change without notice.
@@ -52,7 +52,7 @@ from `packages/engine/python`.
 ```toml
 [project]
 dependencies = [
-  "velocitron-journal @ git+https://github.com/circuitmeridian/velocitron.git@<ref>#subdirectory=packages/journal/python",
+  "velocitron-journal @ git+https://github.com/matthewryanscott/velocitron.git@<ref>#subdirectory=packages/journal/python",
 ]
 ```
 
@@ -60,7 +60,7 @@ With a uv source table:
 
 ```toml
 [tool.uv.sources]
-velocitron-journal = { git = "https://github.com/circuitmeridian/velocitron.git", rev = "<ref>", subdirectory = "packages/journal/python" }
+velocitron-journal = { git = "https://github.com/matthewryanscott/velocitron.git", rev = "<ref>", subdirectory = "packages/journal/python" }
 ```
 
 ```python

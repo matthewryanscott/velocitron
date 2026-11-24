@@ -3,11 +3,11 @@
 Merge already-parsed nets into one net. The Python distribution name is
 `velocitron-merge` (import `velocitron_merge`).
 
-This package is part of the [velocitron](https://github.com/circuitmeridian/velocitron)
+This package is part of the [velocitron](https://github.com/matthewryanscott/velocitron)
 monorepo. It is not published to npm. The package is marked `"private": true`
 so a workspace publish does not send it to the registry. Git subdirectory
 installs still resolve it. Downstream projects depend on a git revision of
-`circuitmeridian/velocitron` and the `packages/merge/typescript`
+`matthewryanscott/velocitron` and the `packages/merge/typescript`
 subdirectory.
 
 Version 0.1.0 is alpha software. The merge may change without notice.
@@ -73,7 +73,7 @@ pnpm:
 ```json
 {
   "dependencies": {
-    "@velocitron/merge": "git+https://github.com/circuitmeridian/velocitron.git#<ref>&path:/packages/merge/typescript"
+    "@velocitron/merge": "git+https://github.com/matthewryanscott/velocitron.git#<ref>&path:/packages/merge/typescript"
   }
 }
 ```
@@ -83,7 +83,7 @@ npm accepts the same git URL, and also:
 ```json
 {
   "dependencies": {
-    "@velocitron/merge": "github:circuitmeridian/velocitron#<ref>&path:packages/merge/typescript"
+    "@velocitron/merge": "github:matthewryanscott/velocitron#<ref>&path:packages/merge/typescript"
   }
 }
 ```

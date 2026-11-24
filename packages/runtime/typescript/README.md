@@ -3,9 +3,9 @@
 Run a net asynchronously and evaluate intended waits. The Python
 distribution name is `velocitron-runtime` (import `velocitron_runtime`).
 
-This package is part of the [velocitron](https://github.com/circuitmeridian/velocitron)
+This package is part of the [velocitron](https://github.com/matthewryanscott/velocitron)
 monorepo. It is not published to npm. Downstream projects depend on a git
-revision of `circuitmeridian/velocitron` and the
+revision of `matthewryanscott/velocitron` and the
 `packages/runtime/typescript` subdirectory.
 
 Version 0.1.0 is alpha software. The runtime may change without notice.
@@ -56,7 +56,7 @@ pnpm:
 ```json
 {
   "dependencies": {
-    "@velocitron/runtime": "git+https://github.com/circuitmeridian/velocitron.git#<ref>&path:/packages/runtime/typescript"
+    "@velocitron/runtime": "git+https://github.com/matthewryanscott/velocitron.git#<ref>&path:/packages/runtime/typescript"
   }
 }
 ```
@@ -66,7 +66,7 @@ npm:
 ```json
 {
   "dependencies": {
-    "@velocitron/runtime": "github:circuitmeridian/velocitron#<ref>&path:packages/runtime/typescript"
+    "@velocitron/runtime": "github:matthewryanscott/velocitron#<ref>&path:packages/runtime/typescript"
   }
 }
 ```

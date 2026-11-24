@@ -23,7 +23,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  EXPECTED_REPOSITORY: circuitmeridian/velocitron
+  EXPECTED_REPOSITORY: matthewryanscott/velocitron
 
 jobs:
   verify:

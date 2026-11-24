@@ -13,7 +13,7 @@ document kind (`net` or `composition`), the header name, and the ANTLR
 `document` tree.
 
 Nothing here is published to npm or PyPI. Consumers install a git
-subdirectory of `circuitmeridian/velocitron`. Each language
+subdirectory of `matthewryanscott/velocitron`. Each language
 README has the install snippet.
 
 Lowering a parse into contribution IR ships in `packages/dsl`. The language

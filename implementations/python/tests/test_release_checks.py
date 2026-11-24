@@ -69,7 +69,7 @@ class _ReleaseChecksTool(Protocol):
 
 _TOOL = cast(_ReleaseChecksTool, cast(object, _RELEASE_CHECKS_MODULE))
 _VERSION = "0.1.0"
-_REPOSITORY = "circuitmeridian/velocitron"
+_REPOSITORY = "matthewryanscott/velocitron"
 _REPOSITORY_URL = f"https://github.com/{_REPOSITORY}"
 _KINDS = ("python-wheel", "python-sdist")
 _PATHS = {
@@ -425,14 +425,14 @@ def test_wrong_repository_detector_covers_supported_git_forms() -> None:
         ) == [identity.decode("ascii")]
 
 
-def test_repository_detector_accepts_circuit_meridian_git_forms() -> None:
+def test_repository_detector_accepts_canonical_owner_git_forms() -> None:
     # given: the approved owner under every supported GitHub transport
     identities = (
-        b"https://GITHUB.com/circuitmeridian/velocitron",
-        b"git+https://github.com/circuitmeridian/velocitron.git",
-        b"ssh://git@GitHub.com/circuitmeridian/velocitron.git",
-        b"git@GITHUB.com:circuitmeridian/velocitron.git",
-        b"circuitmeridian/velocitron",
+        b"https://GITHUB.com/matthewryanscott/velocitron",
+        b"git+https://github.com/matthewryanscott/velocitron.git",
+        b"ssh://git@GitHub.com/matthewryanscott/velocitron.git",
+        b"git@GITHUB.com:matthewryanscott/velocitron.git",
+        b"matthewryanscott/velocitron",
     )
 
     # when/then: generic detection does not reject the canonical repository
@@ -458,7 +458,7 @@ def test_wrong_organization_repository_url_in_metadata_fails(
     ]
     _write_archive(tmp_path, kind, members)
 
-    # when/then: exact metadata assertions bind archives to Circuit Meridian
+    # when/then: exact metadata assertions bind archives to matthewryanscott/velocitron
     with pytest.raises(_TOOL.ReleaseCheckError, match="wrong repository identity"):
         _TOOL.inspect_artifacts(
             tmp_path,

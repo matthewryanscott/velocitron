@@ -3,9 +3,9 @@
 Compile and evaluate CEL. The import name is `velocitron_cel`. The TypeScript
 package is `@velocitron/cel`.
 
-This package is part of the [velocitron](https://github.com/circuitmeridian/velocitron)
+This package is part of the [velocitron](https://github.com/matthewryanscott/velocitron)
 monorepo. It is not published to PyPI. Downstream projects depend on a git
-revision of `circuitmeridian/velocitron` and the
+revision of `matthewryanscott/velocitron` and the
 `packages/cel/python` subdirectory.
 
 Version 0.1.0 is alpha software. The adapter may change without notice.
@@ -50,7 +50,7 @@ published. They point at this repository.
 ```toml
 [project]
 dependencies = [
-  "velocitron-cel @ git+https://github.com/circuitmeridian/velocitron.git@<ref>#subdirectory=packages/cel/python",
+  "velocitron-cel @ git+https://github.com/matthewryanscott/velocitron.git@<ref>#subdirectory=packages/cel/python",
 ]
 ```
 
@@ -58,7 +58,7 @@ With a uv source table:
 
 ```toml
 [tool.uv.sources]
-velocitron-cel = { git = "https://github.com/circuitmeridian/velocitron.git", rev = "<ref>", subdirectory = "packages/cel/python" }
+velocitron-cel = { git = "https://github.com/matthewryanscott/velocitron.git", rev = "<ref>", subdirectory = "packages/cel/python" }
 ```
 
 ```python

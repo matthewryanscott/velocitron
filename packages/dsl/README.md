@@ -24,7 +24,7 @@ package root. Teach grammar to export the surface, then import it here.
 does not vendor another copy.
 
 Nothing here is published to npm or PyPI. Consumers install a git
-subdirectory of `circuitmeridian/velocitron`. Each language
+subdirectory of `matthewryanscott/velocitron`. Each language
 README has the install snippet.
 
 Callers import this package's public API. `emit_petrinet` renders canonical

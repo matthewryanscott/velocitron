@@ -33,8 +33,8 @@ def test_workflow_rejects_the_wrong_repository_identity(
     # given: every live release workflow
     workflow = _workflow(workflow_name)
 
-    # when/then: it pins and checks the Circuit Meridian repository before use
-    assert "EXPECTED_REPOSITORY: circuitmeridian/velocitron" in workflow
+    # when/then: it pins and checks matthewryanscott/velocitron before use
+    assert "EXPECTED_REPOSITORY: matthewryanscott/velocitron" in workflow
     assert 'test "$GITHUB_REPOSITORY" = "$EXPECTED_REPOSITORY"' in workflow
 
 

@@ -19,7 +19,7 @@ graphs and PlantUML stay in the Python package. The conformance cases
 in `spec/conformance/play/` remain the target ([ADR 0031]).
 
 A play never changes a net. It is checked by symbolic firing through the
-ordinary engine, so [`firing-semantics.md`](https://github.com/circuitmeridian/velocitron/blob/main/packages/spec/firing-semantics.md) defines
+ordinary engine, so [`firing-semantics.md`](https://github.com/matthewryanscott/velocitron/blob/main/packages/spec/firing-semantics.md) defines
 every rule of enablement, binding, timers and deposit. This document adds
 only where a firing's output data comes from.
 
@@ -159,7 +159,7 @@ In an `==` token list, a comma followed by `(`, `enabled`, `not`, `next` or
   with a `composition` header, or composition JSON).
 - `use "file" as alias`, `wire a.(p) -> b.(q)`, `share a.(p) ~ b.(q)` and
   `refine a.[t] by b` compose nets in the play itself, with the meaning
-  of the same `.petrinet` facts ([`composition.md`](https://github.com/circuitmeridian/velocitron/blob/main/packages/spec/composition.md)). A
+  of the same `.petrinet` facts ([`composition.md`](https://github.com/matthewryanscott/velocitron/blob/main/packages/spec/composition.md)). A
   play has `net` or `use` lines, not both. A step that names a refined
   transition fails with `SC203`, and the detail names the refining net.
 - A place or transition of a composition is named by its merged name,
@@ -177,7 +177,7 @@ In an `==` token list, a comma followed by `(`, `enabled`, `not`, `next` or
   that reads `instance` and may inject it (below).
 - Every starting marking also holds each **kept record** of the net
   ([`petrinet-language.md`](./petrinet-language.md), "Kept records";
-  [ADR 0051](https://github.com/circuitmeridian/velocitron/blob/main/docs/adr/0051-a-kept-record-is-there-from-the-start-and-only-the-net-writes-it.md)),
+  [ADR 0051](https://github.com/matthewryanscott/velocitron/blob/main/docs/adr/0051-a-kept-record-is-there-from-the-start-and-only-the-net-writes-it.md)),
   with the value its `starts as` expression gives, `marking none` too. A
   start that reads `instance` is built from the token that `instance Token`
   names (`instance $u1`, or `instance hold {"branch": "main"}`); only
@@ -254,7 +254,7 @@ Each step plays against the marking the previous step left.
 
 An `assume` step tells the checker what a handler would answer, so a play
 can reach a transition whose behavior is hand code
-([ADR 0058](https://github.com/circuitmeridian/velocitron/blob/main/docs/adr/0058-a-net-compiles-to-a-python-base-class-and-the-journal-traces-and-replays-the-run.md),
+([ADR 0058](https://github.com/matthewryanscott/velocitron/blob/main/docs/adr/0058-a-net-compiles-to-a-python-base-class-and-the-journal-traces-and-replays-the-run.md),
 "Open decisions"). It changes no marking; the assumption is in force from the
 step to the end of its path.
 
@@ -282,7 +282,7 @@ so the assumed value is visible in the occurrence sequence.
 ### Symbolic firing
 
 1. **Binding.** `Engine.reserve` selects the binding: the first binding, in
-   the enumeration order of [`firing-semantics.md`](https://github.com/circuitmeridian/velocitron/blob/main/packages/spec/firing-semantics.md),
+   the enumeration order of [`firing-semantics.md`](https://github.com/matthewryanscott/velocitron/blob/main/packages/spec/firing-semantics.md),
    that passes every gate. `with` clauses narrow it, through `reserve`'s
    `choose` filter: `with (p) {subset}` wants a bound token from `p` whose
    data contains the subset (objects compare key by key, other values by
@@ -715,10 +715,10 @@ it, so a play it returns passes `check_play` and its occurrence sequence
 is the journal's record-for-record (ids, attempts and timestamps left
 out). [ADR 0060]
 
-[ADR 0024]: https://github.com/circuitmeridian/velocitron/blob/main/docs/adr/0024-views-are-applied-by-a-render-model.md
-[ADR 0031]: https://github.com/circuitmeridian/velocitron/blob/main/docs/adr/0031-plays-check-firing-sequences-by-symbolic-firing.md
-[ADR 0033]: https://github.com/circuitmeridian/velocitron/blob/main/docs/adr/0033-walkthrough-steps-draw-a-scope-as-twin-graphs.md
-[ADR 0038]: https://github.com/circuitmeridian/velocitron/blob/main/docs/adr/0038-sequence-diagrams-project-plays-onto-actors.md
-[ADR 0039]: https://github.com/circuitmeridian/velocitron/blob/main/docs/adr/0039-sequence-diagrams-draw-lived-places-as-columns.md
-[ADR 0059]: https://github.com/circuitmeridian/velocitron/blob/main/docs/adr/0059-velocitron-spells-its-model-words-the-way-the-petri-net-books-do.md
-[ADR 0060]: https://github.com/circuitmeridian/velocitron/blob/main/docs/adr/0060-advance-is-one-seam-and-tick-is-deleted.md
+[ADR 0024]: https://github.com/matthewryanscott/velocitron/blob/main/docs/adr/0024-views-are-applied-by-a-render-model.md
+[ADR 0031]: https://github.com/matthewryanscott/velocitron/blob/main/docs/adr/0031-plays-check-firing-sequences-by-symbolic-firing.md
+[ADR 0033]: https://github.com/matthewryanscott/velocitron/blob/main/docs/adr/0033-walkthrough-steps-draw-a-scope-as-twin-graphs.md
+[ADR 0038]: https://github.com/matthewryanscott/velocitron/blob/main/docs/adr/0038-sequence-diagrams-project-plays-onto-actors.md
+[ADR 0039]: https://github.com/matthewryanscott/velocitron/blob/main/docs/adr/0039-sequence-diagrams-draw-lived-places-as-columns.md
+[ADR 0059]: https://github.com/matthewryanscott/velocitron/blob/main/docs/adr/0059-velocitron-spells-its-model-words-the-way-the-petri-net-books-do.md
+[ADR 0060]: https://github.com/matthewryanscott/velocitron/blob/main/docs/adr/0060-advance-is-one-seam-and-tick-is-deleted.md

@@ -11,7 +11,7 @@ Python `advance(outputs=)` is the symbolic-advance seam;
 `run` is the selection loop. Both require an injected CEL adapter.
 
 Nothing here is published to npm or PyPI. Consumers install a git
-subdirectory of `circuitmeridian/velocitron`. Each language
+subdirectory of `matthewryanscott/velocitron`. Each language
 README has the install snippet.
 
 `velocitron_runtime.Engine` and `@velocitron/runtime`'s `Engine` subclass

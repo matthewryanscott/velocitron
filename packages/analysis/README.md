@@ -12,7 +12,7 @@ The Python package is the prover. The TypeScript package reads the proof
 report document from `packages/spec/proofs.md`. It does not explore a net.
 
 Nothing here is published to npm or PyPI. Consumers install a git
-subdirectory of `circuitmeridian/velocitron`. Each language
+subdirectory of `matthewryanscott/velocitron`. Each language
 README has the install snippet.
 
 Callers import `velocitron_analysis`. The `velocitron prove` command lives

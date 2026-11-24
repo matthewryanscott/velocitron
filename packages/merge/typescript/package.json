@@ -1,7 +1,7 @@
 {
   "author": "Matthew R. Scott",
   "bugs": {
-    "url": "https://github.com/circuitmeridian/velocitron/issues"
+    "url": "https://github.com/matthewryanscott/velocitron/issues"
   },
   "description": "Merges already-parsed Velocitron nets. Does not parse documents, compile CEL, or run the engine.",
   "devDependencies": {
@@ -22,14 +22,14 @@
     "LICENSE",
     "README.md"
   ],
-  "homepage": "https://github.com/circuitmeridian/velocitron",
+  "homepage": "https://github.com/matthewryanscott/velocitron",
   "license": "MIT",
   "name": "@velocitron/merge",
   "private": true,
   "repository": {
     "directory": "packages/merge/typescript",
     "type": "git",
-    "url": "git+https://github.com/circuitmeridian/velocitron.git"
+    "url": "git+https://github.com/matthewryanscott/velocitron.git"
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",

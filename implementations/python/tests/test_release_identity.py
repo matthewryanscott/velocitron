@@ -47,7 +47,7 @@ class _ReleaseIdentityTool(Protocol):
 
 
 _TOOL = cast(_ReleaseIdentityTool, cast(object, _RELEASE_IDENTITY_MODULE))
-_REPOSITORY = "circuitmeridian/velocitron"
+_REPOSITORY = "matthewryanscott/velocitron"
 _TAG = "v0.1.0"
 _TAG_REF = "a" * 40
 _COMMIT = "b" * 40

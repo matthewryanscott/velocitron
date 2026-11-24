@@ -76,7 +76,7 @@ The net description lowers to the documentation-only top-level field.
 
 A composition header names the DSL contribution namespace, which source
 identity and cross-source merging need, and it lowers to the composition
-JSON `name` ([ADR 0043](https://github.com/circuitmeridian/velocitron/blob/main/docs/adr/0043-a-merged-net-has-a-petrinet-form.md)).
+JSON `name` ([ADR 0043](https://github.com/matthewryanscott/velocitron/blob/main/docs/adr/0043-a-merged-net-has-a-petrinet-form.md)).
 The merged net takes that name. JSON-to-DSL writes the header from `name`,
 or `composition` for a composition JSON document without one, regardless of
 its filesystem path.
@@ -237,8 +237,8 @@ in parsed DSL and use lexical name order when reconstructed from JSON.
 inputs; timer facts never synthesize topology or a scheduler.
 
 A bind fact sets one key of a transition's `bindingNames`
-([ADR 0032](https://github.com/circuitmeridian/velocitron/blob/main/docs/adr/0032-composition-keeps-cel-place-names-with-binding-names.md),
-[ADR 0043](https://github.com/circuitmeridian/velocitron/blob/main/docs/adr/0043-a-merged-net-has-a-petrinet-form.md)):
+([ADR 0032](https://github.com/matthewryanscott/velocitron/blob/main/docs/adr/0032-composition-keeps-cel-place-names-with-binding-names.md),
+[ADR 0043](https://github.com/matthewryanscott/velocitron/blob/main/docs/adr/0043-a-merged-net-has-a-petrinet-form.md)):
 
 ```text
 [Transition] bind Name (Place)
@@ -295,7 +295,7 @@ are rejected.
 ## Domain, final, and invariant facts
 
 Three net facts state what the net does not show by its structure
-([ADR 0037](https://github.com/circuitmeridian/velocitron/blob/main/docs/adr/0037-declared-domains-are-a-runtime-contract-and-proofs-check-refinements.md)):
+([ADR 0037](https://github.com/matthewryanscott/velocitron/blob/main/docs/adr/0037-declared-domains-are-a-runtime-contract-and-proofs-check-refinements.md)):
 
 ```text
 domain Color.Field[.Field]* Value Value*
@@ -324,7 +324,7 @@ place. A field key may be quoted, but may not contain a dot.
 prover reads. A `final` fact lists final markings, separated by commas; `+`
 joins the places of one final marking, which the instance reaches when every
 one of them holds a token
-([ADR 0049](https://github.com/circuitmeridian/velocitron/blob/main/docs/adr/0049-a-final-marking-can-need-several-places.md)).
+([ADR 0049](https://github.com/matthewryanscott/velocitron/blob/main/docs/adr/0049-a-final-marking-can-need-several-places.md)).
 Each final marking lowers to its own `proof.final` contribution, whose target
 is its first place and whose `with` lists the others; it lowers to one
 `proofs.final` entry, a place name, or an array of the names when there are
@@ -343,7 +343,7 @@ that stay usable as names; `=` is a token only here.
 ## Actor facts
 
 Actor facts say who does each step of the net, in business words
-([ADR 0038](https://github.com/circuitmeridian/velocitron/blob/main/docs/adr/0038-sequence-diagrams-project-scenarios-onto-actors.md)).
+([ADR 0038](https://github.com/matthewryanscott/velocitron/blob/main/docs/adr/0038-sequence-diagrams-project-scenarios-onto-actors.md)).
 A play's sequence diagram draws one lifeline per actor.
 
 ```text
@@ -394,7 +394,7 @@ and `record` lines, among the documentation facts. `actor`, `person`,
 
 A lived place is a record that stays, such as a branch home or a file on a
 host. A sequence diagram draws it as a column of its own
-([ADR 0039](https://github.com/circuitmeridian/velocitron/blob/main/docs/adr/0039-sequence-diagrams-draw-lived-places-as-columns.md)).
+([ADR 0039](https://github.com/matthewryanscott/velocitron/blob/main/docs/adr/0039-sequence-diagrams-draw-lived-places-as-columns.md)).
 
 ```text
 (Place) lives in Name
@@ -422,7 +422,7 @@ ignores them; canonical output emits them back as these facts. `lives`,
 
 A kept record is a record this system keeps: it is there from the start,
 and only the net's own steps change it
-([ADR 0051](https://github.com/circuitmeridian/velocitron/blob/main/docs/adr/0051-a-kept-record-is-there-from-the-start-and-only-the-net-writes-it.md)).
+([ADR 0051](https://github.com/matthewryanscott/velocitron/blob/main/docs/adr/0051-a-kept-record-is-there-from-the-start-and-only-the-net-writes-it.md)).
 
 ```text
 (Place) kept by Name starts as cel "CEL"
@@ -459,7 +459,7 @@ implementation lowers the fact to the same JSON.
 
 The only composition inclusion fact is `use JsonStringRef as IDENT`; aliases
 are mandatory and unique. The referenced file may be a net or another
-composition ([ADR 0041](https://github.com/circuitmeridian/velocitron/blob/main/docs/adr/0041-a-composition-can-use-a-composition.md)).
+composition ([ADR 0041](https://github.com/matthewryanscott/velocitron/blob/main/docs/adr/0041-a-composition-can-use-a-composition.md)).
 A wire is `wire Alias.(Place) -> Alias.(Place)`. Paths are retained verbatim and
 resolved relative to the containing composition source. Wires connect an output
 port to an equal-typed input port; they fuse existing places and never add
@@ -468,7 +468,7 @@ transition's optional behavior binding is preserved unchanged, including
 absence.
 
 A share is `share Alias.(Place) ~ Alias.(Place) [~ Alias.(Place) ...]`
-([ADR 0040](https://github.com/circuitmeridian/velocitron/blob/main/docs/adr/0040-a-share-fuses-places-without-a-direction.md)). It
+([ADR 0040](https://github.com/matthewryanscott/velocitron/blob/main/docs/adr/0040-a-share-fuses-places-without-a-direction.md)). It
 lowers to one `shares[]` entry `{places: [{net, place}, ...]}` and fuses the
 places into one place without a direction: the places need not be ports, and
 they must accept the same colors. Use it for a record or a lock that several
@@ -488,7 +488,7 @@ is a `PN202` diagnostic at the endpoint.
 
 A composition's own final markings are
 `final Alias.(Place) [+ Alias.(Place)]* [, Alias.(Place) [+ Alias.(Place)]*]*`
-([ADR 0049](https://github.com/circuitmeridian/velocitron/blob/main/docs/adr/0049-a-final-marking-can-need-several-places.md)).
+([ADR 0049](https://github.com/matthewryanscott/velocitron/blob/main/docs/adr/0049-a-final-marking-can-need-several-places.md)).
 One fact lowers to one `composition.final` contribution and to the
 composition's `final` member: a list of final markings, each a list of
 `{net, place}` endpoints. They replace the final facts of the composition's

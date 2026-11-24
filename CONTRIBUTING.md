@@ -3,7 +3,7 @@
 Browse an example or model a small process of your own, then share what feels
 clear, awkward, missing, or misleading. Send broad reactions through an
 existing direct channel with the author. Report reproducible defects through
-[GitHub Issues](https://github.com/circuitmeridian/velocitron/issues),
+[GitHub Issues](https://github.com/matthewryanscott/velocitron/issues),
 especially reports that include the affected version, input, command or API
 call, expected result, actual result, and a minimal reproduction when
 practical.

@@ -11,7 +11,7 @@ explain, skill, check, prove, codegen, equiv, and play. `viz_main` is
 parse argv.
 
 Nothing here is published to npm or PyPI. Consumers install a git
-subdirectory of `circuitmeridian/velocitron`. Each language
+subdirectory of `matthewryanscott/velocitron`. Each language
 README has the install snippet.
 
 Console scripts are `velocitron = velocitron_cli:main` and

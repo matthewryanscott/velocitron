@@ -3,11 +3,11 @@
 Lower `.petrinet` text to contribution IR. The Python distribution name is
 `velocitron-dsl` (import `velocitron_dsl`).
 
-This package is part of the [velocitron](https://github.com/circuitmeridian/velocitron)
+This package is part of the [velocitron](https://github.com/matthewryanscott/velocitron)
 monorepo. It is not published to npm. The package is marked `"private": true`
 so a workspace publish does not send it to the registry. Git subdirectory
 installs still resolve it. Downstream projects depend on a git revision of
-`circuitmeridian/velocitron` and the `packages/dsl/typescript`
+`matthewryanscott/velocitron` and the `packages/dsl/typescript`
 subdirectory.
 
 Version 0.1.0 is alpha software. The lowerer may change without notice.
@@ -65,7 +65,7 @@ pnpm:
 ```json
 {
   "dependencies": {
-    "@velocitron/dsl": "git+https://github.com/circuitmeridian/velocitron.git#<ref>&path:/packages/dsl/typescript"
+    "@velocitron/dsl": "git+https://github.com/matthewryanscott/velocitron.git#<ref>&path:/packages/dsl/typescript"
   }
 }
 ```
@@ -75,7 +75,7 @@ npm accepts the same git URL, and also:
 ```json
 {
   "dependencies": {
-    "@velocitron/dsl": "github:circuitmeridian/velocitron#<ref>&path:packages/dsl/typescript"
+    "@velocitron/dsl": "github:matthewryanscott/velocitron#<ref>&path:packages/dsl/typescript"
   }
 }
 ```

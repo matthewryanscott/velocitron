@@ -11,7 +11,7 @@ handler, and settles that reservation. Intended waits read a transition's
 injected; this package does not own `HandlerRegistry`.
 
 Nothing here is published to npm or PyPI. Consumers install a git
-subdirectory of `circuitmeridian/velocitron`. Each language
+subdirectory of `matthewryanscott/velocitron`. Each language
 README has the install snippet.
 
 `Engine` in this package is `velocitron_engine.Engine` /

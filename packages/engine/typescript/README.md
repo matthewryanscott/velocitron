@@ -3,11 +3,11 @@
 Fire an already-built Velocitron net. The Python distribution name is
 `velocitron-engine` (import `velocitron_engine`).
 
-This package is part of the [velocitron](https://github.com/circuitmeridian/velocitron)
+This package is part of the [velocitron](https://github.com/matthewryanscott/velocitron)
 monorepo. It is not published to npm. The package is marked `"private": true`
 so a workspace publish does not send it to the registry. Git subdirectory
 installs still resolve it. Downstream projects depend on a git revision of
-`circuitmeridian/velocitron` and the
+`matthewryanscott/velocitron` and the
 `packages/engine/typescript` subdirectory.
 
 Version 0.1.0 is alpha software. The engine may change without notice.
@@ -57,7 +57,7 @@ pnpm:
 ```json
 {
   "dependencies": {
-    "@velocitron/engine": "git+https://github.com/circuitmeridian/velocitron.git#<ref>&path:/packages/engine/typescript"
+    "@velocitron/engine": "git+https://github.com/matthewryanscott/velocitron.git#<ref>&path:/packages/engine/typescript"
   }
 }
 ```
@@ -67,7 +67,7 @@ npm accepts the same git URL, and also:
 ```json
 {
   "dependencies": {
-    "@velocitron/engine": "github:circuitmeridian/velocitron#<ref>&path:packages/engine/typescript"
+    "@velocitron/engine": "github:matthewryanscott/velocitron#<ref>&path:packages/engine/typescript"
   }
 }
 ```

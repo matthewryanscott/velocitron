@@ -3,11 +3,11 @@
 Compile and evaluate CEL. The Python distribution name is `velocitron-cel`
 (import `velocitron_cel`).
 
-This package is part of the [velocitron](https://github.com/circuitmeridian/velocitron)
+This package is part of the [velocitron](https://github.com/matthewryanscott/velocitron)
 monorepo. It is not published to npm. The package is marked `"private": true`
 so a workspace publish does not send it to the registry. Git subdirectory
 installs still resolve it. Downstream projects depend on a git revision of
-`circuitmeridian/velocitron` and the `packages/cel/typescript`
+`matthewryanscott/velocitron` and the `packages/cel/typescript`
 subdirectory.
 
 Version 0.1.0 is alpha software. The adapter may change without notice.
@@ -51,7 +51,7 @@ pnpm:
 ```json
 {
   "dependencies": {
-    "@velocitron/cel": "git+https://github.com/circuitmeridian/velocitron.git#<ref>&path:/packages/cel/typescript"
+    "@velocitron/cel": "git+https://github.com/matthewryanscott/velocitron.git#<ref>&path:/packages/cel/typescript"
   }
 }
 ```
@@ -61,7 +61,7 @@ npm accepts the same git URL, and also:
 ```json
 {
   "dependencies": {
-    "@velocitron/cel": "github:circuitmeridian/velocitron#<ref>&path:packages/cel/typescript"
+    "@velocitron/cel": "github:matthewryanscott/velocitron#<ref>&path:packages/cel/typescript"
   }
 }
 ```

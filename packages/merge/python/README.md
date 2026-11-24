@@ -3,9 +3,9 @@
 Merge already-parsed nets into one net. The import name is
 `velocitron_merge`. The TypeScript package is `@velocitron/merge`.
 
-This package is part of the [velocitron](https://github.com/circuitmeridian/velocitron)
+This package is part of the [velocitron](https://github.com/matthewryanscott/velocitron)
 monorepo. It is not published to PyPI. Downstream projects depend on a git
-revision of `circuitmeridian/velocitron` and the
+revision of `matthewryanscott/velocitron` and the
 `packages/merge/python` subdirectory.
 
 Version 0.1.0 is alpha software. The merge may change without notice.
@@ -67,7 +67,7 @@ published. They point at this repository.
 ```toml
 [project]
 dependencies = [
-  "velocitron-merge @ git+https://github.com/circuitmeridian/velocitron.git@<ref>#subdirectory=packages/merge/python",
+  "velocitron-merge @ git+https://github.com/matthewryanscott/velocitron.git@<ref>#subdirectory=packages/merge/python",
 ]
 ```
 
@@ -75,7 +75,7 @@ With a uv source table:
 
 ```toml
 [tool.uv.sources]
-velocitron-merge = { git = "https://github.com/circuitmeridian/velocitron.git", rev = "<ref>", subdirectory = "packages/merge/python" }
+velocitron-merge = { git = "https://github.com/matthewryanscott/velocitron.git", rev = "<ref>", subdirectory = "packages/merge/python" }
 ```
 
 ```python
