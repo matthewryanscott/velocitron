@@ -6,8 +6,10 @@ CEL compile and eval adapters, in two language packages:
 - [`typescript/`](typescript/) — package `@velocitron/cel` (`"private": true`)
 
 `compile` / `eval` (Python) and `compile` / `evaluate` (TypeScript) are the
-portable adapter. Python bundles celpy and can use the optional C++ and Rust
-backends. TypeScript uses `@marcbachmann/cel-js`. A result is a host value
+portable adapter. Python bundles celpy. Auto-detection uses the optional
+Rust backend when it is installed, and otherwise celpy. The optional C++
+backend is a compatibility and conformance reference (ADR 0066); construct
+`CelExprAdapter` to use it. TypeScript uses `@marcbachmann/cel-js`. A result is a host value
 the caller can treat as data. The Python adapter raises `CelEvalError` on
 evaluation failure. The TypeScript adapter throws `CelCompileError` or
 `CelEvaluationError`.

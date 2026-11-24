@@ -14,7 +14,7 @@ and ``get_default_adapter()`` — against all three backends.
 from __future__ import annotations
 
 import pytest
-from _cel_adapters import ADAPTER_IDS, cel_expr_available, cel_rust_available
+from _cel_adapters import ADAPTER_IDS, cel_rust_available
 from _cel_adapters import adapters as _adapters
 
 from velocitron_cel import (
@@ -177,8 +177,9 @@ class TestCelAdapterEval:
 
 
 class TestDefaultAdapter:
-    """``get_default_adapter()`` — auto-detects the best available backend
-    in the three-tier preference order: Rust → C++ → pure Python."""
+    """``get_default_adapter()`` — Rust when it is installed, otherwise celpy.
+
+    ``CelExprAdapter`` is not in the order (ADR 0066)."""
 
     def test_get_default_adapter_returns_cel_adapter(self) -> None:
         """``get_default_adapter()`` returns a ``CelAdapter`` instance."""
@@ -187,32 +188,18 @@ class TestDefaultAdapter:
 
     def test_get_default_adapter_is_cel_rust_when_available(self) -> None:
         """When common-expression-language is installed, the default is
-        ``CelRustAdapter`` (highest preference)."""
+        ``CelRustAdapter``."""
         if not cel_rust_available():
             pytest.skip("common-expression-language is not installed")
         adapter = get_default_adapter()
         assert isinstance(adapter, CelRustAdapter)
 
-    def test_get_default_adapter_is_cel_expr_when_rust_absent_and_cpp_present(
-        self,
-    ) -> None:
-        """When cel-expr-python is installed and the Rust backend is absent,
-        the default is ``CelExprAdapter`` (middle preference)."""
-        if cel_rust_available():
-            pytest.skip(
-                "common-expression-language is installed — default is CelRustAdapter"
-            )
-        if not cel_expr_available():
-            pytest.skip("cel-expr-python is not installed")
-        adapter = get_default_adapter()
-        assert isinstance(adapter, CelExprAdapter)
+    def test_get_default_adapter_is_celpy_when_rust_is_absent(self) -> None:
+        """When the Rust backend is absent, the default is ``CelpyAdapter``.
 
-    def test_get_default_adapter_is_celpy_when_no_optional_installed(
-        self,
-    ) -> None:
-        """When neither optional backend is installed, the default is
-        ``CelpyAdapter`` (fallback)."""
-        if cel_expr_available() or cel_rust_available():
-            pytest.skip("an optional CEL backend is installed")
+        This holds when ``cel-expr-python`` is installed. Auto-detection
+        does not select the C++ binding."""
+        if cel_rust_available():
+            pytest.skip("common-expression-language is installed")
         adapter = get_default_adapter()
         assert isinstance(adapter, CelpyAdapter)

@@ -139,7 +139,7 @@ Engine options (`Engine(registry, *, ...)`):
 - `journal=None` — attach a `Journal` to record firings/injections (below).
 - `deposit_violation="raise"` — or `"record_then_raise"` / `"record_then_drop"` (a handler returning a token with no matching produce template is a programmer error; these modes need a journal).
 - `max_consecutive_failures=None` — opt-in failure budget: cap a transition's consecutive `failed` firings within a `run` (ADR 0015). Any completed firing resets the counts.
-- `cel_adapter=None` — override the CEL backend (auto-detects Rust → C++ → cel-python).
+- `cel_adapter=None` — override the CEL backend (auto-detects Rust, then celpy). Pass `CelExprAdapter` for the C++ reference binding; auto-detection leaves it unselected (ADR 0066).
 
 ## The firing journal
 

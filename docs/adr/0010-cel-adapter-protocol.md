@@ -45,3 +45,12 @@ Linux, musl Linux or CPython 3.15. ADR 0054 adds a stand-in for `re2`
 backed by Python's `re`, and makes velocitron import celpy only when it is
 used.
 
+## Amendment — the C++ binding is a reference backend (ADR 0066)
+
+Auto-detection is Rust, then celpy. `cel-expr-python` stays installable
+and is selected by passing `CelExprAdapter`. It is a compatibility and
+conformance reference, checked by the adapter cases and the numeric
+conformance table, and it is not supported for production runs. ADR 0066
+records the decision. The three-tier order in the amendment above is the
+history of how the Rust backend was added.
+

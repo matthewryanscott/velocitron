@@ -79,7 +79,21 @@ jobs:
 
       - name: Run Python tests
         working-directory: implementations/python
-        run: uv run --no-sync pytest
+        run: |
+          set -euo pipefail
+          # ADR 0066: the C++ binding is a conformance reference. This leg
+          # runs the adapter cases and the numeric table. The other legs
+          # run the suite, including prove parity and arrivals.
+          case "${{ matrix.cel }}" in
+            cpp)
+              uv run --no-sync pytest \
+                tests/test_cel_adapter.py \
+                tests/test_cel_numeric.py::test_every_backend_agrees_on_cross_type_numeric_equality
+              ;;
+            *)
+              uv run --no-sync pytest
+              ;;
+          esac
 
   kernel-modes:
     # I7: the kernel's two modes, every core and one core in the reference's
