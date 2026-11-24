@@ -1,0 +1,25 @@
+// A job starts and finishes. A person may flip the branch home, but only a
+// parked job reads it, and no job is ever parked.
+net waiting_switch "A switch that only a parked job reads"
+
+(jobs) -job-> [start] -job-> (working)
+(working) -job-> [finish] -job-> (done)
+@park_in: (working) -job-> [park]
+[park] -job-> (parked)
+(parked) -job-> [use] -job-> (used)
+@reads: (switch) -switch->? [use]
+@to_new_in: (switch) -switch-> [flip]
+@to_new_out: [flip] -switch-> (switch)
+
+@park_in predicate cel "kind == 'never'"
+@reads predicate cel "owner == 'new'"
+@to_new_in predicate cel "owner == 'old'"
+@to_new_out data cel "{'owner': 'new'}"
+
+(switch) annotation fusion true
+domain switch.owner "old" "new"
+domain job.kind "now"
+record "Branch home"
+(switch) lives in "Branch home"
+marking initial (jobs) <- $job
+$job: job {"kind": "now"}

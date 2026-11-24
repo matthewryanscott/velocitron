@@ -1,0 +1,8 @@
+net give "Work the job, end it and give the lock back"
+(busy) -job-> [work] -job-> (worked)
+(worked) -job-> [give] -job-> (done)
+@unlock: [give] -key-> (lock)
+@unlock data {}
+(busy) port input job
+(worked) port input job
+(done) port output job

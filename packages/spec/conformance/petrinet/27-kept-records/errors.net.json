@@ -1,0 +1,94 @@
+{
+  "name": "condition",
+  "places": [
+    {
+      "name": "returns",
+      "accepts": [
+        "copy"
+      ]
+    },
+    {
+      "name": "shelved",
+      "accepts": [
+        "copy"
+      ]
+    },
+    {
+      "name": "condition",
+      "accepts": [
+        "condition"
+      ],
+      "annotations": {
+        "kept": {
+          "by": "circulation desk",
+          "start": {
+            "cel": "{'isbn': instance.isbn, 'damaged': false}"
+          }
+        }
+      }
+    }
+  ],
+  "transitions": [
+    {
+      "name": "check"
+    }
+  ],
+  "arcs": [
+    {
+      "from": {
+        "place": "returns"
+      },
+      "to": {
+        "transition": "check"
+      },
+      "consume": {
+        "type": "copy"
+      }
+    },
+    {
+      "from": {
+        "transition": "check"
+      },
+      "to": {
+        "place": "shelved"
+      },
+      "produce": {
+        "destination": "shelved",
+        "type": "copy"
+      }
+    },
+    {
+      "from": {
+        "place": "condition"
+      },
+      "to": {
+        "transition": "check"
+      },
+      "consume": {
+        "type": "condition"
+      }
+    },
+    {
+      "from": {
+        "transition": "check"
+      },
+      "to": {
+        "place": "condition"
+      },
+      "produce": {
+        "destination": "condition",
+        "type": "condition",
+        "cel": "{'isbn': binding.condition[0].isbn, 'damaged': true}"
+      }
+    }
+  ],
+  "initialMarking": {},
+  "annotations": {
+    "actors": [
+      {
+        "name": "circulation desk",
+        "kind": "system"
+      }
+    ]
+  }
+}

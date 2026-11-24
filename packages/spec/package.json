@@ -1,0 +1,41 @@
+{
+  "author": "Matthew R. Scott",
+  "bugs": {
+    "url": "https://github.com/circuitmeridian/velocitron/issues"
+  },
+  "description": "Portable Velocitron contracts: JSON Schemas, normative prose, and conformance fixtures.",
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "exports": {
+    ".": {
+      "import": "./index.js",
+      "types": "./index.d.ts"
+    },
+    "./composition.schema.json": "./composition.schema.json",
+    "./conformance/*": "./conformance/*",
+    "./net.schema.json": "./net.schema.json",
+    "./package.json": "./package.json",
+    "./petrinet-contribution-ir.schema.json": "./petrinet-contribution-ir.schema.json"
+  },
+  "files": [
+    "*.md",
+    "*.schema.json",
+    "conformance",
+    "index.d.ts",
+    "index.js",
+    "LICENSE"
+  ],
+  "homepage": "https://github.com/circuitmeridian/velocitron",
+  "license": "MIT",
+  "name": "@velocitron/spec",
+  "private": true,
+  "repository": {
+    "directory": "packages/spec",
+    "type": "git",
+    "url": "git+https://github.com/circuitmeridian/velocitron.git"
+  },
+  "sideEffects": false,
+  "type": "module",
+  "version": "0.1.0"
+}

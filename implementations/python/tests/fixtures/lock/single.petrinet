@@ -1,0 +1,8 @@
+net single "The same lock in one net"
+(todo) -job-> [take] -job-> (busy)
+@lock_in: (lock) -key-> [take]
+(busy) -job-> [do] -job-> (end)
+(end) -job-> [give] -job-> (done)
+@unlock: [give] -key-> (lock)
+@unlock data {}
+(lock) annotation fusion true

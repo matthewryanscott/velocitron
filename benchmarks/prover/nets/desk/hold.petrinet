@@ -1,0 +1,7 @@
+// A wish becomes a loan.
+net hold "A wish becomes a loan"
+
+(wishes) -hold-> [file] -hold-> (loaned)
+(wishes) port input hold
+(loaned) port output hold
+final (loaned)

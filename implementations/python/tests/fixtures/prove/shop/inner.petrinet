@@ -1,0 +1,12 @@
+// The inside of [work]: check the job, then accept or reject it.
+net inner "Check, then accept or reject"
+
+(in) -job-> [check] -job-> (checked)
+@ok: (checked) -job-> [accept] -job-> (out)
+@bad: (checked) -job-> [reject] -job-> (out)
+
+@ok predicate cel "valid"
+@bad predicate cel "!valid"
+
+(in) port input job
+(out) port output job

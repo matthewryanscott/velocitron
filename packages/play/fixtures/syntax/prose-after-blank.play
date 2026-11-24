@@ -1,0 +1,8 @@
+play s
+@a: advance 1
+
+path p from @a
+
+/// The desk is closed, and the
+/// hold waits.
+advance 2

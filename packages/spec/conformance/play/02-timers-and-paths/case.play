@@ -1,0 +1,23 @@
+play timers_and_paths "Advances, timers, the policy's pick, and branching"
+net "retry.petrinet"
+marking none
+
+$job: job {"id": "j-1", "nextAt": 600, "deadline": 3600}
+
+inject (queue) <- $job
+advance 0
+@waiting: fire [try]
+expect not enabled [retry] [give_up]
+
+advance +10m
+expect (queue) == $job
+
+path deadline "The deadline passes while the job waits" from @waiting
+
+advance 1h
+expect (failed) == $job, quiescent
+
+path too_early "Retrying before the timer is a failure" from @waiting
+
+advance 5m
+fire [retry]

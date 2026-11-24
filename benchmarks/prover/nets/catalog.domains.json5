@@ -1,0 +1,10 @@
+// Enough branches that the choice's cases outnumber the tokens of a
+// single starting marking.
+{
+  instance: "copy",
+  domains: {
+    "copy.branch": ["main", "annex", "north", "south", "east", "west", "kiosk"],
+    "copy.damaged": [true, false],
+    "copy.edition": [1, 2, 3],
+  },
+}

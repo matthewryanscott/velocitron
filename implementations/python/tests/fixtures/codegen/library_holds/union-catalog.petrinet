@@ -1,0 +1,71 @@
+// A notice of a partner loan is paired with the stamped checkout, then polled
+// in the union catalog until the copy is shelved or missing. A delay is kept
+// and, after three days, noted. A copy still moving goes back to the watch.
+
+net union_catalog "Watch a partner copy in the union catalog"
+
+[poll_catalog] handler "poll_catalog@catalog"
+
+@pair_notice: (notice) -notice-> [pair]
+@pair_stamp: (stamped) -stamp-> [pair]
+@pair_out: [pair] -watch-> (watching)
+
+(watching) -watch-> [poll_catalog] -watch-> (polled)
+(clock) -tick->? [poll_catalog]
+
+@shelved_in: (polled) -watch-> [shelved_copy] -watch-> (shelved)
+@missing_in: (polled) -watch-> [missing_copy]
+@missing_watch: [missing_copy] -watch-> (missing)
+@missing_signal: [missing_copy] -note-> (notices)
+@missing_reorder: [missing_copy] -reorder-> (reorder)
+@moving_in: (polled) -watch-> [still_moving] -watch-> (watching)
+@delay_in: (polled) -watch-> [note_delay]
+@delay_back: [note_delay] -watch-> (watching)
+@delay_record_in: (delays) -delay-> [note_delay]
+@delay_record_out: [note_delay] -delay-> (delays)
+(clock) -tick->? [note_delay]
+
+@day_in: (delays) -delay-> [delayed_three_days]
+@day_out: [delayed_three_days] -delay-> (delays)
+@day_signal: [delayed_three_days] -note-> (notices)
+@day_watch: (watching) -watch->? [delayed_three_days]
+(clock) -tick->? [delayed_three_days]
+
+@pair_stamp correlate cel "token.isbn == binding.notice[0].isbn"
+@pair_out data cel "{'isbn': binding.notice[0].isbn, 'branch': binding.stamped[0].branch, 'status': 'moving', 'nextPollAt': 0}"
+@shelved_in predicate cel "status == 'shelved'"
+@missing_in predicate cel "status == 'missing'"
+@moving_in predicate cel "status == 'moving'"
+@delay_in predicate cel "status == 'delayed'"
+@missing_signal data cel "{'kind': 'missing', 'isbn': binding.polled[0].isbn}"
+@missing_reorder data cel "{'isbn': binding.polled[0].isbn, 'branch': binding.polled[0].branch}"
+@delay_record_in correlate cel "token.isbn == binding.polled[0].isbn"
+@delay_record_out data cel "{'isbn': binding.delays[0].isbn, 'waiting': true, 'signalled': false, 'since': binding.clock[0].now}"
+@day_in predicate cel "waiting && !signalled"
+@day_out data cel "{'isbn': binding.delays[0].isbn, 'waiting': true, 'signalled': true, 'since': binding.delays[0].since}"
+@day_signal data cel "{'kind': 'delayed_three_days', 'isbn': binding.delays[0].isbn}"
+
+[poll_catalog] timer clock (clock) cel "clock.now >= watch.nextPollAt"
+[poll_catalog] timer bind watch (watching)
+[delayed_three_days] timer clock (clock) cel "clock.now >= delay.since + 259200"
+[delayed_three_days] timer bind delay (delays)
+
+(delays) kept by "circulation desk" starts as cel "{'isbn': instance.isbn, 'waiting': false, 'signalled': false, 'since': 0}"
+(clock) annotation fusion true
+
+(notice) port input notice
+(stamped) port input stamp
+(reorder) port output reorder
+(shelved) port output watch
+(missing) port output watch
+
+system "circulation desk"
+net actor "circulation desk"
+system "Union catalog"
+(polled) lives in "Union catalog"
+(polled) reads as cel "token.status + ' at ' + token.branch"
+(watching) description "a copy the desk is watching"
+(notices) description "notes to the desk"
+
+domain watch.status "shelved" "missing" "moving" "delayed"
+final (shelved), (missing)

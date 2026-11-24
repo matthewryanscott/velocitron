@@ -1,0 +1,27 @@
+{
+  "diagnostic": {
+    "code": "PN202",
+    "column": 8,
+    "file": "nested.refine-by-composition.petrinet",
+    "help": "refine by the alias of a net, not of a composition",
+    "line": 6,
+    "message": "refine worker.[do] by pair: pair is a composition; a refining net must be a net",
+    "span": {
+      "end": {
+        "byteOffset": 192,
+        "column": 19,
+        "line": 6
+      },
+      "source": "nested.refine-by-composition.petrinet",
+      "start": {
+        "byteOffset": 181,
+        "column": 8,
+        "line": 6
+      }
+    }
+  },
+  "source": {
+    "sourceId": "nested.refine-by-composition.petrinet",
+    "text": "composition nested_by_composition\nuse \"pair.petrinet\" as pair\nuse \"worker.petrinet\" as worker\nwire pair.(take.busy) -> worker.(start)\nwire worker.(end) -> pair.(give.worked)\nrefine worker.[do] by pair\n"
+  }
+}

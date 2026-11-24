@@ -1,0 +1,26 @@
+{
+  "diagnostic": {
+    "code": "PN202",
+    "column": 1,
+    "file": "decorations.summary-on-place.petrinet",
+    "line": 8,
+    "message": "summary decorations apply to transitions and arcs; place (running) has no expression to summarize",
+    "span": {
+      "end": {
+        "byteOffset": 198,
+        "column": 34,
+        "line": 8
+      },
+      "source": "decorations.summary-on-place.petrinet",
+      "start": {
+        "byteOffset": 165,
+        "column": 1,
+        "line": 8
+      }
+    }
+  },
+  "source": {
+    "sourceId": "decorations.summary-on-place.petrinet",
+    "text": "net decorations\n\n(queued) -job-> [start] -job-> (running)\n@done_in: (running) -job-> [finish]\n[finish] -receipt-> (done)\n@done_in predicate cel \"job.exitCode == 0\"\n\ndecorate (running) summary \"busy\"\n"
+  }
+}

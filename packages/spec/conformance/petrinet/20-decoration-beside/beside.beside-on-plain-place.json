@@ -1,0 +1,27 @@
+{
+  "diagnostic": {
+    "code": "PN202",
+    "column": 1,
+    "file": "beside.beside-on-plain-place.petrinet",
+    "help": "annotate it with `(switch) annotation fusion true`, or remove the beside decoration",
+    "line": 6,
+    "message": "beside decoration needs a fusion place; (switch) is drawn once, so it has no local copies to place",
+    "span": {
+      "end": {
+        "byteOffset": 110,
+        "column": 31,
+        "line": 6
+      },
+      "source": "beside.beside-on-plain-place.petrinet",
+      "start": {
+        "byteOffset": 80,
+        "column": 1,
+        "line": 6
+      }
+    }
+  },
+  "source": {
+    "sourceId": "beside.beside-on-plain-place.petrinet",
+    "text": "net beside\n\n(queued) -job-> [start] -job-> (running)\n(switch) -flag->? [start]\n\ndecorate (switch) beside right\n"
+  }
+}

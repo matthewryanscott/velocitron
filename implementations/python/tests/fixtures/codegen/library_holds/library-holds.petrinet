@@ -1,0 +1,24 @@
+// The hold lifecycle, with the partner loan in place of [borrow] and the
+// union catalog watching the notice that loan writes.
+
+composition library_holds
+
+use "hold-lifecycle.petrinet" as lifecycle
+use "partner-loan.petrinet" as loan
+use "union-catalog.petrinet" as catalog
+
+wire lifecycle.(shelf.lending) -> loan.(offered)
+wire loan.(loan_ended) -> lifecycle.(checkout.loan_ended)
+wire loan.(union_notice) -> catalog.(notice)
+wire lifecycle.(checkout.stamped) -> catalog.(stamped)
+wire catalog.(reorder) -> lifecycle.(request.reorder)
+refine lifecycle.[checkout.borrow] by loan
+
+// The hold is finished when the loaned copy is shelved or missing in the
+// catalog, when the shelf recalled it, when checkout withdrew it, or when
+// the notice put it back on the shelf.
+final lifecycle.(checkout.loaned) + catalog.(shelved),
+  lifecycle.(checkout.loaned) + catalog.(missing),
+  lifecycle.(shelf.recalled),
+  lifecycle.(checkout.withdrawn),
+  lifecycle.(notice.shelved)

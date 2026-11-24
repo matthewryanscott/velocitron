@@ -1,0 +1,1162 @@
+{
+  "contributions": [
+    {
+      "id": {
+        "part": 0,
+        "source": "correlated-join.petrinet",
+        "statement": 0
+      },
+      "kind": "document.net-header",
+      "ordinal": 0,
+      "span": {
+        "end": {
+          "byteOffset": 101,
+          "column": 102,
+          "line": 1
+        },
+        "source": "correlated-join.petrinet",
+        "start": {
+          "byteOffset": 0,
+          "column": 1,
+          "line": 1
+        }
+      },
+      "target": {
+        "type": "document"
+      },
+      "value": {
+        "description": "Ship a ready order with its own account's settings and a courier for its region",
+        "name": "correlated_join"
+      }
+    },
+    {
+      "id": {
+        "part": 0,
+        "source": "correlated-join.petrinet",
+        "statement": 1
+      },
+      "kind": "arc.handle",
+      "ordinal": 1,
+      "span": {
+        "end": {
+          "byteOffset": 163,
+          "column": 61,
+          "line": 3
+        },
+        "source": "correlated-join.petrinet",
+        "start": {
+          "byteOffset": 103,
+          "column": 1,
+          "line": 3
+        }
+      },
+      "target": {
+        "name": "order_in",
+        "type": "arcHandle"
+      },
+      "value": {
+        "arcIds": [
+          {
+            "document": "correlated-join.petrinet",
+            "part": 1,
+            "statement": 1
+          },
+          {
+            "document": "correlated-join.petrinet",
+            "part": 2,
+            "statement": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": {
+        "part": 1,
+        "source": "correlated-join.petrinet",
+        "statement": 1
+      },
+      "kind": "arc.declare",
+      "ordinal": 2,
+      "span": {
+        "end": {
+          "byteOffset": 141,
+          "column": 39,
+          "line": 3
+        },
+        "source": "correlated-join.petrinet",
+        "start": {
+          "byteOffset": 114,
+          "column": 12,
+          "line": 3
+        }
+      },
+      "target": {
+        "id": {
+          "document": "correlated-join.petrinet",
+          "part": 1,
+          "statement": 1
+        },
+        "type": "arc"
+      },
+      "value": {
+        "color": {
+          "kind": "explicit",
+          "value": "purchase"
+        },
+        "from": {
+          "name": "orders",
+          "type": "place"
+        },
+        "mode": "consume",
+        "to": {
+          "name": "ship",
+          "type": "transition"
+        },
+        "transitionNameSpan": {
+          "end": {
+            "byteOffset": 140,
+            "column": 38,
+            "line": 3
+          },
+          "source": "correlated-join.petrinet",
+          "start": {
+            "byteOffset": 136,
+            "column": 34,
+            "line": 3
+          }
+        }
+      }
+    },
+    {
+      "id": {
+        "part": 2,
+        "source": "correlated-join.petrinet",
+        "statement": 1
+      },
+      "kind": "arc.declare",
+      "ordinal": 3,
+      "span": {
+        "end": {
+          "byteOffset": 163,
+          "column": 61,
+          "line": 3
+        },
+        "source": "correlated-join.petrinet",
+        "start": {
+          "byteOffset": 135,
+          "column": 33,
+          "line": 3
+        }
+      },
+      "target": {
+        "id": {
+          "document": "correlated-join.petrinet",
+          "part": 2,
+          "statement": 1
+        },
+        "type": "arc"
+      },
+      "value": {
+        "color": {
+          "kind": "explicit",
+          "value": "shipment"
+        },
+        "from": {
+          "name": "ship",
+          "type": "transition"
+        },
+        "mode": "produce",
+        "to": {
+          "name": "shipped",
+          "type": "place"
+        }
+      }
+    },
+    {
+      "id": {
+        "part": 0,
+        "source": "correlated-join.petrinet",
+        "statement": 2
+      },
+      "kind": "arc.handle",
+      "ordinal": 4,
+      "span": {
+        "end": {
+          "byteOffset": 207,
+          "column": 44,
+          "line": 4
+        },
+        "source": "correlated-join.petrinet",
+        "start": {
+          "byteOffset": 164,
+          "column": 1,
+          "line": 4
+        }
+      },
+      "target": {
+        "name": "settings_in",
+        "type": "arcHandle"
+      },
+      "value": {
+        "arcIds": [
+          {
+            "document": "correlated-join.petrinet",
+            "part": 1,
+            "statement": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": {
+        "part": 1,
+        "source": "correlated-join.petrinet",
+        "statement": 2
+      },
+      "kind": "arc.declare",
+      "ordinal": 5,
+      "span": {
+        "end": {
+          "byteOffset": 207,
+          "column": 44,
+          "line": 4
+        },
+        "source": "correlated-join.petrinet",
+        "start": {
+          "byteOffset": 178,
+          "column": 15,
+          "line": 4
+        }
+      },
+      "target": {
+        "id": {
+          "document": "correlated-join.petrinet",
+          "part": 1,
+          "statement": 2
+        },
+        "type": "arc"
+      },
+      "value": {
+        "color": {
+          "kind": "explicit",
+          "value": "setting"
+        },
+        "from": {
+          "name": "settings",
+          "type": "place"
+        },
+        "mode": "read",
+        "to": {
+          "name": "ship",
+          "type": "transition"
+        }
+      }
+    },
+    {
+      "id": {
+        "part": 0,
+        "source": "correlated-join.petrinet",
+        "statement": 3
+      },
+      "kind": "arc.handle",
+      "ordinal": 6,
+      "span": {
+        "end": {
+          "byteOffset": 249,
+          "column": 42,
+          "line": 5
+        },
+        "source": "correlated-join.petrinet",
+        "start": {
+          "byteOffset": 208,
+          "column": 1,
+          "line": 5
+        }
+      },
+      "target": {
+        "name": "courier_in",
+        "type": "arcHandle"
+      },
+      "value": {
+        "arcIds": [
+          {
+            "document": "correlated-join.petrinet",
+            "part": 1,
+            "statement": 3
+          }
+        ]
+      }
+    },
+    {
+      "id": {
+        "part": 1,
+        "source": "correlated-join.petrinet",
+        "statement": 3
+      },
+      "kind": "arc.declare",
+      "ordinal": 7,
+      "span": {
+        "end": {
+          "byteOffset": 249,
+          "column": 42,
+          "line": 5
+        },
+        "source": "correlated-join.petrinet",
+        "start": {
+          "byteOffset": 221,
+          "column": 14,
+          "line": 5
+        }
+      },
+      "target": {
+        "id": {
+          "document": "correlated-join.petrinet",
+          "part": 1,
+          "statement": 3
+        },
+        "type": "arc"
+      },
+      "value": {
+        "color": {
+          "kind": "explicit",
+          "value": "courier"
+        },
+        "from": {
+          "name": "couriers",
+          "type": "place"
+        },
+        "mode": "consume",
+        "to": {
+          "name": "ship",
+          "type": "transition"
+        },
+        "transitionNameSpan": {
+          "end": {
+            "byteOffset": 248,
+            "column": 41,
+            "line": 5
+          },
+          "source": "correlated-join.petrinet",
+          "start": {
+            "byteOffset": 244,
+            "column": 37,
+            "line": 5
+          }
+        }
+      }
+    },
+    {
+      "id": {
+        "part": 0,
+        "source": "correlated-join.petrinet",
+        "statement": 4
+      },
+      "kind": "arc.handle",
+      "ordinal": 8,
+      "span": {
+        "end": {
+          "byteOffset": 288,
+          "column": 39,
+          "line": 6
+        },
+        "source": "correlated-join.petrinet",
+        "start": {
+          "byteOffset": 250,
+          "column": 1,
+          "line": 6
+        }
+      },
+      "target": {
+        "name": "not_paused",
+        "type": "arcHandle"
+      },
+      "value": {
+        "arcIds": [
+          {
+            "document": "correlated-join.petrinet",
+            "part": 1,
+            "statement": 4
+          }
+        ]
+      }
+    },
+    {
+      "id": {
+        "part": 1,
+        "source": "correlated-join.petrinet",
+        "statement": 4
+      },
+      "kind": "arc.declare",
+      "ordinal": 9,
+      "span": {
+        "end": {
+          "byteOffset": 288,
+          "column": 39,
+          "line": 6
+        },
+        "source": "correlated-join.petrinet",
+        "start": {
+          "byteOffset": 263,
+          "column": 14,
+          "line": 6
+        }
+      },
+      "target": {
+        "id": {
+          "document": "correlated-join.petrinet",
+          "part": 1,
+          "statement": 4
+        },
+        "type": "arc"
+      },
+      "value": {
+        "color": {
+          "kind": "explicit",
+          "value": "pause"
+        },
+        "from": {
+          "name": "pauses",
+          "type": "place"
+        },
+        "mode": "inhibit",
+        "to": {
+          "name": "ship",
+          "type": "transition"
+        }
+      }
+    },
+    {
+      "id": {
+        "part": 0,
+        "source": "correlated-join.petrinet",
+        "statement": 5
+      },
+      "kind": "arc.declare",
+      "ordinal": 10,
+      "span": {
+        "end": {
+          "byteOffset": 317,
+          "column": 29,
+          "line": 7
+        },
+        "source": "correlated-join.petrinet",
+        "start": {
+          "byteOffset": 289,
+          "column": 1,
+          "line": 7
+        }
+      },
+      "target": {
+        "id": {
+          "document": "correlated-join.petrinet",
+          "part": 0,
+          "statement": 5
+        },
+        "type": "arc"
+      },
+      "value": {
+        "color": {
+          "kind": "explicit",
+          "value": "courier"
+        },
+        "from": {
+          "name": "ship",
+          "type": "transition"
+        },
+        "mode": "produce",
+        "to": {
+          "name": "couriers",
+          "type": "place"
+        }
+      }
+    },
+    {
+      "id": {
+        "part": 0,
+        "source": "correlated-join.petrinet",
+        "statement": 6
+      },
+      "kind": "transition.handler",
+      "ordinal": 11,
+      "span": {
+        "end": {
+          "byteOffset": 345,
+          "column": 28,
+          "line": 8
+        },
+        "source": "correlated-join.petrinet",
+        "start": {
+          "byteOffset": 318,
+          "column": 1,
+          "line": 8
+        }
+      },
+      "target": {
+        "name": "ship",
+        "type": "transition"
+      },
+      "value": {
+        "handler": "ship_order"
+      }
+    },
+    {
+      "id": {
+        "part": 0,
+        "source": "correlated-join.petrinet",
+        "statement": 7
+      },
+      "kind": "arc.predicate",
+      "ordinal": 12,
+      "span": {
+        "end": {
+          "byteOffset": 390,
+          "column": 44,
+          "line": 10
+        },
+        "source": "correlated-join.petrinet",
+        "start": {
+          "byteOffset": 347,
+          "column": 1,
+          "line": 10
+        }
+      },
+      "target": {
+        "name": "order_in",
+        "type": "arcHandle"
+      },
+      "value": {
+        "cel": "status == 'ready'",
+        "kind": "cel"
+      }
+    },
+    {
+      "id": {
+        "part": 0,
+        "source": "correlated-join.petrinet",
+        "statement": 8
+      },
+      "kind": "arc.correlate",
+      "ordinal": 13,
+      "span": {
+        "end": {
+          "byteOffset": 462,
+          "column": 72,
+          "line": 11
+        },
+        "source": "correlated-join.petrinet",
+        "start": {
+          "byteOffset": 391,
+          "column": 1,
+          "line": 11
+        }
+      },
+      "target": {
+        "name": "settings_in",
+        "type": "arcHandle"
+      },
+      "value": {
+        "cel": "token.account == binding.orders[0].account"
+      }
+    },
+    {
+      "id": {
+        "part": 0,
+        "source": "correlated-join.petrinet",
+        "statement": 9
+      },
+      "kind": "arc.predicate",
+      "ordinal": 14,
+      "span": {
+        "end": {
+          "byteOffset": 500,
+          "column": 38,
+          "line": 12
+        },
+        "source": "correlated-join.petrinet",
+        "start": {
+          "byteOffset": 463,
+          "column": 1,
+          "line": 12
+        }
+      },
+      "target": {
+        "name": "courier_in",
+        "type": "arcHandle"
+      },
+      "value": {
+        "cel": "available",
+        "kind": "cel"
+      }
+    },
+    {
+      "id": {
+        "part": 0,
+        "source": "correlated-join.petrinet",
+        "statement": 10
+      },
+      "kind": "arc.correlate",
+      "ordinal": 15,
+      "span": {
+        "end": {
+          "byteOffset": 569,
+          "column": 69,
+          "line": 13
+        },
+        "source": "correlated-join.petrinet",
+        "start": {
+          "byteOffset": 501,
+          "column": 1,
+          "line": 13
+        }
+      },
+      "target": {
+        "name": "courier_in",
+        "type": "arcHandle"
+      },
+      "value": {
+        "cel": "token.region == binding.orders[0].region"
+      }
+    },
+    {
+      "id": {
+        "part": 0,
+        "source": "correlated-join.petrinet",
+        "statement": 11
+      },
+      "kind": "arc.correlate",
+      "ordinal": 16,
+      "span": {
+        "end": {
+          "byteOffset": 640,
+          "column": 71,
+          "line": 14
+        },
+        "source": "correlated-join.petrinet",
+        "start": {
+          "byteOffset": 570,
+          "column": 1,
+          "line": 14
+        }
+      },
+      "target": {
+        "name": "not_paused",
+        "type": "arcHandle"
+      },
+      "value": {
+        "cel": "token.account == binding.orders[0].account"
+      }
+    },
+    {
+      "id": {
+        "part": 0,
+        "source": "correlated-join.petrinet",
+        "statement": 12
+      },
+      "kind": "marking.append",
+      "ordinal": 17,
+      "span": {
+        "end": {
+          "byteOffset": 678,
+          "column": 37,
+          "line": 16
+        },
+        "source": "correlated-join.petrinet",
+        "start": {
+          "byteOffset": 642,
+          "column": 1,
+          "line": 16
+        }
+      },
+      "target": {
+        "name": "orders",
+        "type": "place"
+      },
+      "value": {
+        "count": 1,
+        "token": {
+          "template": {
+            "name": "order_a",
+            "type": "template"
+          }
+        }
+      }
+    },
+    {
+      "id": {
+        "part": 0,
+        "source": "correlated-join.petrinet",
+        "statement": 13
+      },
+      "kind": "marking.append",
+      "ordinal": 18,
+      "span": {
+        "end": {
+          "byteOffset": 715,
+          "column": 37,
+          "line": 17
+        },
+        "source": "correlated-join.petrinet",
+        "start": {
+          "byteOffset": 679,
+          "column": 1,
+          "line": 17
+        }
+      },
+      "target": {
+        "name": "orders",
+        "type": "place"
+      },
+      "value": {
+        "count": 1,
+        "token": {
+          "template": {
+            "name": "order_b",
+            "type": "template"
+          }
+        }
+      }
+    },
+    {
+      "id": {
+        "part": 0,
+        "source": "correlated-join.petrinet",
+        "statement": 14
+      },
+      "kind": "marking.append",
+      "ordinal": 19,
+      "span": {
+        "end": {
+          "byteOffset": 757,
+          "column": 42,
+          "line": 18
+        },
+        "source": "correlated-join.petrinet",
+        "start": {
+          "byteOffset": 716,
+          "column": 1,
+          "line": 18
+        }
+      },
+      "target": {
+        "name": "settings",
+        "type": "place"
+      },
+      "value": {
+        "count": 1,
+        "token": {
+          "template": {
+            "name": "settings_a",
+            "type": "template"
+          }
+        }
+      }
+    },
+    {
+      "id": {
+        "part": 0,
+        "source": "correlated-join.petrinet",
+        "statement": 15
+      },
+      "kind": "marking.append",
+      "ordinal": 20,
+      "span": {
+        "end": {
+          "byteOffset": 799,
+          "column": 42,
+          "line": 19
+        },
+        "source": "correlated-join.petrinet",
+        "start": {
+          "byteOffset": 758,
+          "column": 1,
+          "line": 19
+        }
+      },
+      "target": {
+        "name": "settings",
+        "type": "place"
+      },
+      "value": {
+        "count": 1,
+        "token": {
+          "template": {
+            "name": "settings_b",
+            "type": "template"
+          }
+        }
+      }
+    },
+    {
+      "id": {
+        "part": 0,
+        "source": "correlated-join.petrinet",
+        "statement": 16
+      },
+      "kind": "marking.append",
+      "ordinal": 21,
+      "span": {
+        "end": {
+          "byteOffset": 843,
+          "column": 44,
+          "line": 20
+        },
+        "source": "correlated-join.petrinet",
+        "start": {
+          "byteOffset": 800,
+          "column": 1,
+          "line": 20
+        }
+      },
+      "target": {
+        "name": "couriers",
+        "type": "place"
+      },
+      "value": {
+        "count": 1,
+        "token": {
+          "template": {
+            "name": "courier_east",
+            "type": "template"
+          }
+        }
+      }
+    },
+    {
+      "id": {
+        "part": 0,
+        "source": "correlated-join.petrinet",
+        "statement": 17
+      },
+      "kind": "marking.append",
+      "ordinal": 22,
+      "span": {
+        "end": {
+          "byteOffset": 887,
+          "column": 44,
+          "line": 21
+        },
+        "source": "correlated-join.petrinet",
+        "start": {
+          "byteOffset": 844,
+          "column": 1,
+          "line": 21
+        }
+      },
+      "target": {
+        "name": "couriers",
+        "type": "place"
+      },
+      "value": {
+        "count": 1,
+        "token": {
+          "template": {
+            "name": "courier_west",
+            "type": "template"
+          }
+        }
+      }
+    },
+    {
+      "id": {
+        "part": 0,
+        "source": "correlated-join.petrinet",
+        "statement": 18
+      },
+      "kind": "template.define",
+      "ordinal": 23,
+      "span": {
+        "end": {
+          "byteOffset": 961,
+          "column": 73,
+          "line": 23
+        },
+        "source": "correlated-join.petrinet",
+        "start": {
+          "byteOffset": 889,
+          "column": 1,
+          "line": 23
+        }
+      },
+      "target": {
+        "name": "order_a",
+        "type": "template"
+      },
+      "value": {
+        "value": {
+          "entries": [
+            {
+              "key": "account",
+              "value": {
+                "type": "string",
+                "value": "A"
+              }
+            },
+            {
+              "key": "region",
+              "value": {
+                "type": "string",
+                "value": "west"
+              }
+            },
+            {
+              "key": "status",
+              "value": {
+                "type": "string",
+                "value": "ready"
+              }
+            }
+          ],
+          "type": "object"
+        }
+      }
+    },
+    {
+      "id": {
+        "part": 0,
+        "source": "correlated-join.petrinet",
+        "statement": 19
+      },
+      "kind": "template.define",
+      "ordinal": 24,
+      "span": {
+        "end": {
+          "byteOffset": 1034,
+          "column": 73,
+          "line": 24
+        },
+        "source": "correlated-join.petrinet",
+        "start": {
+          "byteOffset": 962,
+          "column": 1,
+          "line": 24
+        }
+      },
+      "target": {
+        "name": "order_b",
+        "type": "template"
+      },
+      "value": {
+        "value": {
+          "entries": [
+            {
+              "key": "account",
+              "value": {
+                "type": "string",
+                "value": "B"
+              }
+            },
+            {
+              "key": "region",
+              "value": {
+                "type": "string",
+                "value": "east"
+              }
+            },
+            {
+              "key": "status",
+              "value": {
+                "type": "string",
+                "value": "ready"
+              }
+            }
+          ],
+          "type": "object"
+        }
+      }
+    },
+    {
+      "id": {
+        "part": 0,
+        "source": "correlated-join.petrinet",
+        "statement": 20
+      },
+      "kind": "template.define",
+      "ordinal": 25,
+      "span": {
+        "end": {
+          "byteOffset": 1091,
+          "column": 57,
+          "line": 25
+        },
+        "source": "correlated-join.petrinet",
+        "start": {
+          "byteOffset": 1035,
+          "column": 1,
+          "line": 25
+        }
+      },
+      "target": {
+        "name": "settings_a",
+        "type": "template"
+      },
+      "value": {
+        "value": {
+          "entries": [
+            {
+              "key": "account",
+              "value": {
+                "type": "string",
+                "value": "A"
+              }
+            },
+            {
+              "key": "carrier",
+              "value": {
+                "type": "string",
+                "value": "post"
+              }
+            }
+          ],
+          "type": "object"
+        }
+      }
+    },
+    {
+      "id": {
+        "part": 0,
+        "source": "correlated-join.petrinet",
+        "statement": 21
+      },
+      "kind": "template.define",
+      "ordinal": 26,
+      "span": {
+        "end": {
+          "byteOffset": 1147,
+          "column": 56,
+          "line": 26
+        },
+        "source": "correlated-join.petrinet",
+        "start": {
+          "byteOffset": 1092,
+          "column": 1,
+          "line": 26
+        }
+      },
+      "target": {
+        "name": "settings_b",
+        "type": "template"
+      },
+      "value": {
+        "value": {
+          "entries": [
+            {
+              "key": "account",
+              "value": {
+                "type": "string",
+                "value": "B"
+              }
+            },
+            {
+              "key": "carrier",
+              "value": {
+                "type": "string",
+                "value": "van"
+              }
+            }
+          ],
+          "type": "object"
+        }
+      }
+    },
+    {
+      "id": {
+        "part": 0,
+        "source": "correlated-join.petrinet",
+        "statement": 22
+      },
+      "kind": "template.define",
+      "ordinal": 27,
+      "span": {
+        "end": {
+          "byteOffset": 1208,
+          "column": 61,
+          "line": 27
+        },
+        "source": "correlated-join.petrinet",
+        "start": {
+          "byteOffset": 1148,
+          "column": 1,
+          "line": 27
+        }
+      },
+      "target": {
+        "name": "courier_east",
+        "type": "template"
+      },
+      "value": {
+        "value": {
+          "entries": [
+            {
+              "key": "available",
+              "value": {
+                "type": "boolean",
+                "value": true
+              }
+            },
+            {
+              "key": "region",
+              "value": {
+                "type": "string",
+                "value": "east"
+              }
+            }
+          ],
+          "type": "object"
+        }
+      }
+    },
+    {
+      "id": {
+        "part": 0,
+        "source": "correlated-join.petrinet",
+        "statement": 23
+      },
+      "kind": "template.define",
+      "ordinal": 28,
+      "span": {
+        "end": {
+          "byteOffset": 1269,
+          "column": 61,
+          "line": 28
+        },
+        "source": "correlated-join.petrinet",
+        "start": {
+          "byteOffset": 1209,
+          "column": 1,
+          "line": 28
+        }
+      },
+      "target": {
+        "name": "courier_west",
+        "type": "template"
+      },
+      "value": {
+        "value": {
+          "entries": [
+            {
+              "key": "available",
+              "value": {
+                "type": "boolean",
+                "value": true
+              }
+            },
+            {
+              "key": "region",
+              "value": {
+                "type": "string",
+                "value": "west"
+              }
+            }
+          ],
+          "type": "object"
+        }
+      }
+    }
+  ],
+  "document": {
+    "id": "correlated-join.petrinet"
+  },
+  "documentKind": "net",
+  "format": "velocitron.petrinet/contribution-ir",
+  "version": 1
+}

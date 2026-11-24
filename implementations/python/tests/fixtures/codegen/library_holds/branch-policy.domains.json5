@@ -1,0 +1,7 @@
+// A few clock values so the quiet-day alarm can come due, and so it can stay early.
+{
+  domains: {
+    "tick.now": [0, 86400],
+    "slip.at": [0, 86400],
+  },
+}

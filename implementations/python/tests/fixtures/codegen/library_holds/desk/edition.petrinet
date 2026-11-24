@@ -1,0 +1,38 @@
+// A newer edition withdraws a hold that is still queued, recalled, or due.
+// A hold already at the desk is kept when the edition is not newer.
+
+net newer_edition "A newer edition withdraws holds that have not reached the desk"
+
+@ed_queued: (editions) -edition->? [cancel_queued]
+(queued) -hold-> [cancel_queued] -hold-> (withdrawn)
+@ed_recalled: (editions) -edition->? [cancel_recalled]
+(recalled) -hold-> [cancel_recalled] -hold-> (withdrawn)
+@ed_due: (editions) -edition->? [cancel_due]
+(due) -hold-> [cancel_due] -hold-> (withdrawn)
+@keep_in: (at_desk) -hold-> [keep_checkout] -hold-> (kept)
+@keep_edition: (editions) -edition->? [keep_checkout]
+
+@ed_queued correlate cel "token.isbn == binding.queued[0].isbn && token.year > binding.queued[0].year"
+@ed_recalled correlate cel "token.isbn == binding.recalled[0].isbn && token.year > binding.recalled[0].year"
+@ed_due correlate cel "token.isbn == binding.due[0].isbn && token.year > binding.due[0].year"
+@keep_edition correlate cel "token.isbn == binding.at_desk[0].isbn && token.year <= binding.at_desk[0].year"
+
+[cancel_queued] priority 2
+[cancel_recalled] priority 2
+[cancel_due] priority 2
+
+(editions) annotation fusion true
+
+(queued) port input hold
+(recalled) port input hold
+(due) port input hold
+
+system "circulation desk"
+system Catalog
+net actor "circulation desk"
+(editions) actor Catalog
+(editions) description "editions the catalog has published"
+(withdrawn) description "withdrawn for a newer edition"
+(kept) description "already at the desk, so the edition does not cancel it"
+
+final (withdrawn), (kept)

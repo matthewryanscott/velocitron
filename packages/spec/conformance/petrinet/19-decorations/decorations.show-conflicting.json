@@ -1,0 +1,45 @@
+{
+  "diagnostic": {
+    "code": "PN202",
+    "column": 1,
+    "file": "decorations.show-conflicting.petrinet",
+    "help": "remove one declaration or make both decorations identical",
+    "line": 9,
+    "message": "conflicting show decorations for color job",
+    "related": [
+      {
+        "message": "first show decoration was declared here",
+        "span": {
+          "end": {
+            "byteOffset": 193,
+            "column": 29,
+            "line": 8
+          },
+          "source": "decorations.show-conflicting.petrinet",
+          "start": {
+            "byteOffset": 165,
+            "column": 1,
+            "line": 8
+          }
+        }
+      }
+    ],
+    "span": {
+      "end": {
+        "byteOffset": 230,
+        "column": 37,
+        "line": 9
+      },
+      "source": "decorations.show-conflicting.petrinet",
+      "start": {
+        "byteOffset": 194,
+        "column": 1,
+        "line": 9
+      }
+    }
+  },
+  "source": {
+    "sourceId": "decorations.show-conflicting.petrinet",
+    "text": "net decorations\n\n(queued) -job-> [start] -job-> (running)\n@done_in: (running) -job-> [finish]\n[finish] -receipt-> (done)\n@done_in predicate cel \"job.exitCode == 0\"\n\ndecorate color job show \"id\"\ndecorate color job show \"owner.name\"\n"
+  }
+}

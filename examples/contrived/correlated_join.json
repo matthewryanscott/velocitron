@@ -1,0 +1,207 @@
+{
+  "arcs": [
+    {
+      "consume": {
+        "predicate": {
+          "cel": "status == 'ready'"
+        },
+        "type": "purchase"
+      },
+      "from": {
+        "place": "orders"
+      },
+      "to": {
+        "transition": "ship"
+      }
+    },
+    {
+      "consume": {
+        "correlate": {
+          "cel": "token.account == binding.orders[0].account"
+        },
+        "mode": "read",
+        "type": "setting"
+      },
+      "from": {
+        "place": "settings"
+      },
+      "to": {
+        "transition": "ship"
+      }
+    },
+    {
+      "consume": {
+        "correlate": {
+          "cel": "token.region == binding.orders[0].region"
+        },
+        "type": "courier"
+      },
+      "from": {
+        "place": "couriers"
+      },
+      "to": {
+        "transition": "ship"
+      }
+    },
+    {
+      "consume": {
+        "correlate": {
+          "cel": "token.account == binding.orders[0].account"
+        },
+        "mode": "inhibit",
+        "type": "pause"
+      },
+      "from": {
+        "place": "pauses"
+      },
+      "to": {
+        "transition": "ship"
+      }
+    },
+    {
+      "from": {
+        "transition": "ship"
+      },
+      "produce": {
+        "cel": "{'account': binding.orders[0].account, 'carrier': binding.settings[0].carrier, 'region': binding.couriers[0].region}",
+        "destination": "shipped",
+        "type": "shipment"
+      },
+      "to": {
+        "place": "shipped"
+      }
+    },
+    {
+      "from": {
+        "transition": "ship"
+      },
+      "produce": {
+        "destination": "couriers",
+        "type": "courier"
+      },
+      "to": {
+        "place": "couriers"
+      }
+    },
+    {
+      "consume": {
+        "type": "pause"
+      },
+      "from": {
+        "place": "pauses"
+      },
+      "to": {
+        "transition": "lift_pause"
+      }
+    }
+  ],
+  "initialMarking": {
+    "couriers": [
+      {
+        "data": {
+          "region": "west"
+        },
+        "type": "courier"
+      },
+      {
+        "data": {
+          "region": "east"
+        },
+        "type": "courier"
+      }
+    ],
+    "orders": [
+      {
+        "data": {
+          "account": "A",
+          "region": "west",
+          "status": "ready"
+        },
+        "type": "purchase"
+      },
+      {
+        "data": {
+          "account": "B",
+          "region": "east",
+          "status": "ready"
+        },
+        "type": "purchase"
+      },
+      {
+        "data": {
+          "account": "C",
+          "region": "west",
+          "status": "draft"
+        },
+        "type": "purchase"
+      }
+    ],
+    "pauses": [
+      {
+        "data": {
+          "account": "A"
+        },
+        "type": "pause"
+      }
+    ],
+    "settings": [
+      {
+        "data": {
+          "account": "B",
+          "carrier": "van"
+        },
+        "type": "setting"
+      },
+      {
+        "data": {
+          "account": "A",
+          "carrier": "post"
+        },
+        "type": "setting"
+      }
+    ]
+  },
+  "name": "correlated-join",
+  "places": [
+    {
+      "accepts": [
+        "purchase"
+      ],
+      "name": "orders"
+    },
+    {
+      "accepts": [
+        "setting"
+      ],
+      "name": "settings"
+    },
+    {
+      "accepts": [
+        "courier"
+      ],
+      "name": "couriers"
+    },
+    {
+      "accepts": [
+        "pause"
+      ],
+      "name": "pauses"
+    },
+    {
+      "accepts": [
+        "shipment"
+      ],
+      "name": "shipped"
+    }
+  ],
+  "transitions": [
+    {
+      "handler": "ship_order",
+      "name": "ship"
+    },
+    {
+      "handler": "lift_pause",
+      "name": "lift_pause"
+    }
+  ]
+}

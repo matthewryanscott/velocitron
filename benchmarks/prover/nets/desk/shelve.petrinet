@@ -1,0 +1,6 @@
+// A loan comes back and is shelved.
+net shelve "A returned loan is shelved"
+
+(loaned) -hold-> [shelve] -hold-> (shelved)
+(loaned) port input hold
+final (shelved)

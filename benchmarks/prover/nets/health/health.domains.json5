@@ -1,0 +1,6 @@
+// One sensor. A bad reading dates the grace from the clock (broken two
+// minutes later), so the prover is told the times the clock can show.
+{
+  instance: "condition",
+  domains: { "tick.now": [0, 120, 240] },
+}

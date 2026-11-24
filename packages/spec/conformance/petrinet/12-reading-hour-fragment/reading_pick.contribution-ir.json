@@ -1,0 +1,231 @@
+{
+  "format": "velocitron.petrinet/contribution-ir",
+  "version": 1,
+  "documentKind": "net",
+  "document": {
+    "id": "reading_pick.petrinet"
+  },
+  "contributions": [
+    {
+      "id": {
+        "source": "reading_pick.petrinet",
+        "statement": 0,
+        "part": 0
+      },
+      "kind": "document.net-header",
+      "ordinal": 0,
+      "span": {
+        "source": "reading_pick.petrinet",
+        "start": {
+          "byteOffset": 0,
+          "line": 1,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 46,
+          "line": 1,
+          "column": 47
+        }
+      },
+      "target": {
+        "type": "document"
+      },
+      "value": {
+        "name": "reading_pick",
+        "description": "The due passage gets picked"
+      }
+    },
+    {
+      "id": {
+        "source": "reading_pick.petrinet",
+        "statement": 1,
+        "part": 0
+      },
+      "kind": "arc.declare",
+      "ordinal": 1,
+      "span": {
+        "source": "reading_pick.petrinet",
+        "start": {
+          "byteOffset": 48,
+          "line": 3,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 88,
+          "line": 3,
+          "column": 41
+        }
+      },
+      "target": {
+        "type": "arc",
+        "id": {
+          "document": "reading_pick.petrinet",
+          "statement": 1,
+          "part": 0
+        }
+      },
+      "value": {
+        "from": {
+          "type": "place",
+          "name": "refresh_due_in"
+        },
+        "to": {
+          "type": "transition",
+          "name": "curate"
+        },
+        "color": {
+          "kind": "explicit",
+          "value": "refresh_due"
+        },
+        "mode": "consume",
+        "transitionNameSpan": {
+          "source": "reading_pick.petrinet",
+          "start": {
+            "byteOffset": 81,
+            "line": 3,
+            "column": 34
+          },
+          "end": {
+            "byteOffset": 87,
+            "line": 3,
+            "column": 40
+          }
+        }
+      }
+    },
+    {
+      "id": {
+        "source": "reading_pick.petrinet",
+        "statement": 1,
+        "part": 1
+      },
+      "kind": "arc.declare",
+      "ordinal": 2,
+      "span": {
+        "source": "reading_pick.petrinet",
+        "start": {
+          "byteOffset": 80,
+          "line": 3,
+          "column": 33
+        },
+        "end": {
+          "byteOffset": 117,
+          "line": 3,
+          "column": 70
+        }
+      },
+      "target": {
+        "type": "arc",
+        "id": {
+          "document": "reading_pick.petrinet",
+          "statement": 1,
+          "part": 1
+        }
+      },
+      "value": {
+        "from": {
+          "type": "transition",
+          "name": "curate"
+        },
+        "to": {
+          "type": "place",
+          "name": "speak_request"
+        },
+        "color": {
+          "kind": "explicit",
+          "value": "speak_req"
+        },
+        "mode": "produce"
+      }
+    },
+    {
+      "id": {
+        "source": "reading_pick.petrinet",
+        "statement": 2,
+        "part": 0
+      },
+      "kind": "transition.handler",
+      "ordinal": 3,
+      "span": {
+        "source": "reading_pick.petrinet",
+        "start": {
+          "byteOffset": 119,
+          "line": 5,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 151,
+          "line": 5,
+          "column": 33
+        }
+      },
+      "target": {
+        "type": "transition",
+        "name": "curate"
+      },
+      "value": {
+        "handler": "curate@curate"
+      }
+    },
+    {
+      "id": {
+        "source": "reading_pick.petrinet",
+        "statement": 3,
+        "part": 0
+      },
+      "kind": "place.port",
+      "ordinal": 4,
+      "span": {
+        "source": "reading_pick.petrinet",
+        "start": {
+          "byteOffset": 152,
+          "line": 6,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 191,
+          "line": 6,
+          "column": 40
+        }
+      },
+      "target": {
+        "type": "place",
+        "name": "refresh_due_in"
+      },
+      "value": {
+        "direction": "input",
+        "color": "refresh_due"
+      }
+    },
+    {
+      "id": {
+        "source": "reading_pick.petrinet",
+        "statement": 4,
+        "part": 0
+      },
+      "kind": "place.port",
+      "ordinal": 5,
+      "span": {
+        "source": "reading_pick.petrinet",
+        "start": {
+          "byteOffset": 192,
+          "line": 7,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 229,
+          "line": 7,
+          "column": 38
+        }
+      },
+      "target": {
+        "type": "place",
+        "name": "speak_request"
+      },
+      "value": {
+        "direction": "output",
+        "color": "speak_req"
+      }
+    }
+  ]
+}

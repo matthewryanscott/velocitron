@@ -1,0 +1,1 @@
+{ domains: { "tick.now": [0, 600], "vm.wait": [600] } }

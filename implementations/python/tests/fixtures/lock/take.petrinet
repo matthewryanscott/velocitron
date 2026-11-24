@@ -1,0 +1,5 @@
+net take "Start a job when the lock is free"
+(todo) -job-> [take] -job-> (busy)
+@lock_in: (lock) -key-> [take]
+(lock) annotation fusion true
+(busy) port output job

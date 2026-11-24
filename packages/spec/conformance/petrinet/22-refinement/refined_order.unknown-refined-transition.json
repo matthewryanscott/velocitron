@@ -1,0 +1,27 @@
+{
+  "diagnostic": {
+    "code": "PN202",
+    "column": 8,
+    "file": "refined_order.unknown-refined-transition.petrinet",
+    "help": "refine a transition the net declares",
+    "line": 7,
+    "message": "refine shop.[ship] by courier: net shop has no transition [ship]",
+    "span": {
+      "end": {
+        "byteOffset": 215,
+        "column": 19,
+        "line": 7
+      },
+      "source": "refined_order.unknown-refined-transition.petrinet",
+      "start": {
+        "byteOffset": 204,
+        "column": 8,
+        "line": 7
+      }
+    }
+  },
+  "source": {
+    "sourceId": "refined_order.unknown-refined-transition.petrinet",
+    "text": "composition refined_order_unknown_transition\n\nuse \"order_flow.petrinet\" as shop\nuse \"courier.petrinet\" as courier\nwire shop.(sending) -> courier.(pickup)\nwire courier.(dropped) -> shop.(delivered)\nrefine shop.[ship] by courier\n"
+  }
+}

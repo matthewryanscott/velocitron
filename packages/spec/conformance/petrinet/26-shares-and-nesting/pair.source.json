@@ -1,0 +1,4 @@
+{
+  "sourceId": "pair.petrinet",
+  "text": "composition pair\nuse \"take.petrinet\" as take\nuse \"give.petrinet\" as give\nwire take.(busy) -> give.(busy)\nshare take.(lock) ~ give.(lock)\n"
+}

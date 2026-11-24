@@ -1,0 +1,25 @@
+// A person flips which desk owns the shelf, as often as they like. At a
+// copy, the home desk lends a copy it owns and skips one it does not;
+// a loan is confirmed when its slip comes in.
+net owner_switch "A person flips the desk; a copy is lent only for the home desk"
+
+@to_new_in: (switch) -switch-> [flip_to_new]
+@to_new_out: [flip_to_new] -switch-> (switch)
+@to_old_in: (switch) -switch-> [flip_back]
+@to_old_out: [flip_back] -switch-> (switch)
+(copies) -copy-> [lend] -copy-> (loaned)
+(copies) -copy-> [skip] -copy-> (skipped)
+(loaned) -copy-> [confirm] -copy-> (confirmed)
+(slips) -slip->? [confirm]
+@old_owns: (switch) -switch->? [lend]
+@new_owns: (switch) -switch->? [skip]
+
+@to_new_in predicate cel "owner == 'old'"
+@to_old_in predicate cel "owner == 'new'"
+@to_new_out data cel "{'owner': 'new'}"
+@to_old_out data cel "{'owner': 'old'}"
+@old_owns predicate cel "owner == 'old'"
+@new_owns predicate cel "owner == 'new'"
+
+(switch) annotation fusion true
+domain switch.owner "old" "new"

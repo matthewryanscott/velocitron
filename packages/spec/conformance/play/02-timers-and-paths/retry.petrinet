@@ -1,0 +1,13 @@
+net retry "A job retried on a timer until a deadline"
+
+(queue) -job-> [try] -job-> (waiting)
+@retry_in: (waiting) -job-> [retry] -job-> (queue)
+@give_up_in: (waiting) -job-> [give_up] -job-> (failed)
+(clock) -tick->? [retry]
+(clock) -tick->? [give_up]
+
+[retry] timer clock (clock) cel "clock.now >= job.nextAt"
+[retry] timer bind job (waiting)
+[give_up] timer clock (clock) cel "clock.now >= job.deadline"
+[give_up] timer bind job (waiting)
+[give_up] priority 1

@@ -1,0 +1,11 @@
+// A slip's alarm is due an hour after it was written. The due time is a
+// sum, so the check cannot say which clock slot makes it true.
+net arithmetic_timer "An alarm an hour after a slip"
+
+(slip) -slip-> [alarm]
+@out: [alarm] -note-> (rang)
+(clock) -tick->? [alarm]
+
+@out data cel "{'kind': 'quiet'}"
+[alarm] timer clock (clock) cel "clock.now >= slip.at + 3600"
+[alarm] timer bind slip (slip)

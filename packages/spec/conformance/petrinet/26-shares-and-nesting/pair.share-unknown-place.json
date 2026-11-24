@@ -1,0 +1,27 @@
+{
+  "diagnostic": {
+    "code": "PN202",
+    "column": 1,
+    "file": "pair.share-unknown-place.petrinet",
+    "help": "share places that exist and accept the same colors",
+    "line": 5,
+    "message": "share take.(lock) ~ give.(nowhere): net 'give' has no place named 'nowhere'",
+    "span": {
+      "end": {
+        "byteOffset": 153,
+        "column": 35,
+        "line": 5
+      },
+      "source": "pair.share-unknown-place.petrinet",
+      "start": {
+        "byteOffset": 119,
+        "column": 1,
+        "line": 5
+      }
+    }
+  },
+  "source": {
+    "sourceId": "pair.share-unknown-place.petrinet",
+    "text": "composition pair_unknown_place\nuse \"take.petrinet\" as take\nuse \"give.petrinet\" as give\nwire take.(busy) -> give.(busy)\nshare take.(lock) ~ give.(nowhere)\n"
+  }
+}

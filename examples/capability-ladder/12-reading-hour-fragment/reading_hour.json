@@ -1,0 +1,39 @@
+{
+  "name": "reading_hour",
+  "nets": [
+    {
+      "alias": "cadence",
+      "ref": "reading_cadence.json"
+    },
+    {
+      "alias": "curate",
+      "ref": "reading_pick.json"
+    },
+    {
+      "alias": "speaks",
+      "ref": "reading_voice.json"
+    }
+  ],
+  "wires": [
+    {
+      "from": {
+        "net": "cadence",
+        "port": "refresh_due_out"
+      },
+      "to": {
+        "net": "curate",
+        "port": "refresh_due_in"
+      }
+    },
+    {
+      "from": {
+        "net": "curate",
+        "port": "speak_request"
+      },
+      "to": {
+        "net": "speaks",
+        "port": "request_in"
+      }
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+[project]
+name = "velocitron-skill"
+version = "0.1.0"
+description = "Resolves the bundled Velocitron authoring skill shipped from skills/velocitron."
+readme = "README.md"
+authors = [
+    { name = "Matthew R. Scott" },
+]
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.12"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/circuitmeridian/velocitron"
+Repository = "https://github.com/circuitmeridian/velocitron"
+Issues = "https://github.com/circuitmeridian/velocitron/issues"
+
+[dependency-groups]
+test = [
+    "pytest>=9.0",
+]
+
+[build-system]
+requires = ["hatchling==1.31.0"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/velocitron_skill"]
+dev-mode-exact = true
+
+# ``src/velocitron_skill/skill`` is a symlink to the repo-root
+# ``skills/velocitron/`` (the authoring source of truth). hatchling follows
+# it, so the wheel contains those files. An editable install resolves the
+# symlink in place. ``skill_root`` reads that directory through
+# importlib.resources — one code path for both.
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

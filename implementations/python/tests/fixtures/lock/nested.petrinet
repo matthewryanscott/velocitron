@@ -1,0 +1,6 @@
+composition nested
+use "pair.petrinet" as pair
+use "worker.petrinet" as worker
+wire pair.(take.busy) -> worker.(start)
+wire worker.(end) -> pair.(give.worked)
+refine pair.[give.work] by worker

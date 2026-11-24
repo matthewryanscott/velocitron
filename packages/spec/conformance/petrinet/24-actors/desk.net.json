@@ -1,0 +1,117 @@
+{
+  "name": "desk",
+  "places": [
+    {
+      "name": "sign",
+      "accepts": [
+        "state"
+      ],
+      "annotations": {
+        "actor": "Clerk"
+      }
+    },
+    {
+      "name": "open",
+      "accepts": [
+        "token"
+      ]
+    },
+    {
+      "name": "shut",
+      "accepts": [
+        "token"
+      ]
+    }
+  ],
+  "transitions": [
+    {
+      "name": "flip",
+      "annotations": {
+        "actor": "Clerk"
+      }
+    },
+    {
+      "name": "close",
+      "annotations": {
+        "note": "kept"
+      }
+    }
+  ],
+  "arcs": [
+    {
+      "from": {
+        "place": "sign"
+      },
+      "to": {
+        "transition": "flip"
+      },
+      "consume": {
+        "type": "state"
+      }
+    },
+    {
+      "from": {
+        "transition": "flip"
+      },
+      "to": {
+        "place": "sign"
+      },
+      "produce": {
+        "destination": "sign",
+        "type": "state"
+      }
+    },
+    {
+      "from": {
+        "place": "open"
+      },
+      "to": {
+        "transition": "close"
+      },
+      "consume": {
+        "type": "token"
+      }
+    },
+    {
+      "from": {
+        "transition": "close"
+      },
+      "to": {
+        "place": "shut"
+      },
+      "produce": {
+        "destination": "shut",
+        "type": "token"
+      }
+    },
+    {
+      "from": {
+        "place": "sign"
+      },
+      "to": {
+        "transition": "close"
+      },
+      "consume": {
+        "type": "state",
+        "mode": "read"
+      }
+    }
+  ],
+  "initialMarking": {},
+  "annotations": {
+    "actors": [
+      {
+        "name": "Clerk",
+        "kind": "person"
+      },
+      {
+        "name": "Annex",
+        "kind": "system"
+      },
+      {
+        "name": "Catalog",
+        "kind": "system"
+      }
+    ]
+  }
+}

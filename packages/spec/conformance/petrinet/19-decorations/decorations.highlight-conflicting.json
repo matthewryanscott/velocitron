@@ -1,0 +1,45 @@
+{
+  "diagnostic": {
+    "code": "PN202",
+    "column": 1,
+    "file": "decorations.highlight-conflicting.petrinet",
+    "help": "remove one declaration or make both decorations identical",
+    "line": 9,
+    "message": "conflicting highlight decorations for [start]",
+    "related": [
+      {
+        "message": "first highlight decoration was declared here",
+        "span": {
+          "end": {
+            "byteOffset": 196,
+            "column": 32,
+            "line": 8
+          },
+          "source": "decorations.highlight-conflicting.petrinet",
+          "start": {
+            "byteOffset": 165,
+            "column": 1,
+            "line": 8
+          }
+        }
+      }
+    ],
+    "span": {
+      "end": {
+        "byteOffset": 228,
+        "column": 32,
+        "line": 9
+      },
+      "source": "decorations.highlight-conflicting.petrinet",
+      "start": {
+        "byteOffset": 197,
+        "column": 1,
+        "line": 9
+      }
+    }
+  },
+  "source": {
+    "sourceId": "decorations.highlight-conflicting.petrinet",
+    "text": "net decorations\n\n(queued) -job-> [start] -job-> (running)\n@done_in: (running) -job-> [finish]\n[finish] -receipt-> (done)\n@done_in predicate cel \"job.exitCode == 0\"\n\ndecorate [start] highlight \"R1\"\ndecorate [start] highlight \"R2\"\n"
+  }
+}

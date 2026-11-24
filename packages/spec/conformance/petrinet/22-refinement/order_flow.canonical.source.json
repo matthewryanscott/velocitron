@@ -1,0 +1,4 @@
+{
+  "sourceId": "order_flow.canonical.petrinet",
+  "text": "net order_flow \"An order, sent and settled\"\n\n(placed) -parcel-> [send] -parcel-> (sending)\n(sending) -parcel-> [deliver] -receipt-> (delivered)\n(delivered) -receipt-> [settle] -receipt-> (settled)\n\n(sending) port output parcel\n(delivered) port input receipt\n"
+}

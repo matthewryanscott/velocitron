@@ -1,0 +1,22 @@
+// A request is opened and checked before a step reads its approval, a fact
+// the outside world gives once. Only the approval's level decides between
+// sending and dropping; who approved travels on with a sent request.
+net late_approval "Check a request, then send or drop it on its approval"
+
+(requests) -request-> [open] -request-> (opened)
+(opened) -request-> [check] -request-> (pending)
+@send_in: (pending) -request-> [send]
+@send_out: [send] -request-> (sent)
+@send_ok: (approvals) -approval->? [send]
+@drop_in: (pending) -request-> [drop]
+@drop_out: [drop] -request-> (dropped)
+@drop_ok: (approvals) -approval->? [drop]
+
+@send_ok predicate cel "level >= 3"
+@drop_ok predicate cel "level < 3"
+@send_out data cel "{'id': binding.pending[0].id, 'by': binding.approvals[0].by}"
+@drop_out data cel "{'id': binding.pending[0].id}"
+
+(approvals) annotation fusion true
+domain approval.level 1 2 3 4 5
+domain approval.by "ann" "bob"

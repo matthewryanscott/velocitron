@@ -1,0 +1,10 @@
+// Several kinds of job, and a clock that steps forward often enough that
+// the slips do not run out inside the state cap.
+{
+  instance: "job",
+  domains: {
+    "tick.now": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    "job.kind": ["plane", "sand", "glue", "clamp"],
+    "job.since": [0],
+  },
+}

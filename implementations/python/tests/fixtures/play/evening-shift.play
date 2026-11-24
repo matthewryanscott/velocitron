@@ -1,0 +1,30 @@
+play evening_shift "Evening shift"
+/// The clerk closes the desk, a runner takes one hold, and the clerk checks it
+/// an hour later before the desk opens again.
+net "evening-shift.petrinet"
+show sequence
+box "Night crew" Runner Desk
+
+/// ## Close
+@closed: fire [close_desk]
+fire [desk_closes] "Close the desk"
+
+/// ### First hold
+inject (request) <- {"titles": 4, "branch": "annex"} "Hold filed"
+fire [runner_takes] "Take the hold"
+expect (ready) count 1
+
+advance +90m
+/// ## Check and reopen
+fire [check] -> (checked) {"ok": true} "Check the hold"
+fire [open_desk] "Open the desk"
+fire [desk_opens]
+expect (desk_open) count 1, (open_sign) has {"state": "open"}
+
+path early_check "Check too early" from @closed
+show sequence only
+fire [desk_closes] "Close the desk"
+inject (request) <- {"titles": 4, "branch": "annex"} "Hold filed"
+fire [runner_takes] "Take the hold"
+/// The check waits for the clock; nobody advanced it.
+fire [check] -> (checked) {"ok": true} "Check the hold"

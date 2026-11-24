@@ -1,0 +1,8 @@
+// [work] of the outer net is refined by the inner net.
+composition shop
+
+use "outer.petrinet" as outer
+use "inner.petrinet" as inner
+wire outer.(queue) -> inner.(in)
+wire inner.(out) -> outer.(result)
+refine outer.[work] by inner

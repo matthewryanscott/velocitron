@@ -1,0 +1,45 @@
+{
+  "diagnostic": {
+    "code": "PN202",
+    "column": 1,
+    "file": "desk.actor-conflicting-assignment.petrinet",
+    "line": 11,
+    "message": "conflicting annotation actor facts for transition [flip]",
+    "span": {
+      "source": "desk.actor-conflicting-assignment.petrinet",
+      "start": {
+        "byteOffset": 149,
+        "line": 11,
+        "column": 1
+      },
+      "end": {
+        "byteOffset": 167,
+        "line": 11,
+        "column": 19
+      }
+    },
+    "help": "remove one declaration or make both annotation values identical",
+    "related": [
+      {
+        "message": "first annotation value was declared here",
+        "span": {
+          "source": "desk.actor-conflicting-assignment.petrinet",
+          "start": {
+            "byteOffset": 130,
+            "line": 10,
+            "column": 1
+          },
+          "end": {
+            "byteOffset": 148,
+            "line": 10,
+            "column": 19
+          }
+        }
+      }
+    ]
+  },
+  "source": {
+    "sourceId": "desk.actor-conflicting-assignment.petrinet",
+    "text": "net desk\n\nperson Clerk\nsystem Annex\n\n(sign) -state-> [flip] -state-> (sign)\n(open) -> [close] -> (shut)\n(sign) -state->? [close]\n\n[flip] actor Clerk\n[flip] actor Annex\n"
+  }
+}

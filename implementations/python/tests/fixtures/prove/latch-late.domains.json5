@@ -1,0 +1,3 @@
+// The VM opens at 600, the last time listed; the latch copies it, and the
+// stop is then due at 1200.
+{ domains: { "tick.now": [0, 600], "vm.startAt": [600], "vm.wait": [600] } }

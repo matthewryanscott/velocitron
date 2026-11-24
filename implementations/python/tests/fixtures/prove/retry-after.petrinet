@@ -1,0 +1,24 @@
+// A job is tried at its reminder, then once more a minute after that try.
+// The retry is dated from the clock, so it falls on no time the domains file
+// lists when the reminder fired late; the retry's maturity names it.
+net retry_after "Try at the reminder, and again a minute later"
+
+(kept) -job-> [remind] -job-> (tried)
+@remind_clock: (clock) -tick->? [remind]
+[remind] timer clock (clock) cel "clock.now >= kept.remindAt"
+[remind] timer bind kept (kept)
+[remind] timer maturity cel "kept.remindAt"
+
+@wait_in: (tried) -job-> [wait]
+@wait_out: [wait] -job-> (waiting)
+@wait_clock: (clock) -tick->? [wait]
+@wait_out data cel "{'remindAt': binding.tried[0].remindAt, 'retryAt': binding.clock[0].now + 60}"
+
+(waiting) -job-> [again] -job-> (done)
+@again_clock: (clock) -tick->? [again]
+[again] timer clock (clock) cel "clock.now >= waiting.retryAt"
+[again] timer bind waiting (waiting)
+[again] timer maturity cel "waiting.retryAt"
+
+(kept) port input job
+final (done)

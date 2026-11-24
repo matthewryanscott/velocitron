@@ -1,0 +1,23 @@
+// Reshelving takes a scan, then either a sort or a recount. The desk keeps a
+// log from the start; its alarm waits a day, longer than the check's clock goes.
+net never_due "Reshelving steps, and an alarm that never comes due"
+
+(jobs) -job-> [scan] -job-> (scanned)
+@sort_in: (scanned) -job-> [sort] -job-> (sorted)
+@recount_in: (scanned) -job-> [recount] -job-> (sorted)
+(sorted) -job-> [shelve] -job-> (done)
+@sort_in predicate cel "clean"
+@recount_in predicate cel "!clean"
+@alarm_in: (log) -log-> [alarm]
+@alarm_out: [alarm] -log-> (log)
+(clock) -tick->? [alarm]
+
+@alarm_out data cel "{'since': binding.log[0].since}"
+[alarm] timer clock (clock) cel "clock.now >= log.since + 86400"
+[alarm] timer bind log (log)
+
+(jobs) port input job
+system "circulation desk"
+(log) kept by "circulation desk" starts as cel "{'since': 0}"
+domain tick.now 0 1 2
+domain job.clean true false

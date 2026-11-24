@@ -1,0 +1,5 @@
+play s
+scope neighbors
+show hold id, remindAt
+show loan outcome, hold.id, "edition"
+show sequence only

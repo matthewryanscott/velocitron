@@ -1,0 +1,24 @@
+// The desk checks a return and keeps a damage record per title.
+net poller "The desk checks a return for damage"
+
+@ok: (returns) -copy-> [accepted]
+[accepted] -copy-> (shelved)
+@bad: (returns) -copy-> [damaged]
+[damaged] -copy-> (alerts)
+@ok_in: (condition) -condition-> [accepted]
+@ok_out: [accepted] -condition-> (condition)
+@bad_in: (condition) -condition-> [damaged]
+@bad_out: [damaged] -condition-> (condition)
+
+@ok predicate cel "state == 'clean'"
+@bad predicate cel "state == 'damaged'"
+@ok_in correlate cel "token.isbn == binding.returns[0].isbn"
+@bad_in correlate cel "token.isbn == binding.returns[0].isbn"
+@ok_out data cel "{'isbn': binding.condition[0].isbn, 'damaged': false}"
+@bad_out data cel "{'isbn': binding.condition[0].isbn, 'damaged': true}"
+
+(returns) port input copy
+(alerts) port output copy
+(condition) kept by "circulation desk" starts as cel "{'isbn': instance.isbn, 'damaged': false}"
+domain copy.state "clean" "damaged"
+domain condition.damaged true false

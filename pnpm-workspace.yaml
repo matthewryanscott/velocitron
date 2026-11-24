@@ -1,0 +1,23 @@
+packages:
+  - implementations/typescript
+  - packages/analysis/typescript
+  - packages/properties/typescript
+  - packages/explain/typescript
+  - packages/equiv/typescript
+  - packages/codegen/typescript
+  - packages/netbase/typescript
+  - packages/replay/typescript
+  - packages/cli/typescript
+  - packages/cel/typescript
+  - packages/dsl/typescript
+  - packages/grammar/typescript
+  - packages/ir/typescript
+  - packages/merge/typescript
+  - packages/petrinet/typescript
+  - packages/play/typescript
+  - packages/play-check/typescript
+  - packages/engine/typescript
+  - packages/journal/typescript
+  - packages/runtime/typescript
+  - packages/viz/typescript
+  - packages/spec

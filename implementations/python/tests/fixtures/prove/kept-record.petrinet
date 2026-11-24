@@ -1,0 +1,25 @@
+// A return is checked in. The circulation desk keeps one record per title
+// of whether the copy came back damaged; it starts clean.
+net kept_record "A return is checked; the desk keeps a damage record"
+
+@ok: (returns) -copy-> [accepted]
+[accepted] -copy-> (shelved)
+@bad: (returns) -copy-> [damaged]
+[damaged] -copy-> (shelved)
+@ok_in: (condition) -condition-> [accepted]
+@ok_out: [accepted] -condition-> (condition)
+@bad_in: (condition) -condition-> [damaged]
+@bad_out: [damaged] -condition-> (condition)
+
+@ok predicate cel "state == 'clean'"
+@bad predicate cel "state == 'damaged'"
+@ok_in correlate cel "token.isbn == binding.returns[0].isbn"
+@bad_in correlate cel "token.isbn == binding.returns[0].isbn"
+@ok_out data cel "{'isbn': binding.condition[0].isbn, 'damaged': false}"
+@bad_out data cel "{'isbn': binding.condition[0].isbn, 'damaged': true}"
+
+(returns) port input copy
+system "circulation desk"
+(condition) kept by "circulation desk" starts as cel "{'isbn': instance.isbn, 'damaged': false}"
+domain copy.state "clean" "damaged"
+domain condition.damaged true false

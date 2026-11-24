@@ -1,0 +1,8 @@
+net small_guarded "A guarded transition and a predicate handler"
+
+(gate_in) -task-> [go] -task-> (out)
+@p: (gate_in) -task->? [go]
+@p predicate handler "skip_done"
+[go] guard "g"
+[go] handler "go@small"
+(gate_in) port input task

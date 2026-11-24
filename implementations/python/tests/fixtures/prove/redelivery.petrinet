@@ -1,0 +1,16 @@
+// A notice a person can send again until it is filed. Each send again
+// leaves a try behind, so the markings never repeat; nothing takes a try,
+// and only [escalate] reads them, three at once, so the prover keeps three
+// (ADR 0062) and the exploration ends. A third try lets the notice escalate.
+net redelivery "A notice a person can send again until it is filed"
+
+(pending) -> [send] -> (sent)
+(sent) -> [redeliver] -> (pending)
+[redeliver] -try-> (tries)
+(sent) -> [finish] -> (done)
+(sent) -> [escalate] -> (done)
+@third: (tries) -try->? [escalate]
+@third weight 3
+
+final (done)
+marking initial (pending) <- 1

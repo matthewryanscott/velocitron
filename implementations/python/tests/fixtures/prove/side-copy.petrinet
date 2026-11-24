@@ -1,0 +1,19 @@
+// An item follows its work page: a page
+// event that is not the end is copied into (followed), which no step reads;
+// a done page ends the item. Whether a job runs travels only in the copy.
+net side_copy "Follow a work page until it is done"
+
+(items) -item-> [start] -item-> (started)
+@fo_in: (started) -item->? [follow]
+@fo_page: (page) -page-> [follow]
+@fo_out: [follow] -page-> (followed)
+@end_in: (started) -item-> [end]
+@end_page: (page) -page-> [end]
+@end_out: [end] -item-> (finished)
+
+@fo_page predicate cel "status != 'done'"
+@end_page predicate cel "status == 'done'"
+
+(page) port input page
+domain page.status "waiting" "review" "done"
+domain page.running true false

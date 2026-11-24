@@ -1,0 +1,58 @@
+{
+  "name": "reading_pick",
+  "places": [
+    {
+      "name": "refresh_due_in",
+      "accepts": [
+        "refresh_due"
+      ],
+      "port": {
+        "direction": "input",
+        "type": "refresh_due"
+      }
+    },
+    {
+      "name": "speak_request",
+      "accepts": [
+        "speak_req"
+      ],
+      "port": {
+        "direction": "output",
+        "type": "speak_req"
+      }
+    }
+  ],
+  "transitions": [
+    {
+      "name": "curate",
+      "handler": "curate@curate"
+    }
+  ],
+  "arcs": [
+    {
+      "from": {
+        "place": "refresh_due_in"
+      },
+      "to": {
+        "transition": "curate"
+      },
+      "consume": {
+        "type": "refresh_due"
+      }
+    },
+    {
+      "from": {
+        "transition": "curate"
+      },
+      "to": {
+        "place": "speak_request"
+      },
+      "produce": {
+        "destination": "speak_request",
+        "type": "speak_req"
+      }
+    }
+  ],
+  "initialMarking": {},
+  "description": "The due passage gets picked"
+}

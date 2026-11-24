@@ -1,0 +1,4 @@
+// One shared permit, two named workers already at the shelf.
+{
+  instance: "worker",
+}

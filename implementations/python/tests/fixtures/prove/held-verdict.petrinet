@@ -1,0 +1,23 @@
+// A held request goes on when a person releases it, or when the verdict
+// changes and no longer holds it. The release writes the verdict back.
+net held_verdict "Send or hold on the verdict; release or pass a held request"
+
+(requests) -request-> [open] -request-> (pending)
+(pending) -request-> [send] -request-> (sent)
+(pending) -request-> [hold] -request-> (held)
+(held) -request-> [release] -request-> (pending)
+(held) -request-> [passed] -request-> (pending)
+@send_verdict: (verdicts) -verdict->? [send]
+@hold_verdict: (verdicts) -verdict->? [hold]
+@passed_verdict: (verdicts) -verdict->? [passed]
+@release_in: (verdicts) -verdict-> [release]
+@release_out: [release] -verdict-> (verdicts)
+
+@send_verdict predicate cel "result != 'hold'"
+@hold_verdict predicate cel "result == 'hold'"
+@passed_verdict predicate cel "result != 'hold'"
+@release_in predicate cel "result == 'hold'"
+@release_out data cel "{'result': 'released'}"
+
+(verdicts) annotation fusion true
+domain verdict.result "pass" "hold" "released"

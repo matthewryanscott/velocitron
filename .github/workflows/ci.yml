@@ -1,0 +1,446 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "24.15.0"
+  PNPM_VERSION: "11.13.1"
+  BASEDPYRIGHT_VERSION: "1.39.9"
+  PYTHON_VERSION: "3.12.11"
+  # 0.11.29's Python index stops at 3.14.6, so `uv python install 3.14.8`
+  # failed with "No download found". 0.13.5 still publishes 3.14.8.
+  UV_VERSION: "0.13.5"
+  UV_CHECKSUM: "f68d291c75783122dad58ab77def0e13f3233f358731db5d6d7e8715603b928f"
+
+jobs:
+  python:
+    name: Python ${{ matrix.python }} / CEL ${{ matrix.cel }}
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        cel:
+          - core
+          - cpp
+          - rust
+          - all
+        # The floor of requires-python; the newest Python runs the all leg.
+        python:
+          - "3.12.11"
+        include:
+          - cel: all
+            python: "3.14.8"
+    env:
+      UV_PROJECT_ENVIRONMENT: ${{ github.workspace }}/implementations/python/.venv-ci-${{ matrix.python }}-${{ matrix.cel }}
+    steps:
+      - name: Check out the reviewed source
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Install pinned uv
+        uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
+        with:
+          version: ${{ env.UV_VERSION }}
+          checksum: ${{ env.UV_CHECKSUM }}
+          enable-cache: true
+          cache-dependency-glob: implementations/python/uv.lock
+
+      - name: Install pinned Python
+        run: uv python install "${{ matrix.python }}"
+
+      - name: Sync the locked CEL leg
+        working-directory: implementations/python
+        env:
+          UV_PYTHON: ${{ matrix.python }}
+        run: |
+          set -euo pipefail
+          case "${{ matrix.cel }}" in
+            core) extras=() ;;
+            cpp) extras=(--extra cel-cpp) ;;
+            rust) extras=(--extra cel-rust) ;;
+            all) extras=(--extra cel-cpp --extra cel-rust) ;;
+            *) echo "Unknown CEL leg" >&2; exit 2 ;;
+          esac
+          uv sync --locked --no-default-groups --group test "${extras[@]}"
+
+      - name: Run Python tests
+        working-directory: implementations/python
+        run: uv run --no-sync pytest
+
+  kernel-modes:
+    # I7: the kernel's two modes, every core and one core in the reference's
+    # order, give the same counts and results; each is held to the record
+    # on the quick set, so the one-core mode vouches for the mode authors use.
+    name: Prover kernel, every core and one core (I7)
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    env:
+      UV_PYTHON: "3.12.11"
+    steps:
+      - name: Check out the reviewed source
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Install pinned uv
+        uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
+        with:
+          version: ${{ env.UV_VERSION }}
+          checksum: ${{ env.UV_CHECKSUM }}
+          enable-cache: true
+          cache-dependency-glob: implementations/python/uv.lock
+
+      - name: Install pinned Python and locked dependencies, the Rust CEL leg
+        working-directory: implementations/python
+        run: |
+          uv python install "$PYTHON_VERSION"
+          uv sync --locked --no-default-groups --extra cel-rust
+
+      - name: Prove the quick set on every core
+        working-directory: implementations/python
+        run: uv run --no-sync python ../../tools/prover_bench.py --quick --fast
+
+      - name: Prove the quick set on one core, in the reference's order
+        working-directory: implementations/python
+        run: uv run --no-sync python ../../tools/prover_bench.py --quick --fast --one-core
+
+  contracts-and-typescript:
+    name: Generated contracts and TypeScript
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    env:
+      UV_PYTHON: "3.12.11"
+      PRE_COMMIT_HOME: ${{ github.workspace }}/.cache/pre-commit
+      VELOCITRON_ANTLR_CACHE: ${{ github.workspace }}/.cache/antlr
+    steps:
+      - name: Check out the reviewed source
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Install pinned uv
+        uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
+        with:
+          version: ${{ env.UV_VERSION }}
+          checksum: ${{ env.UV_CHECKSUM }}
+          enable-cache: true
+          cache-dependency-glob: implementations/python/uv.lock
+
+      - name: Lint layer imports
+        run: python3 tools/layer_lint.py
+
+      - name: Install pinned Python and locked dependencies
+        run: |
+          uv python install "$PYTHON_VERSION"
+          uv sync --locked --project implementations/python
+          echo "$GITHUB_WORKSPACE/implementations/python/.venv/bin" >> "$GITHUB_PATH"
+
+      - name: Test the contribution IR Python package
+        working-directory: packages/ir/python
+        run: uv run --locked --no-editable --group test pytest
+
+      - name: Test the grammar Python package
+        working-directory: packages/grammar/python
+        run: uv run --locked --no-editable --group test pytest
+
+      - name: Test the CEL Python package
+        working-directory: packages/cel/python
+        run: uv run --locked --no-editable --group test pytest
+
+      - name: Test the DSL Python package
+        working-directory: packages/dsl/python
+        run: uv run --locked --no-editable --group test pytest
+
+      - name: Test the petrinet Python package
+        working-directory: packages/petrinet/python
+        run: uv run --locked --no-editable --group test pytest
+
+      - name: Test the composition-merge Python package
+        working-directory: packages/merge/python
+        run: uv run --locked --no-editable --group test pytest
+
+      - name: Test the play Python package
+        working-directory: packages/play/python
+        run: uv run --locked --no-editable --group test pytest
+
+      - name: Test the play-check Python package
+        working-directory: packages/play-check/python
+        run: uv run --locked --no-editable --group test pytest
+
+      - name: Test the engine Python package
+        working-directory: packages/engine/python
+        run: uv run --locked --no-editable --group test pytest
+
+      - name: Test the viz Python package
+        working-directory: packages/viz/python
+        run: uv run --locked --no-editable --group test pytest
+
+      - name: Test the journal Python package
+        working-directory: packages/journal/python
+        run: uv run --locked --no-editable --group test pytest
+
+      - name: Test the runtime Python package
+        working-directory: packages/runtime/python
+        run: uv run --locked --no-editable --group test pytest
+
+      - name: Test the analysis Python package
+        working-directory: packages/analysis/python
+        run: uv run --locked --no-editable --group test pytest
+
+      - name: Test the codegen Python package
+        working-directory: packages/codegen/python
+        run: uv run --locked --no-editable --group test pytest
+
+      - name: Test the netbase Python package
+        working-directory: packages/netbase/python
+        run: uv run --locked --no-editable --group test pytest
+
+      - name: Test the replay Python package
+        working-directory: packages/replay/python
+        run: uv run --locked --no-editable --group test pytest
+
+      - name: Test the properties Python package
+        working-directory: packages/properties/python
+        run: uv run --locked --no-editable --group test pytest
+
+      - name: Test the explain Python package
+        working-directory: packages/explain/python
+        run: uv run --locked --no-editable --group test pytest
+
+      - name: Test the equiv Python package
+        working-directory: packages/equiv/python
+        run: uv run --locked --no-editable --group test pytest
+
+      - name: Test the CLI Python package
+        working-directory: packages/cli/python
+        run: uv run --locked --no-editable --group test pytest
+
+      - name: Test the skill Python package
+        working-directory: packages/skill/python
+        run: uv run --locked --no-editable --group test pytest
+
+      - name: Install pinned pnpm
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: false
+
+      - name: Install pinned Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install frozen TypeScript dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check generated Python parser
+        run: python3 tools/antlr.py check
+
+      - name: Check the CEL package copies
+        run: python3 tools/cel_package.py check
+
+      - name: Check the DSL package copies
+        run: python3 tools/dsl_package.py check
+
+      - name: Check the petrinet package copies
+        run: python3 tools/petrinet_package.py check
+
+      - name: Check the composition-merge package copies
+        run: python3 tools/merge_package.py check
+
+      - name: Check the play package copy
+        run: python3 tools/play_package.py check
+
+      - name: Check the play-check package copy
+        run: python3 tools/play_check_package.py check
+
+      - name: Check the engine package copies
+        run: python3 tools/engine_package.py check
+
+      - name: Check the viz package copies
+        run: python3 tools/viz_package.py check
+
+      - name: Check the journal package copies
+        run: python3 tools/journal_package.py check
+
+      - name: Check the runtime package copies
+        run: python3 tools/runtime_package.py check
+
+      - name: Check the analysis package copies
+        run: python3 tools/analysis_package.py check
+
+      - name: Check the codegen package copies
+        run: python3 tools/codegen_package.py check
+
+      - name: Check the netbase package copies
+        run: python3 tools/netbase_package.py check
+
+      - name: Check the replay package copies
+        run: python3 tools/replay_package.py check
+
+      - name: Check the properties package copies
+        run: python3 tools/properties_package.py check
+
+      - name: Check the explain package copies
+        run: python3 tools/explain_package.py check
+
+      - name: Check the equiv package copies
+        run: python3 tools/equiv_package.py check
+
+      - name: Check the CLI package copies
+        run: python3 tools/cli_package.py check
+
+      - name: Check the skill package copy
+        run: python3 tools/skill_package.py check
+
+      - name: Check generated TypeScript parser and schemas
+        run: pnpm check:generated
+
+      - name: Type-check Python
+        working-directory: implementations/python
+        run: |
+          test "$(basedpyright --version | head -n 1)" = "basedpyright $BASEDPYRIGHT_VERSION"
+          basedpyright --project pyrightconfig.json
+
+      - name: Type-check the contribution IR Python package
+        run: basedpyright --project packages/ir/python/pyrightconfig.json
+
+      - name: Type-check the grammar Python package
+        run: basedpyright --project packages/grammar/python/pyrightconfig.json
+
+      - name: Type-check the CEL Python package
+        working-directory: packages/cel/python
+        run: |
+          uv sync --locked --no-editable --group test --extra cel-cpp --extra cel-rust
+          basedpyright --project pyrightconfig.json
+
+      - name: Type-check the DSL Python package
+        run: basedpyright --project packages/dsl/python/pyrightconfig.json
+
+      - name: Type-check the petrinet Python package
+        working-directory: packages/petrinet/python
+        run: |
+          uv sync --locked --no-editable --group test
+          basedpyright --project pyrightconfig.json
+
+      - name: Type-check the composition-merge Python package
+        working-directory: packages/merge/python
+        run: |
+          uv sync --locked --no-editable --group test
+          basedpyright --project pyrightconfig.json
+
+      - name: Type-check the play Python package
+        run: basedpyright --project packages/play/python/pyrightconfig.json
+
+      - name: Type-check the play-check Python package
+        working-directory: packages/play-check/python
+        run: |
+          uv sync --locked --no-editable --group test
+          basedpyright --project pyrightconfig.json
+
+      - name: Type-check the engine Python package
+        working-directory: packages/engine/python
+        run: |
+          uv sync --locked --no-editable --group test
+          basedpyright --project pyrightconfig.json
+
+      - name: Type-check the viz Python package
+        working-directory: packages/viz/python
+        run: |
+          uv sync --locked --no-editable --group test
+          basedpyright --project pyrightconfig.json
+
+      - name: Type-check the journal Python package
+        working-directory: packages/journal/python
+        run: |
+          uv sync --locked --no-editable --group test
+          basedpyright --project pyrightconfig.json
+
+      - name: Type-check the runtime Python package
+        working-directory: packages/runtime/python
+        run: |
+          uv sync --locked --no-editable --group test
+          basedpyright --project pyrightconfig.json
+
+      - name: Type-check the analysis Python package
+        working-directory: packages/analysis/python
+        run: |
+          uv sync --locked --no-editable --group test
+          basedpyright --project pyrightconfig.json
+
+      - name: Type-check the codegen Python package
+        working-directory: packages/codegen/python
+        run: |
+          uv sync --locked --no-editable --group test
+          basedpyright --project pyrightconfig.json
+
+      - name: Type-check the netbase Python package
+        working-directory: packages/netbase/python
+        run: |
+          uv sync --locked --no-editable --group test
+          basedpyright --project pyrightconfig.json
+
+      - name: Type-check the replay Python package
+        working-directory: packages/replay/python
+        run: |
+          uv sync --locked --no-editable --group test
+          basedpyright --project pyrightconfig.json
+
+      - name: Type-check the properties Python package
+        working-directory: packages/properties/python
+        run: |
+          uv sync --locked --no-editable --group test
+          basedpyright --project pyrightconfig.json
+
+      - name: Type-check the explain Python package
+        working-directory: packages/explain/python
+        run: |
+          uv sync --locked --no-editable --group test
+          basedpyright --project pyrightconfig.json
+
+      - name: Type-check the equiv Python package
+        working-directory: packages/equiv/python
+        run: |
+          uv sync --locked --no-editable --group test
+          basedpyright --project pyrightconfig.json
+
+      - name: Type-check the CLI Python package
+        working-directory: packages/cli/python
+        run: |
+          uv sync --locked --no-editable --group test
+          basedpyright --project pyrightconfig.json
+
+      - name: Type-check the skill Python package
+        working-directory: packages/skill/python
+        run: |
+          uv sync --locked --no-editable --group test
+          basedpyright --project pyrightconfig.json
+
+      - name: Type-check TypeScript
+        run: pnpm typecheck
+
+      - name: Run TypeScript and cross-language tests
+        run: pnpm test
+
+      - name: Audit the browser seam
+        run: pnpm audit:browser
+
+      - name: Build the npm package
+        run: pnpm build

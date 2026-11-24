@@ -1,0 +1,28 @@
+// A job is tried, and tried again an hour later, until it passes or the
+// third failure closes it. The retry waits on purpose while the hour has
+// not elapsed.
+net retry "A job is tried again until it passes or fails three times"
+
+(queued) -job-> [try] -job-> (running)
+@pass_in: (running) -job-> [pass]
+@pass_out: [pass] -job-> (done)
+@fail_in: (running) -job-> [fail]
+@fail_out: [fail] -job-> (waiting)
+@again_in: (waiting) -job-> [again]
+@again_out: [again] -job-> (queued)
+@close_in: (waiting) -job-> [close]
+@close_out: [close] -job-> (done)
+@again_clock: (clock) -tick->? [again]
+
+@pass_in predicate cel "ok"
+@fail_in predicate cel "!ok && tries < 3"
+@close_in predicate cel "!ok && tries >= 3"
+@fail_out data cel "{'id': binding.running[0].id, 'ok': false, 'tries': binding.running[0].tries + 1, 'since': binding.running[0].since}"
+@again_out data cel "{'id': binding.waiting[0].id, 'ok': false, 'tries': binding.waiting[0].tries, 'since': binding.clock[0].now}"
+[again] timer clock (clock) cel "clock.now >= job.since + 3600"
+[again] timer bind job (waiting)
+[again] annotation wait {"when": "binding.clock.exists(t, t.now < binding.waiting[0].since + 3600)", "for": "an hour to pass before the job is tried again"}
+
+(queued) port input job
+(clock) annotation fusion true
+final (done)

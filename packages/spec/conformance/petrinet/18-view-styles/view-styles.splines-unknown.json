@@ -1,0 +1,26 @@
+{
+  "diagnostic": {
+    "code": "PN202",
+    "column": 1,
+    "file": "view-styles.splines-unknown.petrinet",
+    "line": 6,
+    "message": "unknown splines value 'wavy' for view 'default'; expected one of ortho, spline, curved, polyline, line",
+    "span": {
+      "end": {
+        "byteOffset": 115,
+        "column": 26,
+        "line": 6
+      },
+      "source": "view-styles.splines-unknown.petrinet",
+      "start": {
+        "byteOffset": 90,
+        "column": 1,
+        "line": 6
+      }
+    }
+  },
+  "source": {
+    "sourceId": "view-styles.splines-unknown.petrinet",
+    "text": "net view_styles\n\n(seed) -pulse-> [emit] -pulse-> (out)\n[emit] handler \"emit@view_styles\"\n\nview default splines wavy\n"
+  }
+}

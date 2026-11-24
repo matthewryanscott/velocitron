@@ -1,0 +1,4 @@
+{
+  "sourceId": "condition.petrinet",
+  "text": "net condition\n\nsystem \"circulation desk\"\n\n(returns) -copy-> [check] -copy-> (shelved)\n@in: (condition) -condition-> [check]\n@out: [check] -condition-> (condition)\n@out data cel \"{'isbn': binding.condition[0].isbn, 'damaged': true}\"\n\n(condition) kept by \"circulation desk\" starts as cel \"{'isbn': instance.isbn, 'damaged': false}\"\n"
+}

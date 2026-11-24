@@ -1,0 +1,247 @@
+{
+  "format": "velocitron.petrinet/contribution-ir",
+  "version": 1,
+  "documentKind": "composition",
+  "document": {
+    "id": "reading_hour.petrinet"
+  },
+  "contributions": [
+    {
+      "id": {
+        "source": "reading_hour.petrinet",
+        "statement": 0,
+        "part": 0
+      },
+      "kind": "document.composition-header",
+      "ordinal": 0,
+      "span": {
+        "source": "reading_hour.petrinet",
+        "start": {
+          "byteOffset": 0,
+          "line": 1,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 24,
+          "line": 1,
+          "column": 25
+        }
+      },
+      "target": {
+        "type": "document"
+      },
+      "value": {
+        "namespace": "reading_hour"
+      }
+    },
+    {
+      "id": {
+        "source": "reading_hour.petrinet",
+        "statement": 1,
+        "part": 0
+      },
+      "kind": "composition.use",
+      "ordinal": 1,
+      "span": {
+        "source": "reading_hour.petrinet",
+        "start": {
+          "byteOffset": 26,
+          "line": 3,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 67,
+          "line": 3,
+          "column": 42
+        }
+      },
+      "target": {
+        "type": "document"
+      },
+      "value": {
+        "ref": "reading_cadence.petrinet",
+        "alias": "cadence"
+      }
+    },
+    {
+      "id": {
+        "source": "reading_hour.petrinet",
+        "statement": 2,
+        "part": 0
+      },
+      "kind": "composition.use",
+      "ordinal": 2,
+      "span": {
+        "source": "reading_hour.petrinet",
+        "start": {
+          "byteOffset": 68,
+          "line": 4,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 105,
+          "line": 4,
+          "column": 38
+        }
+      },
+      "target": {
+        "type": "document"
+      },
+      "value": {
+        "ref": "reading_pick.petrinet",
+        "alias": "curate"
+      }
+    },
+    {
+      "id": {
+        "source": "reading_hour.petrinet",
+        "statement": 3,
+        "part": 0
+      },
+      "kind": "composition.use",
+      "ordinal": 3,
+      "span": {
+        "source": "reading_hour.petrinet",
+        "start": {
+          "byteOffset": 106,
+          "line": 5,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 144,
+          "line": 5,
+          "column": 39
+        }
+      },
+      "target": {
+        "type": "document"
+      },
+      "value": {
+        "ref": "reading_voice.petrinet",
+        "alias": "speaks"
+      }
+    },
+    {
+      "id": {
+        "source": "reading_hour.petrinet",
+        "statement": 4,
+        "part": 0
+      },
+      "kind": "composition.wire",
+      "ordinal": 4,
+      "span": {
+        "source": "reading_hour.petrinet",
+        "start": {
+          "byteOffset": 146,
+          "line": 7,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 203,
+          "line": 7,
+          "column": 58
+        }
+      },
+      "target": {
+        "type": "document"
+      },
+      "value": {
+        "from": {
+          "alias": "cadence",
+          "place": "refresh_due_out",
+          "span": {
+            "source": "reading_hour.petrinet",
+            "start": {
+              "byteOffset": 151,
+              "line": 7,
+              "column": 6
+            },
+            "end": {
+              "byteOffset": 176,
+              "line": 7,
+              "column": 31
+            }
+          }
+        },
+        "to": {
+          "alias": "curate",
+          "place": "refresh_due_in",
+          "span": {
+            "source": "reading_hour.petrinet",
+            "start": {
+              "byteOffset": 180,
+              "line": 7,
+              "column": 35
+            },
+            "end": {
+              "byteOffset": 203,
+              "line": 7,
+              "column": 58
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": {
+        "source": "reading_hour.petrinet",
+        "statement": 5,
+        "part": 0
+      },
+      "kind": "composition.wire",
+      "ordinal": 5,
+      "span": {
+        "source": "reading_hour.petrinet",
+        "start": {
+          "byteOffset": 204,
+          "line": 8,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 254,
+          "line": 8,
+          "column": 51
+        }
+      },
+      "target": {
+        "type": "document"
+      },
+      "value": {
+        "from": {
+          "alias": "curate",
+          "place": "speak_request",
+          "span": {
+            "source": "reading_hour.petrinet",
+            "start": {
+              "byteOffset": 209,
+              "line": 8,
+              "column": 6
+            },
+            "end": {
+              "byteOffset": 231,
+              "line": 8,
+              "column": 28
+            }
+          }
+        },
+        "to": {
+          "alias": "speaks",
+          "place": "request_in",
+          "span": {
+            "source": "reading_hour.petrinet",
+            "start": {
+              "byteOffset": 235,
+              "line": 8,
+              "column": 32
+            },
+            "end": {
+              "byteOffset": 254,
+              "line": 8,
+              "column": 51
+            }
+          }
+        }
+      }
+    }
+  ]
+}

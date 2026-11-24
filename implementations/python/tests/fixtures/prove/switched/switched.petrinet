@@ -1,0 +1,6 @@
+// The flips set the copies' desk through a wire.
+composition switched
+
+use "flips.petrinet" as flips
+use "slots.petrinet" as slots
+wire flips.(switch) -> slots.(switch)

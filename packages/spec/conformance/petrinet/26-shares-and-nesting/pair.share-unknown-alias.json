@@ -1,0 +1,27 @@
+{
+  "diagnostic": {
+    "code": "PN202",
+    "column": 21,
+    "file": "pair.share-unknown-alias.petrinet",
+    "help": "declare the alias with use before sharing its place",
+    "line": 5,
+    "message": "share references unknown alias nobody",
+    "span": {
+      "end": {
+        "byteOffset": 152,
+        "column": 34,
+        "line": 5
+      },
+      "source": "pair.share-unknown-alias.petrinet",
+      "start": {
+        "byteOffset": 139,
+        "column": 21,
+        "line": 5
+      }
+    }
+  },
+  "source": {
+    "sourceId": "pair.share-unknown-alias.petrinet",
+    "text": "composition pair_unknown_alias\nuse \"take.petrinet\" as take\nuse \"give.petrinet\" as give\nwire take.(busy) -> give.(busy)\nshare take.(lock) ~ nobody.(lock)\n"
+  }
+}

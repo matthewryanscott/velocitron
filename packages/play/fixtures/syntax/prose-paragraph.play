@@ -1,0 +1,8 @@
+play s
+@a: advance 1
+path p from @a
+/// One sentence that goes on
+/// over two lines.
+///
+/// A second paragraph.
+advance 2

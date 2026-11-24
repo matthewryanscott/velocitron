@@ -1,0 +1,42 @@
+{
+  "name": "refined_order",
+  "nets": [
+    {
+      "alias": "shop",
+      "ref": "order_flow.petrinet"
+    },
+    {
+      "alias": "courier",
+      "ref": "courier.petrinet"
+    }
+  ],
+  "refinements": [
+    {
+      "by": "courier",
+      "net": "shop",
+      "transition": "deliver"
+    }
+  ],
+  "wires": [
+    {
+      "from": {
+        "net": "shop",
+        "port": "sending"
+      },
+      "to": {
+        "net": "courier",
+        "port": "pickup"
+      }
+    },
+    {
+      "from": {
+        "net": "courier",
+        "port": "dropped"
+      },
+      "to": {
+        "net": "shop",
+        "port": "delivered"
+      }
+    }
+  ]
+}

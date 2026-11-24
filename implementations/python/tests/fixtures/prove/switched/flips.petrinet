@@ -1,0 +1,16 @@
+// A person flips which desk owns the shelf.
+net flips "A person flips the desk"
+
+@to_new_in: (switch) -switch-> [flip_to_new]
+@to_new_out: [flip_to_new] -switch-> (switch)
+@to_old_in: (switch) -switch-> [flip_back]
+@to_old_out: [flip_back] -switch-> (switch)
+
+@to_new_in predicate cel "owner == 'old'"
+@to_old_in predicate cel "owner == 'new'"
+@to_new_out data cel "{'owner': 'new'}"
+@to_old_out data cel "{'owner': 'old'}"
+
+(switch) port output switch
+(switch) annotation fusion true
+domain switch.owner "old" "new"

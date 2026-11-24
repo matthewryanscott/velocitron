@@ -1,0 +1,102 @@
+// One interlibrary loan. The quote forks into a priced hold and a customs
+// flag. Those join again at packing. A missing crate ends the loan. A busy
+// lane holds the box until a lane is free, then it ships. Receiving is a
+// separate step that writes the union-catalog notice.
+
+net partner_loan "Quote, clear, pack, and receive one partner-library loan"
+
+[request_quote] handler "request_quote@loan"
+[fill_form] handler "fill_form@loan"
+[pack] handler "pack@loan"
+[dispatch] handler "dispatch@loan"
+[receive] handler "receive@loan"
+
+(offered) -hold-> [request_quote] -hold-> (quote_result)
+
+@quoted_in: (quote_result) -hold-> [quoted]
+@quoted_hold: [quoted] -hold-> (priced)
+@quoted_flag: [quoted] -flag-> (customs)
+@refused_in: (quote_result) -hold-> [quote_refused]
+@refused_out: [quote_refused] -result-> (loan_ended)
+
+(priced) -hold-> [fill_form] -hold-> (cleared)
+@no_form: (forms) -form->0 [fill_form]
+@form_out: [fill_form] -form-> (forms)
+(priced) -hold-> [form_on_file] -hold-> (cleared)
+@form_match: (forms) -form->? [form_on_file]
+(priced) -hold-> [form_rejected]
+@rejected_out: [form_rejected] -result-> (loan_ended)
+@form_differs: (forms) -form->? [form_rejected]
+
+(customs) -flag-> [stamp_customs] -flag-> (cleared_flag)
+
+(cleared) -hold-> [pack]
+(cleared_flag) -flag-> [pack]
+(crates) -crate->? [pack]
+[pack] -hold-> (pack_result)
+(cleared) -hold-> [crate_missing]
+(cleared_flag) -flag-> [crate_missing]
+@no_crate: (crates) -crate->0 [crate_missing]
+@crate_out: [crate_missing] -result-> (loan_ended)
+
+@packed_in: (pack_result) -hold-> [packed] -hold-> (boxed)
+@pack_err_in: (pack_result) -hold-> [pack_failed]
+@pack_err_out: [pack_failed] -result-> (loan_ended)
+
+(boxed) -hold-> [dispatch] -hold-> (dispatch_result)
+(lanes) -lane->? [dispatch]
+@sent_in: (dispatch_result) -hold-> [shipped] -hold-> (in_transit)
+@busy_in: (dispatch_result) -hold-> [reroute] -hold-> (held_lane)
+(held_lane) -hold-> [release_lane] -hold-> (in_transit)
+(lanes) -lane->? [release_lane]
+
+(in_transit) -hold-> [receive]
+@received_out: [receive] -result-> (loan_ended)
+@notice_out: [receive] -notice-> (union_notice)
+
+@quoted_in predicate cel "accepted"
+@refused_in predicate cel "!accepted"
+@refused_out data cel "{'outcome': 'refused', 'hold': binding.quote_result[0]}"
+@quoted_flag data cel "{'isbn': binding.quote_result[0].isbn, 'code': 'standard'}"
+@no_form correlate cel "token.isbn == binding.priced[0].isbn"
+@form_out data cel "{'isbn': binding.priced[0].isbn, 'code': binding.priced[0].code}"
+@form_match correlate cel "token.isbn == binding.priced[0].isbn && token.code == binding.priced[0].code"
+@form_differs correlate cel "token.isbn == binding.priced[0].isbn && token.code != binding.priced[0].code"
+@rejected_out data cel "{'outcome': 'form_rejected', 'hold': binding.priced[0]}"
+@no_crate correlate cel "token.lane == binding.cleared[0].branch"
+@crate_out data cel "{'outcome': 'no_crate', 'hold': binding.cleared[0]}"
+@packed_in predicate cel "packed"
+@pack_err_in predicate cel "!packed"
+@pack_err_out data cel "{'outcome': 'refused', 'hold': binding.pack_result[0]}"
+@sent_in predicate cel "dispatched"
+@busy_in predicate cel "!dispatched"
+
+(offered) port input hold
+(loan_ended) port output result
+(union_notice) port output notice
+
+system "circulation desk"
+net actor "circulation desk"
+system "Partner library"
+(quote_result) lives in "Partner library"
+(quote_result) reads as cel "token.accepted ? 'quote accepted' : 'quote refused'"
+(pack_result) lives in "Partner library"
+(pack_result) reads as cel "token.packed ? 'packed' : 'could not pack'"
+(dispatch_result) lives in "Partner library"
+(dispatch_result) reads as cel "token.dispatched ? 'on a lane' : 'lane busy'"
+(forms) annotation fusion true
+(crates) annotation fusion true
+(lanes) annotation fusion true
+
+(offered) description "a hold offered to a partner library"
+(in_transit) description "the box is on its way"
+(union_notice) description "a notice for the union catalog"
+[request_quote] description "Ask the partner library for a quote"
+[fill_form] description "Fill a customs form when none is on file"
+[pack] description "Pack the cleared hold into a crate"
+[dispatch] description "Put the box on a lane"
+[receive] description "Receive the box and write the catalog notice"
+
+domain result.outcome "loaned" "due_soon" "damaged" "form_rejected" "no_crate" "refused"
+decorate color hold show "isbn" "accepted" "packed" "dispatched"
+view default detail summary

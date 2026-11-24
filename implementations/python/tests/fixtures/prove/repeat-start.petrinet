@@ -1,0 +1,27 @@
+// Jobs arrive for one account. The counter keeps whether a job for that
+// account came before; it starts empty. A repeat job raises an alarm, so
+// [repeat] can only fire when the instance starts more than once.
+net repeat_start "Jobs for one account; a repeat job raises an alarm"
+
+@new: (jobs) -job-> [first]
+[first] -job-> (done)
+@new_in: (counter) -seen-> [first]
+@new_out: [first] -seen-> (counter)
+@again: (jobs) -job-> [repeat]
+[repeat] -job-> (done)
+@again_in: (counter) -seen-> [repeat]
+@again_out: [repeat] -seen-> (counter)
+[repeat] -alarm-> (alarms)
+
+@new_in predicate cel "!before"
+@again_in predicate cel "before"
+@new_in correlate cel "token.account == binding.jobs[0].account"
+@again_in correlate cel "token.account == binding.jobs[0].account"
+@new_out data cel "{'account': binding.counter[0].account, 'before': true}"
+@again_out data cel "{'account': binding.counter[0].account, 'before': true}"
+
+(jobs) port input job
+system "counter"
+(counter) kept by "counter" starts as cel "{'account': instance.account, 'before': false}"
+domain seen.before true false
+final (done)

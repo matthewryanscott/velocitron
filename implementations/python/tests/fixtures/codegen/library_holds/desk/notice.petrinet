@@ -1,0 +1,37 @@
+// A due hold is reminded after fourteen days, or fined and shelved after
+// twenty-eight. Once both timers are due, the fine wins.
+
+net overdue_notice "Remind at fourteen days, fine at twenty-eight"
+
+@remind_in: (due) -hold-> [remind] -hold-> (lending)
+@fine_in: (due) -hold-> [fine] -hold-> (shelved)
+@fine_note: [fine] -note-> (notices)
+(clock) -tick->? [remind]
+(clock) -tick->? [fine]
+@slot_remind: (shelf_slot) -slot-> [remind]
+
+@slot_remind correlate cel "token.isbn == binding.due[0].isbn && token.free"
+@fine_note data cel "{'kind': 'fine', 'isbn': binding.due[0].isbn}"
+
+[remind] timer clock (clock) cel "clock.now >= hold.remindAt"
+[fine] timer clock (clock) cel "clock.now >= hold.fineAt"
+[remind] timer bind hold (due)
+[fine] timer bind hold (due)
+[fine] priority 1
+
+(shelf_slot) kept by "circulation desk" starts as cel "{'isbn': instance.isbn, 'free': true}"
+(clock) annotation fusion true
+
+(due) port input hold
+(lending) port output hold
+(shelved) port output hold
+
+system "circulation desk"
+net actor "circulation desk"
+(due) description "a hold that is due"
+(notices) description "notes to the desk"
+(shelved) description "back on the shelf, with a fine"
+[remind] description "Send the fourteen-day reminder and lend the copy again"
+[fine] description "Twenty-eight days: fine the hold and shelve the copy"
+
+final (shelved), (lending)

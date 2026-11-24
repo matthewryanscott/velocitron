@@ -1,0 +1,22 @@
+// The twin of side-copy: the same copy of a page event goes into
+// (followed), and a later step tests whether its job runs, so the copy is
+// read.
+net side_copy_read "Follow a work page until it is done, and log a running job"
+
+(items) -item-> [start] -item-> (started)
+@fo_in: (started) -item->? [follow]
+@fo_page: (page) -page-> [follow]
+@fo_out: [follow] -page-> (followed)
+@end_in: (started) -item-> [end]
+@end_page: (page) -page-> [end]
+@end_out: [end] -item-> (finished)
+@log_in: (followed) -page-> [log]
+@log_out: [log] -page-> (logged)
+
+@fo_page predicate cel "status != 'done'"
+@end_page predicate cel "status == 'done'"
+@log_in predicate cel "running"
+
+(page) port input page
+domain page.status "waiting" "review" "done"
+domain page.running true false

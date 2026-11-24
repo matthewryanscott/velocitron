@@ -1,0 +1,365 @@
+{
+  "contributions": [
+    {
+      "id": {
+        "part": 0,
+        "source": "view-styles.petrinet",
+        "statement": 0
+      },
+      "kind": "document.net-header",
+      "ordinal": 0,
+      "span": {
+        "end": {
+          "byteOffset": 15,
+          "column": 16,
+          "line": 1
+        },
+        "source": "view-styles.petrinet",
+        "start": {
+          "byteOffset": 0,
+          "column": 1,
+          "line": 1
+        }
+      },
+      "target": {
+        "type": "document"
+      },
+      "value": {
+        "name": "view_styles"
+      }
+    },
+    {
+      "id": {
+        "part": 0,
+        "source": "view-styles.petrinet",
+        "statement": 1
+      },
+      "kind": "arc.declare",
+      "ordinal": 1,
+      "span": {
+        "end": {
+          "byteOffset": 39,
+          "column": 23,
+          "line": 3
+        },
+        "source": "view-styles.petrinet",
+        "start": {
+          "byteOffset": 17,
+          "column": 1,
+          "line": 3
+        }
+      },
+      "target": {
+        "id": {
+          "document": "view-styles.petrinet",
+          "part": 0,
+          "statement": 1
+        },
+        "type": "arc"
+      },
+      "value": {
+        "color": {
+          "kind": "explicit",
+          "value": "pulse"
+        },
+        "from": {
+          "name": "seed",
+          "type": "place"
+        },
+        "mode": "consume",
+        "to": {
+          "name": "emit",
+          "type": "transition"
+        },
+        "transitionNameSpan": {
+          "end": {
+            "byteOffset": 38,
+            "column": 22,
+            "line": 3
+          },
+          "source": "view-styles.petrinet",
+          "start": {
+            "byteOffset": 34,
+            "column": 18,
+            "line": 3
+          }
+        }
+      }
+    },
+    {
+      "id": {
+        "part": 1,
+        "source": "view-styles.petrinet",
+        "statement": 1
+      },
+      "kind": "arc.declare",
+      "ordinal": 2,
+      "span": {
+        "end": {
+          "byteOffset": 54,
+          "column": 38,
+          "line": 3
+        },
+        "source": "view-styles.petrinet",
+        "start": {
+          "byteOffset": 33,
+          "column": 17,
+          "line": 3
+        }
+      },
+      "target": {
+        "id": {
+          "document": "view-styles.petrinet",
+          "part": 1,
+          "statement": 1
+        },
+        "type": "arc"
+      },
+      "value": {
+        "color": {
+          "kind": "explicit",
+          "value": "pulse"
+        },
+        "from": {
+          "name": "emit",
+          "type": "transition"
+        },
+        "mode": "produce",
+        "to": {
+          "name": "out",
+          "type": "place"
+        }
+      }
+    },
+    {
+      "id": {
+        "part": 0,
+        "source": "view-styles.petrinet",
+        "statement": 2
+      },
+      "kind": "transition.handler",
+      "ordinal": 3,
+      "span": {
+        "end": {
+          "byteOffset": 88,
+          "column": 34,
+          "line": 4
+        },
+        "source": "view-styles.petrinet",
+        "start": {
+          "byteOffset": 55,
+          "column": 1,
+          "line": 4
+        }
+      },
+      "target": {
+        "name": "emit",
+        "type": "transition"
+      },
+      "value": {
+        "handler": "emit@view_styles"
+      }
+    },
+    {
+      "id": {
+        "part": 0,
+        "source": "view-styles.petrinet",
+        "statement": 3
+      },
+      "kind": "view.splines",
+      "ordinal": 4,
+      "span": {
+        "end": {
+          "byteOffset": 117,
+          "column": 28,
+          "line": 6
+        },
+        "source": "view-styles.petrinet",
+        "start": {
+          "byteOffset": 90,
+          "column": 1,
+          "line": 6
+        }
+      },
+      "target": {
+        "name": "default",
+        "type": "view"
+      },
+      "value": {
+        "splines": "curved"
+      }
+    },
+    {
+      "id": {
+        "part": 0,
+        "source": "view-styles.petrinet",
+        "statement": 4
+      },
+      "kind": "view.detail",
+      "ordinal": 5,
+      "span": {
+        "end": {
+          "byteOffset": 145,
+          "column": 28,
+          "line": 7
+        },
+        "source": "view-styles.petrinet",
+        "start": {
+          "byteOffset": 118,
+          "column": 1,
+          "line": 7
+        }
+      },
+      "target": {
+        "name": "default",
+        "type": "view"
+      },
+      "value": {
+        "detail": "summary"
+      }
+    },
+    {
+      "id": {
+        "part": 0,
+        "source": "view-styles.petrinet",
+        "statement": 5
+      },
+      "kind": "view.position",
+      "ordinal": 6,
+      "span": {
+        "end": {
+          "byteOffset": 194,
+          "column": 49,
+          "line": 8
+        },
+        "source": "view-styles.petrinet",
+        "start": {
+          "byteOffset": 146,
+          "column": 1,
+          "line": 8
+        }
+      },
+      "target": {
+        "name": "default",
+        "type": "view"
+      },
+      "value": {
+        "position": {
+          "entries": [
+            {
+              "key": "x",
+              "value": {
+                "lexeme": "0",
+                "type": "number"
+              }
+            },
+            {
+              "key": "y",
+              "value": {
+                "lexeme": "0",
+                "type": "number"
+              }
+            }
+          ],
+          "type": "object"
+        },
+        "subject": {
+          "name": "seed",
+          "type": "place"
+        }
+      }
+    },
+    {
+      "id": {
+        "part": 0,
+        "source": "view-styles.petrinet",
+        "statement": 6
+      },
+      "kind": "view.position",
+      "ordinal": 7,
+      "span": {
+        "end": {
+          "byteOffset": 259,
+          "column": 65,
+          "line": 9
+        },
+        "source": "view-styles.petrinet",
+        "start": {
+          "byteOffset": 195,
+          "column": 1,
+          "line": 9
+        }
+      },
+      "target": {
+        "name": "default",
+        "type": "view"
+      },
+      "value": {
+        "position": {
+          "delta": {
+            "entries": [
+              {
+                "key": "x",
+                "value": {
+                  "lexeme": "200",
+                  "type": "number"
+                }
+              },
+              {
+                "key": "y",
+                "value": {
+                  "lexeme": "0",
+                  "type": "number"
+                }
+              }
+            ],
+            "type": "object"
+          },
+          "from": {
+            "name": "seed",
+            "type": "place"
+          }
+        },
+        "subject": {
+          "name": "out",
+          "type": "place"
+        }
+      }
+    },
+    {
+      "id": {
+        "part": 0,
+        "source": "view-styles.petrinet",
+        "statement": 7
+      },
+      "kind": "view.detail",
+      "ordinal": 8,
+      "span": {
+        "end": {
+          "byteOffset": 288,
+          "column": 29,
+          "line": 10
+        },
+        "source": "view-styles.petrinet",
+        "start": {
+          "byteOffset": 260,
+          "column": 1,
+          "line": 10
+        }
+      },
+      "target": {
+        "name": "sketch",
+        "type": "view"
+      },
+      "value": {
+        "detail": "structure"
+      }
+    }
+  ],
+  "document": {
+    "id": "view-styles.petrinet"
+  },
+  "documentKind": "net",
+  "format": "velocitron.petrinet/contribution-ir",
+  "version": 1
+}

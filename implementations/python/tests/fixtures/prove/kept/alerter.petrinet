@@ -1,0 +1,11 @@
+// The desk alerts once for a return while its title is marked damaged.
+net alerter "The desk alerts on a damaged title"
+
+(alerts) -copy-> [alert] -copy-> (alerted)
+@damaged: (condition) -condition->? [alert]
+@damaged correlate cel "token.isbn == binding.alerts[0].isbn"
+@damaged predicate cel "damaged"
+
+(alerts) port input copy
+(condition) kept by "circulation desk" starts as cel "{'isbn': instance.isbn, 'damaged': false}"
+domain condition.damaged true false

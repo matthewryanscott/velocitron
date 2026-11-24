@@ -1,0 +1,52 @@
+[project]
+name = "velocitron-equiv"
+version = "0.1.0"
+description = "Compares two merged Velocitron nets up to renaming of places and transitions."
+readme = "README.md"
+authors = [
+    { name = "Matthew R. Scott" },
+]
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.12"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+    "velocitron-analysis",
+    "velocitron-dsl",
+    "velocitron-engine",
+    "velocitron-merge",
+    "velocitron-petrinet",
+]
+
+[tool.uv.sources]
+velocitron-analysis = { path = "../../analysis/python", editable = false }
+velocitron-dsl = { path = "../../dsl/python", editable = false }
+velocitron-engine = { path = "../../engine/python", editable = false }
+velocitron-merge = { path = "../../merge/python", editable = false }
+velocitron-petrinet = { path = "../../petrinet/python", editable = false }
+
+[project.urls]
+Homepage = "https://github.com/circuitmeridian/velocitron"
+Repository = "https://github.com/circuitmeridian/velocitron"
+Issues = "https://github.com/circuitmeridian/velocitron/issues"
+
+[dependency-groups]
+test = [
+    "pytest>=9.0",
+]
+
+[build-system]
+requires = ["hatchling==1.31.0"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/velocitron_equiv"]
+dev-mode-exact = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

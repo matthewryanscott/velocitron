@@ -1,0 +1,37 @@
+// idle-latch with no way out but the stop: a latch taken at the stop's
+// maturity is due at a time the exploration does not move to, and only that
+// stop ends the instance.
+net latch_loop "Stop a VM a wait after it last went quiet; nothing else ends it"
+
+@arrive_in: (seen) -vm-> [arrive]
+[arrive] -vm-> (busy)
+
+@rest_in: (busy) -vm-> [rest]
+@rest_out: [rest] -vm-> (idle)
+@rest_look: (look) -look->? [rest]
+@rest_clock: (clock) -tick->? [rest]
+@rest_look predicate cel "!busy"
+@rest_out data cel "{'vm': binding.busy[0].vm, 'wait': binding.busy[0].wait, 'since': binding.clock[0].now}"
+[rest] annotation wait {"when": "binding.look.exists(l, l.busy)", "for": "the job in it to end"}
+
+@wake_in: (idle) -vm-> [wake]
+[wake] -vm-> (busy)
+@wake_look: (look) -look->? [wake]
+@wake_look predicate cel "busy"
+
+@stop_in: (idle) -vm-> [stop]
+[stop] -vm-> (stopped)
+@stop_look: (look) -look->? [stop]
+@stop_clock: (clock) -tick->? [stop]
+@stop_look predicate cel "!busy"
+[stop] timer clock (clock) cel "clock.now >= idle.since + idle.wait"
+[stop] timer bind idle (idle)
+[stop] timer maturity cel "idle.since + idle.wait"
+[stop] annotation wait {"when": "binding.look.exists(l, !l.busy)", "for": "the wait"}
+
+(seen) port input vm
+record "The look"
+(look) lives in "The look"
+(look) annotation fusion true
+(clock) annotation fusion true
+final (stopped)

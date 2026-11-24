@@ -1,0 +1,43 @@
+{
+  "format": "velocitron.prove/progress-lines",
+  "version": 1,
+  "about": "The progress line of a long exploration (proofs.md, The progress line): each case gives the figures, and the line any prover writes for them.",
+  "cases": [
+    {
+      "id": "minutes-and-gigabytes",
+      "net": "item",
+      "markings": 1240000,
+      "perSecond": 4100,
+      "memoryBytes": 1400000000,
+      "seconds": 302,
+      "maxStates": 8000000,
+      "waiting": 310000,
+      "trend": "rising",
+      "line": "prove item: 1 240 000 markings · 4 100 a second · 1.4 GB · 5 min 02 s · 15 % of the state cap · 310 000 waiting, rising"
+    },
+    {
+      "id": "seconds-and-megabytes",
+      "net": "grid",
+      "markings": 812,
+      "perSecond": 81,
+      "memoryBytes": 96400000,
+      "seconds": 10,
+      "maxStates": 50000,
+      "waiting": 40,
+      "trend": "falling",
+      "line": "prove grid: 812 markings · 81 a second · 96 MB · 10 s · 1 % of the state cap · 40 waiting, falling"
+    },
+    {
+      "id": "hours-and-a-steady-queue",
+      "net": "loop",
+      "markings": 3625248,
+      "perSecond": 0,
+      "memoryBytes": 12340000000,
+      "seconds": 3725,
+      "maxStates": 4000000,
+      "waiting": 1532192,
+      "trend": "steady",
+      "line": "prove loop: 3 625 248 markings · 0 a second · 12.3 GB · 1 h 02 min · 90 % of the state cap · 1 532 192 waiting, steady"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+[project]
+name = "velocitron-kernel"
+version = "0.1.0"
+description = "The prover's fast path: a compiled kernel that explores a net from the tables the reference explorer fills."
+readme = "README.md"
+authors = [
+    { name = "Matthew R. Scott" },
+]
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.12"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Rust",
+]
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/circuitmeridian/velocitron"
+Repository = "https://github.com/circuitmeridian/velocitron"
+Issues = "https://github.com/circuitmeridian/velocitron/issues"
+
+[build-system]
+requires = ["maturin>=1.16,<2"]
+build-backend = "maturin"
+
+[tool.maturin]
+module-name = "velocitron_kernel"
+features = ["pyo3/extension-module"]

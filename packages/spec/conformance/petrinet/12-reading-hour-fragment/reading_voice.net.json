@@ -1,0 +1,144 @@
+{
+  "name": "reading_voice",
+  "places": [
+    {
+      "name": "request_in",
+      "accepts": [
+        "speak_req"
+      ],
+      "port": {
+        "direction": "input",
+        "type": "speak_req"
+      }
+    },
+    {
+      "name": "in_flight",
+      "accepts": [
+        "speak_token"
+      ]
+    },
+    {
+      "name": "work",
+      "accepts": [
+        "speak_work"
+      ]
+    },
+    {
+      "name": "utterance_out",
+      "accepts": [
+        "utterance"
+      ],
+      "port": {
+        "direction": "output",
+        "type": "utterance"
+      }
+    }
+  ],
+  "transitions": [
+    {
+      "name": "start",
+      "handler": "start@speaks"
+    },
+    {
+      "name": "finish",
+      "handler": "finish@speaks"
+    }
+  ],
+  "arcs": [
+    {
+      "from": {
+        "place": "request_in"
+      },
+      "to": {
+        "transition": "start"
+      },
+      "consume": {
+        "type": "speak_req"
+      }
+    },
+    {
+      "from": {
+        "transition": "start"
+      },
+      "to": {
+        "place": "in_flight"
+      },
+      "produce": {
+        "destination": "in_flight",
+        "type": "speak_token"
+      }
+    },
+    {
+      "from": {
+        "place": "in_flight"
+      },
+      "to": {
+        "transition": "start"
+      },
+      "consume": {
+        "type": "speak_token",
+        "mode": "inhibit"
+      }
+    },
+    {
+      "from": {
+        "place": "work"
+      },
+      "to": {
+        "transition": "start"
+      },
+      "consume": {
+        "type": "speak_work",
+        "mode": "inhibit"
+      }
+    },
+    {
+      "from": {
+        "transition": "start"
+      },
+      "to": {
+        "place": "work"
+      },
+      "produce": {
+        "destination": "work",
+        "type": "speak_work"
+      }
+    },
+    {
+      "from": {
+        "place": "work"
+      },
+      "to": {
+        "transition": "finish"
+      },
+      "consume": {
+        "type": "speak_work"
+      }
+    },
+    {
+      "from": {
+        "transition": "finish"
+      },
+      "to": {
+        "place": "utterance_out"
+      },
+      "produce": {
+        "destination": "utterance_out",
+        "type": "utterance"
+      }
+    },
+    {
+      "from": {
+        "place": "in_flight"
+      },
+      "to": {
+        "transition": "finish"
+      },
+      "consume": {
+        "type": "speak_token"
+      }
+    }
+  ],
+  "initialMarking": {},
+  "description": "A chosen passage is spoken"
+}

@@ -1,0 +1,60 @@
+[project]
+name = "velocitron-analysis"
+version = "0.1.0"
+description = "Proves choice coverage, place invariants, soundness, and refinement of a Velocitron net. Also checks kept records and opt-in lint."
+readme = "README.md"
+authors = [
+    { name = "Matthew R. Scott" },
+]
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.12"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+    "json5>=0.15.0",
+    "velocitron-cel",
+    "velocitron-engine",
+    "velocitron-merge",
+    "velocitron-petrinet",
+    "velocitron-runtime",
+]
+
+[project.optional-dependencies]
+# The fast path (`prove --fast`): the compiled kernel. Building it from
+# source needs a Rust toolchain.
+fast = ["velocitron-kernel"]
+
+[tool.uv.sources]
+velocitron-cel = { path = "../../cel/python", editable = false }
+velocitron-engine = { path = "../../engine/python", editable = false }
+velocitron-merge = { path = "../../merge/python", editable = false }
+velocitron-petrinet = { path = "../../petrinet/python", editable = false }
+velocitron-runtime = { path = "../../runtime/python", editable = false }
+velocitron-kernel = { path = "../../kernel/python", editable = false }
+
+[project.urls]
+Homepage = "https://github.com/circuitmeridian/velocitron"
+Repository = "https://github.com/circuitmeridian/velocitron"
+Issues = "https://github.com/circuitmeridian/velocitron/issues"
+
+[dependency-groups]
+test = [
+    "pytest>=9.0",
+    "velocitron-kernel",
+]
+
+[build-system]
+requires = ["hatchling==1.31.0"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/velocitron_analysis"]
+dev-mode-exact = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

@@ -1,0 +1,30 @@
+net shop "A small shop for play tests"
+
+(inbox) -purchase-> [accept] -purchase-> (accepted)
+(accepted) -purchase-> [ship] -parcel-> (shipped)
+@stock: (stock) -item->? [ship]
+@hold: (holds) -hold->0 [ship]
+@receipt: [ship] -receipt-> (receipts)
+(accepted) -purchase-> [expire] -purchase-> (expired)
+@expire_clock: (clock) -tick->? [expire]
+(accepted) -purchase-> [split] -purchase-> (lane_a)
+[split] -purchase-> (lane_b)
+@peek: (stock) -item->? [copy] -item-> (copies)
+@audit_in: (accepted) -purchase->? [audit] -memo-> (notes)
+
+@stock correlate cel "token.sku == binding.accepted[0].sku"
+@receipt data {"kind": "receipt"}
+[expire] timer clock (clock) cel "clock.now >= purchase.dueAt"
+[expire] timer bind purchase (accepted)
+[expire] priority 1
+[audit] guard "audit_ok"
+
+marking initial (inbox) <- $o1
+marking initial (stock) <- $item_a
+marking rush (inbox) <- $o2
+
+$o1: purchase {"id": "o-1", "sku": "a", "dueAt": 100}
+$o2: purchase {"id": "o-2", "sku": "b", "dueAt": 50}
+$item_a: item {"sku": "a"}
+
+decorate [ship] note "one parcel per order"

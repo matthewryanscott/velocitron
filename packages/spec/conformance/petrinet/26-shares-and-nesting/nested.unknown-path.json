@@ -1,0 +1,27 @@
+{
+  "diagnostic": {
+    "code": "PN202",
+    "column": 6,
+    "file": "nested.unknown-path.petrinet",
+    "help": "wire only declared port places",
+    "line": 4,
+    "message": "wire references unknown port pair.(take.nowhere)",
+    "span": {
+      "end": {
+        "byteOffset": 116,
+        "column": 25,
+        "line": 4
+      },
+      "source": "nested.unknown-path.petrinet",
+      "start": {
+        "byteOffset": 97,
+        "column": 6,
+        "line": 4
+      }
+    }
+  },
+  "source": {
+    "sourceId": "nested.unknown-path.petrinet",
+    "text": "composition nested_unknown_path\nuse \"pair.petrinet\" as pair\nuse \"worker.petrinet\" as worker\nwire pair.(take.nowhere) -> worker.(start)\nwire worker.(end) -> pair.(give.worked)\nrefine pair.[give.work] by worker\n"
+  }
+}

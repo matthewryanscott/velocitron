@@ -1,0 +1,4 @@
+{
+  "sourceId": "relative-views.canonical.petrinet",
+  "text": "net relative_views\n\n(seed) -pulse-> [emit]\n[emit] -pulse-> (out)\n(out) -pulse-> [echo]\n\n[emit] handler \"emit@relative_views\"\n[echo] handler \"echo@relative_views\"\n\nview laid position (seed) at {\"x\":3,\"y\":4}\nview laid position [emit] relative (seed) + {\"x\":10,\"y\":5}\nview laid position (out) relative [emit] + {\"x\":5,\"y\":5}\nextensions {}\n"
+}

@@ -1,0 +1,19 @@
+// At the deadline two timed transitions are due. Giving up has priority;
+// a late retry would leave the job where nothing can take it.
+net deadline "Give up at the deadline"
+
+(jobs) -job-> [take] -job-> (waiting)
+(waiting) -job-> [give_up] -job-> (gave_up)
+(waiting) -job-> [late_retry] -job-> (limbo)
+@drain_in: (limbo) -job-> [drain]
+[drain] -job-> (done)
+(clock) -tick->? [give_up]
+(clock) -tick->? [late_retry]
+
+@drain_in weight 2
+
+[give_up] timer clock (clock) cel "clock.now >= job.limit"
+[give_up] timer bind job (waiting)
+[late_retry] timer clock (clock) cel "clock.now >= job.limit"
+[late_retry] timer bind job (waiting)
+[give_up] priority 1

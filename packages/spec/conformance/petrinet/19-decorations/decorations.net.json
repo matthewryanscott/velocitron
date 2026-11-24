@@ -1,0 +1,129 @@
+{
+  "annotations": {
+    "petrinet.dsl/v1": {
+      "arcHandles": {
+        "done_in": {
+          "fingerprint": {
+            "from": {
+              "place": "running"
+            },
+            "mode": "consume",
+            "to": {
+              "transition": "finish"
+            },
+            "type": "job"
+          },
+          "index": 2
+        }
+      },
+      "decorations": {
+        "arc:done_in": {
+          "note": "see R2.3",
+          "summary": "succeeded"
+        },
+        "color:job": {
+          "quiet": true,
+          "show": [
+            "id",
+            "owner.name"
+          ]
+        },
+        "place:running": {
+          "highlight": {},
+          "note": "one worker at a time"
+        },
+        "transition:finish": {
+          "summary": "writes the receipt"
+        },
+        "transition:start": {
+          "highlight": {
+            "label": "R2.11"
+          }
+        }
+      },
+      "extensions": {},
+      "markings": {},
+      "views": {}
+    }
+  },
+  "arcs": [
+    {
+      "consume": {
+        "type": "job"
+      },
+      "from": {
+        "place": "queued"
+      },
+      "to": {
+        "transition": "start"
+      }
+    },
+    {
+      "from": {
+        "transition": "start"
+      },
+      "produce": {
+        "destination": "running",
+        "type": "job"
+      },
+      "to": {
+        "place": "running"
+      }
+    },
+    {
+      "consume": {
+        "predicate": {
+          "cel": "job.exitCode == 0"
+        },
+        "type": "job"
+      },
+      "from": {
+        "place": "running"
+      },
+      "to": {
+        "transition": "finish"
+      }
+    },
+    {
+      "from": {
+        "transition": "finish"
+      },
+      "produce": {
+        "destination": "done",
+        "type": "receipt"
+      },
+      "to": {
+        "place": "done"
+      }
+    }
+  ],
+  "name": "decorations",
+  "places": [
+    {
+      "accepts": [
+        "job"
+      ],
+      "name": "queued"
+    },
+    {
+      "accepts": [
+        "job"
+      ],
+      "name": "running"
+    },
+    {
+      "accepts": [
+        "receipt"
+      ],
+      "name": "done"
+    }
+  ],
+  "transitions": [
+    {
+      "name": "start"
+    },
+    {
+      "name": "finish"
+    }
+  ]
+}

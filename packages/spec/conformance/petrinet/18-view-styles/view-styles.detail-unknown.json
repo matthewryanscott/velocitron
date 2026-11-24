@@ -1,0 +1,26 @@
+{
+  "diagnostic": {
+    "code": "PN202",
+    "column": 1,
+    "file": "view-styles.detail-unknown.petrinet",
+    "line": 6,
+    "message": "unknown detail value 'verbose' for view 'default'; expected one of full, summary, structure",
+    "span": {
+      "end": {
+        "byteOffset": 117,
+        "column": 28,
+        "line": 6
+      },
+      "source": "view-styles.detail-unknown.petrinet",
+      "start": {
+        "byteOffset": 90,
+        "column": 1,
+        "line": 6
+      }
+    }
+  },
+  "source": {
+    "sourceId": "view-styles.detail-unknown.petrinet",
+    "text": "net view_styles\n\n(seed) -pulse-> [emit] -pulse-> (out)\n[emit] handler \"emit@view_styles\"\n\nview default detail verbose\n"
+  }
+}

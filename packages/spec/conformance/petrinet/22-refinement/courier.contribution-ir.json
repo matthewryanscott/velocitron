@@ -1,0 +1,305 @@
+{
+  "contributions": [
+    {
+      "id": {
+        "part": 0,
+        "source": "courier.petrinet",
+        "statement": 0
+      },
+      "kind": "document.net-header",
+      "ordinal": 0,
+      "span": {
+        "end": {
+          "byteOffset": 42,
+          "column": 43,
+          "line": 1
+        },
+        "source": "courier.petrinet",
+        "start": {
+          "byteOffset": 0,
+          "column": 1,
+          "line": 1
+        }
+      },
+      "target": {
+        "type": "document"
+      },
+      "value": {
+        "description": "A courier delivers one order",
+        "name": "courier"
+      }
+    },
+    {
+      "id": {
+        "part": 0,
+        "source": "courier.petrinet",
+        "statement": 1
+      },
+      "kind": "arc.declare",
+      "ordinal": 1,
+      "span": {
+        "end": {
+          "byteOffset": 69,
+          "column": 26,
+          "line": 3
+        },
+        "source": "courier.petrinet",
+        "start": {
+          "byteOffset": 44,
+          "column": 1,
+          "line": 3
+        }
+      },
+      "target": {
+        "id": {
+          "document": "courier.petrinet",
+          "part": 0,
+          "statement": 1
+        },
+        "type": "arc"
+      },
+      "value": {
+        "color": {
+          "kind": "explicit",
+          "value": "parcel"
+        },
+        "from": {
+          "name": "pickup",
+          "type": "place"
+        },
+        "mode": "consume",
+        "to": {
+          "name": "pick",
+          "type": "transition"
+        },
+        "transitionNameSpan": {
+          "end": {
+            "byteOffset": 68,
+            "column": 25,
+            "line": 3
+          },
+          "source": "courier.petrinet",
+          "start": {
+            "byteOffset": 64,
+            "column": 21,
+            "line": 3
+          }
+        }
+      }
+    },
+    {
+      "id": {
+        "part": 1,
+        "source": "courier.petrinet",
+        "statement": 1
+      },
+      "kind": "arc.declare",
+      "ordinal": 2,
+      "span": {
+        "end": {
+          "byteOffset": 88,
+          "column": 45,
+          "line": 3
+        },
+        "source": "courier.petrinet",
+        "start": {
+          "byteOffset": 63,
+          "column": 20,
+          "line": 3
+        }
+      },
+      "target": {
+        "id": {
+          "document": "courier.petrinet",
+          "part": 1,
+          "statement": 1
+        },
+        "type": "arc"
+      },
+      "value": {
+        "color": {
+          "kind": "explicit",
+          "value": "parcel"
+        },
+        "from": {
+          "name": "pick",
+          "type": "transition"
+        },
+        "mode": "produce",
+        "to": {
+          "name": "riding",
+          "type": "place"
+        }
+      }
+    },
+    {
+      "id": {
+        "part": 0,
+        "source": "courier.petrinet",
+        "statement": 2
+      },
+      "kind": "arc.declare",
+      "ordinal": 3,
+      "span": {
+        "end": {
+          "byteOffset": 114,
+          "column": 26,
+          "line": 4
+        },
+        "source": "courier.petrinet",
+        "start": {
+          "byteOffset": 89,
+          "column": 1,
+          "line": 4
+        }
+      },
+      "target": {
+        "id": {
+          "document": "courier.petrinet",
+          "part": 0,
+          "statement": 2
+        },
+        "type": "arc"
+      },
+      "value": {
+        "color": {
+          "kind": "explicit",
+          "value": "parcel"
+        },
+        "from": {
+          "name": "riding",
+          "type": "place"
+        },
+        "mode": "consume",
+        "to": {
+          "name": "drop",
+          "type": "transition"
+        },
+        "transitionNameSpan": {
+          "end": {
+            "byteOffset": 113,
+            "column": 25,
+            "line": 4
+          },
+          "source": "courier.petrinet",
+          "start": {
+            "byteOffset": 109,
+            "column": 21,
+            "line": 4
+          }
+        }
+      }
+    },
+    {
+      "id": {
+        "part": 1,
+        "source": "courier.petrinet",
+        "statement": 2
+      },
+      "kind": "arc.declare",
+      "ordinal": 4,
+      "span": {
+        "end": {
+          "byteOffset": 135,
+          "column": 47,
+          "line": 4
+        },
+        "source": "courier.petrinet",
+        "start": {
+          "byteOffset": 108,
+          "column": 20,
+          "line": 4
+        }
+      },
+      "target": {
+        "id": {
+          "document": "courier.petrinet",
+          "part": 1,
+          "statement": 2
+        },
+        "type": "arc"
+      },
+      "value": {
+        "color": {
+          "kind": "explicit",
+          "value": "receipt"
+        },
+        "from": {
+          "name": "drop",
+          "type": "transition"
+        },
+        "mode": "produce",
+        "to": {
+          "name": "dropped",
+          "type": "place"
+        }
+      }
+    },
+    {
+      "id": {
+        "part": 0,
+        "source": "courier.petrinet",
+        "statement": 3
+      },
+      "kind": "place.port",
+      "ordinal": 5,
+      "span": {
+        "end": {
+          "byteOffset": 163,
+          "column": 27,
+          "line": 6
+        },
+        "source": "courier.petrinet",
+        "start": {
+          "byteOffset": 137,
+          "column": 1,
+          "line": 6
+        }
+      },
+      "target": {
+        "name": "pickup",
+        "type": "place"
+      },
+      "value": {
+        "color": "parcel",
+        "direction": "input"
+      }
+    },
+    {
+      "id": {
+        "part": 0,
+        "source": "courier.petrinet",
+        "statement": 4
+      },
+      "kind": "place.port",
+      "ordinal": 6,
+      "span": {
+        "end": {
+          "byteOffset": 193,
+          "column": 30,
+          "line": 7
+        },
+        "source": "courier.petrinet",
+        "start": {
+          "byteOffset": 164,
+          "column": 1,
+          "line": 7
+        }
+      },
+      "target": {
+        "name": "dropped",
+        "type": "place"
+      },
+      "value": {
+        "color": "receipt",
+        "direction": "output"
+      }
+    }
+  ],
+  "document": {
+    "id": "courier.petrinet"
+  },
+  "documentKind": "net",
+  "format": "velocitron.petrinet/contribution-ir",
+  "version": 1
+}

@@ -1,0 +1,85 @@
+// The board moves a title's home branch. The annex posts a confirmation slip.
+// A day with no confirmation raises one alarm, which the circulation desk
+// owns. Lending from the annex and the condition survey are filled by people,
+// so generation without an actor filter cannot fill them.
+
+net branch_policy_as_is "Move a title's home branch; the quiet-day alarm stays with the annex"
+
+person Board
+system Annex
+system "circulation desk"
+net actor Annex
+
+@to_annex_in: (home) -route-> [send_to_annex]
+@to_annex_out: [send_to_annex] -route-> (home)
+@to_main_in: (home) -route-> [send_to_main]
+@to_main_out: [send_to_main] -route-> (home)
+
+@slip_home: (home) -route-> [post_slip]
+@slip_out: [post_slip] -slip-> (slip)
+@slip_home_out: [post_slip] -route-> (home)
+(clock) -tick->? [post_slip]
+
+@again_in: (slip) -slip-> [post_slip_again]
+@again_out: [post_slip_again] -slip-> (slip)
+(clock) -tick->? [post_slip_again]
+
+@quiet_in: (slip) -slip-> [quiet_for_a_day]
+@quiet_out: [quiet_for_a_day] -slip-> (slip)
+@quiet_signal: [quiet_for_a_day] -note-> (alarms)
+(clock) -tick->? [quiet_for_a_day]
+
+@lend_in: (requests) -hold-> [annex_lends]
+@lend_home: (home) -route->? [annex_lends]
+@lend_out: [annex_lends] -loan-> (loaned)
+
+@wait_in: (requests) -hold-> [waitlist]
+@wait_home: (home) -route->? [waitlist]
+@wait_out: [waitlist] -hold-> (waitlisted)
+
+@survey_main: (spine) -copy->? [survey_copies]
+@survey_annex: (pocket) -copy->? [survey_copies]
+@survey_out: [survey_copies] -survey-> (survey)
+
+[send_to_annex] actor Board
+[send_to_main] actor Board
+[survey_copies] actor Board
+
+@to_annex_in predicate cel "branch == 'main'"
+@to_annex_out data cel "{'isbn': binding.home[0].isbn, 'branch': 'annex', 'confirmed': false}"
+@to_main_in predicate cel "branch == 'annex'"
+@to_main_out data cel "{'isbn': binding.home[0].isbn, 'branch': 'main', 'confirmed': false}"
+@slip_home predicate cel "!confirmed"
+@slip_out data cel "{'isbn': binding.home[0].isbn, 'at': binding.clock[0].now, 'quiet': false}"
+@slip_home_out data cel "{'isbn': binding.home[0].isbn, 'branch': binding.home[0].branch, 'confirmed': true}"
+@again_in predicate cel "quiet"
+@again_out data cel "{'isbn': binding.slip[0].isbn, 'at': binding.clock[0].now, 'quiet': false}"
+@quiet_in predicate cel "!quiet"
+@quiet_out data cel "{'isbn': binding.slip[0].isbn, 'at': binding.slip[0].at, 'quiet': true}"
+@quiet_signal data cel "{'kind': 'annex_quiet_for_a_day', 'isbn': binding.slip[0].isbn}"
+[quiet_for_a_day] timer clock (clock) cel "clock.now >= slip.at + 86400"
+[quiet_for_a_day] timer bind slip (slip)
+@lend_home predicate cel "branch == 'annex' && confirmed"
+@lend_home correlate cel "token.isbn == binding.requests[0].isbn"
+@wait_home predicate cel "branch == 'main'"
+@wait_home correlate cel "token.isbn == binding.requests[0].isbn"
+@wait_out data cel "{'isbn': binding.requests[0].isbn, 'branch': 'main'}"
+@survey_annex correlate cel "token.isbn == binding.spine[0].isbn"
+
+record "Branch home"
+(home) lives in "Branch home"
+(home) reads as cel "token.isbn + ' home is ' + token.branch"
+(home) description "the title's home branch"
+(alarms) description "one alarm when the annex stays quiet"
+[send_to_annex] description "The board sends the title's home to the annex"
+[send_to_main] description "The board sends the title's home back to the main branch"
+[post_slip] description "The annex posts a confirmation slip"
+[post_slip_again] description "The annex posts again after an alarm"
+[quiet_for_a_day] description "A day with no confirmation: raise one alarm"
+[annex_lends] description "The annex lends the title to a waiting patron"
+[waitlist] description "The title's home is the main branch, so the request waits"
+[survey_copies] description "The board surveys the main copy against the annex copy"
+
+domain route.branch "main" "annex"
+domain route.confirmed true false
+final (waitlisted), (loaned) + (survey)

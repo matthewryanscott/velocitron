@@ -1,0 +1,626 @@
+{
+  "format": "velocitron.petrinet/contribution-ir",
+  "version": 1,
+  "documentKind": "net",
+  "document": {
+    "id": "reading_voice.petrinet"
+  },
+  "contributions": [
+    {
+      "id": {
+        "source": "reading_voice.petrinet",
+        "statement": 0,
+        "part": 0
+      },
+      "kind": "document.net-header",
+      "ordinal": 0,
+      "span": {
+        "source": "reading_voice.petrinet",
+        "start": {
+          "byteOffset": 0,
+          "line": 1,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 46,
+          "line": 1,
+          "column": 47
+        }
+      },
+      "target": {
+        "type": "document"
+      },
+      "value": {
+        "name": "reading_voice",
+        "description": "A chosen passage is spoken"
+      }
+    },
+    {
+      "id": {
+        "source": "reading_voice.petrinet",
+        "statement": 1,
+        "part": 0
+      },
+      "kind": "arc.declare",
+      "ordinal": 1,
+      "span": {
+        "source": "reading_voice.petrinet",
+        "start": {
+          "byteOffset": 48,
+          "line": 3,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 81,
+          "line": 3,
+          "column": 34
+        }
+      },
+      "target": {
+        "type": "arc",
+        "id": {
+          "document": "reading_voice.petrinet",
+          "statement": 1,
+          "part": 0
+        }
+      },
+      "value": {
+        "from": {
+          "type": "place",
+          "name": "request_in"
+        },
+        "to": {
+          "type": "transition",
+          "name": "start"
+        },
+        "color": {
+          "kind": "explicit",
+          "value": "speak_req"
+        },
+        "mode": "consume",
+        "transitionNameSpan": {
+          "source": "reading_voice.petrinet",
+          "start": {
+            "byteOffset": 75,
+            "line": 3,
+            "column": 28
+          },
+          "end": {
+            "byteOffset": 80,
+            "line": 3,
+            "column": 33
+          }
+        }
+      }
+    },
+    {
+      "id": {
+        "source": "reading_voice.petrinet",
+        "statement": 1,
+        "part": 1
+      },
+      "kind": "arc.declare",
+      "ordinal": 2,
+      "span": {
+        "source": "reading_voice.petrinet",
+        "start": {
+          "byteOffset": 74,
+          "line": 3,
+          "column": 27
+        },
+        "end": {
+          "byteOffset": 108,
+          "line": 3,
+          "column": 61
+        }
+      },
+      "target": {
+        "type": "arc",
+        "id": {
+          "document": "reading_voice.petrinet",
+          "statement": 1,
+          "part": 1
+        }
+      },
+      "value": {
+        "from": {
+          "type": "transition",
+          "name": "start"
+        },
+        "to": {
+          "type": "place",
+          "name": "in_flight"
+        },
+        "color": {
+          "kind": "explicit",
+          "value": "speak_token"
+        },
+        "mode": "produce"
+      }
+    },
+    {
+      "id": {
+        "source": "reading_voice.petrinet",
+        "statement": 2,
+        "part": 0
+      },
+      "kind": "arc.handle",
+      "ordinal": 3,
+      "span": {
+        "source": "reading_voice.petrinet",
+        "start": {
+          "byteOffset": 109,
+          "line": 4,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 162,
+          "line": 4,
+          "column": 54
+        }
+      },
+      "target": {
+        "type": "arcHandle",
+        "name": "in_flight_clear"
+      },
+      "value": {
+        "arcIds": [
+          {
+            "document": "reading_voice.petrinet",
+            "statement": 2,
+            "part": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": {
+        "source": "reading_voice.petrinet",
+        "statement": 2,
+        "part": 1
+      },
+      "kind": "arc.declare",
+      "ordinal": 4,
+      "span": {
+        "source": "reading_voice.petrinet",
+        "start": {
+          "byteOffset": 127,
+          "line": 4,
+          "column": 19
+        },
+        "end": {
+          "byteOffset": 162,
+          "line": 4,
+          "column": 54
+        }
+      },
+      "target": {
+        "type": "arc",
+        "id": {
+          "document": "reading_voice.petrinet",
+          "statement": 2,
+          "part": 1
+        }
+      },
+      "value": {
+        "from": {
+          "type": "place",
+          "name": "in_flight"
+        },
+        "to": {
+          "type": "transition",
+          "name": "start"
+        },
+        "color": {
+          "kind": "explicit",
+          "value": "speak_token"
+        },
+        "mode": "inhibit"
+      }
+    },
+    {
+      "id": {
+        "source": "reading_voice.petrinet",
+        "statement": 3,
+        "part": 0
+      },
+      "kind": "arc.handle",
+      "ordinal": 5,
+      "span": {
+        "source": "reading_voice.petrinet",
+        "start": {
+          "byteOffset": 163,
+          "line": 5,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 205,
+          "line": 5,
+          "column": 43
+        }
+      },
+      "target": {
+        "type": "arcHandle",
+        "name": "work_clear"
+      },
+      "value": {
+        "arcIds": [
+          {
+            "document": "reading_voice.petrinet",
+            "statement": 3,
+            "part": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": {
+        "source": "reading_voice.petrinet",
+        "statement": 3,
+        "part": 1
+      },
+      "kind": "arc.declare",
+      "ordinal": 6,
+      "span": {
+        "source": "reading_voice.petrinet",
+        "start": {
+          "byteOffset": 176,
+          "line": 5,
+          "column": 14
+        },
+        "end": {
+          "byteOffset": 205,
+          "line": 5,
+          "column": 43
+        }
+      },
+      "target": {
+        "type": "arc",
+        "id": {
+          "document": "reading_voice.petrinet",
+          "statement": 3,
+          "part": 1
+        }
+      },
+      "value": {
+        "from": {
+          "type": "place",
+          "name": "work"
+        },
+        "to": {
+          "type": "transition",
+          "name": "start"
+        },
+        "color": {
+          "kind": "explicit",
+          "value": "speak_work"
+        },
+        "mode": "inhibit"
+      }
+    },
+    {
+      "id": {
+        "source": "reading_voice.petrinet",
+        "statement": 4,
+        "part": 0
+      },
+      "kind": "arc.declare",
+      "ordinal": 7,
+      "span": {
+        "source": "reading_voice.petrinet",
+        "start": {
+          "byteOffset": 206,
+          "line": 6,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 234,
+          "line": 6,
+          "column": 29
+        }
+      },
+      "target": {
+        "type": "arc",
+        "id": {
+          "document": "reading_voice.petrinet",
+          "statement": 4,
+          "part": 0
+        }
+      },
+      "value": {
+        "from": {
+          "type": "transition",
+          "name": "start"
+        },
+        "to": {
+          "type": "place",
+          "name": "work"
+        },
+        "color": {
+          "kind": "explicit",
+          "value": "speak_work"
+        },
+        "mode": "produce"
+      }
+    },
+    {
+      "id": {
+        "source": "reading_voice.petrinet",
+        "statement": 5,
+        "part": 0
+      },
+      "kind": "arc.declare",
+      "ordinal": 8,
+      "span": {
+        "source": "reading_voice.petrinet",
+        "start": {
+          "byteOffset": 236,
+          "line": 8,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 265,
+          "line": 8,
+          "column": 30
+        }
+      },
+      "target": {
+        "type": "arc",
+        "id": {
+          "document": "reading_voice.petrinet",
+          "statement": 5,
+          "part": 0
+        }
+      },
+      "value": {
+        "from": {
+          "type": "place",
+          "name": "work"
+        },
+        "to": {
+          "type": "transition",
+          "name": "finish"
+        },
+        "color": {
+          "kind": "explicit",
+          "value": "speak_work"
+        },
+        "mode": "consume",
+        "transitionNameSpan": {
+          "source": "reading_voice.petrinet",
+          "start": {
+            "byteOffset": 258,
+            "line": 8,
+            "column": 23
+          },
+          "end": {
+            "byteOffset": 264,
+            "line": 8,
+            "column": 29
+          }
+        }
+      }
+    },
+    {
+      "id": {
+        "source": "reading_voice.petrinet",
+        "statement": 5,
+        "part": 1
+      },
+      "kind": "arc.declare",
+      "ordinal": 9,
+      "span": {
+        "source": "reading_voice.petrinet",
+        "start": {
+          "byteOffset": 257,
+          "line": 8,
+          "column": 22
+        },
+        "end": {
+          "byteOffset": 294,
+          "line": 8,
+          "column": 59
+        }
+      },
+      "target": {
+        "type": "arc",
+        "id": {
+          "document": "reading_voice.petrinet",
+          "statement": 5,
+          "part": 1
+        }
+      },
+      "value": {
+        "from": {
+          "type": "transition",
+          "name": "finish"
+        },
+        "to": {
+          "type": "place",
+          "name": "utterance_out"
+        },
+        "color": {
+          "kind": "explicit",
+          "value": "utterance"
+        },
+        "mode": "produce"
+      }
+    },
+    {
+      "id": {
+        "source": "reading_voice.petrinet",
+        "statement": 6,
+        "part": 0
+      },
+      "kind": "arc.declare",
+      "ordinal": 10,
+      "span": {
+        "source": "reading_voice.petrinet",
+        "start": {
+          "byteOffset": 295,
+          "line": 9,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 330,
+          "line": 9,
+          "column": 36
+        }
+      },
+      "target": {
+        "type": "arc",
+        "id": {
+          "document": "reading_voice.petrinet",
+          "statement": 6,
+          "part": 0
+        }
+      },
+      "value": {
+        "from": {
+          "type": "place",
+          "name": "in_flight"
+        },
+        "to": {
+          "type": "transition",
+          "name": "finish"
+        },
+        "color": {
+          "kind": "explicit",
+          "value": "speak_token"
+        },
+        "mode": "consume",
+        "transitionNameSpan": {
+          "source": "reading_voice.petrinet",
+          "start": {
+            "byteOffset": 323,
+            "line": 9,
+            "column": 29
+          },
+          "end": {
+            "byteOffset": 329,
+            "line": 9,
+            "column": 35
+          }
+        }
+      }
+    },
+    {
+      "id": {
+        "source": "reading_voice.petrinet",
+        "statement": 7,
+        "part": 0
+      },
+      "kind": "transition.handler",
+      "ordinal": 11,
+      "span": {
+        "source": "reading_voice.petrinet",
+        "start": {
+          "byteOffset": 332,
+          "line": 11,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 362,
+          "line": 11,
+          "column": 31
+        }
+      },
+      "target": {
+        "type": "transition",
+        "name": "start"
+      },
+      "value": {
+        "handler": "start@speaks"
+      }
+    },
+    {
+      "id": {
+        "source": "reading_voice.petrinet",
+        "statement": 8,
+        "part": 0
+      },
+      "kind": "transition.handler",
+      "ordinal": 12,
+      "span": {
+        "source": "reading_voice.petrinet",
+        "start": {
+          "byteOffset": 363,
+          "line": 12,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 395,
+          "line": 12,
+          "column": 33
+        }
+      },
+      "target": {
+        "type": "transition",
+        "name": "finish"
+      },
+      "value": {
+        "handler": "finish@speaks"
+      }
+    },
+    {
+      "id": {
+        "source": "reading_voice.petrinet",
+        "statement": 9,
+        "part": 0
+      },
+      "kind": "place.port",
+      "ordinal": 13,
+      "span": {
+        "source": "reading_voice.petrinet",
+        "start": {
+          "byteOffset": 396,
+          "line": 13,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 429,
+          "line": 13,
+          "column": 34
+        }
+      },
+      "target": {
+        "type": "place",
+        "name": "request_in"
+      },
+      "value": {
+        "direction": "input",
+        "color": "speak_req"
+      }
+    },
+    {
+      "id": {
+        "source": "reading_voice.petrinet",
+        "statement": 10,
+        "part": 0
+      },
+      "kind": "place.port",
+      "ordinal": 14,
+      "span": {
+        "source": "reading_voice.petrinet",
+        "start": {
+          "byteOffset": 430,
+          "line": 14,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 467,
+          "line": 14,
+          "column": 38
+        }
+      },
+      "target": {
+        "type": "place",
+        "name": "utterance_out"
+      },
+      "value": {
+        "direction": "output",
+        "color": "utterance"
+      }
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "diagnostic": {
+    "code": "PN202",
+    "column": 1,
+    "file": "checkout.invariant-unknown-place.petrinet",
+    "line": 10,
+    "message": "invariant refers to unknown place (lost)",
+    "span": {
+      "source": "checkout.invariant-unknown-place.petrinet",
+      "start": {
+        "byteOffset": 245,
+        "line": 10,
+        "column": 1
+      },
+      "end": {
+        "byteOffset": 281,
+        "line": 10,
+        "column": 37
+      }
+    }
+  },
+  "source": {
+    "sourceId": "checkout.invariant-unknown-place.petrinet",
+    "text": "net checkout\n\n(pending) -checkout-> [send] -checkout-> (sending)\n(free) -lock-> [send]\n(sending) -checkout-> [finish] -outcome-> (ended)\n@unlock: [finish] -lock-> (free)\n(ended) -outcome-> [close] -checkout-> (done)\n@unlock data {\"id\": \"desk\"}\n\ninvariant \"lock\" (free) + (lost) = 1\n"
+  }
+}

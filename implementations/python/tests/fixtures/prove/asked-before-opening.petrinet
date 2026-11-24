@@ -1,0 +1,29 @@
+// The desk loans or refers a title when it opens, by the answer it keeps.
+// A clerk asks which branch holds the title before opening, so the branch
+// record must be able to arrive, and be asked about, before the opening does.
+net asked_before_opening "A clerk asks which branch holds a title before the desk opens"
+
+(opening) -slot-> [loan] -slot-> (loaned)
+(opening) -slot-> [refer] -slot-> (referred)
+@main_owns: (answer) -answer->? [loan]
+@annex_owns: (answer) -answer->? [refer]
+@ask_home_in: (home) -route-> [ask]
+@ask_home_out: [ask] -route-> (home)
+@ask_answer_in: (answer) -answer-> [ask]
+@ask_answer_out: [ask] -answer-> (answer)
+@ask_slip: [ask] -note-> (asked)
+
+@main_owns predicate cel "branch == 'main'"
+@annex_owns predicate cel "branch == 'annex'"
+@ask_home_in predicate cel "confirmed == false"
+@ask_home_out data cel "{'branch': binding.home[0].branch, 'confirmed': true}"
+@ask_answer_out data cel "{'branch': binding.home[0].branch}"
+@ask_slip data cel "{'branch': binding.home[0].branch}"
+
+system "circulation desk"
+(answer) kept by "circulation desk" starts as cel "{'branch': 'main'}"
+record "Branch home"
+(home) lives in "Branch home"
+domain route.branch "main" "annex"
+domain route.confirmed true false
+domain answer.branch "main" "annex"

@@ -1,0 +1,45 @@
+{
+  "diagnostic": {
+    "code": "PN202",
+    "column": 1,
+    "file": "checkout.domain-conflicting.petrinet",
+    "line": 11,
+    "message": "conflicting domain facts for outcome.outcome",
+    "span": {
+      "source": "checkout.domain-conflicting.petrinet",
+      "start": {
+        "byteOffset": 288,
+        "line": 11,
+        "column": 1
+      },
+      "end": {
+        "byteOffset": 319,
+        "line": 11,
+        "column": 32
+      }
+    },
+    "help": "remove one declaration or make both value lists identical",
+    "related": [
+      {
+        "message": "first domain was declared here",
+        "span": {
+          "source": "checkout.domain-conflicting.petrinet",
+          "start": {
+            "byteOffset": 245,
+            "line": 10,
+            "column": 1
+          },
+          "end": {
+            "byteOffset": 287,
+            "line": 10,
+            "column": 43
+          }
+        }
+      }
+    ]
+  },
+  "source": {
+    "sourceId": "checkout.domain-conflicting.petrinet",
+    "text": "net checkout\n\n(pending) -checkout-> [send] -checkout-> (sending)\n(free) -lock-> [send]\n(sending) -checkout-> [finish] -outcome-> (ended)\n@unlock: [finish] -lock-> (free)\n(ended) -outcome-> [close] -checkout-> (done)\n@unlock data {\"id\": \"desk\"}\n\ndomain outcome.outcome \"returned\" \"failed\"\ndomain outcome.outcome \"failed\"\n"
+  }
+}

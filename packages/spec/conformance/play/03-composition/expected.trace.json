@@ -1,0 +1,461 @@
+[
+  {
+    "play": "composition",
+    "path": "trunk",
+    "status": "passed",
+    "inherited": 0,
+    "initial": {},
+    "steps": [
+      {
+        "line": 6,
+        "kind": "inject",
+        "statement": "inject (prod.work) <- {\"id\": \"w-1\", \"lane\": \"b\"}",
+        "records": [
+          {
+            "kind": "injection",
+            "place": "prod.work",
+            "injectionKind": "inject",
+            "tokens": [
+              {
+                "type": "task",
+                "data": {
+                  "id": "w-1",
+                  "lane": "b"
+                }
+              }
+            ],
+            "replaced": []
+          }
+        ],
+        "afterEach": [
+          {
+            "prod.work": [
+              {
+                "type": "task",
+                "data": {
+                  "id": "w-1",
+                  "lane": "b"
+                }
+              }
+            ]
+          }
+        ],
+        "checks": [],
+        "after": {
+          "prod.work": [
+            {
+              "type": "task",
+              "data": {
+                "id": "w-1",
+                "lane": "b"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "line": 7,
+        "kind": "inject",
+        "statement": "inject (cons.slots) <- slot {\"name\": \"s-a\", \"lane\": \"a\"}, slot {\"name\": \"s-b\", \"lane\": \"b\"}",
+        "records": [
+          {
+            "kind": "injection",
+            "place": "cons.slots",
+            "injectionKind": "inject",
+            "tokens": [
+              {
+                "type": "slot",
+                "data": {
+                  "name": "s-a",
+                  "lane": "a"
+                }
+              }
+            ],
+            "replaced": []
+          },
+          {
+            "kind": "injection",
+            "place": "cons.slots",
+            "injectionKind": "inject",
+            "tokens": [
+              {
+                "type": "slot",
+                "data": {
+                  "name": "s-b",
+                  "lane": "b"
+                }
+              }
+            ],
+            "replaced": []
+          }
+        ],
+        "afterEach": [
+          {
+            "cons.slots": [
+              {
+                "type": "slot",
+                "data": {
+                  "name": "s-a",
+                  "lane": "a"
+                }
+              }
+            ],
+            "prod.work": [
+              {
+                "type": "task",
+                "data": {
+                  "id": "w-1",
+                  "lane": "b"
+                }
+              }
+            ]
+          },
+          {
+            "cons.slots": [
+              {
+                "type": "slot",
+                "data": {
+                  "name": "s-a",
+                  "lane": "a"
+                }
+              },
+              {
+                "type": "slot",
+                "data": {
+                  "name": "s-b",
+                  "lane": "b"
+                }
+              }
+            ],
+            "prod.work": [
+              {
+                "type": "task",
+                "data": {
+                  "id": "w-1",
+                  "lane": "b"
+                }
+              }
+            ]
+          }
+        ],
+        "checks": [],
+        "after": {
+          "cons.slots": [
+            {
+              "type": "slot",
+              "data": {
+                "name": "s-a",
+                "lane": "a"
+              }
+            },
+            {
+              "type": "slot",
+              "data": {
+                "name": "s-b",
+                "lane": "b"
+              }
+            }
+          ],
+          "prod.work": [
+            {
+              "type": "task",
+              "data": {
+                "id": "w-1",
+                "lane": "b"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "line": 8,
+        "kind": "fire",
+        "statement": "fire [prod.make]",
+        "records": [
+          {
+            "kind": "firing",
+            "transition": "prod.make",
+            "status": "completed",
+            "inputTokens": {
+              "prod.work": [
+                {
+                  "type": "task",
+                  "data": {
+                    "id": "w-1",
+                    "lane": "b"
+                  }
+                }
+              ]
+            },
+            "outputTokens": {
+              "prod.out": [
+                {
+                  "type": "task",
+                  "data": {
+                    "id": "w-1",
+                    "lane": "b"
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "afterEach": [
+          {
+            "cons.slots": [
+              {
+                "type": "slot",
+                "data": {
+                  "name": "s-a",
+                  "lane": "a"
+                }
+              },
+              {
+                "type": "slot",
+                "data": {
+                  "name": "s-b",
+                  "lane": "b"
+                }
+              }
+            ],
+            "prod.out": [
+              {
+                "type": "task",
+                "data": {
+                  "id": "w-1",
+                  "lane": "b"
+                }
+              }
+            ]
+          }
+        ],
+        "checks": [],
+        "after": {
+          "cons.slots": [
+            {
+              "type": "slot",
+              "data": {
+                "name": "s-a",
+                "lane": "a"
+              }
+            },
+            {
+              "type": "slot",
+              "data": {
+                "name": "s-b",
+                "lane": "b"
+              }
+            }
+          ],
+          "prod.out": [
+            {
+              "type": "task",
+              "data": {
+                "id": "w-1",
+                "lane": "b"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "line": 10,
+        "kind": "expect",
+        "statement": "expect (prod.out) count 1, (cons.in) == task {\"id\": \"w-1\", \"lane\": \"b\"}",
+        "records": [],
+        "afterEach": [],
+        "checks": [
+          {
+            "text": "(prod.out) count 1",
+            "ok": true,
+            "detail": "(prod.out) holds 1"
+          },
+          {
+            "text": "(cons.in) == task {\"id\": \"w-1\", \"lane\": \"b\"}",
+            "ok": true,
+            "detail": "(prod.out) holds task {\"id\": \"w-1\", \"lane\": \"b\"}"
+          }
+        ],
+        "after": {
+          "cons.slots": [
+            {
+              "type": "slot",
+              "data": {
+                "name": "s-a",
+                "lane": "a"
+              }
+            },
+            {
+              "type": "slot",
+              "data": {
+                "name": "s-b",
+                "lane": "b"
+              }
+            }
+          ],
+          "prod.out": [
+            {
+              "type": "task",
+              "data": {
+                "id": "w-1",
+                "lane": "b"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "line": 12,
+        "kind": "fire",
+        "statement": "fire [cons.take]",
+        "records": [
+          {
+            "kind": "firing",
+            "transition": "cons.take",
+            "status": "completed",
+            "inputTokens": {
+              "prod.out": [
+                {
+                  "type": "task",
+                  "data": {
+                    "id": "w-1",
+                    "lane": "b"
+                  }
+                }
+              ],
+              "cons.slots": [
+                {
+                  "type": "slot",
+                  "data": {
+                    "name": "s-b",
+                    "lane": "b"
+                  }
+                }
+              ]
+            },
+            "outputTokens": {
+              "cons.done": [
+                {
+                  "type": "result",
+                  "data": {
+                    "slot": "s-b",
+                    "of": "w-1"
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "afterEach": [
+          {
+            "cons.done": [
+              {
+                "type": "result",
+                "data": {
+                  "slot": "s-b",
+                  "of": "w-1"
+                }
+              }
+            ],
+            "cons.slots": [
+              {
+                "type": "slot",
+                "data": {
+                  "name": "s-a",
+                  "lane": "a"
+                }
+              },
+              {
+                "type": "slot",
+                "data": {
+                  "name": "s-b",
+                  "lane": "b"
+                }
+              }
+            ]
+          }
+        ],
+        "checks": [],
+        "after": {
+          "cons.done": [
+            {
+              "type": "result",
+              "data": {
+                "slot": "s-b",
+                "of": "w-1"
+              }
+            }
+          ],
+          "cons.slots": [
+            {
+              "type": "slot",
+              "data": {
+                "name": "s-a",
+                "lane": "a"
+              }
+            },
+            {
+              "type": "slot",
+              "data": {
+                "name": "s-b",
+                "lane": "b"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "line": 13,
+        "kind": "expect",
+        "statement": "expect (cons.done) == result {\"of\": \"w-1\", \"slot\": \"s-b\"}, (cons.slots) count 2, quiescent",
+        "records": [],
+        "afterEach": [],
+        "checks": [
+          {
+            "text": "(cons.done) == result {\"of\": \"w-1\", \"slot\": \"s-b\"}",
+            "ok": true,
+            "detail": "(cons.done) holds result {\"of\": \"w-1\", \"slot\": \"s-b\"}"
+          },
+          {
+            "text": "(cons.slots) count 2",
+            "ok": true,
+            "detail": "(cons.slots) holds 2"
+          },
+          {
+            "text": "quiescent",
+            "ok": true,
+            "detail": "enabled now: nothing"
+          }
+        ],
+        "after": {
+          "cons.done": [
+            {
+              "type": "result",
+              "data": {
+                "slot": "s-b",
+                "of": "w-1"
+              }
+            }
+          ],
+          "cons.slots": [
+            {
+              "type": "slot",
+              "data": {
+                "name": "s-a",
+                "lane": "a"
+              }
+            },
+            {
+              "type": "slot",
+              "data": {
+                "name": "s-b",
+                "lane": "b"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "failure": null
+  }
+]

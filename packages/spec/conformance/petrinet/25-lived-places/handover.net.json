@@ -1,0 +1,116 @@
+{
+  "name": "handover",
+  "places": [
+    {
+      "name": "switch",
+      "accepts": [
+        "route"
+      ],
+      "annotations": {
+        "actor": "Clerk",
+        "lives": "Branch home",
+        "reads_as": {
+          "cel": "token.owner + ' owns it'"
+        }
+      }
+    },
+    {
+      "name": "outbox",
+      "accepts": [
+        "token"
+      ]
+    },
+    {
+      "name": "loaned",
+      "accepts": [
+        "token"
+      ],
+      "annotations": {
+        "lives": {
+          "cel": "token.branch"
+        }
+      }
+    }
+  ],
+  "transitions": [
+    {
+      "name": "flip"
+    },
+    {
+      "name": "send"
+    }
+  ],
+  "arcs": [
+    {
+      "from": {
+        "place": "switch"
+      },
+      "to": {
+        "transition": "flip"
+      },
+      "consume": {
+        "type": "route"
+      }
+    },
+    {
+      "from": {
+        "transition": "flip"
+      },
+      "to": {
+        "place": "switch"
+      },
+      "produce": {
+        "destination": "switch",
+        "type": "route"
+      }
+    },
+    {
+      "from": {
+        "place": "outbox"
+      },
+      "to": {
+        "transition": "send"
+      },
+      "consume": {
+        "type": "token"
+      }
+    },
+    {
+      "from": {
+        "transition": "send"
+      },
+      "to": {
+        "place": "loaned"
+      },
+      "produce": {
+        "destination": "loaned",
+        "type": "token"
+      }
+    },
+    {
+      "from": {
+        "place": "switch"
+      },
+      "to": {
+        "transition": "send"
+      },
+      "consume": {
+        "type": "route",
+        "mode": "read"
+      }
+    }
+  ],
+  "initialMarking": {},
+  "annotations": {
+    "actors": [
+      {
+        "name": "Clerk",
+        "kind": "person"
+      },
+      {
+        "name": "Branch home",
+        "kind": "record"
+      }
+    ]
+  }
+}

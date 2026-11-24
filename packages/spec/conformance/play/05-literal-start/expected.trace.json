@@ -1,0 +1,297 @@
+[
+  {
+    "play": "literal_start",
+    "path": "trunk",
+    "status": "passed",
+    "inherited": 0,
+    "initial": {},
+    "steps": [
+      {
+        "line": 7,
+        "kind": "inject",
+        "statement": "inject (condition) <- condition {\"isbn\": \"978-014\", \"damaged\": false}",
+        "records": [
+          {
+            "kind": "injection",
+            "place": "condition",
+            "injectionKind": "inject",
+            "tokens": [
+              {
+                "type": "condition",
+                "data": {
+                  "isbn": "978-014",
+                  "damaged": false
+                }
+              }
+            ],
+            "replaced": []
+          }
+        ],
+        "afterEach": [
+          {
+            "condition": [
+              {
+                "type": "condition",
+                "data": {
+                  "isbn": "978-014",
+                  "damaged": false
+                }
+              }
+            ]
+          }
+        ],
+        "checks": [],
+        "after": {
+          "condition": [
+            {
+              "type": "condition",
+              "data": {
+                "isbn": "978-014",
+                "damaged": false
+              }
+            }
+          ]
+        }
+      },
+      {
+        "line": 8,
+        "kind": "inject",
+        "statement": "inject (returns) <- copy {\"isbn\": \"978-014\", \"state\": \"damaged\"}",
+        "records": [
+          {
+            "kind": "injection",
+            "place": "returns",
+            "injectionKind": "inject",
+            "tokens": [
+              {
+                "type": "copy",
+                "data": {
+                  "isbn": "978-014",
+                  "state": "damaged"
+                }
+              }
+            ],
+            "replaced": []
+          }
+        ],
+        "afterEach": [
+          {
+            "condition": [
+              {
+                "type": "condition",
+                "data": {
+                  "isbn": "978-014",
+                  "damaged": false
+                }
+              }
+            ],
+            "returns": [
+              {
+                "type": "copy",
+                "data": {
+                  "isbn": "978-014",
+                  "state": "damaged"
+                }
+              }
+            ]
+          }
+        ],
+        "checks": [],
+        "after": {
+          "condition": [
+            {
+              "type": "condition",
+              "data": {
+                "isbn": "978-014",
+                "damaged": false
+              }
+            }
+          ],
+          "returns": [
+            {
+              "type": "copy",
+              "data": {
+                "isbn": "978-014",
+                "state": "damaged"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "line": 9,
+        "kind": "fire",
+        "statement": "fire [damaged]",
+        "records": [
+          {
+            "kind": "firing",
+            "transition": "damaged",
+            "status": "completed",
+            "inputTokens": {
+              "returns": [
+                {
+                  "type": "copy",
+                  "data": {
+                    "isbn": "978-014",
+                    "state": "damaged"
+                  }
+                }
+              ],
+              "condition": [
+                {
+                  "type": "condition",
+                  "data": {
+                    "isbn": "978-014",
+                    "damaged": false
+                  }
+                }
+              ]
+            },
+            "outputTokens": {
+              "shelved": [
+                {
+                  "type": "copy",
+                  "data": {
+                    "isbn": "978-014",
+                    "state": "damaged"
+                  }
+                }
+              ],
+              "condition": [
+                {
+                  "type": "condition",
+                  "data": {
+                    "isbn": "978-014",
+                    "damaged": true
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "afterEach": [
+          {
+            "condition": [
+              {
+                "type": "condition",
+                "data": {
+                  "isbn": "978-014",
+                  "damaged": true
+                }
+              }
+            ],
+            "shelved": [
+              {
+                "type": "copy",
+                "data": {
+                  "isbn": "978-014",
+                  "state": "damaged"
+                }
+              }
+            ]
+          }
+        ],
+        "checks": [],
+        "after": {
+          "condition": [
+            {
+              "type": "condition",
+              "data": {
+                "isbn": "978-014",
+                "damaged": true
+              }
+            }
+          ],
+          "shelved": [
+            {
+              "type": "copy",
+              "data": {
+                "isbn": "978-014",
+                "state": "damaged"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "line": 10,
+        "kind": "expect",
+        "statement": "expect (condition) == condition {\"isbn\": \"978-014\", \"damaged\": true}, (shelved) count 1",
+        "records": [],
+        "afterEach": [],
+        "checks": [
+          {
+            "text": "(condition) == condition {\"isbn\": \"978-014\", \"damaged\": true}",
+            "ok": true,
+            "detail": "(condition) holds condition {\"damaged\": true, \"isbn\": \"978-014\"}"
+          },
+          {
+            "text": "(shelved) count 1",
+            "ok": true,
+            "detail": "(shelved) holds 1"
+          }
+        ],
+        "after": {
+          "condition": [
+            {
+              "type": "condition",
+              "data": {
+                "isbn": "978-014",
+                "damaged": true
+              }
+            }
+          ],
+          "shelved": [
+            {
+              "type": "copy",
+              "data": {
+                "isbn": "978-014",
+                "state": "damaged"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "line": 11,
+        "kind": "expect",
+        "statement": "expect (returns) empty, quiescent",
+        "records": [],
+        "afterEach": [],
+        "checks": [
+          {
+            "text": "(returns) empty",
+            "ok": true,
+            "detail": "(returns) is empty"
+          },
+          {
+            "text": "quiescent",
+            "ok": true,
+            "detail": "enabled now: nothing"
+          }
+        ],
+        "after": {
+          "condition": [
+            {
+              "type": "condition",
+              "data": {
+                "isbn": "978-014",
+                "damaged": true
+              }
+            }
+          ],
+          "shelved": [
+            {
+              "type": "copy",
+              "data": {
+                "isbn": "978-014",
+                "state": "damaged"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "failure": null
+  }
+]

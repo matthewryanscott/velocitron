@@ -1,0 +1,786 @@
+{
+  "format": "velocitron.petrinet/contribution-ir",
+  "version": 1,
+  "documentKind": "net",
+  "document": {
+    "id": "checkout.petrinet"
+  },
+  "contributions": [
+    {
+      "id": {
+        "source": "checkout.petrinet",
+        "statement": 0,
+        "part": 0
+      },
+      "kind": "document.net-header",
+      "ordinal": 0,
+      "span": {
+        "source": "checkout.petrinet",
+        "start": {
+          "byteOffset": 0,
+          "line": 1,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 12,
+          "line": 1,
+          "column": 13
+        }
+      },
+      "target": {
+        "type": "document"
+      },
+      "value": {
+        "name": "checkout"
+      }
+    },
+    {
+      "id": {
+        "source": "checkout.petrinet",
+        "statement": 1,
+        "part": 0
+      },
+      "kind": "arc.declare",
+      "ordinal": 1,
+      "span": {
+        "source": "checkout.petrinet",
+        "start": {
+          "byteOffset": 14,
+          "line": 3,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 42,
+          "line": 3,
+          "column": 29
+        }
+      },
+      "target": {
+        "type": "arc",
+        "id": {
+          "document": "checkout.petrinet",
+          "statement": 1,
+          "part": 0
+        }
+      },
+      "value": {
+        "from": {
+          "type": "place",
+          "name": "pending"
+        },
+        "to": {
+          "type": "transition",
+          "name": "send"
+        },
+        "color": {
+          "kind": "explicit",
+          "value": "checkout"
+        },
+        "mode": "consume",
+        "transitionNameSpan": {
+          "source": "checkout.petrinet",
+          "start": {
+            "byteOffset": 37,
+            "line": 3,
+            "column": 24
+          },
+          "end": {
+            "byteOffset": 41,
+            "line": 3,
+            "column": 28
+          }
+        }
+      }
+    },
+    {
+      "id": {
+        "source": "checkout.petrinet",
+        "statement": 1,
+        "part": 1
+      },
+      "kind": "arc.declare",
+      "ordinal": 2,
+      "span": {
+        "source": "checkout.petrinet",
+        "start": {
+          "byteOffset": 36,
+          "line": 3,
+          "column": 23
+        },
+        "end": {
+          "byteOffset": 64,
+          "line": 3,
+          "column": 51
+        }
+      },
+      "target": {
+        "type": "arc",
+        "id": {
+          "document": "checkout.petrinet",
+          "statement": 1,
+          "part": 1
+        }
+      },
+      "value": {
+        "from": {
+          "type": "transition",
+          "name": "send"
+        },
+        "to": {
+          "type": "place",
+          "name": "sending"
+        },
+        "color": {
+          "kind": "explicit",
+          "value": "checkout"
+        },
+        "mode": "produce"
+      }
+    },
+    {
+      "id": {
+        "source": "checkout.petrinet",
+        "statement": 2,
+        "part": 0
+      },
+      "kind": "arc.declare",
+      "ordinal": 3,
+      "span": {
+        "source": "checkout.petrinet",
+        "start": {
+          "byteOffset": 65,
+          "line": 4,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 86,
+          "line": 4,
+          "column": 22
+        }
+      },
+      "target": {
+        "type": "arc",
+        "id": {
+          "document": "checkout.petrinet",
+          "statement": 2,
+          "part": 0
+        }
+      },
+      "value": {
+        "from": {
+          "type": "place",
+          "name": "free"
+        },
+        "to": {
+          "type": "transition",
+          "name": "send"
+        },
+        "color": {
+          "kind": "explicit",
+          "value": "lock"
+        },
+        "mode": "consume",
+        "transitionNameSpan": {
+          "source": "checkout.petrinet",
+          "start": {
+            "byteOffset": 81,
+            "line": 4,
+            "column": 17
+          },
+          "end": {
+            "byteOffset": 85,
+            "line": 4,
+            "column": 21
+          }
+        }
+      }
+    },
+    {
+      "id": {
+        "source": "checkout.petrinet",
+        "statement": 3,
+        "part": 0
+      },
+      "kind": "arc.declare",
+      "ordinal": 4,
+      "span": {
+        "source": "checkout.petrinet",
+        "start": {
+          "byteOffset": 87,
+          "line": 5,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 117,
+          "line": 5,
+          "column": 31
+        }
+      },
+      "target": {
+        "type": "arc",
+        "id": {
+          "document": "checkout.petrinet",
+          "statement": 3,
+          "part": 0
+        }
+      },
+      "value": {
+        "from": {
+          "type": "place",
+          "name": "sending"
+        },
+        "to": {
+          "type": "transition",
+          "name": "finish"
+        },
+        "color": {
+          "kind": "explicit",
+          "value": "checkout"
+        },
+        "mode": "consume",
+        "transitionNameSpan": {
+          "source": "checkout.petrinet",
+          "start": {
+            "byteOffset": 110,
+            "line": 5,
+            "column": 24
+          },
+          "end": {
+            "byteOffset": 116,
+            "line": 5,
+            "column": 30
+          }
+        }
+      }
+    },
+    {
+      "id": {
+        "source": "checkout.petrinet",
+        "statement": 3,
+        "part": 1
+      },
+      "kind": "arc.declare",
+      "ordinal": 5,
+      "span": {
+        "source": "checkout.petrinet",
+        "start": {
+          "byteOffset": 109,
+          "line": 5,
+          "column": 23
+        },
+        "end": {
+          "byteOffset": 136,
+          "line": 5,
+          "column": 50
+        }
+      },
+      "target": {
+        "type": "arc",
+        "id": {
+          "document": "checkout.petrinet",
+          "statement": 3,
+          "part": 1
+        }
+      },
+      "value": {
+        "from": {
+          "type": "transition",
+          "name": "finish"
+        },
+        "to": {
+          "type": "place",
+          "name": "ended"
+        },
+        "color": {
+          "kind": "explicit",
+          "value": "outcome"
+        },
+        "mode": "produce"
+      }
+    },
+    {
+      "id": {
+        "source": "checkout.petrinet",
+        "statement": 4,
+        "part": 0
+      },
+      "kind": "arc.handle",
+      "ordinal": 6,
+      "span": {
+        "source": "checkout.petrinet",
+        "start": {
+          "byteOffset": 137,
+          "line": 6,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 169,
+          "line": 6,
+          "column": 33
+        }
+      },
+      "target": {
+        "type": "arcHandle",
+        "name": "unlock"
+      },
+      "value": {
+        "arcIds": [
+          {
+            "document": "checkout.petrinet",
+            "statement": 4,
+            "part": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": {
+        "source": "checkout.petrinet",
+        "statement": 4,
+        "part": 1
+      },
+      "kind": "arc.declare",
+      "ordinal": 7,
+      "span": {
+        "source": "checkout.petrinet",
+        "start": {
+          "byteOffset": 146,
+          "line": 6,
+          "column": 10
+        },
+        "end": {
+          "byteOffset": 169,
+          "line": 6,
+          "column": 33
+        }
+      },
+      "target": {
+        "type": "arc",
+        "id": {
+          "document": "checkout.petrinet",
+          "statement": 4,
+          "part": 1
+        }
+      },
+      "value": {
+        "from": {
+          "type": "transition",
+          "name": "finish"
+        },
+        "to": {
+          "type": "place",
+          "name": "free"
+        },
+        "color": {
+          "kind": "explicit",
+          "value": "lock"
+        },
+        "mode": "produce"
+      }
+    },
+    {
+      "id": {
+        "source": "checkout.petrinet",
+        "statement": 5,
+        "part": 0
+      },
+      "kind": "arc.declare",
+      "ordinal": 8,
+      "span": {
+        "source": "checkout.petrinet",
+        "start": {
+          "byteOffset": 170,
+          "line": 7,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 196,
+          "line": 7,
+          "column": 27
+        }
+      },
+      "target": {
+        "type": "arc",
+        "id": {
+          "document": "checkout.petrinet",
+          "statement": 5,
+          "part": 0
+        }
+      },
+      "value": {
+        "from": {
+          "type": "place",
+          "name": "ended"
+        },
+        "to": {
+          "type": "transition",
+          "name": "close"
+        },
+        "color": {
+          "kind": "explicit",
+          "value": "outcome"
+        },
+        "mode": "consume",
+        "transitionNameSpan": {
+          "source": "checkout.petrinet",
+          "start": {
+            "byteOffset": 190,
+            "line": 7,
+            "column": 21
+          },
+          "end": {
+            "byteOffset": 195,
+            "line": 7,
+            "column": 26
+          }
+        }
+      }
+    },
+    {
+      "id": {
+        "source": "checkout.petrinet",
+        "statement": 5,
+        "part": 1
+      },
+      "kind": "arc.declare",
+      "ordinal": 9,
+      "span": {
+        "source": "checkout.petrinet",
+        "start": {
+          "byteOffset": 189,
+          "line": 7,
+          "column": 20
+        },
+        "end": {
+          "byteOffset": 215,
+          "line": 7,
+          "column": 46
+        }
+      },
+      "target": {
+        "type": "arc",
+        "id": {
+          "document": "checkout.petrinet",
+          "statement": 5,
+          "part": 1
+        }
+      },
+      "value": {
+        "from": {
+          "type": "transition",
+          "name": "close"
+        },
+        "to": {
+          "type": "place",
+          "name": "done"
+        },
+        "color": {
+          "kind": "explicit",
+          "value": "checkout"
+        },
+        "mode": "produce"
+      }
+    },
+    {
+      "id": {
+        "source": "checkout.petrinet",
+        "statement": 6,
+        "part": 0
+      },
+      "kind": "arc.produce-data",
+      "ordinal": 10,
+      "span": {
+        "source": "checkout.petrinet",
+        "start": {
+          "byteOffset": 216,
+          "line": 8,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 243,
+          "line": 8,
+          "column": 28
+        }
+      },
+      "target": {
+        "type": "arcHandle",
+        "name": "unlock"
+      },
+      "value": {
+        "data": {
+          "type": "object",
+          "entries": [
+            {
+              "key": "id",
+              "value": {
+                "type": "string",
+                "value": "desk"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": {
+        "source": "checkout.petrinet",
+        "statement": 7,
+        "part": 0
+      },
+      "kind": "domain.values",
+      "ordinal": 11,
+      "span": {
+        "source": "checkout.petrinet",
+        "start": {
+          "byteOffset": 245,
+          "line": 10,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 287,
+          "line": 10,
+          "column": 43
+        }
+      },
+      "target": {
+        "type": "color",
+        "name": "outcome"
+      },
+      "value": {
+        "path": "outcome",
+        "values": [
+          {
+            "type": "string",
+            "value": "returned"
+          },
+          {
+            "type": "string",
+            "value": "failed"
+          }
+        ]
+      }
+    },
+    {
+      "id": {
+        "source": "checkout.petrinet",
+        "statement": 8,
+        "part": 0
+      },
+      "kind": "domain.values",
+      "ordinal": 12,
+      "span": {
+        "source": "checkout.petrinet",
+        "start": {
+          "byteOffset": 288,
+          "line": 11,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 325,
+          "line": 11,
+          "column": 38
+        }
+      },
+      "target": {
+        "type": "color",
+        "name": "outcome"
+      },
+      "value": {
+        "path": "checkout.tries",
+        "values": [
+          {
+            "type": "number",
+            "lexeme": "0"
+          },
+          {
+            "type": "number",
+            "lexeme": "1"
+          },
+          {
+            "type": "number",
+            "lexeme": "2.5"
+          }
+        ]
+      }
+    },
+    {
+      "id": {
+        "source": "checkout.petrinet",
+        "statement": 9,
+        "part": 0
+      },
+      "kind": "domain.values",
+      "ordinal": 13,
+      "span": {
+        "source": "checkout.petrinet",
+        "start": {
+          "byteOffset": 326,
+          "line": 12,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 359,
+          "line": 12,
+          "column": 34
+        }
+      },
+      "target": {
+        "type": "color",
+        "name": "checkout"
+      },
+      "value": {
+        "path": "urgent",
+        "values": [
+          {
+            "type": "boolean",
+            "value": true
+          },
+          {
+            "type": "boolean",
+            "value": false
+          }
+        ]
+      }
+    },
+    {
+      "id": {
+        "source": "checkout.petrinet",
+        "statement": 10,
+        "part": 0
+      },
+      "kind": "proof.final",
+      "ordinal": 14,
+      "span": {
+        "source": "checkout.petrinet",
+        "start": {
+          "byteOffset": 366,
+          "line": 13,
+          "column": 7
+        },
+        "end": {
+          "byteOffset": 372,
+          "line": 13,
+          "column": 13
+        }
+      },
+      "target": {
+        "type": "place",
+        "name": "done"
+      },
+      "value": {}
+    },
+    {
+      "id": {
+        "source": "checkout.petrinet",
+        "statement": 10,
+        "part": 1
+      },
+      "kind": "proof.final",
+      "ordinal": 15,
+      "span": {
+        "source": "checkout.petrinet",
+        "start": {
+          "byteOffset": 374,
+          "line": 13,
+          "column": 15
+        },
+        "end": {
+          "byteOffset": 393,
+          "line": 13,
+          "column": 34
+        }
+      },
+      "target": {
+        "type": "place",
+        "name": "sending"
+      },
+      "value": {
+        "with": [
+          "ended"
+        ]
+      }
+    },
+    {
+      "id": {
+        "source": "checkout.petrinet",
+        "statement": 11,
+        "part": 0
+      },
+      "kind": "proof.invariant",
+      "ordinal": 16,
+      "span": {
+        "source": "checkout.petrinet",
+        "start": {
+          "byteOffset": 394,
+          "line": 14,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 443,
+          "line": 14,
+          "column": 50
+        }
+      },
+      "target": {
+        "type": "document",
+        "kind": "net"
+      },
+      "value": {
+        "terms": [
+          {
+            "place": "free",
+            "weight": 1
+          },
+          {
+            "place": "sending",
+            "weight": 1
+          },
+          {
+            "place": "ended",
+            "weight": 1
+          }
+        ],
+        "name": "lock",
+        "constant": 1
+      }
+    },
+    {
+      "id": {
+        "source": "checkout.petrinet",
+        "statement": 12,
+        "part": 0
+      },
+      "kind": "proof.invariant",
+      "ordinal": 17,
+      "span": {
+        "source": "checkout.petrinet",
+        "start": {
+          "byteOffset": 444,
+          "line": 15,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 476,
+          "line": 15,
+          "column": 33
+        }
+      },
+      "target": {
+        "type": "document",
+        "kind": "net"
+      },
+      "value": {
+        "terms": [
+          {
+            "place": "pending",
+            "weight": 2
+          },
+          {
+            "place": "done",
+            "weight": 1
+          }
+        ]
+      }
+    }
+  ]
+}

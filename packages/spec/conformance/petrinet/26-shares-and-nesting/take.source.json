@@ -1,0 +1,4 @@
+{
+  "sourceId": "take.petrinet",
+  "text": "net take \"Start a job when the lock is free\"\n(todo) -job-> [take] -job-> (busy)\n@lock_in: (lock) -key-> [take]\n(lock) annotation fusion true\n(busy) port output job\n"
+}

@@ -1,0 +1,64 @@
+{
+  "contributions": [
+    {
+      "id": {
+        "part": 0,
+        "source": "example.petrinet",
+        "statement": 0
+      },
+      "kind": "place.declare",
+      "ordinal": 0,
+      "span": {
+        "end": {
+          "byteOffset": 3,
+          "column": 4,
+          "line": 1
+        },
+        "source": "example.petrinet",
+        "start": {
+          "byteOffset": 0,
+          "column": 1,
+          "line": 1
+        }
+      },
+      "target": {
+        "name": "slot",
+        "type": "place"
+      },
+      "value": {}
+    },
+    {
+      "id": {
+        "part": 0,
+        "source": "example.petrinet",
+        "statement": 1
+      },
+      "kind": "place.declare",
+      "ordinal": 0,
+      "span": {
+        "end": {
+          "byteOffset": 3,
+          "column": 4,
+          "line": 1
+        },
+        "source": "example.petrinet",
+        "start": {
+          "byteOffset": 0,
+          "column": 1,
+          "line": 1
+        }
+      },
+      "target": {
+        "name": "box",
+        "type": "place"
+      },
+      "value": {}
+    }
+  ],
+  "document": {
+    "id": "example.petrinet"
+  },
+  "documentKind": "net",
+  "format": "velocitron.petrinet/contribution-ir",
+  "version": 1
+}

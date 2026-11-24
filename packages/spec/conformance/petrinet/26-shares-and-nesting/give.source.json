@@ -1,0 +1,4 @@
+{
+  "sourceId": "give.petrinet",
+  "text": "net give \"Work the job, end it and give the lock back\"\n(busy) -job-> [work] -job-> (worked)\n(worked) -job-> [give] -job-> (done)\n@unlock: [give] -key-> (lock)\n@unlock data {}\n(busy) port input job\n(worked) port input job\n(done) port output job\n"
+}

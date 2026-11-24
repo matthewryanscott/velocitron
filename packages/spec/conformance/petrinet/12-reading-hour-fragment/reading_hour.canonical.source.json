@@ -1,0 +1,4 @@
+{
+  "sourceId": "reading_hour.petrinet",
+  "text": "composition reading_hour\n\nuse \"reading_cadence.petrinet\" as cadence\nuse \"reading_pick.petrinet\" as curate\nuse \"reading_voice.petrinet\" as speaks\nwire cadence.(refresh_due_out) -> curate.(refresh_due_in)\nwire curate.(speak_request) -> speaks.(request_in)\n"
+}

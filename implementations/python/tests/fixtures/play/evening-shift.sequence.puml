@@ -1,0 +1,59 @@
+@startuml
+skinparam backgroundColor #FEFEFE
+skinparam defaultFontColor #222222
+skinparam shadowing false
+skinparam ArrowColor #555555
+skinparam ArrowFontColor #222222
+skinparam sequenceMessageAlign left
+skinparam SequenceLifeLineBorderColor #999999
+skinparam SequenceLifeLineBackgroundColor #FFFFFF
+skinparam ParticipantBorderColor #5B7DB1
+skinparam ParticipantBackgroundColor #EEF3FA
+skinparam ParticipantFontColor #222222
+skinparam ActorBorderColor #8A6D1F
+skinparam ActorBackgroundColor #FFF6E0
+skinparam ActorFontColor #222222
+skinparam DatabaseBorderColor #B08A2E
+skinparam DatabaseBackgroundColor #FFF6E0
+skinparam DatabaseFontColor #222222
+skinparam NoteBorderColor #C9B458
+skinparam NoteBackgroundColor #FFFBEA
+skinparam NoteFontColor #222222
+skinparam BoxBorderColor #BBBBBB
+skinparam BoxFontColor #444444
+skinparam SequenceGroupBorderColor #888888
+skinparam SequenceGroupBackgroundColor #F0F0F0
+skinparam SequenceGroupHeaderFontColor #222222
+skinparam SequenceGroupFontColor #222222
+skinparam SequenceDividerBorderColor #888888
+skinparam SequenceDividerBackgroundColor #EEEEEE
+skinparam SequenceDividerFontColor #222222
+skinparam SequenceDelayFontColor #555555
+skinparam TitleFontColor #222222
+hide footbox
+title Evening shift
+actor "Clerk" as clerk
+box "Night crew" #F4F4F4
+participant "Runner" as runner
+participant "Desk" as desk
+end box
+database "Desk sign" as desk_sign
+participant "annex" as annex
+== Close ==
+clerk -> desk_sign : Close the desk
+desk_sign --> desk : desk shut
+note right of desk : Close the desk
+group First hold
+desk -> runner : Hold filed
+activate runner
+desk_sign --> runner : desk shut
+runner -> annex : Take the hold
+deactivate runner
+...1 hour 30 minutes later...
+end
+== Check and reopen ==
+annex --> clerk : a hold waiting on the clerk
+note right of clerk : Check the hold
+clerk -> desk_sign : Open the desk
+desk_sign --> desk : desk open
+@enduml

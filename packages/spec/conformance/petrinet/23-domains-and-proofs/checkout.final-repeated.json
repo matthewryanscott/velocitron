@@ -1,0 +1,26 @@
+{
+  "diagnostic": {
+    "code": "PN202",
+    "column": 15,
+    "file": "checkout.final-repeated.petrinet",
+    "line": 10,
+    "message": "final names (done) more than once",
+    "span": {
+      "source": "checkout.final-repeated.petrinet",
+      "start": {
+        "byteOffset": 259,
+        "line": 10,
+        "column": 15
+      },
+      "end": {
+        "byteOffset": 265,
+        "line": 10,
+        "column": 21
+      }
+    }
+  },
+  "source": {
+    "sourceId": "checkout.final-repeated.petrinet",
+    "text": "net checkout\n\n(pending) -checkout-> [send] -checkout-> (sending)\n(free) -lock-> [send]\n(sending) -checkout-> [finish] -outcome-> (ended)\n@unlock: [finish] -lock-> (free)\n(ended) -outcome-> [close] -checkout-> (done)\n@unlock data {\"id\": \"desk\"}\n\nfinal (done), (done)\n"
+  }
+}

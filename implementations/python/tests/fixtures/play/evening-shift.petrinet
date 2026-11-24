@@ -1,0 +1,52 @@
+net evening_shift "Close the desk for the evening, hand one hold to a runner, check it after an hour, and open again"
+
+person Clerk
+system Desk
+system Runner
+net actor Desk
+
+@shut_in: (open_sign) -sign-> [close_desk]
+@shut_out: [close_desk] -sign-> (open_sign)
+(desk_open) -token-> [desk_closes] -token-> (desk_closed)
+@closes_when_shut: (open_sign) -sign->? [desk_closes]
+(request) -hold-> [runner_takes] -hold-> (ready)
+@takes_when_shut: (open_sign) -sign->? [runner_takes]
+(ready) -hold->? [check] -report-> (checked)
+(clock) -tick->? [check]
+@open_in: (open_sign) -sign-> [open_desk]
+@open_out: [open_desk] -sign-> (open_sign)
+(checked) -report-> [open_desk]
+(desk_closed) -token-> [desk_opens] -token-> (desk_open)
+@opens_when_open: (open_sign) -sign->? [desk_opens]
+
+[close_desk] actor Clerk
+[runner_takes] actor Runner
+[check] actor Clerk
+[open_desk] actor Clerk
+(request) actor Desk
+(open_sign) actor Clerk
+
+record "Desk sign"
+(open_sign) lives in "Desk sign"
+(open_sign) reads as cel "'desk ' + token.state"
+(ready) lives in cel "token.branch"
+(ready) description "a hold waiting on the clerk"
+
+[close_desk] description "Close the desk"
+[desk_opens] description "Open the desk again"
+
+@shut_in predicate cel "state == 'open'"
+@shut_out data {"state": "shut"}
+@closes_when_shut predicate cel "state == 'shut'"
+@takes_when_shut predicate cel "state == 'shut'"
+@open_in predicate cel "state == 'shut'"
+@open_out data {"state": "open"}
+@opens_when_open predicate cel "state == 'open'"
+
+[check] timer clock (clock) cel "clock.now >= 3600"
+
+$open: sign {"state": "open"}
+$start: tick {"now": 0}
+marking initial (open_sign) <- $open
+marking initial (desk_open) <- 1
+marking initial (clock) <- $start

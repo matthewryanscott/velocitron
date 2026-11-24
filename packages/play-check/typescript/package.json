@@ -1,0 +1,52 @@
+{
+  "author": "Matthew R. Scott",
+  "bugs": {
+    "url": "https://github.com/circuitmeridian/velocitron/issues"
+  },
+  "dependencies": {
+    "@velocitron/cel": "workspace:*",
+    "@velocitron/dsl": "workspace:*",
+    "@velocitron/engine": "workspace:*",
+    "@velocitron/merge": "workspace:*",
+    "@velocitron/petrinet": "workspace:*",
+    "@velocitron/play": "workspace:*"
+  },
+  "description": "Checks a .play document against a net and steps a walkthrough. Does not parse the grammar, store a journal, or own the CLI.",
+  "devDependencies": {
+    "@types/node": "24.10.1",
+    "typescript": "7.0.2"
+  },
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
+  "homepage": "https://github.com/circuitmeridian/velocitron",
+  "license": "MIT",
+  "name": "@velocitron/play-check",
+  "private": true,
+  "repository": {
+    "directory": "packages/play-check/typescript",
+    "type": "git",
+    "url": "git+https://github.com/circuitmeridian/velocitron.git"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "prepare": "tsc -p tsconfig.build.json",
+    "test": "tsc -p tsconfig.build.json && node --test test/*.test.js",
+    "typecheck": "tsc -p tsconfig.build.json && tsc -p tsconfig.json --noEmit"
+  },
+  "sideEffects": false,
+  "type": "module",
+  "version": "0.1.0"
+}

@@ -1,0 +1,14 @@
+// A catalog poll: no branch takes a worn copy that also has notes.
+net polled "Act on a catalog poll"
+
+(returns) -copy-> [poll] -copy-> (polled)
+@ok_in: (polled) -copy-> [succeeded]
+[succeeded] -copy-> (processed)
+@failed_in: (polled) -copy-> [failed]
+[failed] -copy-> (rejected)
+@worn_in: (polled) -copy-> [worn]
+[worn] -copy-> (resent)
+
+@ok_in predicate cel "state == 'SUCCEEDED' && size(notes) == 0 && double(wearShare) < 0.01"
+@failed_in predicate cel "state == 'FAILED' || (state == 'SUCCEEDED' && size(notes) > 0 && double(wearShare) < 0.01)"
+@worn_in predicate cel "state == 'SUCCEEDED' && size(notes) == 0 && double(wearShare) >= 0.01"

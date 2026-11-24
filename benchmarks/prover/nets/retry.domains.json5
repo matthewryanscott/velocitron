@@ -1,0 +1,11 @@
+// The clock shows the start and one hour later, which is when a retry
+// can fire. A job is either already ok or not.
+{
+  instance: "job",
+  domains: {
+    "tick.now": [0, 3600],
+    "job.ok": [true, false],
+    "job.tries": [0, 1, 2, 3],
+    "job.since": [0],
+  },
+}

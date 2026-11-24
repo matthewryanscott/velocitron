@@ -1,0 +1,1013 @@
+{
+  "examples/capability-ladder/01-coin-deposit/coin-deposit.petrinet": {
+    "edges": 1,
+    "facts": {
+      "invariant: place invariant 1": "proved",
+      "soundness: no dead transitions": "proved",
+      "soundness: option to complete": "proved",
+      "soundness: proper completion": "proved"
+    },
+    "report": "134b4fad7d19ca043046d91e7655e67aaecce89ccbba13eeff25a371d99622c4",
+    "states": 2
+  },
+  "examples/capability-ladder/02-coin-choice/coin-choice-order-free.petrinet": {
+    "edges": 2,
+    "facts": {
+      "choice: choice at (coin_slot): [return_coin] | [accept_coin]": "refuted",
+      "soundness: no dead transitions": "proved",
+      "soundness: option to complete": "refuted",
+      "soundness: proper completion": "proved"
+    },
+    "report": "0e0fa1d0bce0603437396b6cfb7aea67ece8493ec60816cd9bed6a80ca079ed0",
+    "states": 3
+  },
+  "examples/capability-ladder/02-coin-choice/coin-choice.petrinet": {
+    "edges": 2,
+    "facts": {
+      "choice: choice at (coin_slot): [accept_coin] | [return_coin]": "refuted",
+      "soundness: no dead transitions": "proved",
+      "soundness: option to complete": "refuted",
+      "soundness: proper completion": "proved"
+    },
+    "report": "f5eb2feacf5e8d1f67dcc14954b3f8eadf5309117b1d42281468081719a2ca46",
+    "states": 3
+  },
+  "examples/capability-ladder/03-cookie-vending/cookie-vending.petrinet": {
+    "edges": 2,
+    "facts": {
+      "choice: choice at (coin_slot): [accept_coin] | [return_coin]": "refuted",
+      "soundness: no dead transitions": "refuted",
+      "soundness: option to complete": "refuted",
+      "soundness: proper completion": "refuted"
+    },
+    "report": "62c945b2b25567c8810b78304fdb171b2df2c8b42ede01d90dea21d27be3cd22",
+    "states": 3
+  },
+  "examples/capability-ladder/04-source-router/source-router-predicate-handlers.petrinet": {
+    "edges": 0,
+    "facts": {
+      "choice: choice at (sample_in): [route_co2mon] | [route_weather]": "unknown",
+      "invariant: place invariant 1": "proved",
+      "soundness: no dead transitions": "unknown",
+      "soundness: option to complete": "unknown",
+      "soundness: proper completion": "unknown"
+    },
+    "report": "51a2a33e48f8b3a898e635ab1743939a98f53decf980ede0dc254d8e709c4924",
+    "states": 1
+  },
+  "examples/capability-ladder/04-source-router/source-router.petrinet": {
+    "edges": 1,
+    "facts": {
+      "choice: choice at (sample_in): [route_co2mon] | [route_weather]": "refuted",
+      "invariant: place invariant 1": "proved",
+      "soundness: no dead transitions": "refuted",
+      "soundness: option to complete": "proved",
+      "soundness: proper completion": "proved"
+    },
+    "report": "45227d9d69ca29fab3feaa7d29a1d5cf26c000d1b661586b8eefb0c03928a1c8",
+    "states": 2
+  },
+  "examples/capability-ladder/05-crossing-window/crossing-window.petrinet": {
+    "edges": 13,
+    "facts": {
+      "invariant: place invariant 1": "proved",
+      "soundness: no dead transitions": "proved",
+      "soundness: option to complete": "proved",
+      "soundness: proper completion": "proved"
+    },
+    "report": "9d6b80300cc0f0152d60eee305d021a74d8a9535e6f7f23c3109cf841257a36e",
+    "states": 5
+  },
+  "examples/capability-ladder/06-batch-gate/batch-gate.petrinet": {
+    "edges": 0,
+    "facts": {
+      "invariant: place invariant 1": "proved",
+      "soundness: no dead transitions": "refuted",
+      "soundness: option to complete": "proved",
+      "soundness: proper completion": "proved"
+    },
+    "report": "ad9522ef41f8e9fd415eac9d9c323cb488da65c532c96277fc16f3eb542ef378",
+    "states": 1
+  },
+  "examples/capability-ladder/07-per-key-suppression/per-key-suppression.petrinet": {
+    "edges": 12,
+    "facts": {
+      "invariant: place invariant 1": "proved",
+      "soundness: no dead transitions": "proved",
+      "soundness: option to complete": "proved",
+      "soundness: proper completion": "proved"
+    },
+    "report": "32c38ecf500c7daf28256c55fed4f4ff8aab59a66c77b0db9a32de5794339ce0",
+    "states": 13
+  },
+  "examples/capability-ladder/08-guarded-curation-choice/guarded-curation-choice.petrinet": {
+    "edges": 0,
+    "facts": {
+      "choice: choice at (curation_token): [speak_gate_speak] | [speak_gate_skip]": "unknown",
+      "invariant: place invariant 1": "proved",
+      "soundness: no dead transitions": "unknown",
+      "soundness: option to complete": "unknown",
+      "soundness: proper completion": "unknown"
+    },
+    "report": "51aea0e3ab07fb593f5ca7d813c9c300d8df86af27e307f04e6a615161f4640e",
+    "states": 1
+  },
+  "examples/capability-ladder/09-cadence-tick/cadence-tick.petrinet": {
+    "edges": 2,
+    "facts": {
+      "choice: choice at (tick_latch): [on_tick] | [on_alert]": "unknown",
+      "soundness: no dead transitions": "unknown",
+      "soundness: option to complete": "unknown",
+      "soundness: proper completion": "unknown"
+    },
+    "report": "1f79ad389a2b63e6bc0652b48baa0af9f411cfe2c40c20dd4f24ad7a370dac41",
+    "states": 3
+  },
+  "examples/capability-ladder/10-wired-pulse/pulse_sink.petrinet": {
+    "edges": 2,
+    "facts": {
+      "invariant: place invariant 1": "proved",
+      "soundness: no dead transitions": "proved",
+      "soundness: option to complete": "proved",
+      "soundness: proper completion": "proved"
+    },
+    "report": "88332ec7d49d783ee7d455798d0342f39588e23ff403b816f1cd1646d3a785ba",
+    "states": 3
+  },
+  "examples/capability-ladder/10-wired-pulse/pulse_source.petrinet": {
+    "edges": 1,
+    "facts": {
+      "invariant: place invariant 1": "proved",
+      "soundness: no dead transitions": "proved",
+      "soundness: option to complete": "proved",
+      "soundness: proper completion": "proved"
+    },
+    "report": "010782cb6d075df6d05f03daf13f13c95293cc6d082cf7a796dfc83a711e45b8",
+    "states": 2
+  },
+  "examples/capability-ladder/10-wired-pulse/wired_pulse.petrinet": {
+    "edges": 10,
+    "facts": {
+      "invariant: place invariant 1": "proved",
+      "soundness: no dead transitions": "proved",
+      "soundness: option to complete": "proved",
+      "soundness: proper completion": "refuted"
+    },
+    "report": "4dff2953348dd298522c46e64da7e75bcaacf48dec1a9899563f9b30f5e77349",
+    "states": 8
+  },
+  "examples/capability-ladder/11-speaks-window/speaks_window.petrinet": {
+    "edges": 7,
+    "facts": {
+      "invariant: place invariant 1": "proved",
+      "invariant: place invariant 2": "proved",
+      "soundness: no dead transitions": "proved",
+      "soundness: option to complete": "refuted",
+      "soundness: proper completion": "proved"
+    },
+    "report": "4348afffed7fa543b84b7d2c473647ab9864f7e091ea6d532883989e16b3912d",
+    "states": 6
+  },
+  "examples/capability-ladder/12-reading-hour-fragment/reading_cadence.petrinet": {
+    "edges": 0,
+    "facts": {
+      "soundness: no dead transitions": "unknown",
+      "soundness: option to complete": "unknown",
+      "soundness: proper completion": "unknown"
+    },
+    "report": "4837c478c3444dd45636387ffbdbae0e08c70e071f101b6f62c37de5cae190ab",
+    "states": 1
+  },
+  "examples/capability-ladder/12-reading-hour-fragment/reading_hour.petrinet": {
+    "edges": 0,
+    "facts": {
+      "soundness: no dead transitions": "unknown",
+      "soundness: option to complete": "unknown",
+      "soundness: proper completion": "unknown"
+    },
+    "report": "bf9c11de7394ef8ab67f9faee104c7163e488634b7555fd074cab6ec805e1f3b",
+    "states": 1
+  },
+  "examples/capability-ladder/12-reading-hour-fragment/reading_pick.petrinet": {
+    "edges": 2,
+    "facts": {
+      "invariant: place invariant 1": "proved",
+      "soundness: no dead transitions": "proved",
+      "soundness: option to complete": "proved",
+      "soundness: proper completion": "proved"
+    },
+    "report": "893497ec53d174fd0a6ddc5d9d9c4e457494ed49d032b5b63b201a2b8e77dd29",
+    "states": 3
+  },
+  "examples/capability-ladder/12-reading-hour-fragment/reading_voice.petrinet": {
+    "edges": 3,
+    "facts": {
+      "invariant: place invariant 1": "proved",
+      "invariant: place invariant 2": "proved",
+      "soundness: no dead transitions": "proved",
+      "soundness: option to complete": "proved",
+      "soundness: proper completion": "proved"
+    },
+    "report": "383bb745d8bc244a3c2795a86a6764ef83e2298caa4a6b15c174595dbea3fd45",
+    "states": 4
+  },
+  "examples/capability-ladder/13-museum-loan/museum-loan.petrinet": {
+    "edges": 877,
+    "facts": {
+      "choice: choice at (active_reservations): [confirm_reservation] | [expire_reservation]": "unknown",
+      "choice: choice at (curation_decisions): [approve_loan] | [decline_loan]": "proved",
+      "invariant: place invariant 1": "proved",
+      "invariant: place invariant 2": "proved",
+      "soundness: no dead transitions": "unknown",
+      "soundness: option to complete": "unknown",
+      "soundness: proper completion": "unknown"
+    },
+    "report": "577549b414ccb13ce875a6ddd57b8a1cb9c0b8b3ae46034841bc84c99781e576",
+    "states": 302
+  },
+  "implementations/python/tests/fixtures/codegen/library_holds/branch-policy-as-is.petrinet": {
+    "edges": 1315,
+    "facts": {
+      "choice: choice at (slip): [post_slip_again] | [quiet_for_a_day]": "refuted",
+      "invariant: place invariant 1": "proved",
+      "soundness: no dead transitions": "unknown",
+      "soundness: option to complete": "unknown",
+      "soundness: proper completion": "unknown"
+    },
+    "report": "7891419420223acd1409f41c2ea625ffa64c069f4c8f9c9fc4751818acbec2dc",
+    "states": 301
+  },
+  "implementations/python/tests/fixtures/codegen/library_holds/branch-policy.petrinet": {
+    "edges": 1167,
+    "facts": {
+      "choice: choice at (slip): [post_slip_again] | [quiet_for_a_day]": "refuted",
+      "invariant: place invariant 1": "proved",
+      "soundness: no dead transitions": "proved",
+      "soundness: option to complete": "unknown",
+      "soundness: proper completion": "refuted"
+    },
+    "report": "254b53c4cd8cbff22f805ed79eb96dbb73973c47458019ba59e611169a10b79b",
+    "states": 304
+  },
+  "implementations/python/tests/fixtures/codegen/library_holds/desk/checkout.petrinet": {
+    "edges": 103,
+    "facts": {
+      "choice: choice at (loan_ended): [stamp_due] | [notify] | [refuse_damage] | [cancel_edition] | [record_other]": "proved",
+      "invariant: place invariant 1": "proved",
+      "invariant: place invariant 2": "proved",
+      "invariant: place invariant 3": "proved",
+      "soundness: no dead transitions": "proved",
+      "soundness: option to complete": "proved",
+      "soundness: proper completion": "proved"
+    },
+    "report": "8740e38cc3dc43fa63e4a189f9e74994b01dd23ee89fb5ce9e9cb84fb937a763",
+    "states": 47
+  },
+  "implementations/python/tests/fixtures/codegen/library_holds/desk/edition.petrinet": {
+    "edges": 50,
+    "facts": {
+      "invariant: place invariant 1": "proved",
+      "invariant: place invariant 2": "proved",
+      "soundness: no dead transitions": "proved",
+      "soundness: option to complete": "refuted",
+      "soundness: proper completion": "proved"
+    },
+    "report": "f5ee2425cd042008391f668a12e063d91693015843125e09448eba0b1532c7ea",
+    "states": 31
+  },
+  "implementations/python/tests/fixtures/codegen/library_holds/desk/notice.petrinet": {
+    "edges": 23,
+    "facts": {
+      "choice: choice at (due): [remind] | [fine]": "proved",
+      "invariant: place invariant 1": "proved",
+      "invariant: place invariant 2": "proved",
+      "invariant: place invariant 3": "proved",
+      "soundness: no dead transitions": "proved",
+      "soundness: option to complete": "proved",
+      "soundness: proper completion": "proved"
+    },
+    "report": "87605955db98bb05f7d39a2c484a7b535bc475655a605d040da206c0c5be9c9e",
+    "states": 18
+  },
+  "implementations/python/tests/fixtures/codegen/library_holds/desk/request.petrinet": {
+    "edges": 6,
+    "facts": {
+      "choice: choice at (wishes): [file_hold] | [decline]": "proved",
+      "invariant: place invariant 1": "proved",
+      "soundness: no dead transitions": "proved",
+      "soundness: option to complete": "proved",
+      "soundness: proper completion": "proved"
+    },
+    "report": "0e0e3f939f23575c28b14a447c4e19984d599048de9e8986991c777c193ce0f4",
+    "states": 6
+  },
+  "implementations/python/tests/fixtures/codegen/library_holds/desk/shelf.petrinet": {
+    "edges": 637,
+    "facts": {
+      "choice: choice at (queued): [lend] | [recall] | [wait_return]": "refuted",
+      "choice: choice at (waiting_return): [clear_wait] | [return_arrived]": "refuted",
+      "invariant: place invariant 1": "proved",
+      "invariant: place invariant 2": "proved",
+      "soundness: no dead transitions": "proved",
+      "soundness: option to complete": "unknown",
+      "soundness: proper completion": "refuted"
+    },
+    "report": "5c49c25dce4636d87d67ae268e361ba44aa7e600d96fa88d3ec4bd6b958be08d",
+    "states": 300
+  },
+  "implementations/python/tests/fixtures/codegen/library_holds/hold-lifecycle.petrinet": {
+    "edges": 684,
+    "facts": {
+      "choice: choice at (checkout.due): [notice.remind] | [notice.fine] | [edition.cancel_due]": "proved",
+      "choice: choice at (checkout.loan_ended): [checkout.stamp_due] | [checkout.notify] | [checkout.refuse_damage] | [checkout.cancel_edition] | [checkout.record_other]": "proved",
+      "choice: choice at (request.queued): [shelf.lend] | [shelf.recall] | [shelf.wait_return] | [edition.cancel_queued]": "refuted",
+      "choice: choice at (request.wishes): [request.file_hold] | [request.decline]": "proved",
+      "choice: choice at (shelf.waiting_return): [shelf.clear_wait] | [shelf.return_arrived]": "refuted",
+      "invariant: place invariant 1": "proved",
+      "invariant: place invariant 2": "proved",
+      "invariant: place invariant 3": "proved",
+      "invariant: place invariant 4": "proved",
+      "soundness: no dead transitions": "proved",
+      "soundness: option to complete": "unknown",
+      "soundness: proper completion": "refuted"
+    },
+    "report": "c796a359850b77e73d4fe86446ac12689a86d01db78076c1b2e0c23f3bca7285",
+    "states": 300
+  },
+  "implementations/python/tests/fixtures/codegen/library_holds/library-holds.petrinet": {
+    "edges": 301,
+    "facts": {
+      "choice: choice at (catalog.polled): [catalog.shelved_copy] | [catalog.missing_copy] | [catalog.still_moving] | [catalog.note_delay]": "proved",
+      "choice: choice at (lifecycle.checkout.due): [lifecycle.notice.remind] | [lifecycle.notice.fine] | [lifecycle.edition.cancel_due]": "proved",
+      "choice: choice at (lifecycle.request.queued): [lifecycle.shelf.lend] | [lifecycle.shelf.recall] | [lifecycle.shelf.wait_return] | [lifecycle.edition.cancel_queued]": "refuted",
+      "choice: choice at (lifecycle.request.wishes): [lifecycle.request.file_hold] | [lifecycle.request.decline]": "proved",
+      "choice: choice at (lifecycle.shelf.waiting_return): [lifecycle.shelf.clear_wait] | [lifecycle.shelf.return_arrived]": "refuted",
+      "choice: choice at (loan.cleared): [loan.pack] | [loan.crate_missing]": "refuted",
+      "choice: choice at (loan.cleared_flag): [loan.pack] | [loan.crate_missing]": "refuted",
+      "choice: choice at (loan.dispatch_result): [loan.shipped] | [loan.reroute]": "proved",
+      "choice: choice at (loan.loan_ended): [lifecycle.checkout.stamp_due] | [lifecycle.checkout.notify] | [lifecycle.checkout.refuse_damage] | [lifecycle.checkout.cancel_edition] | [lifecycle.checkout.record_other]": "proved",
+      "choice: choice at (loan.pack_result): [loan.packed] | [loan.pack_failed]": "proved",
+      "choice: choice at (loan.priced): [loan.fill_form] | [loan.form_on_file] | [loan.form_rejected]": "proved",
+      "choice: choice at (loan.quote_result): [loan.quoted] | [loan.quote_refused]": "proved",
+      "invariant: place invariant 1": "proved",
+      "invariant: place invariant 2": "proved",
+      "invariant: place invariant 3": "proved",
+      "refinement: refinement lifecycle.checkout.[borrow] by loan": "refuted",
+      "soundness: no dead transitions": "unknown",
+      "soundness: option to complete": "unknown",
+      "soundness: proper completion": "unknown"
+    },
+    "report": "aaabd9010618857b7693c6c041f9ec1dae4868e1da0a173be422dc82524d9eff",
+    "states": 302
+  },
+  "implementations/python/tests/fixtures/codegen/library_holds/partner-loan.petrinet": {
+    "edges": 679,
+    "facts": {
+      "choice: choice at (cleared): [pack] | [crate_missing]": "refuted",
+      "choice: choice at (cleared_flag): [pack] | [crate_missing]": "refuted",
+      "choice: choice at (dispatch_result): [shipped] | [reroute]": "proved",
+      "choice: choice at (pack_result): [packed] | [pack_failed]": "proved",
+      "choice: choice at (priced): [fill_form] | [form_on_file] | [form_rejected]": "proved",
+      "choice: choice at (quote_result): [quoted] | [quote_refused]": "proved",
+      "invariant: place invariant 1": "proved",
+      "soundness: no dead transitions": "proved",
+      "soundness: option to complete": "proved",
+      "soundness: proper completion": "refuted"
+    },
+    "report": "8d65b28ce68f63946a9c76715ae162d150d6d1d803be1346f1204fc19a5134f2",
+    "states": 270
+  },
+  "implementations/python/tests/fixtures/codegen/library_holds/union-catalog.petrinet": {
+    "edges": 2,
+    "facts": {
+      "choice: choice at (polled): [shelved_copy] | [missing_copy] | [still_moving] | [note_delay]": "proved",
+      "invariant: place invariant 1": "proved",
+      "invariant: place invariant 2": "proved",
+      "invariant: place invariant 3": "proved",
+      "invariant: place invariant 4": "proved",
+      "soundness: no dead transitions": "unknown",
+      "soundness: option to complete": "unknown",
+      "soundness: proper completion": "unknown"
+    },
+    "report": "f07bf42465391ea9ce3bd97d8cccc009474b88db4a4025aaab6fae48ac8fab6c",
+    "states": 2
+  },
+  "implementations/python/tests/fixtures/codegen/small_guarded.petrinet": {
+    "edges": 1,
+    "facts": {
+      "invariant: place invariant 1": "proved",
+      "soundness: no dead transitions": "unknown",
+      "soundness: option to complete": "unknown",
+      "soundness: proper completion": "unknown"
+    },
+    "report": "8626be7b702d56127b80e2cf17dc0023e7e6f970b24eef4d401d1257496bb70d",
+    "states": 2
+  },
+  "implementations/python/tests/fixtures/lock/flat.petrinet": {
+    "edges": 5,
+    "facts": {
+      "invariant: place invariant 1": "proved",
+      "invariant: place invariant 2": "proved",
+      "refinement: refinement give.[work] by worker": "proved",
+      "soundness: no dead transitions": "proved",
+      "soundness: option to complete": "proved",
+      "soundness: proper completion": "proved"
+    },
+    "report": "ee55834cfd48af4f6d7f76963a9ea59531efae0c556c5bed1ba88e93865cb150",
+    "states": 6
+  },
+  "implementations/python/tests/fixtures/lock/give.petrinet": {
+    "edges": 4,
+    "facts": {
+      "invariant: place invariant 1": "proved",
+      "invariant: place invariant 2": "proved",
+      "soundness: no dead transitions": "proved",
+      "soundness: option to complete": "proved",
+      "soundness: proper completion": "proved"
+    },
+    "report": "0cbbe5fe91de2732feb5b3761a0dafc32f0bd90e0a16666908865320a31675e8",
+    "states": 4
+  },
+  "implementations/python/tests/fixtures/lock/nested.petrinet": {
+    "edges": 5,
+    "facts": {
+      "invariant: place invariant 1": "proved",
+      "invariant: place invariant 2": "proved",
+      "refinement: refinement pair.give.[work] by worker": "proved",
+      "soundness: no dead transitions": "proved",
+      "soundness: option to complete": "proved",
+      "soundness: proper completion": "proved"
+    },
+    "report": "21598654f0421b074fa0c14284f0f0f0968f06c5ea47e04e4e3d0ab52e94828e",
+    "states": 6
+  },
+  "implementations/python/tests/fixtures/lock/pair.petrinet": {
+    "edges": 6,
+    "facts": {
+      "invariant: place invariant 1": "proved",
+      "invariant: place invariant 2": "proved",
+      "soundness: no dead transitions": "proved",
+      "soundness: option to complete": "proved",
+      "soundness: proper completion": "proved"
+    },
+    "report": "4fda960a5ce34df801c9a1fc89af54ddcd97f72601d958d4950c1bff47723af8",
+    "states": 6
+  },
+  "implementations/python/tests/fixtures/lock/single.petrinet": {
+    "edges": 5,
+    "facts": {
+      "invariant: place invariant 1": "proved",
+      "invariant: place invariant 2": "proved",
+      "soundness: no dead transitions": "proved",
+      "soundness: option to complete": "proved",
+      "soundness: proper completion": "proved"
+    },
+    "report": "0d4cb573eb62ba6896203d29d1b3ae9a972aa95206db8bd34de3779438bfa73e",
+    "states": 6
+  },
+  "implementations/python/tests/fixtures/lock/take.petrinet": {
+    "edges": 3,
+    "facts": {
+      "invariant: place invariant 1": "proved",
+      "invariant: place invariant 2": "proved",
+      "soundness: no dead transitions": "proved",
+      "soundness: option to complete": "proved",
+      "soundness: proper completion": "proved"
+    },
+    "report": "c9d8abb24a6f888c4256fe58794127cb7ba68d62a84b95ccbf169efced65d141",
+    "states": 4
+  },
+  "implementations/python/tests/fixtures/lock/worker.petrinet": {
+    "edges": 2,
+    "facts": {
+      "invariant: place invariant 1": "proved",
+      "soundness: no dead transitions": "proved",
+      "soundness: option to complete": "proved",
+      "soundness: proper completion": "proved"
+    },
+    "report": "4d4beef21cdf310f9afb9e0f7960511ae574c8a015483f6e146e735a601fad46",
+    "states": 3
+  },
+  "implementations/python/tests/fixtures/play/evening-shift.petrinet": {
+    "edges": 1805,
+    "facts": {
+      "invariant: place invariant 1": "proved",
+      "invariant: place invariant 2": "proved",
+      "soundness: no dead transitions": "proved",
+      "soundness: option to complete": "unknown",
+      "soundness: proper completion": "unknown"
+    },
+    "report": "3055f8d7a426838a19f343c6de3181ce18956fe299a5b5bf9d15c30fa9ba9144",
+    "states": 300
+  },
+  "implementations/python/tests/fixtures/play/shop.petrinet": {
+    "edges": 99,
+    "facts": {
+      "choice: choice at (accepted): [ship] | [expire] | [split]": "refuted",
+      "invariant: place invariant 1": "proved",
+      "invariant: place invariant 2": "proved",
+      "invariant: place invariant 3": "proved",
+      "invariant: place invariant 4": "proved",
+      "soundness: no dead transitions": "unknown",
+      "soundness: option to complete": "unknown",
+      "soundness: proper completion": "unknown"
+    },
+    "report": "d791e6c42c5f87b7d843befda9f25d9002df89b0543a1e46715658b9182b2960",
+    "states": 39
+  },
+  "implementations/python/tests/fixtures/prove/arithmetic-timer.petrinet": {
+    "edges": 1,
+    "facts": {
+      "invariant: place invariant 1": "proved",
+      "soundness: no dead transitions": "unknown",
+      "soundness: option to complete": "unknown",
+      "soundness: proper completion": "unknown"
+    },
+    "report": "4793cf0e8efd145d7e78835cd1c6b935e2ed9b475558f6db6975fe0e501d3ffb",
+    "states": 2
+  },
+  "implementations/python/tests/fixtures/prove/asked-before-opening.petrinet": {
+    "edges": 82,
+    "facts": {
+      "choice: choice at (opening): [loan] | [refer]": "proved",
+      "invariant: place invariant 1": "proved",
+      "soundness: no dead transitions": "proved",
+      "soundness: option to complete": "proved",
+      "soundness: proper completion": "proved"
+    },
+    "report": "82fb501a29d7fb7e6057a7e6c5796e1f9d2202499c0a78cac42f2e839aef3bc7",
+    "states": 27
+  },
+  "implementations/python/tests/fixtures/prove/compare.petrinet": {
+    "edges": 2,
+    "facts": {
+      "invariant: place invariant 1": "proved",
+      "soundness: no dead transitions": "proved",
+      "soundness: option to complete": "proved",
+      "soundness: proper completion": "proved"
+    },
+    "report": "a79cc53ced235b56712e05cb1d936905cd3e2bb847879129e6e06c75d2884874",
+    "states": 3
+  },
+  "implementations/python/tests/fixtures/prove/deadline.petrinet": {
+    "edges": 4,
+    "facts": {
+      "choice: choice at (waiting): [give_up] | [late_retry]": "proved",
+      "invariant: place invariant 1": "proved",
+      "soundness: no dead transitions": "refuted",
+      "soundness: option to complete": "proved",
+      "soundness: proper completion": "proved"
+    },
+    "report": "c4fa108b62e31e83f585bc03805748800f001342443dadc1502fed9a8ba1663f",
+    "states": 5
+  },
+  "implementations/python/tests/fixtures/prove/deadlock-workflow.petrinet": {
+    "edges": 2,
+    "facts": {
+      "choice: choice at (i): [a] | [b]": "refuted",
+      "invariant: place invariant 1": "proved",
+      "soundness: no dead transitions": "refuted",
+      "soundness: option to complete": "refuted",
+      "soundness: proper completion": "proved"
+    },
+    "report": "87fc4c867e012eb1af28bb731090181148f468dbb8378fe2c1ddf2ad969530c8",
+    "states": 3
+  },
+  "implementations/python/tests/fixtures/prove/held-verdict.petrinet": {
+    "edges": 8,
+    "facts": {
+      "choice: choice at (held): [release] | [passed]": "proved",
+      "choice: choice at (pending): [send] | [hold]": "proved",
+      "invariant: place invariant 1": "proved",
+      "soundness: no dead transitions": "refuted",
+      "soundness: option to complete": "proved",
+      "soundness: proper completion": "proved"
+    },
+    "report": "b6e066a029c502b29fd137331ae3524c80287a26918eb0b7b7dbf599288bec23",
+    "states": 8
+  },
+  "implementations/python/tests/fixtures/prove/idle-latch.petrinet": {
+    "edges": 97,
+    "facts": {
+      "choice: choice at (busy): [rest] | [leave_busy]": "proved",
+      "choice: choice at (idle): [wake] | [stop] | [leave_idle]": "proved",
+      "invariant: place invariant 1": "proved",
+      "soundness: no dead transitions": "proved",
+      "soundness: option to complete": "proved",
+      "soundness: proper completion": "proved"
+    },
+    "report": "139224a431c840348c3ca8b8d3d3a3f158fcc9c90fdee89d5f31d762b0d9963f",
+    "states": 42
+  },
+  "implementations/python/tests/fixtures/prove/idle-since.petrinet": {
+    "edges": 14,
+    "facts": {
+      "choice: choice at (idle): [stop] | [leave]": "proved",
+      "invariant: place invariant 1": "proved",
+      "soundness: no dead transitions": "proved",
+      "soundness: option to complete": "proved",
+      "soundness: proper completion": "proved"
+    },
+    "report": "5fc83af87c66436b2197400391be03eac7c841394fa7b86a95645aff0ae332d0",
+    "states": 12
+  },
+  "implementations/python/tests/fixtures/prove/improper-workflow.petrinet": {
+    "edges": 3,
+    "facts": {
+      "invariant: place invariant 1": "proved",
+      "invariant: place invariant 2": "proved",
+      "soundness: no dead transitions": "proved",
+      "soundness: option to complete": "proved",
+      "soundness: proper completion": "refuted"
+    },
+    "report": "4c00d1fa66a29f0234f7a6b98f62aa7bf6fff39707fec3cd40a97d35b5101571",
+    "states": 3
+  },
+  "implementations/python/tests/fixtures/prove/kept-record.petrinet": {
+    "edges": 4,
+    "facts": {
+      "choice: choice at (returns): [accepted] | [damaged]": "proved",
+      "invariant: place invariant 1": "proved",
+      "soundness: no dead transitions": "proved",
+      "soundness: option to complete": "proved",
+      "soundness: proper completion": "proved"
+    },
+    "report": "d8efb3174b9d24a0426131f7917db2d0edd84c1734f27246ed0034c728fc34bc",
+    "states": 5
+  },
+  "implementations/python/tests/fixtures/prove/kept/alerter.petrinet": {
+    "edges": 1,
+    "facts": {
+      "invariant: place invariant 1": "proved",
+      "soundness: no dead transitions": "refuted",
+      "soundness: option to complete": "refuted",
+      "soundness: proper completion": "proved"
+    },
+    "report": "c5f2f3fb67f27f59846b0267ee96399230dfd9a311082b304dbf14ce190461b7",
+    "states": 2
+  },
+  "implementations/python/tests/fixtures/prove/kept/poller.petrinet": {
+    "edges": 4,
+    "facts": {
+      "choice: choice at (returns): [accepted] | [damaged]": "proved",
+      "invariant: place invariant 1": "proved",
+      "soundness: no dead transitions": "proved",
+      "soundness: option to complete": "proved",
+      "soundness: proper completion": "proved"
+    },
+    "report": "d76cf1e15fcdafa0f0b845b8a3c39cbf49257a7480e296a80869a2d107359df2",
+    "states": 5
+  },
+  "implementations/python/tests/fixtures/prove/kept/watched.petrinet": {
+    "edges": 5,
+    "facts": {
+      "choice: choice at (poller.returns): [poller.accepted] | [poller.damaged]": "proved",
+      "invariant: place invariant 1": "proved",
+      "soundness: no dead transitions": "proved",
+      "soundness: option to complete": "proved",
+      "soundness: proper completion": "proved"
+    },
+    "report": "e5422d52a2b88f6d1f41c154685987bb834a2011ed3c0adfd4a4c67e569b2761",
+    "states": 6
+  },
+  "implementations/python/tests/fixtures/prove/latch-late.petrinet": {
+    "edges": 10,
+    "facts": {
+      "invariant: place invariant 1": "proved",
+      "soundness: no dead transitions": "proved",
+      "soundness: option to complete": "proved",
+      "soundness: proper completion": "proved"
+    },
+    "report": "13b37c3dc207f52a58ec8cdc3aaf928985219d4e1f87f7e724bc8bab7cd4333d",
+    "states": 10
+  },
+  "implementations/python/tests/fixtures/prove/latch-loop.petrinet": {
+    "edges": 41,
+    "facts": {
+      "choice: choice at (idle): [wake] | [stop]": "proved",
+      "invariant: place invariant 1": "proved",
+      "soundness: no dead transitions": "proved",
+      "soundness: option to complete": "unknown",
+      "soundness: proper completion": "proved"
+    },
+    "report": "d3da058a8222874ce691c09df53e32bbc902cdfdb49d7b5699bb8e42da967782",
+    "states": 27
+  },
+  "implementations/python/tests/fixtures/prove/late-approval.petrinet": {
+    "edges": 51,
+    "facts": {
+      "choice: choice at (pending): [send] | [drop]": "proved",
+      "invariant: place invariant 1": "proved",
+      "soundness: no dead transitions": "proved",
+      "soundness: option to complete": "proved",
+      "soundness: proper completion": "proved"
+    },
+    "report": "64d521e6fa1ad30258260f8722b419e633d8f15557653b340fc8841b29034aee",
+    "states": 23
+  },
+  "implementations/python/tests/fixtures/prove/late-gate.petrinet": {
+    "edges": 19,
+    "facts": {
+      "choice: choice at (pending): [send] | [hold]": "proved",
+      "choice: choice at (shelved): [finish] | [again]": "refuted",
+      "invariant: place invariant 1": "proved",
+      "soundness: no dead transitions": "proved",
+      "soundness: option to complete": "proved",
+      "soundness: proper completion": "proved"
+    },
+    "report": "50d80c567cf20e4a3035e563b8fbd92c2ee52009d2868e19797c564486d07ff7",
+    "states": 13
+  },
+  "implementations/python/tests/fixtures/prove/mutex.petrinet": {
+    "edges": 4,
+    "facts": {
+      "choice: choice at (free): [enter1] | [enter2]": "refuted",
+      "invariant: place invariant 1": "proved",
+      "invariant: place invariant 2": "proved",
+      "invariant: place invariant 3": "proved",
+      "soundness: no dead transitions": "proved",
+      "soundness: option to complete": "unknown",
+      "soundness: proper completion": "proved"
+    },
+    "report": "b09fe001cfad2854c0cd49db71254071308dc7b74abfea5226f35137c2f28807",
+    "states": 3
+  },
+  "implementations/python/tests/fixtures/prove/never-due.petrinet": {
+    "edges": 10,
+    "facts": {
+      "choice: choice at (scanned): [sort] | [recount]": "proved",
+      "invariant: place invariant 1": "proved",
+      "soundness: no dead transitions": "refuted",
+      "soundness: option to complete": "proved",
+      "soundness: proper completion": "proved"
+    },
+    "report": "5cbf41b917b8759eb398ba7f0605aa64653b03325b7fbf9b753b56eac13a5559",
+    "states": 9
+  },
+  "implementations/python/tests/fixtures/prove/orders.petrinet": {
+    "edges": 49,
+    "facts": {
+      "choice: choice at (orders): [ship] | [cancel] | [refund]": "refuted",
+      "invariant: place invariant 1": "proved",
+      "soundness: no dead transitions": "proved",
+      "soundness: option to complete": "proved",
+      "soundness: proper completion": "proved"
+    },
+    "report": "c62e14564ca713c50237e2ba2f17b2a9f86a942e426c0480ad82a440a73f5b7b",
+    "states": 20
+  },
+  "implementations/python/tests/fixtures/prove/owner-switch.petrinet": {
+    "edges": 28,
+    "facts": {
+      "choice: choice at (copies): [lend] | [skip]": "proved",
+      "invariant: place invariant 1": "proved",
+      "soundness: no dead transitions": "proved",
+      "soundness: option to complete": "refuted",
+      "soundness: proper completion": "proved"
+    },
+    "report": "28458be17f5b499d6d2a21d70fd2333ce70c0142cff09313ca2db3dedebc11af",
+    "states": 16
+  },
+  "implementations/python/tests/fixtures/prove/polled.petrinet": {
+    "edges": 166,
+    "facts": {
+      "choice: choice at (polled): [succeeded] | [failed] | [worn]": "refuted",
+      "invariant: place invariant 1": "proved",
+      "soundness: no dead transitions": "proved",
+      "soundness: option to complete": "refuted",
+      "soundness: proper completion": "proved"
+    },
+    "report": "4f477a7686588f90df86e717a804d005118d7081500f15c675995b2fbff32dc0",
+    "states": 35
+  },
+  "implementations/python/tests/fixtures/prove/port-choice.petrinet": {
+    "edges": 9,
+    "facts": {
+      "choice: choice at (asked): [retry] | [keep]": "proved",
+      "invariant: place invariant 1": "proved",
+      "soundness: no dead transitions": "proved",
+      "soundness: option to complete": "proved",
+      "soundness: proper completion": "proved"
+    },
+    "report": "3930c2db40477b5b57629ed97f8bba55a07b5154037ec9a267e70435c35b2003",
+    "states": 8
+  },
+  "implementations/python/tests/fixtures/prove/redelivery.petrinet": {
+    "edges": 13,
+    "facts": {
+      "choice: choice at (sent): [redeliver] | [finish] | [escalate]": "refuted",
+      "invariant: place invariant 1": "proved",
+      "soundness: no dead transitions": "proved",
+      "soundness: option to complete": "proved",
+      "soundness: proper completion": "refuted"
+    },
+    "report": "2a13df1e6c935bb2481ebb82ea03ead99249d71e2e38c03acae64cc0d7f72fca",
+    "states": 12
+  },
+  "implementations/python/tests/fixtures/prove/release.petrinet": {
+    "edges": 14,
+    "facts": {
+      "choice: choice at (pending): [hold] | [send]": "refuted",
+      "invariant: place invariant 1": "proved",
+      "soundness: no dead transitions": "proved",
+      "soundness: option to complete": "refuted",
+      "soundness: proper completion": "proved"
+    },
+    "report": "91ecc36e65775105b6825cdeae5844c35e1d9cf0fa73f2f48e0806ed03670244",
+    "states": 11
+  },
+  "implementations/python/tests/fixtures/prove/repeat-start.petrinet": {
+    "edges": 2,
+    "facts": {
+      "choice: choice at (jobs): [first] | [repeat]": "proved",
+      "invariant: place invariant 1": "proved",
+      "soundness: no dead transitions": "refuted",
+      "soundness: option to complete": "proved",
+      "soundness: proper completion": "proved"
+    },
+    "report": "5dbd22ea442df50716fd8ea16b97cf2a0a7fb95720aebe5e163a10040684aa6d",
+    "states": 3
+  },
+  "implementations/python/tests/fixtures/prove/retry-after.petrinet": {
+    "edges": 20,
+    "facts": {
+      "invariant: place invariant 1": "proved",
+      "soundness: no dead transitions": "proved",
+      "soundness: option to complete": "proved",
+      "soundness: proper completion": "proved"
+    },
+    "report": "3c516a4231900e884e6c12eecb37143d10bd80684f6862c58c3c49fb01843b71",
+    "states": 17
+  },
+  "implementations/python/tests/fixtures/prove/shop/inner.petrinet": {
+    "edges": 8,
+    "facts": {
+      "choice: choice at (checked): [accept] | [reject]": "proved",
+      "invariant: place invariant 1": "proved",
+      "soundness: no dead transitions": "proved",
+      "soundness: option to complete": "proved",
+      "soundness: proper completion": "proved"
+    },
+    "report": "1aea77cb5f5f92a2317d9e146bd17252fa59eb55f0ce768ac18f66f7788c939a",
+    "states": 7
+  },
+  "implementations/python/tests/fixtures/prove/shop/outer.petrinet": {
+    "edges": 5,
+    "facts": {
+      "invariant: place invariant 1": "proved",
+      "soundness: no dead transitions": "proved",
+      "soundness: option to complete": "proved",
+      "soundness: proper completion": "proved"
+    },
+    "report": "1f925a42d85f27d77ba8eca9c7e292502868f736fd72862cba56e68b85c751d7",
+    "states": 5
+  },
+  "implementations/python/tests/fixtures/prove/shop/shop.petrinet": {
+    "edges": 12,
+    "facts": {
+      "choice: choice at (inner.checked): [inner.accept] | [inner.reject]": "proved",
+      "invariant: place invariant 1": "proved",
+      "refinement: refinement outer.[work] by inner": "proved",
+      "soundness: no dead transitions": "proved",
+      "soundness: option to complete": "proved",
+      "soundness: proper completion": "proved"
+    },
+    "report": "6fa473a01cff0b140ba606e26dd915faac4f6b22cd569ef619c5d12261b04653",
+    "states": 11
+  },
+  "implementations/python/tests/fixtures/prove/side-copy-count.petrinet": {
+    "edges": 13,
+    "facts": {
+      "choice: choice at (sent): [redeliver] | [finish] | [escalate]": "refuted",
+      "invariant: place invariant 1": "proved",
+      "soundness: no dead transitions": "proved",
+      "soundness: option to complete": "proved",
+      "soundness: proper completion": "refuted"
+    },
+    "report": "5be9cb6edf883a6ad113b45b43258f41d8c40eeed4cc85aa202300fec5afe421",
+    "states": 12
+  },
+  "implementations/python/tests/fixtures/prove/side-copy-embedded.petrinet": {
+    "edges": 28,
+    "facts": {
+      "invariant: place invariant 1": "proved",
+      "invariant: place invariant 2": "proved",
+      "invariant: place invariant 3": "proved",
+      "soundness: no dead transitions": "proved",
+      "soundness: option to complete": "proved",
+      "soundness: proper completion": "proved"
+    },
+    "report": "eeba9f4fd3a79165d14e5df88391237ba06f2dfc35321f2453417394030ebd03",
+    "states": 13
+  },
+  "implementations/python/tests/fixtures/prove/side-copy-read.petrinet": {
+    "edges": 20,
+    "facts": {
+      "choice: choice at (page): [follow] | [end]": "proved",
+      "invariant: place invariant 1": "proved",
+      "invariant: place invariant 2": "proved",
+      "soundness: no dead transitions": "proved",
+      "soundness: option to complete": "refuted",
+      "soundness: proper completion": "proved"
+    },
+    "report": "b20a5ccef99574f60eeea92acc76ad235638798192b398bed7f2b1530380a79d",
+    "states": 14
+  },
+  "implementations/python/tests/fixtures/prove/side-copy.petrinet": {
+    "edges": 6,
+    "facts": {
+      "choice: choice at (page): [follow] | [end]": "proved",
+      "invariant: place invariant 1": "proved",
+      "invariant: place invariant 2": "proved",
+      "soundness: no dead transitions": "proved",
+      "soundness: option to complete": "proved",
+      "soundness: proper completion": "proved"
+    },
+    "report": "41f04fe404981d223ab71d6ab57480f246588f969139e1d66349a9ab25868030",
+    "states": 6
+  },
+  "implementations/python/tests/fixtures/prove/sound-workflow.petrinet": {
+    "edges": 6,
+    "facts": {
+      "invariant: place invariant 1": "proved",
+      "invariant: place invariant 2": "proved",
+      "soundness: no dead transitions": "proved",
+      "soundness: option to complete": "proved",
+      "soundness: proper completion": "proved"
+    },
+    "report": "2f6def04d523725b8a0ff6b3fa5b12cd5b24ede28ccf07e6be9e154219272895",
+    "states": 6
+  },
+  "implementations/python/tests/fixtures/prove/switched/flips.petrinet": {
+    "edges": 4,
+    "facts": {
+      "choice: choice at (switch): [flip_to_new] | [flip_back]": "proved",
+      "soundness: no dead transitions": "proved",
+      "soundness: option to complete": "unknown",
+      "soundness: proper completion": "proved"
+    },
+    "report": "a104be358fa74f7c2fd9974dd9dab32ff04e9553e0e91fc22b7fb5a223832861",
+    "states": 3
+  },
+  "implementations/python/tests/fixtures/prove/switched/slots.petrinet": {
+    "edges": 9,
+    "facts": {
+      "choice: choice at (copies): [lend] | [skip]": "proved",
+      "invariant: place invariant 1": "proved",
+      "soundness: no dead transitions": "proved",
+      "soundness: option to complete": "proved",
+      "soundness: proper completion": "proved"
+    },
+    "report": "cce3b1f01894dd8330fe58138816bcd36f31c3b29d78fa3e0998c495ddd425da",
+    "states": 8
+  },
+  "implementations/python/tests/fixtures/prove/switched/switched.petrinet": {
+    "edges": 0,
+    "facts": {
+      "choice: choice at (flips.switch): [flips.flip_to_new] | [flips.flip_back]": "proved",
+      "choice: choice at (slots.copies): [slots.lend] | [slots.skip]": "proved",
+      "invariant: place invariant 1": "proved",
+      "soundness: no dead transitions": "refuted",
+      "soundness: option to complete": "refuted",
+      "soundness: proper completion": "proved"
+    },
+    "report": "b87c12e73cc8d65010ebff363c892d17fa70a9be2bb887dac6da698fe1d1fd58",
+    "states": 1
+  },
+  "implementations/python/tests/fixtures/prove/verdicts.petrinet": {
+    "edges": 6,
+    "facts": {
+      "choice: choice at (verdicts): [ship] | [review]": "proved",
+      "invariant: place invariant 1": "proved",
+      "soundness: no dead transitions": "proved",
+      "soundness: option to complete": "proved",
+      "soundness: proper completion": "proved"
+    },
+    "report": "4a75f474ceb686a4ee786d11decda4eaf3ef8d315a110e5029a288729cc2cb73",
+    "states": 7
+  },
+  "implementations/python/tests/fixtures/prove/waiting-for-shelf.petrinet": {
+    "edges": 21,
+    "facts": {
+      "choice: choice at (waiting): [cancel] | [fill] | [repair]": "proved",
+      "invariant: place invariant 1": "proved",
+      "soundness: no dead transitions": "proved",
+      "soundness: option to complete": "proved",
+      "soundness: proper completion": "proved"
+    },
+    "report": "bdd1ab6a14596660e9d1e682acff587b605b71400633d2300768637fe2302115",
+    "states": 10
+  },
+  "implementations/python/tests/fixtures/prove/waiting-switch.petrinet": {
+    "edges": 10,
+    "facts": {
+      "choice: choice at (working): [finish] | [park]": "proved",
+      "invariant: place invariant 1": "proved",
+      "soundness: no dead transitions": "refuted",
+      "soundness: option to complete": "proved",
+      "soundness: proper completion": "proved"
+    },
+    "report": "f258765ac397db139fb267a534eb114f97008326e8c5ba7505d27731d2175e67",
+    "states": 9
+  }
+}

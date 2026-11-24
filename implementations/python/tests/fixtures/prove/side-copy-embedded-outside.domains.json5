@@ -1,0 +1,4 @@
+// For side-copy-embedded.petrinet: the job a page event carries gets a
+// value outside the net's declared domain (job.running is true or false),
+// so the engine refuses the copy of that job (ADR 0065, Limit).
+{ domains: { "job.running": [true, false, "unset"] } }

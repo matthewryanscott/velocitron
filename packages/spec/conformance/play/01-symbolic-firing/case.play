@@ -1,0 +1,21 @@
+play symbolic_firing "Net data, step data, carry, merge and nothing"
+net "kitchen.petrinet"
+marking none
+
+$t1: ticket {"id": "t-1", "cuisine": "thai"}
+$t2: ticket {"id": "t-2", "cuisine": "thai"}
+
+inject (tickets) <- $t1, $t2
+inject (spices) <- spice {"cuisine": "thai", "heat": 3}
+
+// The step gives the dish; the net computes the receipt; the spice is read.
+fire [cook] with (tickets) $t2 -> (pass) dish {"ticket": "t-2"}
+expect (receipts) == receipt {"ticket": "t-2"}, (spices) count 1, (tickets) == $t1
+
+// The dish carries over unchanged, then a merge adds a field to it.
+fire [serve] -> (served) +{"table": 4}
+expect (served) has {"ticket": "t-2", "table": 4}
+
+// Both halves would carry the one dish; the step keeps one half empty.
+fire [split] -> (right_half) nothing
+expect (left_half) count 1, (right_half) empty, (served) empty

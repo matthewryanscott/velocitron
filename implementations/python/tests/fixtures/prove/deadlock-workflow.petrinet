@@ -1,0 +1,9 @@
+// An exclusive choice joined by a transition that needs both branches.
+net deadlock_workflow "Choose one branch, then wait for both"
+
+(i) -> [a] -> (p1)
+(i) -> [b] -> (p2)
+(p1) -> [join] -> (o)
+(p2) -> [join]
+
+marking initial (i) <- 1

@@ -1,0 +1,544 @@
+{
+  "cases": [
+    {
+      "name": "disjoint",
+      "mergeName": "composition",
+      "nets": {
+        "a": {
+          "name": "a",
+          "places": [
+            {"name": "ready", "accepts": ["task"]},
+            {"name": "done", "accepts": ["task"]}
+          ],
+          "transitions": [
+            {"name": "finish", "handler": "noop", "guard": "ready", "priority": 2}
+          ],
+          "arcs": [
+            {
+              "fromPlace": "ready",
+              "toTransition": "finish",
+              "consume": {"type": "task", "mode": "consume", "weight": 1}
+            },
+            {
+              "fromTransition": "finish",
+              "toPlace": "done",
+              "produce": {"type": "task", "destination": "done"}
+            }
+          ]
+        },
+        "b": {
+          "name": "b",
+          "places": [{"name": "holding", "accepts": ["task"], "port": {"direction": "input", "type": "task"}}],
+          "transitions": [],
+          "arcs": []
+        }
+      },
+      "wires": [],
+      "shares": [],
+      "refinements": [],
+      "final": null
+    },
+    {
+      "name": "single-wire",
+      "mergeName": "wired",
+      "nets": {
+        "prod": {
+          "name": "prod",
+          "places": [
+            {"name": "src", "accepts": ["task"]},
+            {
+              "name": "out",
+              "accepts": ["task"],
+              "port": {"direction": "output", "type": "task"},
+              "description": "from prod",
+              "annotations": {"lane": "prod", "note": "source"}
+            }
+          ],
+          "transitions": [{"name": "make", "handler": "noop"}],
+          "arcs": [
+            {
+              "fromPlace": "src",
+              "toTransition": "make",
+              "consume": {"type": "task", "mode": "consume", "weight": 1}
+            },
+            {
+              "fromTransition": "make",
+              "toPlace": "out",
+              "produce": {
+                "type": "task",
+                "destination": "out",
+                "cel": "binding.src[0]"
+              }
+            }
+          ],
+          "initialMarking": {
+            "src": [{"type": "task", "data": {"n": 1}}],
+            "out": [{"type": "task", "data": {"n": 2}}]
+          }
+        },
+        "cons": {
+          "name": "cons",
+          "places": [
+            {
+              "name": "inbox",
+              "accepts": ["task", "note"],
+              "port": {"direction": "input", "type": "task"},
+              "description": "from cons",
+              "annotations": {"lane": "cons", "extra": "sink"}
+            },
+            {"name": "done", "accepts": ["task"]}
+          ],
+          "transitions": [{"name": "take", "handler": "noop"}],
+          "arcs": [
+            {
+              "fromPlace": "inbox",
+              "toTransition": "take",
+              "consume": {"type": "task", "mode": "consume", "weight": 1}
+            },
+            {
+              "fromTransition": "take",
+              "toPlace": "done",
+              "produce": {"type": "task", "destination": "done"}
+            }
+          ],
+          "initialMarking": {
+            "inbox": [{"type": "task", "data": {"n": 3}}]
+          }
+        }
+      },
+      "wires": [
+        {"from": {"net": "prod", "port": "out"}, "to": {"net": "cons", "port": "inbox"}}
+      ],
+      "shares": [],
+      "refinements": [],
+      "final": null
+    },
+    {
+      "name": "fan-out",
+      "mergeName": "composition",
+      "nets": {
+        "hub": {
+          "name": "hub",
+          "places": [
+            {"name": "out", "accepts": ["task"], "port": {"direction": "output", "type": "task"}}
+          ],
+          "transitions": [],
+          "arcs": []
+        },
+        "left": {
+          "name": "left",
+          "places": [
+            {"name": "inbox", "accepts": ["task"], "port": {"direction": "input", "type": "task"}}
+          ],
+          "transitions": [],
+          "arcs": []
+        },
+        "right": {
+          "name": "right",
+          "places": [
+            {"name": "inbox", "accepts": ["task"], "port": {"direction": "input", "type": "task"}}
+          ],
+          "transitions": [],
+          "arcs": []
+        }
+      },
+      "wires": [
+        {"from": {"net": "hub", "port": "out"}, "to": {"net": "left", "port": "inbox"}},
+        {"from": {"net": "hub", "port": "out"}, "to": {"net": "right", "port": "inbox"}}
+      ],
+      "shares": [],
+      "refinements": [],
+      "final": null
+    },
+    {
+      "name": "fan-in",
+      "mergeName": "composition",
+      "nets": {
+        "left": {
+          "name": "left",
+          "places": [
+            {
+              "name": "out",
+              "accepts": ["task"],
+              "port": {"direction": "output", "type": "task"},
+              "description": "left"
+            }
+          ],
+          "transitions": [],
+          "arcs": []
+        },
+        "right": {
+          "name": "right",
+          "places": [
+            {
+              "name": "out",
+              "accepts": ["task"],
+              "port": {"direction": "output", "type": "task"},
+              "description": "right"
+            }
+          ],
+          "transitions": [],
+          "arcs": []
+        },
+        "sink": {
+          "name": "sink",
+          "places": [
+            {"name": "inbox", "accepts": ["task"], "port": {"direction": "input", "type": "task"}}
+          ],
+          "transitions": [],
+          "arcs": []
+        }
+      },
+      "wires": [
+        {"from": {"net": "left", "port": "out"}, "to": {"net": "sink", "port": "inbox"}},
+        {"from": {"net": "right", "port": "out"}, "to": {"net": "sink", "port": "inbox"}}
+      ],
+      "shares": [],
+      "refinements": [],
+      "final": null
+    },
+    {
+      "name": "share",
+      "mergeName": "composition",
+      "nets": {
+        "alpha": {
+          "name": "alpha",
+          "places": [
+            {"name": "buf", "accepts": ["task"], "description": "alpha"},
+            {"name": "next", "accepts": ["task"]}
+          ],
+          "transitions": [{"name": "pass", "handler": "noop"}],
+          "arcs": [
+            {
+              "fromPlace": "buf",
+              "toTransition": "pass",
+              "consume": {"type": "task", "mode": "consume", "weight": 1}
+            },
+            {
+              "fromTransition": "pass",
+              "toPlace": "next",
+              "produce": {"type": "task", "destination": "next"}
+            }
+          ]
+        },
+        "beta": {
+          "name": "beta",
+          "places": [
+            {"name": "buf", "accepts": ["task"], "description": "beta"}
+          ],
+          "transitions": [],
+          "arcs": []
+        }
+      },
+      "wires": [],
+      "shares": [
+        {
+          "places": [
+            {"net": "alpha", "place": "buf"},
+            {"net": "beta", "place": "buf"}
+          ]
+        }
+      ],
+      "refinements": [],
+      "final": null
+    },
+    {
+      "name": "refinement",
+      "mergeName": "refined",
+      "nets": {
+        "shop": {
+          "name": "shop",
+          "places": [
+            {"name": "placed", "accepts": ["parcel"]},
+            {"name": "sending", "accepts": ["parcel"], "port": {"direction": "output", "type": "parcel"}},
+            {"name": "delivered", "accepts": ["receipt"], "port": {"direction": "input", "type": "receipt"}},
+            {"name": "settled", "accepts": ["receipt"]}
+          ],
+          "transitions": [
+            {"name": "send", "handler": "noop"},
+            {"name": "deliver", "handler": "noop"}
+          ],
+          "arcs": [
+            {
+              "fromPlace": "placed",
+              "toTransition": "send",
+              "consume": {"type": "parcel", "mode": "consume", "weight": 1}
+            },
+            {
+              "fromTransition": "send",
+              "toPlace": "sending",
+              "produce": {"type": "parcel", "destination": "sending"}
+            },
+            {
+              "fromPlace": "sending",
+              "toTransition": "deliver",
+              "consume": {"type": "parcel", "mode": "consume", "weight": 1}
+            },
+            {
+              "fromTransition": "deliver",
+              "toPlace": "delivered",
+              "produce": {"type": "receipt", "destination": "delivered"}
+            }
+          ]
+        },
+        "courier": {
+          "name": "courier",
+          "places": [
+            {"name": "pickup", "accepts": ["parcel"], "port": {"direction": "input", "type": "parcel"}},
+            {"name": "riding", "accepts": ["parcel"]},
+            {"name": "dropped", "accepts": ["receipt"], "port": {"direction": "output", "type": "receipt"}}
+          ],
+          "transitions": [
+            {"name": "pick", "handler": "noop"},
+            {"name": "drop", "handler": "noop"}
+          ],
+          "arcs": [
+            {
+              "fromPlace": "pickup",
+              "toTransition": "pick",
+              "consume": {"type": "parcel", "mode": "consume", "weight": 1}
+            },
+            {
+              "fromTransition": "pick",
+              "toPlace": "riding",
+              "produce": {"type": "parcel", "destination": "riding"}
+            },
+            {
+              "fromPlace": "riding",
+              "toTransition": "drop",
+              "consume": {"type": "parcel", "mode": "consume", "weight": 1}
+            },
+            {
+              "fromTransition": "drop",
+              "toPlace": "dropped",
+              "produce": {"type": "receipt", "destination": "dropped"}
+            }
+          ]
+        }
+      },
+      "wires": [
+        {"from": {"net": "shop", "port": "sending"}, "to": {"net": "courier", "port": "pickup"}},
+        {"from": {"net": "courier", "port": "dropped"}, "to": {"net": "shop", "port": "delivered"}}
+      ],
+      "shares": [],
+      "refinements": [{"net": "shop", "transition": "deliver", "by": "courier"}],
+      "final": null
+    },
+    {
+      "name": "timer",
+      "mergeName": "composition",
+      "nets": {
+        "chip": {
+          "name": "chip",
+          "places": [
+            {"name": "inbox", "accepts": ["task"]},
+            {"name": "clock", "accepts": ["clock"]},
+            {"name": "done", "accepts": ["task"]}
+          ],
+          "transitions": [
+            {
+              "name": "go",
+              "handler": "noop",
+              "timer": {
+                "clock": "clock",
+                "cel": "clock.now > 0",
+                "bind": {"request": "inbox"}
+              }
+            }
+          ],
+          "arcs": [
+            {
+              "fromPlace": "inbox",
+              "toTransition": "go",
+              "consume": {"type": "task", "mode": "consume", "weight": 1}
+            },
+            {
+              "fromPlace": "clock",
+              "toTransition": "go",
+              "consume": {"type": "clock", "mode": "read", "weight": 1}
+            },
+            {
+              "fromTransition": "go",
+              "toPlace": "done",
+              "produce": {"type": "task", "destination": "done"}
+            }
+          ]
+        }
+      },
+      "wires": [],
+      "shares": [],
+      "refinements": [],
+      "final": null
+    },
+    {
+      "name": "proofs",
+      "mergeName": "composition",
+      "nets": {
+        "job": {
+          "name": "job",
+          "places": [
+            {"name": "open", "accepts": ["task"]},
+            {"name": "shut", "accepts": ["task"]}
+          ],
+          "transitions": [{"name": "close", "handler": "noop"}],
+          "arcs": [
+            {
+              "fromPlace": "open",
+              "toTransition": "close",
+              "consume": {"type": "task", "mode": "consume", "weight": 1}
+            },
+            {
+              "fromTransition": "close",
+              "toPlace": "shut",
+              "produce": {"type": "task", "destination": "shut"}
+            }
+          ],
+          "proofs": {
+            "final": [["shut"]],
+            "invariants": [
+              {"name": "jobs", "weights": {"open": 1, "shut": 1}, "constant": 1}
+            ]
+          }
+        }
+      },
+      "wires": [],
+      "shares": [],
+      "refinements": [],
+      "final": null
+    },
+    {
+      "name": "composition-final",
+      "mergeName": "composition",
+      "nets": {
+        "job": {
+          "name": "job",
+          "places": [
+            {"name": "open", "accepts": ["task"]},
+            {"name": "shut", "accepts": ["task"]}
+          ],
+          "transitions": [{"name": "close", "handler": "noop"}],
+          "arcs": [
+            {
+              "fromPlace": "open",
+              "toTransition": "close",
+              "consume": {"type": "task", "mode": "consume", "weight": 1}
+            },
+            {
+              "fromTransition": "close",
+              "toPlace": "shut",
+              "produce": {"type": "task", "destination": "shut"}
+            }
+          ],
+          "proofs": {
+            "final": [["shut"]]
+          }
+        }
+      },
+      "wires": [],
+      "shares": [],
+      "refinements": [],
+      "final": [[{"net": "job", "place": "open"}]]
+    },
+    {
+      "name": "actors",
+      "mergeName": "composition",
+      "nets": {
+        "desk": {
+          "name": "desk",
+          "annotations": {
+            "actor": "clerk",
+            "actors": [{"name": "clerk", "kind": "human"}]
+          },
+          "places": [
+            {"name": "in", "accepts": ["task"]},
+            {"name": "out", "accepts": ["task"]}
+          ],
+          "transitions": [{"name": "file", "handler": "noop"}],
+          "arcs": [
+            {
+              "fromPlace": "in",
+              "toTransition": "file",
+              "consume": {"type": "task", "mode": "consume", "weight": 1}
+            },
+            {
+              "fromTransition": "file",
+              "toPlace": "out",
+              "produce": {"type": "task", "destination": "out"}
+            }
+          ]
+        }
+      },
+      "wires": [],
+      "shares": [],
+      "refinements": [],
+      "final": null
+    },
+    {
+      "name": "domain-conflict",
+      "mergeName": "composition",
+      "nets": {
+        "a": {
+          "name": "a",
+          "places": [{"name": "p", "accepts": ["task"]}],
+          "transitions": [],
+          "arcs": [],
+          "domains": {"task.kind": ["one"]}
+        },
+        "b": {
+          "name": "b",
+          "places": [{"name": "p", "accepts": ["task"]}],
+          "transitions": [],
+          "arcs": [],
+          "domains": {"task.kind": ["two"]}
+        }
+      },
+      "wires": [],
+      "shares": [],
+      "refinements": [],
+      "final": null,
+      "error": "domain task.kind differs between a and b"
+    },
+    {
+      "name": "actor-conflict",
+      "mergeName": "composition",
+      "nets": {
+        "a": {
+          "name": "a",
+          "annotations": {"actors": [{"name": "clerk", "kind": "human"}]},
+          "places": [{"name": "p", "accepts": ["task"]}],
+          "transitions": [],
+          "arcs": []
+        },
+        "b": {
+          "name": "b",
+          "annotations": {"actors": [{"name": "clerk", "kind": "system"}]},
+          "places": [{"name": "p", "accepts": ["task"]}],
+          "transitions": [],
+          "arcs": []
+        }
+      },
+      "wires": [],
+      "shares": [],
+      "refinements": [],
+      "final": null,
+      "error": "actor clerk is a human in one net and a system in b"
+    },
+    {
+      "name": "refinement-unknown",
+      "mergeName": "composition",
+      "nets": {
+        "shop": {
+          "name": "shop",
+          "places": [{"name": "p", "accepts": ["task"]}],
+          "transitions": [{"name": "deliver", "handler": "noop"}],
+          "arcs": []
+        }
+      },
+      "wires": [],
+      "shares": [],
+      "refinements": [{"net": "shop", "transition": "deliver", "by": "ghost"}],
+      "final": null,
+      "error": "refine shop.[deliver] by ghost: unknown alias ghost"
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "description": "Single forbidden-token inventory for the browser seam of the TypeScript packages. Every consumer (the source-tree audit in tools/release_checks.py and the TypeScript schema generators) MUST load this file instead of embedding its own token copy. Patterns are portable between Python re and JavaScript RegExp.",
+  "schemaVersion": 1,
+  "tokens": [
+    {
+      "label": "CommonJS require",
+      "pattern": "\\brequire\\s*\\("
+    },
+    {
+      "label": "dynamic Function",
+      "pattern": "\\b(?:new\\s+)?Function\\s*\\("
+    },
+    {
+      "label": "direct eval",
+      "pattern": "(?<![\\w$.])eval\\s*\\("
+    },
+    {
+      "label": "WebAssembly",
+      "pattern": "\\bWebAssembly\\b"
+    },
+    {
+      "label": "Node protocol import",
+      "pattern": "['\"]node:"
+    }
+  ]
+}

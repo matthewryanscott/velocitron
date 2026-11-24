@@ -1,0 +1,109 @@
+{
+  "name": "reading_cadence",
+  "places": [
+    {
+      "name": "tick_latch",
+      "accepts": [
+        "tick_latch"
+      ]
+    },
+    {
+      "name": "clock",
+      "accepts": [
+        "clock"
+      ]
+    },
+    {
+      "name": "refresh_due_out",
+      "accepts": [
+        "refresh_due"
+      ],
+      "port": {
+        "direction": "output",
+        "type": "refresh_due"
+      }
+    }
+  ],
+  "transitions": [
+    {
+      "name": "on_tick",
+      "handler": "on_tick@cadence",
+      "timer": {
+        "clock": "clock",
+        "cel": "clock.now >= latch.fired_at + latch.cadence_s",
+        "bind": {
+          "latch": "tick_latch"
+        }
+      }
+    }
+  ],
+  "arcs": [
+    {
+      "from": {
+        "place": "tick_latch"
+      },
+      "to": {
+        "transition": "on_tick"
+      },
+      "consume": {
+        "type": "tick_latch"
+      }
+    },
+    {
+      "from": {
+        "transition": "on_tick"
+      },
+      "to": {
+        "place": "tick_latch"
+      },
+      "produce": {
+        "destination": "tick_latch",
+        "type": "tick_latch"
+      }
+    },
+    {
+      "from": {
+        "place": "clock"
+      },
+      "to": {
+        "transition": "on_tick"
+      },
+      "consume": {
+        "type": "clock",
+        "mode": "read"
+      }
+    },
+    {
+      "from": {
+        "transition": "on_tick"
+      },
+      "to": {
+        "place": "refresh_due_out"
+      },
+      "produce": {
+        "destination": "refresh_due_out",
+        "type": "refresh_due"
+      }
+    }
+  ],
+  "initialMarking": {
+    "clock": [
+      {
+        "type": "clock",
+        "data": {
+          "now": 0
+        }
+      }
+    ],
+    "tick_latch": [
+      {
+        "type": "tick_latch",
+        "data": {
+          "fired_at": 0,
+          "cadence_s": 300
+        }
+      }
+    ]
+  },
+  "description": "A reading on its own timer."
+}

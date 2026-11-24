@@ -1,0 +1,77 @@
+// A borrow ends as a stamped loan, a due-soon notice, a damaged
+// withdrawal, or a cancellation when a newer edition exists. Other endings
+// are recorded and the copy is withdrawn. [borrow] is the step a partner
+// loan refines.
+
+net loan_checkout "Stamp, notify, withdraw, or cancel"
+
+[stamp_due] handler "stamp_due@checkout"
+[notify] handler "notify@checkout"
+[borrow] handler "borrow@checkout"
+
+(lending) -hold-> [borrow] -result-> (loan_ended)
+
+@ok_in: (loan_ended) -result-> [stamp_due]
+@loaned_out: [stamp_due] -hold-> (loaned)
+@stamped_out: [stamp_due] -stamp-> (stamped)
+@unlock_due: [stamp_due] -slot-> (shelf_slot)
+
+@due_in: (loan_ended) -result-> [notify]
+[notify] -hold-> (due)
+@unlock_notify: [notify] -slot-> (shelf_slot)
+@no_edition: (editions) -edition->0 [notify]
+
+@damage_in: (loan_ended) -result-> [refuse_damage]
+@damage_out: [refuse_damage] -hold-> (withdrawn)
+@damage_note: [refuse_damage] -note-> (notices)
+@unlock_damage: [refuse_damage] -slot-> (shelf_slot)
+
+@cancel_in: (loan_ended) -result-> [cancel_edition]
+@cancel_edition_read: (editions) -edition->? [cancel_edition]
+@cancel_out: [cancel_edition] -hold-> (withdrawn)
+@unlock_cancel: [cancel_edition] -slot-> (shelf_slot)
+
+@other_in: (loan_ended) -result-> [record_other]
+@other_out: [record_other] -hold-> (withdrawn)
+@unlock_other: [record_other] -slot-> (shelf_slot)
+
+@ok_in predicate cel "outcome == 'loaned'"
+@due_in predicate cel "outcome == 'due_soon'"
+@damage_in predicate cel "outcome == 'damaged'"
+@cancel_in predicate cel "outcome == 'due_soon'"
+@other_in predicate cel "outcome != 'loaned' && outcome != 'due_soon' && outcome != 'damaged'"
+@cancel_edition_read correlate cel "token.isbn == binding.loan_ended[0].hold.isbn && token.year > binding.loan_ended[0].hold.year"
+@no_edition correlate cel "token.isbn == binding.loan_ended[0].hold.isbn && token.year > binding.loan_ended[0].hold.year"
+
+@loaned_out data cel "binding.loan_ended[0].hold"
+@stamped_out data cel "{'isbn': binding.loan_ended[0].hold.isbn, 'branch': binding.loan_ended[0].hold.branch}"
+@unlock_due data cel "{'isbn': binding.loan_ended[0].hold.isbn, 'free': true}"
+@unlock_notify data cel "{'isbn': binding.loan_ended[0].hold.isbn, 'free': true}"
+@damage_out data cel "binding.loan_ended[0].hold"
+@damage_note data cel "{'kind': 'damaged', 'isbn': binding.loan_ended[0].hold.isbn}"
+@unlock_damage data cel "{'isbn': binding.loan_ended[0].hold.isbn, 'free': true}"
+@cancel_out data cel "binding.loan_ended[0].hold"
+@unlock_cancel data cel "{'isbn': binding.loan_ended[0].hold.isbn, 'free': true}"
+@other_out data cel "binding.loan_ended[0].hold"
+@unlock_other data cel "{'isbn': binding.loan_ended[0].hold.isbn, 'free': true}"
+
+(shelf_slot) kept by "circulation desk" starts as cel "{'isbn': instance.isbn, 'free': true}"
+(editions) annotation fusion true
+
+(lending) port input hold
+(loan_ended) port input result
+(loaned) port output hold
+(due) port output hold
+(stamped) port output stamp
+
+system "circulation desk"
+net actor "circulation desk"
+(loaned) lives in cel "token.branch"
+(loaned) description "the loaned copy"
+(loan_ended) lives in cel "token.hold.branch"
+(loan_ended) reads as cel "token.outcome == 'loaned' ? 'stamped' : 'not loaned'"
+(due) description "due soon"
+(notices) description "notes to the desk"
+
+domain result.outcome "loaned" "due_soon" "damaged" "form_rejected" "no_crate" "refused"
+final (loaned), (withdrawn), (due)

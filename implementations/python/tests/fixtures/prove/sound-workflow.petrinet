@@ -1,0 +1,11 @@
+// A workflow net that splits into two branches and joins them again.
+net sound_workflow "Two branches run side by side and join"
+
+(i) -> [split] -> (p1)
+[split] -> (p2)
+(p1) -> [left] -> (p3)
+(p2) -> [right] -> (p4)
+(p3) -> [join] -> (o)
+(p4) -> [join]
+
+marking initial (i) <- 1

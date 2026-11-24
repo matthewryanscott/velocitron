@@ -1,0 +1,34 @@
+name: Publish npm package
+
+on:
+  workflow_dispatch:
+    inputs:
+      candidate_run_id:
+        description: Successful Build release candidate workflow run ID
+        required: true
+        type: string
+      candidate_artifact_id:
+        description: Immutable candidate artifact ID from that run
+        required: true
+        type: string
+      candidate_manifest_sha256:
+        description: Approved candidate manifest SHA-256 from that run
+        required: true
+        type: string
+
+permissions: {}
+
+concurrency:
+  group: publish-npm
+  cancel-in-progress: false
+
+jobs:
+  retired:
+    name: The npm library is retired
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Refuse to publish a deleted package
+        run: |
+          echo "@velocitron/core is retired. There is no npm library package to publish." >&2
+          echo "Install the private workspace packages from this repository instead." >&2
+          exit 1

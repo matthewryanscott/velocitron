@@ -1,0 +1,107 @@
+[project]
+name = "velocitron-python-tests"
+version = "0.1.0"
+description = "Integration tests for the Velocitron Python packages. This project is not a library."
+readme = "README.md"
+authors = [
+    { name = "Matthew R. Scott" },
+]
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.12"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+    "jsonschema>=4.26.0",
+    "json5>=0.15.0",
+    "velocitron-spec",
+    "velocitron-ir",
+    "velocitron-cel",
+    "velocitron-dsl",
+    "velocitron-petrinet",
+    "velocitron-play",
+    "velocitron-play-check",
+    "velocitron-engine",
+    "velocitron-journal",
+    "velocitron-runtime",
+    "velocitron-analysis",
+    "velocitron-kernel",
+    "velocitron-properties",
+    "velocitron-explain",
+    "velocitron-equiv",
+    "velocitron-codegen",
+    "velocitron-netbase",
+    "velocitron-replay",
+    "velocitron-cli",
+    "velocitron-skill",
+    "velocitron-merge",
+    "velocitron-viz",
+]
+
+[project.optional-dependencies]
+cel-cpp = ["velocitron-cel[cel-cpp]"]
+cel-rust = ["velocitron-cel[cel-rust]"]
+
+[project.urls]
+Homepage = "https://github.com/circuitmeridian/velocitron"
+Repository = "https://github.com/circuitmeridian/velocitron"
+Issues = "https://github.com/circuitmeridian/velocitron/issues"
+
+[tool.uv]
+package = false
+
+[tool.uv.sources]
+velocitron-spec = { path = "../../packages/spec", editable = false }
+velocitron-ir = { path = "../../packages/ir/python", editable = false }
+velocitron-cel = { path = "../../packages/cel/python", editable = false }
+velocitron-dsl = { path = "../../packages/dsl/python", editable = false }
+velocitron-petrinet = { path = "../../packages/petrinet/python", editable = false }
+velocitron-play = { path = "../../packages/play/python", editable = false }
+velocitron-play-check = { path = "../../packages/play-check/python", editable = false }
+velocitron-engine = { path = "../../packages/engine/python", editable = false }
+velocitron-journal = { path = "../../packages/journal/python", editable = false }
+velocitron-runtime = { path = "../../packages/runtime/python", editable = false }
+velocitron-analysis = { path = "../../packages/analysis/python", editable = false }
+velocitron-kernel = { path = "../../packages/kernel/python", editable = false }
+velocitron-properties = { path = "../../packages/properties/python", editable = false }
+velocitron-explain = { path = "../../packages/explain/python", editable = false }
+velocitron-equiv = { path = "../../packages/equiv/python", editable = false }
+velocitron-codegen = { path = "../../packages/codegen/python", editable = false }
+velocitron-netbase = { path = "../../packages/netbase/python", editable = false }
+velocitron-replay = { path = "../../packages/replay/python", editable = false }
+velocitron-cli = { path = "../../packages/cli/python", editable = false }
+velocitron-skill = { path = "../../packages/skill/python", editable = false }
+velocitron-merge = { path = "../../packages/merge/python", editable = false }
+velocitron-viz = { path = "../../packages/viz/python", editable = false }
+
+[dependency-groups]
+test = [
+    "pytest>=9.0",
+]
+
+dev = [
+    { include-group = "test" },
+    "basedpyright==1.39.9",
+    "cel-expr-python>=0.1.3",
+    "common-expression-language>=0.6.0",
+    "typing_extensions>=4.12",
+    "pre-commit==4.6.0",
+]
+
+release = [
+    "build==1.5.0",
+    "hatchling==1.31.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+force-exclude = true
+
+[tool.ruff.lint]
+extend-select = ["BLE001"]

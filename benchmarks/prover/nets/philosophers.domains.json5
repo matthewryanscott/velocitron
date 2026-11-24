@@ -1,0 +1,5 @@
+// The three seats and three forks are the initial marking. No further
+// arrivals.
+{
+  instance: "diner",
+}

@@ -1,0 +1,13 @@
+// A title is either lent or sent to repair. The choice is wide: many
+// branches, and a copy is either damaged or not.
+net catalog "A title is lent or sent to repair"
+
+@lend_in: (waiting) -copy-> [lend]
+@lend_out: [lend] -copy-> (loaned)
+@repair_in: (waiting) -copy-> [repair]
+@repair_out: [repair] -copy-> (mending)
+@lend_in predicate cel "!damaged"
+@repair_in predicate cel "damaged"
+
+(waiting) port input copy
+final (loaned), (mending)

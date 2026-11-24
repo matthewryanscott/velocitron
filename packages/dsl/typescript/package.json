@@ -1,0 +1,46 @@
+{
+  "author": "Matthew R. Scott",
+  "bugs": {
+    "url": "https://github.com/circuitmeridian/velocitron/issues"
+  },
+  "dependencies": {
+    "antlr4": "4.13.2"
+  },
+  "description": "Lowers Velocitron .petrinet documents to contribution IR. Does not resolve IR, compile CEL, or merge compositions.",
+  "devDependencies": {
+    "typescript": "7.0.2"
+  },
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
+  "homepage": "https://github.com/circuitmeridian/velocitron",
+  "license": "MIT",
+  "name": "@velocitron/dsl",
+  "private": true,
+  "repository": {
+    "directory": "packages/dsl/typescript",
+    "type": "git",
+    "url": "git+https://github.com/circuitmeridian/velocitron.git"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "prepare": "tsc -p tsconfig.build.json",
+    "test": "tsc -p tsconfig.build.json && node --test test/*.test.js",
+    "typecheck": "tsc -p tsconfig.build.json && tsc -p tsconfig.json --noEmit"
+  },
+  "sideEffects": false,
+  "type": "module",
+  "version": "0.1.0"
+}

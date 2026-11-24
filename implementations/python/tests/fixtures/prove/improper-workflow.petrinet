@@ -1,0 +1,9 @@
+// One branch finishes while the other keeps a token.
+net improper_workflow "Finish while a branch still runs"
+
+(i) -> [split] -> (p1)
+[split] -> (p2)
+(p1) -> [finish] -> (o)
+(p2) -> [spin] -> (p2)
+
+marking initial (i) <- 1

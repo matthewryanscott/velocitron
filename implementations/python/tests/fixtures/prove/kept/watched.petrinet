@@ -1,0 +1,7 @@
+// The poller and the alerter keep one record together.
+composition watched
+
+use "poller.petrinet" as poller
+use "alerter.petrinet" as alerter
+wire poller.(alerts) -> alerter.(alerts)
+share poller.(condition) ~ alerter.(condition)

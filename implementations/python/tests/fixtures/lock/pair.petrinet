@@ -1,0 +1,5 @@
+composition pair
+use "take.petrinet" as take
+use "give.petrinet" as give
+wire take.(busy) -> give.(busy)
+share take.(lock) ~ give.(lock)

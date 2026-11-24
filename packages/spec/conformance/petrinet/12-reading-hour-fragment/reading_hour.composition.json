@@ -1,0 +1,39 @@
+{
+  "name": "reading_hour",
+  "nets": [
+    {
+      "ref": "reading_cadence.petrinet",
+      "alias": "cadence"
+    },
+    {
+      "ref": "reading_pick.petrinet",
+      "alias": "curate"
+    },
+    {
+      "ref": "reading_voice.petrinet",
+      "alias": "speaks"
+    }
+  ],
+  "wires": [
+    {
+      "from": {
+        "net": "cadence",
+        "port": "refresh_due_out"
+      },
+      "to": {
+        "net": "curate",
+        "port": "refresh_due_in"
+      }
+    },
+    {
+      "from": {
+        "net": "curate",
+        "port": "speak_request"
+      },
+      "to": {
+        "net": "speaks",
+        "port": "request_in"
+      }
+    }
+  ]
+}

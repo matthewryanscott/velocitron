@@ -1,0 +1,11 @@
+play literal_start "A hand-built marking, stated as `marking none` and leading `inject` steps"
+net "kept-record.petrinet"
+marking none
+
+// The story states its literal start: the kept record (condition) injected
+// before the play's own steps, then the return it checks.
+inject (condition) <- condition {"isbn": "978-014", "damaged": false}
+inject (returns) <- copy {"isbn": "978-014", "state": "damaged"}
+fire [damaged]
+expect (condition) == condition {"isbn": "978-014", "damaged": true}, (shelved) count 1
+expect (returns) empty, quiescent

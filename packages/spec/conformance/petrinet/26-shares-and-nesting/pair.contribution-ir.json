@@ -1,0 +1,220 @@
+{
+  "contributions": [
+    {
+      "id": {
+        "part": 0,
+        "source": "pair.petrinet",
+        "statement": 0
+      },
+      "kind": "document.composition-header",
+      "ordinal": 0,
+      "span": {
+        "end": {
+          "byteOffset": 16,
+          "column": 17,
+          "line": 1
+        },
+        "source": "pair.petrinet",
+        "start": {
+          "byteOffset": 0,
+          "column": 1,
+          "line": 1
+        }
+      },
+      "target": {
+        "type": "document"
+      },
+      "value": {
+        "namespace": "pair"
+      }
+    },
+    {
+      "id": {
+        "part": 0,
+        "source": "pair.petrinet",
+        "statement": 1
+      },
+      "kind": "composition.use",
+      "ordinal": 1,
+      "span": {
+        "end": {
+          "byteOffset": 44,
+          "column": 28,
+          "line": 2
+        },
+        "source": "pair.petrinet",
+        "start": {
+          "byteOffset": 17,
+          "column": 1,
+          "line": 2
+        }
+      },
+      "target": {
+        "type": "document"
+      },
+      "value": {
+        "alias": "take",
+        "ref": "take.petrinet"
+      }
+    },
+    {
+      "id": {
+        "part": 0,
+        "source": "pair.petrinet",
+        "statement": 2
+      },
+      "kind": "composition.use",
+      "ordinal": 2,
+      "span": {
+        "end": {
+          "byteOffset": 72,
+          "column": 28,
+          "line": 3
+        },
+        "source": "pair.petrinet",
+        "start": {
+          "byteOffset": 45,
+          "column": 1,
+          "line": 3
+        }
+      },
+      "target": {
+        "type": "document"
+      },
+      "value": {
+        "alias": "give",
+        "ref": "give.petrinet"
+      }
+    },
+    {
+      "id": {
+        "part": 0,
+        "source": "pair.petrinet",
+        "statement": 3
+      },
+      "kind": "composition.wire",
+      "ordinal": 3,
+      "span": {
+        "end": {
+          "byteOffset": 104,
+          "column": 32,
+          "line": 4
+        },
+        "source": "pair.petrinet",
+        "start": {
+          "byteOffset": 73,
+          "column": 1,
+          "line": 4
+        }
+      },
+      "target": {
+        "type": "document"
+      },
+      "value": {
+        "from": {
+          "alias": "take",
+          "place": "busy",
+          "span": {
+            "end": {
+              "byteOffset": 89,
+              "column": 17,
+              "line": 4
+            },
+            "source": "pair.petrinet",
+            "start": {
+              "byteOffset": 78,
+              "column": 6,
+              "line": 4
+            }
+          }
+        },
+        "to": {
+          "alias": "give",
+          "place": "busy",
+          "span": {
+            "end": {
+              "byteOffset": 104,
+              "column": 32,
+              "line": 4
+            },
+            "source": "pair.petrinet",
+            "start": {
+              "byteOffset": 93,
+              "column": 21,
+              "line": 4
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": {
+        "part": 0,
+        "source": "pair.petrinet",
+        "statement": 4
+      },
+      "kind": "composition.share",
+      "ordinal": 4,
+      "span": {
+        "end": {
+          "byteOffset": 136,
+          "column": 32,
+          "line": 5
+        },
+        "source": "pair.petrinet",
+        "start": {
+          "byteOffset": 105,
+          "column": 1,
+          "line": 5
+        }
+      },
+      "target": {
+        "type": "document"
+      },
+      "value": {
+        "places": [
+          {
+            "alias": "take",
+            "place": "lock",
+            "span": {
+              "end": {
+                "byteOffset": 122,
+                "column": 18,
+                "line": 5
+              },
+              "source": "pair.petrinet",
+              "start": {
+                "byteOffset": 111,
+                "column": 7,
+                "line": 5
+              }
+            }
+          },
+          {
+            "alias": "give",
+            "place": "lock",
+            "span": {
+              "end": {
+                "byteOffset": 136,
+                "column": 32,
+                "line": 5
+              },
+              "source": "pair.petrinet",
+              "start": {
+                "byteOffset": 125,
+                "column": 21,
+                "line": 5
+              }
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "document": {
+    "id": "pair.petrinet"
+  },
+  "documentKind": "composition",
+  "format": "velocitron.petrinet/contribution-ir",
+  "version": 1
+}

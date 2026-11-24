@@ -1,0 +1,45 @@
+{
+  "diagnostic": {
+    "code": "PN202",
+    "column": 1,
+    "file": "beside.beside-conflicting.petrinet",
+    "help": "remove one declaration or make both decorations identical",
+    "line": 8,
+    "message": "conflicting beside decorations for (switch)",
+    "related": [
+      {
+        "message": "first beside decoration was declared here",
+        "span": {
+          "end": {
+            "byteOffset": 141,
+            "column": 30,
+            "line": 7
+          },
+          "source": "beside.beside-conflicting.petrinet",
+          "start": {
+            "byteOffset": 112,
+            "column": 1,
+            "line": 7
+          }
+        }
+      }
+    ],
+    "span": {
+      "end": {
+        "byteOffset": 172,
+        "column": 31,
+        "line": 8
+      },
+      "source": "beside.beside-conflicting.petrinet",
+      "start": {
+        "byteOffset": 142,
+        "column": 1,
+        "line": 8
+      }
+    }
+  },
+  "source": {
+    "sourceId": "beside.beside-conflicting.petrinet",
+    "text": "net beside\n\n(queued) -job-> [start] -job-> (running)\n(switch) -flag->? [start]\n(switch) annotation fusion true\n\ndecorate (switch) beside left\ndecorate (switch) beside right\n"
+  }
+}

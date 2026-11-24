@@ -1,0 +1,4 @@
+net worker "The work, in detail"
+(start) -job-> [do] -job-> (end)
+(start) port input job
+(end) port output job

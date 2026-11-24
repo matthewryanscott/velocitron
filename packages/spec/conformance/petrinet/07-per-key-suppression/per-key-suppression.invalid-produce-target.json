@@ -1,0 +1,45 @@
+{
+  "diagnostic": {
+    "code": "PN202",
+    "column": 1,
+    "file": "per-key-suppression.invalid-produce-target.petrinet",
+    "help": "move correlate to a named input arc",
+    "line": 7,
+    "message": "correlate must target exactly one input arc (->, ->?, ->0); @admitted names no input arc",
+    "related": [
+      {
+        "message": "arc @admitted was declared here",
+        "span": {
+          "end": {
+            "byteOffset": 73,
+            "column": 41,
+            "line": 3
+          },
+          "source": "per-key-suppression.invalid-produce-target.petrinet",
+          "start": {
+            "byteOffset": 33,
+            "column": 1,
+            "line": 3
+          }
+        }
+      }
+    ],
+    "span": {
+      "end": {
+        "byteOffset": 170,
+        "column": 63,
+        "line": 7
+      },
+      "source": "per-key-suppression.invalid-produce-target.petrinet",
+      "start": {
+        "byteOffset": 108,
+        "column": 1,
+        "line": 7
+      }
+    }
+  },
+  "source": {
+    "sourceId": "per-key-suppression.invalid-produce-target.petrinet",
+    "text": "net per_key_suppression_invalid\n\n@admitted: [admit] -request-> (admitted)\n\n[admit] handler \"admit_request\"\n\n@admitted correlate cel \"token.key == binding.requests[0].key\"\n"
+  }
+}

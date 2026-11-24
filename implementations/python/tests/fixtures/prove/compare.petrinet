@@ -1,0 +1,6 @@
+// A person compares a file; the check's result is closed, but no CEL reads it.
+net compare "Compare a file"
+
+(files) -file-> [compare] -check-> (checks)
+
+domain check.result "matches" "differs"

@@ -1,0 +1,2435 @@
+{
+  "01-symbolic-firing": {
+    "ok": true,
+    "name": "symbolic_firing",
+    "title": "Net data, step data, carry, merge and nothing",
+    "prose": "",
+    "line": 1,
+    "column": 1,
+    "net": "kitchen.petrinet",
+    "marking": "none",
+    "scope": null,
+    "sequence": null,
+    "instance": null,
+    "uses": [],
+    "wires": [],
+    "refines": [],
+    "shares": [],
+    "shows": [],
+    "actors": [],
+    "boxes": [],
+    "templates": [
+      {
+        "name": "t1",
+        "color": "ticket",
+        "data": {
+          "id": "t-1",
+          "cuisine": "thai"
+        }
+      },
+      {
+        "name": "t2",
+        "color": "ticket",
+        "data": {
+          "id": "t-2",
+          "cuisine": "thai"
+        }
+      }
+    ],
+    "paths": [
+      {
+        "name": "trunk",
+        "title": null,
+        "prose": "",
+        "from": null,
+        "sequence": null,
+        "steps": [
+          {
+            "kind": "inject",
+            "label": null,
+            "title": null,
+            "prose": "",
+            "statement": "inject (tickets) <- $t1, $t2",
+            "line": 8,
+            "column": 1,
+            "body": {
+              "place": "tickets",
+              "tokens": [
+                {
+                  "template": "t1"
+                },
+                {
+                  "template": "t2"
+                }
+              ]
+            }
+          },
+          {
+            "kind": "inject",
+            "label": null,
+            "title": null,
+            "prose": "",
+            "statement": "inject (spices) <- spice {\"cuisine\": \"thai\", \"heat\": 3}",
+            "line": 9,
+            "column": 1,
+            "body": {
+              "place": "spices",
+              "tokens": [
+                {
+                  "color": "spice",
+                  "data": {
+                    "cuisine": "thai",
+                    "heat": 3
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "kind": "fire",
+            "label": null,
+            "title": null,
+            "prose": "",
+            "statement": "fire [cook] with (tickets) $t2 -> (pass) dish {\"ticket\": \"t-2\"}",
+            "line": 12,
+            "column": 1,
+            "body": {
+              "transition": "cook",
+              "with": [
+                {
+                  "place": "tickets",
+                  "template": "t2"
+                }
+              ],
+              "output": [
+                {
+                  "place": "pass",
+                  "tokens": [
+                    {
+                      "color": "dish",
+                      "data": {
+                        "ticket": "t-2"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "kind": "expect",
+            "label": null,
+            "title": null,
+            "prose": "",
+            "statement": "expect (receipts) == receipt {\"ticket\": \"t-2\"}, (spices) count 1, (tickets) == $t1",
+            "line": 13,
+            "column": 1,
+            "body": {
+              "conditions": [
+                {
+                  "kind": "equals",
+                  "text": "(receipts) == receipt {\"ticket\": \"t-2\"}",
+                  "place": "receipts",
+                  "tokens": [
+                    {
+                      "color": "receipt",
+                      "data": {
+                        "ticket": "t-2"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "kind": "count",
+                  "text": "(spices) count 1",
+                  "place": "spices",
+                  "count": 1
+                },
+                {
+                  "kind": "equals",
+                  "text": "(tickets) == $t1",
+                  "place": "tickets",
+                  "tokens": [
+                    {
+                      "template": "t1"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "kind": "fire",
+            "label": null,
+            "title": null,
+            "prose": "",
+            "statement": "fire [serve] -> (served) +{\"table\": 4}",
+            "line": 16,
+            "column": 1,
+            "body": {
+              "transition": "serve",
+              "with": [],
+              "output": [
+                {
+                  "place": "served",
+                  "merge": {
+                    "table": 4
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "kind": "expect",
+            "label": null,
+            "title": null,
+            "prose": "",
+            "statement": "expect (served) has {\"ticket\": \"t-2\", \"table\": 4}",
+            "line": 17,
+            "column": 1,
+            "body": {
+              "conditions": [
+                {
+                  "kind": "has",
+                  "text": "(served) has {\"ticket\": \"t-2\", \"table\": 4}",
+                  "place": "served",
+                  "tokens": [
+                    {
+                      "color": null,
+                      "data": {
+                        "ticket": "t-2",
+                        "table": 4
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "kind": "fire",
+            "label": null,
+            "title": null,
+            "prose": "",
+            "statement": "fire [split] -> (right_half) nothing",
+            "line": 20,
+            "column": 1,
+            "body": {
+              "transition": "split",
+              "with": [],
+              "output": [
+                {
+                  "place": "right_half",
+                  "nothing": true
+                }
+              ]
+            }
+          },
+          {
+            "kind": "expect",
+            "label": null,
+            "title": null,
+            "prose": "",
+            "statement": "expect (left_half) count 1, (right_half) empty, (served) empty",
+            "line": 21,
+            "column": 1,
+            "body": {
+              "conditions": [
+                {
+                  "kind": "count",
+                  "text": "(left_half) count 1",
+                  "place": "left_half",
+                  "count": 1
+                },
+                {
+                  "kind": "empty",
+                  "text": "(right_half) empty",
+                  "place": "right_half"
+                },
+                {
+                  "kind": "empty",
+                  "text": "(served) empty",
+                  "place": "served"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "02-timers-and-paths": {
+    "ok": true,
+    "name": "timers_and_paths",
+    "title": "Advances, timers, the policy's pick, and branching",
+    "prose": "",
+    "line": 1,
+    "column": 1,
+    "net": "retry.petrinet",
+    "marking": "none",
+    "scope": null,
+    "sequence": null,
+    "instance": null,
+    "uses": [],
+    "wires": [],
+    "refines": [],
+    "shares": [],
+    "shows": [],
+    "actors": [],
+    "boxes": [],
+    "templates": [
+      {
+        "name": "job",
+        "color": "job",
+        "data": {
+          "id": "j-1",
+          "nextAt": 600,
+          "deadline": 3600
+        }
+      }
+    ],
+    "paths": [
+      {
+        "name": "trunk",
+        "title": null,
+        "prose": "",
+        "from": null,
+        "sequence": null,
+        "steps": [
+          {
+            "kind": "inject",
+            "label": null,
+            "title": null,
+            "prose": "",
+            "statement": "inject (queue) <- $job",
+            "line": 7,
+            "column": 1,
+            "body": {
+              "place": "queue",
+              "tokens": [
+                {
+                  "template": "job"
+                }
+              ]
+            }
+          },
+          {
+            "kind": "advance",
+            "label": null,
+            "title": null,
+            "prose": "",
+            "statement": "advance 0",
+            "line": 8,
+            "column": 1,
+            "body": {
+              "place": null,
+              "seconds": 0,
+              "relative": false
+            }
+          },
+          {
+            "kind": "fire",
+            "label": "waiting",
+            "title": null,
+            "prose": "",
+            "statement": "fire [try]",
+            "line": 9,
+            "column": 1,
+            "body": {
+              "transition": "try",
+              "with": [],
+              "output": []
+            }
+          },
+          {
+            "kind": "expect",
+            "label": null,
+            "title": null,
+            "prose": "",
+            "statement": "expect not enabled [retry] [give_up]",
+            "line": 10,
+            "column": 1,
+            "body": {
+              "conditions": [
+                {
+                  "kind": "not-enabled",
+                  "text": "not enabled [retry] [give_up]",
+                  "transitions": [
+                    "retry",
+                    "give_up"
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "kind": "advance",
+            "label": null,
+            "title": null,
+            "prose": "",
+            "statement": "advance +10m",
+            "line": 12,
+            "column": 1,
+            "body": {
+              "place": null,
+              "seconds": 600,
+              "relative": true
+            }
+          },
+          {
+            "kind": "expect",
+            "label": null,
+            "title": null,
+            "prose": "",
+            "statement": "expect (queue) == $job",
+            "line": 13,
+            "column": 1,
+            "body": {
+              "conditions": [
+                {
+                  "kind": "equals",
+                  "text": "(queue) == $job",
+                  "place": "queue",
+                  "tokens": [
+                    {
+                      "template": "job"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "deadline",
+        "title": "The deadline passes while the job waits",
+        "prose": "",
+        "from": {
+          "name": "waiting",
+          "line": 15,
+          "column": 62
+        },
+        "sequence": null,
+        "steps": [
+          {
+            "kind": "advance",
+            "label": null,
+            "title": null,
+            "prose": "",
+            "statement": "advance 1h",
+            "line": 17,
+            "column": 1,
+            "body": {
+              "place": null,
+              "seconds": 3600,
+              "relative": false
+            }
+          },
+          {
+            "kind": "expect",
+            "label": null,
+            "title": null,
+            "prose": "",
+            "statement": "expect (failed) == $job, quiescent",
+            "line": 18,
+            "column": 1,
+            "body": {
+              "conditions": [
+                {
+                  "kind": "equals",
+                  "text": "(failed) == $job",
+                  "place": "failed",
+                  "tokens": [
+                    {
+                      "template": "job"
+                    }
+                  ]
+                },
+                {
+                  "kind": "quiescent",
+                  "text": "quiescent"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "too_early",
+        "title": "Retrying before the timer is a failure",
+        "prose": "",
+        "from": {
+          "name": "waiting",
+          "line": 20,
+          "column": 62
+        },
+        "sequence": null,
+        "steps": [
+          {
+            "kind": "advance",
+            "label": null,
+            "title": null,
+            "prose": "",
+            "statement": "advance 5m",
+            "line": 22,
+            "column": 1,
+            "body": {
+              "place": null,
+              "seconds": 300,
+              "relative": false
+            }
+          },
+          {
+            "kind": "fire",
+            "label": null,
+            "title": null,
+            "prose": "",
+            "statement": "fire [retry]",
+            "line": 23,
+            "column": 1,
+            "body": {
+              "transition": "retry",
+              "with": [],
+              "output": []
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "03-composition": {
+    "ok": true,
+    "name": "composition",
+    "title": "A play across two composed nets",
+    "prose": "",
+    "line": 1,
+    "column": 1,
+    "net": null,
+    "marking": "initial",
+    "scope": null,
+    "sequence": null,
+    "instance": null,
+    "uses": [
+      {
+        "ref": "producer.petrinet",
+        "alias": "prod"
+      },
+      {
+        "ref": "consumer.petrinet",
+        "alias": "cons"
+      }
+    ],
+    "wires": [
+      {
+        "from_alias": "prod",
+        "from_place": "out",
+        "to_alias": "cons",
+        "to_place": "in"
+      }
+    ],
+    "refines": [],
+    "shares": [],
+    "shows": [],
+    "actors": [],
+    "boxes": [],
+    "templates": [],
+    "paths": [
+      {
+        "name": "trunk",
+        "title": null,
+        "prose": "",
+        "from": null,
+        "sequence": null,
+        "steps": [
+          {
+            "kind": "inject",
+            "label": null,
+            "title": null,
+            "prose": "",
+            "statement": "inject (prod.work) <- {\"id\": \"w-1\", \"lane\": \"b\"}",
+            "line": 6,
+            "column": 1,
+            "body": {
+              "place": "prod.work",
+              "tokens": [
+                {
+                  "color": null,
+                  "data": {
+                    "id": "w-1",
+                    "lane": "b"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "kind": "inject",
+            "label": null,
+            "title": null,
+            "prose": "",
+            "statement": "inject (cons.slots) <- slot {\"name\": \"s-a\", \"lane\": \"a\"}, slot {\"name\": \"s-b\", \"lane\": \"b\"}",
+            "line": 7,
+            "column": 1,
+            "body": {
+              "place": "cons.slots",
+              "tokens": [
+                {
+                  "color": "slot",
+                  "data": {
+                    "name": "s-a",
+                    "lane": "a"
+                  }
+                },
+                {
+                  "color": "slot",
+                  "data": {
+                    "name": "s-b",
+                    "lane": "b"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "kind": "fire",
+            "label": null,
+            "title": null,
+            "prose": "",
+            "statement": "fire [prod.make]",
+            "line": 8,
+            "column": 1,
+            "body": {
+              "transition": "prod.make",
+              "with": [],
+              "output": []
+            }
+          },
+          {
+            "kind": "expect",
+            "label": null,
+            "title": null,
+            "prose": "",
+            "statement": "expect (prod.out) count 1, (cons.in) == task {\"id\": \"w-1\", \"lane\": \"b\"}",
+            "line": 10,
+            "column": 1,
+            "body": {
+              "conditions": [
+                {
+                  "kind": "count",
+                  "text": "(prod.out) count 1",
+                  "place": "prod.out",
+                  "count": 1
+                },
+                {
+                  "kind": "equals",
+                  "text": "(cons.in) == task {\"id\": \"w-1\", \"lane\": \"b\"}",
+                  "place": "cons.in",
+                  "tokens": [
+                    {
+                      "color": "task",
+                      "data": {
+                        "id": "w-1",
+                        "lane": "b"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "kind": "fire",
+            "label": null,
+            "title": null,
+            "prose": "",
+            "statement": "fire [cons.take]",
+            "line": 12,
+            "column": 1,
+            "body": {
+              "transition": "cons.take",
+              "with": [],
+              "output": []
+            }
+          },
+          {
+            "kind": "expect",
+            "label": null,
+            "title": null,
+            "prose": "",
+            "statement": "expect (cons.done) == result {\"of\": \"w-1\", \"slot\": \"s-b\"}, (cons.slots) count 2, quiescent",
+            "line": 13,
+            "column": 1,
+            "body": {
+              "conditions": [
+                {
+                  "kind": "equals",
+                  "text": "(cons.done) == result {\"of\": \"w-1\", \"slot\": \"s-b\"}",
+                  "place": "cons.done",
+                  "tokens": [
+                    {
+                      "color": "result",
+                      "data": {
+                        "of": "w-1",
+                        "slot": "s-b"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "kind": "count",
+                  "text": "(cons.slots) count 2",
+                  "place": "cons.slots",
+                  "count": 2
+                },
+                {
+                  "kind": "quiescent",
+                  "text": "quiescent"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "04-refinement": {
+    "ok": true,
+    "name": "refinement",
+    "title": "A courier net refines the shop's abstract delivery",
+    "prose": "",
+    "line": 1,
+    "column": 1,
+    "net": null,
+    "marking": "initial",
+    "scope": null,
+    "sequence": null,
+    "instance": null,
+    "uses": [
+      {
+        "ref": "shop.petrinet",
+        "alias": "shop"
+      },
+      {
+        "ref": "courier.petrinet",
+        "alias": "courier"
+      }
+    ],
+    "wires": [
+      {
+        "from_alias": "shop",
+        "from_place": "sending",
+        "to_alias": "courier",
+        "to_place": "pickup"
+      },
+      {
+        "from_alias": "courier",
+        "from_place": "dropped",
+        "to_alias": "shop",
+        "to_place": "delivered"
+      }
+    ],
+    "refines": [
+      {
+        "alias": "shop",
+        "transition": "deliver",
+        "by": "courier"
+      }
+    ],
+    "shares": [],
+    "shows": [],
+    "actors": [],
+    "boxes": [],
+    "templates": [],
+    "paths": [
+      {
+        "name": "trunk",
+        "title": null,
+        "prose": "",
+        "from": null,
+        "sequence": null,
+        "steps": [
+          {
+            "kind": "inject",
+            "label": null,
+            "title": null,
+            "prose": "",
+            "statement": "inject (shop.placed) <- {\"id\": \"p-1\"}",
+            "line": 8,
+            "column": 1,
+            "body": {
+              "place": "shop.placed",
+              "tokens": [
+                {
+                  "color": null,
+                  "data": {
+                    "id": "p-1"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "kind": "fire",
+            "label": null,
+            "title": null,
+            "prose": "",
+            "statement": "fire [shop.send]",
+            "line": 9,
+            "column": 1,
+            "body": {
+              "transition": "shop.send",
+              "with": [],
+              "output": []
+            }
+          },
+          {
+            "kind": "expect",
+            "label": null,
+            "title": null,
+            "prose": "",
+            "statement": "expect enabled [courier.pick], (courier.pickup) count 1",
+            "line": 11,
+            "column": 1,
+            "body": {
+              "conditions": [
+                {
+                  "kind": "enabled",
+                  "text": "enabled [courier.pick]",
+                  "transitions": [
+                    "courier.pick"
+                  ]
+                },
+                {
+                  "kind": "count",
+                  "text": "(courier.pickup) count 1",
+                  "place": "courier.pickup",
+                  "count": 1
+                }
+              ]
+            }
+          },
+          {
+            "kind": "fire",
+            "label": null,
+            "title": null,
+            "prose": "",
+            "statement": "fire [courier.pick]",
+            "line": 12,
+            "column": 1,
+            "body": {
+              "transition": "courier.pick",
+              "with": [],
+              "output": []
+            }
+          },
+          {
+            "kind": "fire",
+            "label": null,
+            "title": null,
+            "prose": "",
+            "statement": "fire [courier.drop] -> (courier.dropped) {\"id\": \"p-1\", \"signed\": true}",
+            "line": 13,
+            "column": 1,
+            "body": {
+              "transition": "courier.drop",
+              "with": [],
+              "output": [
+                {
+                  "place": "courier.dropped",
+                  "tokens": [
+                    {
+                      "color": null,
+                      "data": {
+                        "id": "p-1",
+                        "signed": true
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "kind": "expect",
+            "label": null,
+            "title": null,
+            "prose": "",
+            "statement": "expect (shop.delivered) == receipt {\"id\": \"p-1\", \"signed\": true}",
+            "line": 15,
+            "column": 1,
+            "body": {
+              "conditions": [
+                {
+                  "kind": "equals",
+                  "text": "(shop.delivered) == receipt {\"id\": \"p-1\", \"signed\": true}",
+                  "place": "shop.delivered",
+                  "tokens": [
+                    {
+                      "color": "receipt",
+                      "data": {
+                        "id": "p-1",
+                        "signed": true
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "kind": "fire",
+            "label": null,
+            "title": null,
+            "prose": "",
+            "statement": "fire [shop.settle]",
+            "line": 16,
+            "column": 1,
+            "body": {
+              "transition": "shop.settle",
+              "with": [],
+              "output": []
+            }
+          },
+          {
+            "kind": "expect",
+            "label": null,
+            "title": null,
+            "prose": "",
+            "statement": "expect (shop.settled) count 1, quiescent",
+            "line": 17,
+            "column": 1,
+            "body": {
+              "conditions": [
+                {
+                  "kind": "count",
+                  "text": "(shop.settled) count 1",
+                  "place": "shop.settled",
+                  "count": 1
+                },
+                {
+                  "kind": "quiescent",
+                  "text": "quiescent"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "05-literal-start": {
+    "ok": true,
+    "name": "literal_start",
+    "title": "A hand-built marking, stated as `marking none` and leading `inject` steps",
+    "prose": "",
+    "line": 1,
+    "column": 1,
+    "net": "kept-record.petrinet",
+    "marking": "none",
+    "scope": null,
+    "sequence": null,
+    "instance": null,
+    "uses": [],
+    "wires": [],
+    "refines": [],
+    "shares": [],
+    "shows": [],
+    "actors": [],
+    "boxes": [],
+    "templates": [],
+    "paths": [
+      {
+        "name": "trunk",
+        "title": null,
+        "prose": "",
+        "from": null,
+        "sequence": null,
+        "steps": [
+          {
+            "kind": "inject",
+            "label": null,
+            "title": null,
+            "prose": "",
+            "statement": "inject (condition) <- condition {\"isbn\": \"978-014\", \"damaged\": false}",
+            "line": 7,
+            "column": 1,
+            "body": {
+              "place": "condition",
+              "tokens": [
+                {
+                  "color": "condition",
+                  "data": {
+                    "isbn": "978-014",
+                    "damaged": false
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "kind": "inject",
+            "label": null,
+            "title": null,
+            "prose": "",
+            "statement": "inject (returns) <- copy {\"isbn\": \"978-014\", \"state\": \"damaged\"}",
+            "line": 8,
+            "column": 1,
+            "body": {
+              "place": "returns",
+              "tokens": [
+                {
+                  "color": "copy",
+                  "data": {
+                    "isbn": "978-014",
+                    "state": "damaged"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "kind": "fire",
+            "label": null,
+            "title": null,
+            "prose": "",
+            "statement": "fire [damaged]",
+            "line": 9,
+            "column": 1,
+            "body": {
+              "transition": "damaged",
+              "with": [],
+              "output": []
+            }
+          },
+          {
+            "kind": "expect",
+            "label": null,
+            "title": null,
+            "prose": "",
+            "statement": "expect (condition) == condition {\"isbn\": \"978-014\", \"damaged\": true}, (shelved) count 1",
+            "line": 10,
+            "column": 1,
+            "body": {
+              "conditions": [
+                {
+                  "kind": "equals",
+                  "text": "(condition) == condition {\"isbn\": \"978-014\", \"damaged\": true}",
+                  "place": "condition",
+                  "tokens": [
+                    {
+                      "color": "condition",
+                      "data": {
+                        "isbn": "978-014",
+                        "damaged": true
+                      }
+                    }
+                  ]
+                },
+                {
+                  "kind": "count",
+                  "text": "(shelved) count 1",
+                  "place": "shelved",
+                  "count": 1
+                }
+              ]
+            }
+          },
+          {
+            "kind": "expect",
+            "label": null,
+            "title": null,
+            "prose": "",
+            "statement": "expect (returns) empty, quiescent",
+            "line": 11,
+            "column": 1,
+            "body": {
+              "conditions": [
+                {
+                  "kind": "empty",
+                  "text": "(returns) empty",
+                  "place": "returns"
+                },
+                {
+                  "kind": "quiescent",
+                  "text": "quiescent"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "shop": {
+    "ok": true,
+    "name": "shop",
+    "title": "One purchase through the shop",
+    "prose": "A purchase arrives in the initial marking. The stock holds one item\nof its sku.",
+    "line": 1,
+    "column": 1,
+    "net": "shop.petrinet",
+    "marking": "initial",
+    "scope": null,
+    "sequence": null,
+    "instance": null,
+    "uses": [],
+    "wires": [],
+    "refines": [],
+    "shares": [],
+    "shows": [],
+    "actors": [],
+    "boxes": [],
+    "templates": [
+      {
+        "name": "o1",
+        "color": "purchase",
+        "data": {
+          "id": "o-1",
+          "sku": "a",
+          "dueAt": 100
+        }
+      }
+    ],
+    "paths": [
+      {
+        "name": "trunk",
+        "title": null,
+        "prose": "",
+        "from": null,
+        "sequence": null,
+        "steps": [
+          {
+            "kind": "fire",
+            "label": "accepted",
+            "title": "the shop accepts the purchase",
+            "prose": "Accepting moves the purchase; the carry rule keeps its data.",
+            "statement": "fire [accept]",
+            "line": 10,
+            "column": 1,
+            "body": {
+              "transition": "accept",
+              "with": [],
+              "output": []
+            }
+          },
+          {
+            "kind": "expect",
+            "label": null,
+            "title": null,
+            "prose": "",
+            "statement": "expect (accepted) == $o1, enabled [ship]",
+            "line": 11,
+            "column": 1,
+            "body": {
+              "conditions": [
+                {
+                  "kind": "equals",
+                  "text": "(accepted) == $o1",
+                  "place": "accepted",
+                  "tokens": [
+                    {
+                      "template": "o1"
+                    }
+                  ]
+                },
+                {
+                  "kind": "enabled",
+                  "text": "enabled [ship]",
+                  "transitions": [
+                    "ship"
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "kind": "fire",
+            "label": null,
+            "title": "the purchase ships",
+            "prose": "Shipping reads the item and gives a parcel; the net fixes the receipt.",
+            "statement": "fire [ship] -> (shipped) parcel {\"order\": \"o-1\"}",
+            "line": 14,
+            "column": 1,
+            "body": {
+              "transition": "ship",
+              "with": [],
+              "output": [
+                {
+                  "place": "shipped",
+                  "tokens": [
+                    {
+                      "color": "parcel",
+                      "data": {
+                        "order": "o-1"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "kind": "expect",
+            "label": null,
+            "title": null,
+            "prose": "",
+            "statement": "expect (receipts) count 1",
+            "line": 15,
+            "column": 1,
+            "body": {
+              "conditions": [
+                {
+                  "kind": "count",
+                  "text": "(receipts) count 1",
+                  "place": "receipts",
+                  "count": 1
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "late",
+        "title": "The purchase is not shipped in time",
+        "prose": "",
+        "from": {
+          "name": "accepted",
+          "line": 17,
+          "column": 54
+        },
+        "sequence": null,
+        "steps": [
+          {
+            "kind": "advance",
+            "label": null,
+            "title": "past the deadline",
+            "prose": "",
+            "statement": "advance 150",
+            "line": 19,
+            "column": 1,
+            "body": {
+              "place": null,
+              "seconds": 150,
+              "relative": false
+            }
+          },
+          {
+            "kind": "expect",
+            "label": null,
+            "title": null,
+            "prose": "",
+            "statement": "expect next [expire]",
+            "line": 20,
+            "column": 1,
+            "body": {
+              "conditions": [
+                {
+                  "kind": "next",
+                  "text": "next [expire]",
+                  "transitions": [
+                    "expire"
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "kind": "fire",
+            "label": null,
+            "title": null,
+            "prose": "",
+            "statement": "fire [expire]",
+            "line": 21,
+            "column": 1,
+            "body": {
+              "transition": "expire",
+              "with": [],
+              "output": []
+            }
+          }
+        ]
+      },
+      {
+        "name": "held",
+        "title": "A hold stops shipping",
+        "prose": "",
+        "from": {
+          "name": "accepted",
+          "line": 23,
+          "column": 40
+        },
+        "sequence": null,
+        "steps": [
+          {
+            "kind": "inject",
+            "label": null,
+            "title": null,
+            "prose": "",
+            "statement": "inject (holds) <- hold {\"why\": \"fraud check\"}",
+            "line": 25,
+            "column": 1,
+            "body": {
+              "place": "holds",
+              "tokens": [
+                {
+                  "color": "hold",
+                  "data": {
+                    "why": "fraud check"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "kind": "fire",
+            "label": null,
+            "title": null,
+            "prose": "",
+            "statement": "fire [ship] -> (shipped) parcel {}",
+            "line": 26,
+            "column": 1,
+            "body": {
+              "transition": "ship",
+              "with": [],
+              "output": [
+                {
+                  "place": "shipped",
+                  "tokens": [
+                    {
+                      "color": "parcel",
+                      "data": {}
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "evening_shift": {
+    "ok": true,
+    "name": "evening_shift",
+    "title": "Evening shift",
+    "prose": "The clerk closes the desk, a runner takes one hold, and the clerk checks it\nan hour later before the desk opens again.",
+    "line": 1,
+    "column": 1,
+    "net": "evening-shift.petrinet",
+    "marking": "initial",
+    "scope": null,
+    "sequence": "beside",
+    "instance": null,
+    "uses": [],
+    "wires": [],
+    "refines": [],
+    "shares": [],
+    "shows": [],
+    "actors": [],
+    "boxes": [
+      {
+        "title": "Night crew",
+        "members": [
+          "Runner",
+          "Desk"
+        ]
+      }
+    ],
+    "templates": [],
+    "paths": [
+      {
+        "name": "trunk",
+        "title": null,
+        "prose": "",
+        "from": null,
+        "sequence": null,
+        "steps": [
+          {
+            "kind": "fire",
+            "label": "closed",
+            "title": null,
+            "prose": "## Close",
+            "statement": "fire [close_desk]",
+            "line": 9,
+            "column": 1,
+            "body": {
+              "transition": "close_desk",
+              "with": [],
+              "output": []
+            }
+          },
+          {
+            "kind": "fire",
+            "label": null,
+            "title": "Close the desk",
+            "prose": "",
+            "statement": "fire [desk_closes]",
+            "line": 10,
+            "column": 1,
+            "body": {
+              "transition": "desk_closes",
+              "with": [],
+              "output": []
+            }
+          },
+          {
+            "kind": "inject",
+            "label": null,
+            "title": "Hold filed",
+            "prose": "### First hold",
+            "statement": "inject (request) <- {\"titles\": 4, \"branch\": \"annex\"}",
+            "line": 13,
+            "column": 1,
+            "body": {
+              "place": "request",
+              "tokens": [
+                {
+                  "color": null,
+                  "data": {
+                    "titles": 4,
+                    "branch": "annex"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "kind": "fire",
+            "label": null,
+            "title": "Take the hold",
+            "prose": "",
+            "statement": "fire [runner_takes]",
+            "line": 14,
+            "column": 1,
+            "body": {
+              "transition": "runner_takes",
+              "with": [],
+              "output": []
+            }
+          },
+          {
+            "kind": "expect",
+            "label": null,
+            "title": null,
+            "prose": "",
+            "statement": "expect (ready) count 1",
+            "line": 15,
+            "column": 1,
+            "body": {
+              "conditions": [
+                {
+                  "kind": "count",
+                  "text": "(ready) count 1",
+                  "place": "ready",
+                  "count": 1
+                }
+              ]
+            }
+          },
+          {
+            "kind": "advance",
+            "label": null,
+            "title": null,
+            "prose": "",
+            "statement": "advance +90m",
+            "line": 17,
+            "column": 1,
+            "body": {
+              "place": null,
+              "seconds": 5400,
+              "relative": true
+            }
+          },
+          {
+            "kind": "fire",
+            "label": null,
+            "title": "Check the hold",
+            "prose": "## Check and reopen",
+            "statement": "fire [check] -> (checked) {\"ok\": true}",
+            "line": 19,
+            "column": 1,
+            "body": {
+              "transition": "check",
+              "with": [],
+              "output": [
+                {
+                  "place": "checked",
+                  "tokens": [
+                    {
+                      "color": null,
+                      "data": {
+                        "ok": true
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "kind": "fire",
+            "label": null,
+            "title": "Open the desk",
+            "prose": "",
+            "statement": "fire [open_desk]",
+            "line": 20,
+            "column": 1,
+            "body": {
+              "transition": "open_desk",
+              "with": [],
+              "output": []
+            }
+          },
+          {
+            "kind": "fire",
+            "label": null,
+            "title": null,
+            "prose": "",
+            "statement": "fire [desk_opens]",
+            "line": 21,
+            "column": 1,
+            "body": {
+              "transition": "desk_opens",
+              "with": [],
+              "output": []
+            }
+          },
+          {
+            "kind": "expect",
+            "label": null,
+            "title": null,
+            "prose": "",
+            "statement": "expect (desk_open) count 1, (open_sign) has {\"state\": \"open\"}",
+            "line": 22,
+            "column": 1,
+            "body": {
+              "conditions": [
+                {
+                  "kind": "count",
+                  "text": "(desk_open) count 1",
+                  "place": "desk_open",
+                  "count": 1
+                },
+                {
+                  "kind": "has",
+                  "text": "(open_sign) has {\"state\": \"open\"}",
+                  "place": "open_sign",
+                  "tokens": [
+                    {
+                      "color": null,
+                      "data": {
+                        "state": "open"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "early_check",
+        "title": "Check too early",
+        "prose": "",
+        "from": {
+          "name": "closed",
+          "line": 24,
+          "column": 41
+        },
+        "sequence": "only",
+        "steps": [
+          {
+            "kind": "fire",
+            "label": null,
+            "title": "Close the desk",
+            "prose": "",
+            "statement": "fire [desk_closes]",
+            "line": 26,
+            "column": 1,
+            "body": {
+              "transition": "desk_closes",
+              "with": [],
+              "output": []
+            }
+          },
+          {
+            "kind": "inject",
+            "label": null,
+            "title": "Hold filed",
+            "prose": "",
+            "statement": "inject (request) <- {\"titles\": 4, \"branch\": \"annex\"}",
+            "line": 27,
+            "column": 1,
+            "body": {
+              "place": "request",
+              "tokens": [
+                {
+                  "color": null,
+                  "data": {
+                    "titles": 4,
+                    "branch": "annex"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "kind": "fire",
+            "label": null,
+            "title": "Take the hold",
+            "prose": "",
+            "statement": "fire [runner_takes]",
+            "line": 28,
+            "column": 1,
+            "body": {
+              "transition": "runner_takes",
+              "with": [],
+              "output": []
+            }
+          },
+          {
+            "kind": "fire",
+            "label": null,
+            "title": "Check the hold",
+            "prose": "The check waits for the clock; nobody advanced it.",
+            "statement": "fire [check] -> (checked) {\"ok\": true}",
+            "line": 30,
+            "column": 1,
+            "body": {
+              "transition": "check",
+              "with": [],
+              "output": [
+                {
+                  "place": "checked",
+                  "tokens": [
+                    {
+                      "color": null,
+                      "data": {
+                        "ok": true
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "kitchen-sink": {
+    "ok": true,
+    "name": "review_sla",
+    "title": "A document review escalates once it is overdue",
+    "prose": "Region C of the kitchen sink. A queued document is assigned for review,\nand the assignment escalates when the clock passes its due time.",
+    "line": 13,
+    "column": 1,
+    "net": "kitchen-sink.petrinet",
+    "marking": "initial",
+    "scope": null,
+    "sequence": null,
+    "instance": null,
+    "uses": [],
+    "wires": [],
+    "refines": [],
+    "shares": [],
+    "shows": [],
+    "actors": [],
+    "boxes": [],
+    "templates": [
+      {
+        "name": "due",
+        "color": "assignment",
+        "data": {
+          "docId": "doc-1",
+          "dueAt": 1000
+        }
+      }
+    ],
+    "paths": [
+      {
+        "name": "trunk",
+        "title": null,
+        "prose": "",
+        "from": null,
+        "sequence": null,
+        "steps": [
+          {
+            "kind": "fire",
+            "label": "assigned",
+            "title": "assign the review",
+            "prose": "`[assign_review]` turns a `doc` into an `assignment`. The net has no data\ntemplate for it and the colors differ, so the carry rule cannot fill it:\nthe step states the assignment.",
+            "statement": "fire [assign_review] -> (assignments) $due",
+            "line": 25,
+            "column": 1,
+            "body": {
+              "transition": "assign_review",
+              "with": [],
+              "output": [
+                {
+                  "place": "assignments",
+                  "tokens": [
+                    {
+                      "template": "due"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "kind": "expect",
+            "label": null,
+            "title": null,
+            "prose": "",
+            "statement": "expect (review_queue) empty, (assignments) == $due, not enabled [escalate_review]",
+            "line": 26,
+            "column": 1,
+            "body": {
+              "conditions": [
+                {
+                  "kind": "empty",
+                  "text": "(review_queue) empty",
+                  "place": "review_queue"
+                },
+                {
+                  "kind": "equals",
+                  "text": "(assignments) == $due",
+                  "place": "assignments",
+                  "tokens": [
+                    {
+                      "template": "due"
+                    }
+                  ]
+                },
+                {
+                  "kind": "not-enabled",
+                  "text": "not enabled [escalate_review]",
+                  "transitions": [
+                    "escalate_review"
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "kind": "advance",
+            "label": null,
+            "title": null,
+            "prose": "A advance replaces the clock token's `now`. It fires nothing by itself.",
+            "statement": "advance 999",
+            "line": 29,
+            "column": 1,
+            "body": {
+              "place": null,
+              "seconds": 999,
+              "relative": false
+            }
+          },
+          {
+            "kind": "expect",
+            "label": null,
+            "title": null,
+            "prose": "",
+            "statement": "expect not enabled [escalate_review]",
+            "line": 30,
+            "column": 1,
+            "body": {
+              "conditions": [
+                {
+                  "kind": "not-enabled",
+                  "text": "not enabled [escalate_review]",
+                  "transitions": [
+                    "escalate_review"
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "kind": "advance",
+            "label": null,
+            "title": "the review is due",
+            "prose": "",
+            "statement": "advance +1s",
+            "line": 32,
+            "column": 1,
+            "body": {
+              "place": null,
+              "seconds": 1,
+              "relative": true
+            }
+          },
+          {
+            "kind": "expect",
+            "label": null,
+            "title": null,
+            "prose": "",
+            "statement": "expect enabled [escalate_review]",
+            "line": 33,
+            "column": 1,
+            "body": {
+              "conditions": [
+                {
+                  "kind": "enabled",
+                  "text": "enabled [escalate_review]",
+                  "transitions": [
+                    "escalate_review"
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "kind": "fire",
+            "label": null,
+            "title": "escalate it",
+            "prose": "",
+            "statement": "fire [escalate_review] -> (escalations) escalation {\"docId\": \"doc-1\"}",
+            "line": 34,
+            "column": 1,
+            "body": {
+              "transition": "escalate_review",
+              "with": [],
+              "output": [
+                {
+                  "place": "escalations",
+                  "tokens": [
+                    {
+                      "color": "escalation",
+                      "data": {
+                        "docId": "doc-1"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "kind": "expect",
+            "label": null,
+            "title": null,
+            "prose": "",
+            "statement": "expect (assignments) empty, (escalations) count 1",
+            "line": 35,
+            "column": 1,
+            "body": {
+              "conditions": [
+                {
+                  "kind": "empty",
+                  "text": "(assignments) empty",
+                  "place": "assignments"
+                },
+                {
+                  "kind": "count",
+                  "text": "(escalations) count 1",
+                  "place": "escalations",
+                  "count": 1
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "shipment",
+        "title": "A guarded transition fires under an assumed answer",
+        "prose": "",
+        "from": {
+          "name": "assigned",
+          "line": 37,
+          "column": 73
+        },
+        "sequence": null,
+        "steps": [
+          {
+            "kind": "expect",
+            "label": null,
+            "title": null,
+            "prose": "`[form_shipment]` has two accepted orders, stock for their sku and no open\nshipment for their customer, but its guard is a named handler. A play\nregisters no handlers, so the transition is not enabled \u2014 until the path\nassumes the guard's answer.",
+            "statement": "expect not enabled [form_shipment], enabled [accept_order]",
+            "line": 43,
+            "column": 1,
+            "body": {
+              "conditions": [
+                {
+                  "kind": "not-enabled",
+                  "text": "not enabled [form_shipment]",
+                  "transitions": [
+                    "form_shipment"
+                  ]
+                },
+                {
+                  "kind": "enabled",
+                  "text": "enabled [accept_order]",
+                  "transitions": [
+                    "accept_order"
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "kind": "fire",
+            "label": null,
+            "title": "a new order is accepted",
+            "prose": "",
+            "statement": "fire [accept_order] -> (accepted_orders) accepted_order {\"customerId\": \"cust-1\", \"sku\": \"WIDGET-1\"}",
+            "line": 44,
+            "column": 1,
+            "body": {
+              "transition": "accept_order",
+              "with": [],
+              "output": [
+                {
+                  "place": "accepted_orders",
+                  "tokens": [
+                    {
+                      "color": "accepted_order",
+                      "data": {
+                        "customerId": "cust-1",
+                        "sku": "WIDGET-1"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "kind": "expect",
+            "label": null,
+            "title": null,
+            "prose": "",
+            "statement": "expect (accepted_orders) count 3",
+            "line": 45,
+            "column": 1,
+            "body": {
+              "conditions": [
+                {
+                  "kind": "count",
+                  "text": "(accepted_orders) count 3",
+                  "place": "accepted_orders",
+                  "count": 3
+                }
+              ]
+            }
+          },
+          {
+            "kind": "assume",
+            "label": null,
+            "title": null,
+            "prose": "",
+            "statement": "assume [form_shipment] guard true",
+            "line": 46,
+            "column": 1,
+            "body": {
+              "assume": "guard",
+              "transition": "form_shipment",
+              "value": true
+            }
+          },
+          {
+            "kind": "fire",
+            "label": "shipped",
+            "title": "the assumed answer opens the warehouse",
+            "prose": "",
+            "statement": "fire [form_shipment]",
+            "line": 47,
+            "column": 1,
+            "body": {
+              "transition": "form_shipment",
+              "with": [],
+              "output": []
+            }
+          },
+          {
+            "kind": "expect",
+            "label": null,
+            "title": null,
+            "prose": "",
+            "statement": "expect (shipments) count 1",
+            "line": 48,
+            "column": 1,
+            "body": {
+              "conditions": [
+                {
+                  "kind": "count",
+                  "text": "(shipments) count 1",
+                  "place": "shipments",
+                  "count": 1
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "durations": {
+    "ok": true,
+    "name": "s",
+    "title": null,
+    "prose": "",
+    "line": 1,
+    "column": 1,
+    "net": null,
+    "marking": "initial",
+    "scope": null,
+    "sequence": null,
+    "instance": null,
+    "uses": [],
+    "wires": [],
+    "refines": [],
+    "shares": [],
+    "shows": [],
+    "actors": [],
+    "boxes": [],
+    "templates": [],
+    "paths": [
+      {
+        "name": "trunk",
+        "title": null,
+        "prose": "",
+        "from": null,
+        "sequence": null,
+        "steps": [
+          {
+            "kind": "advance",
+            "label": null,
+            "title": null,
+            "prose": "",
+            "statement": "advance 5400",
+            "line": 2,
+            "column": 1,
+            "body": {
+              "place": null,
+              "seconds": 5400,
+              "relative": false
+            }
+          },
+          {
+            "kind": "advance",
+            "label": null,
+            "title": null,
+            "prose": "",
+            "statement": "advance +5400.5",
+            "line": 3,
+            "column": 1,
+            "body": {
+              "place": null,
+              "seconds": 5400.5,
+              "relative": true
+            }
+          },
+          {
+            "kind": "advance",
+            "label": null,
+            "title": null,
+            "prose": "",
+            "statement": "advance +90s",
+            "line": 4,
+            "column": 1,
+            "body": {
+              "place": null,
+              "seconds": 90,
+              "relative": true
+            }
+          },
+          {
+            "kind": "advance",
+            "label": null,
+            "title": null,
+            "prose": "",
+            "statement": "advance +90m",
+            "line": 5,
+            "column": 1,
+            "body": {
+              "place": null,
+              "seconds": 5400,
+              "relative": true
+            }
+          },
+          {
+            "kind": "advance",
+            "label": null,
+            "title": null,
+            "prose": "",
+            "statement": "advance +22.5h",
+            "line": 6,
+            "column": 1,
+            "body": {
+              "place": null,
+              "seconds": 81000,
+              "relative": true
+            }
+          },
+          {
+            "kind": "advance",
+            "label": null,
+            "title": null,
+            "prose": "",
+            "statement": "advance +1h30m",
+            "line": 7,
+            "column": 1,
+            "body": {
+              "place": null,
+              "seconds": 5400,
+              "relative": true
+            }
+          },
+          {
+            "kind": "advance",
+            "label": null,
+            "title": null,
+            "prose": "",
+            "statement": "advance +1d",
+            "line": 8,
+            "column": 1,
+            "body": {
+              "place": null,
+              "seconds": 86400,
+              "relative": true
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "prose-after-blank": {
+    "ok": true,
+    "name": "s",
+    "title": null,
+    "prose": "",
+    "line": 1,
+    "column": 1,
+    "net": null,
+    "marking": "initial",
+    "scope": null,
+    "sequence": null,
+    "instance": null,
+    "uses": [],
+    "wires": [],
+    "refines": [],
+    "shares": [],
+    "shows": [],
+    "actors": [],
+    "boxes": [],
+    "templates": [],
+    "paths": [
+      {
+        "name": "trunk",
+        "title": null,
+        "prose": "",
+        "from": null,
+        "sequence": null,
+        "steps": [
+          {
+            "kind": "advance",
+            "label": "a",
+            "title": null,
+            "prose": "",
+            "statement": "advance 1",
+            "line": 2,
+            "column": 1,
+            "body": {
+              "place": null,
+              "seconds": 1,
+              "relative": false
+            }
+          }
+        ]
+      },
+      {
+        "name": "p",
+        "title": null,
+        "prose": "",
+        "from": {
+          "name": "a",
+          "line": 4,
+          "column": 13
+        },
+        "sequence": null,
+        "steps": [
+          {
+            "kind": "advance",
+            "label": null,
+            "title": null,
+            "prose": "The desk is closed, and the\nhold waits.",
+            "statement": "advance 2",
+            "line": 8,
+            "column": 1,
+            "body": {
+              "place": null,
+              "seconds": 2,
+              "relative": false
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "prose-paragraph": {
+    "ok": true,
+    "name": "s",
+    "title": null,
+    "prose": "",
+    "line": 1,
+    "column": 1,
+    "net": null,
+    "marking": "initial",
+    "scope": null,
+    "sequence": null,
+    "instance": null,
+    "uses": [],
+    "wires": [],
+    "refines": [],
+    "shares": [],
+    "shows": [],
+    "actors": [],
+    "boxes": [],
+    "templates": [],
+    "paths": [
+      {
+        "name": "trunk",
+        "title": null,
+        "prose": "",
+        "from": null,
+        "sequence": null,
+        "steps": [
+          {
+            "kind": "advance",
+            "label": "a",
+            "title": null,
+            "prose": "",
+            "statement": "advance 1",
+            "line": 2,
+            "column": 1,
+            "body": {
+              "place": null,
+              "seconds": 1,
+              "relative": false
+            }
+          }
+        ]
+      },
+      {
+        "name": "p",
+        "title": null,
+        "prose": "One sentence that goes on\nover two lines.\n\nA second paragraph.",
+        "from": {
+          "name": "a",
+          "line": 3,
+          "column": 13
+        },
+        "sequence": null,
+        "steps": [
+          {
+            "kind": "advance",
+            "label": null,
+            "title": null,
+            "prose": "",
+            "statement": "advance 2",
+            "line": 8,
+            "column": 1,
+            "body": {
+              "place": null,
+              "seconds": 2,
+              "relative": false
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "show-scope": {
+    "ok": true,
+    "name": "s",
+    "title": null,
+    "prose": "",
+    "line": 1,
+    "column": 1,
+    "net": null,
+    "marking": "initial",
+    "scope": "neighbors",
+    "sequence": "only",
+    "instance": null,
+    "uses": [],
+    "wires": [],
+    "refines": [],
+    "shares": [],
+    "shows": [
+      {
+        "color": "hold",
+        "fields": [
+          "id",
+          "remindAt"
+        ]
+      },
+      {
+        "color": "loan",
+        "fields": [
+          "outcome",
+          "hold.id",
+          "edition"
+        ]
+      }
+    ],
+    "actors": [],
+    "boxes": [],
+    "templates": [],
+    "paths": [
+      {
+        "name": "trunk",
+        "title": null,
+        "prose": "",
+        "from": null,
+        "sequence": null,
+        "steps": []
+      }
+    ]
+  },
+  "show-sequence-color": {
+    "ok": true,
+    "name": "s",
+    "title": null,
+    "prose": "",
+    "line": 1,
+    "column": 1,
+    "net": "n.petrinet",
+    "marking": "initial",
+    "scope": null,
+    "sequence": null,
+    "instance": null,
+    "uses": [],
+    "wires": [],
+    "refines": [],
+    "shares": [],
+    "shows": [
+      {
+        "color": "sequence",
+        "fields": [
+          "id"
+        ]
+      }
+    ],
+    "actors": [
+      {
+        "name": "Ops",
+        "kind": "person"
+      }
+    ],
+    "boxes": [],
+    "templates": [],
+    "paths": [
+      {
+        "name": "trunk",
+        "title": null,
+        "prose": "",
+        "from": null,
+        "sequence": null,
+        "steps": []
+      }
+    ]
+  },
+  "unknown-statement": {
+    "ok": false,
+    "code": "SC101",
+    "line": 3,
+    "column": 1
+  },
+  "duplicate-key": {
+    "ok": false,
+    "code": "SC102",
+    "line": 2,
+    "column": 17
+  },
+  "bad-duration": {
+    "ok": false,
+    "code": "SC103",
+    "line": 2,
+    "column": 10
+  },
+  "advance-extra": {
+    "ok": false,
+    "code": "SC101",
+    "line": 2,
+    "column": 14
+  },
+  "missing-header": {
+    "ok": false,
+    "code": "SC104",
+    "line": 1,
+    "column": 1
+  },
+  "duplicate-label": {
+    "ok": false,
+    "code": "SC105",
+    "line": 3,
+    "column": 1
+  },
+  "trunk-path": {
+    "ok": false,
+    "code": "SC105",
+    "line": 3,
+    "column": 6
+  },
+  "indented": {
+    "ok": false,
+    "code": "SC101",
+    "line": 1,
+    "column": 1
+  },
+  "show-sequence-twice": {
+    "ok": false,
+    "code": "SC101",
+    "line": 2,
+    "column": 15
+  },
+  "duplicate-actor": {
+    "ok": false,
+    "code": "SC105",
+    "line": 3,
+    "column": 1
+  },
+  "bad-scope": {
+    "ok": false,
+    "code": "SC101",
+    "line": 2,
+    "column": 7
+  },
+  "duplicate-scope": {
+    "ok": false,
+    "code": "SC104",
+    "line": 3,
+    "column": 1
+  },
+  "duplicate-show": {
+    "ok": false,
+    "code": "SC104",
+    "line": 3,
+    "column": 1
+  },
+  "repeated-field": {
+    "ok": false,
+    "code": "SC101",
+    "line": 2,
+    "column": 1
+  },
+  "empty-field": {
+    "ok": false,
+    "code": "SC101",
+    "line": 2,
+    "column": 8
+  },
+  "kebab-name": {
+    "ok": false,
+    "code": "SC101",
+    "line": 1,
+    "column": 10
+  }
+}

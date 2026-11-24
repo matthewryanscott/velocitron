@@ -1,0 +1,696 @@
+[
+  {
+    "play": "symbolic_firing",
+    "path": "trunk",
+    "status": "passed",
+    "inherited": 0,
+    "initial": {},
+    "steps": [
+      {
+        "line": 8,
+        "kind": "inject",
+        "statement": "inject (tickets) <- $t1, $t2",
+        "records": [
+          {
+            "kind": "injection",
+            "place": "tickets",
+            "injectionKind": "inject",
+            "tokens": [
+              {
+                "type": "ticket",
+                "data": {
+                  "id": "t-1",
+                  "cuisine": "thai"
+                }
+              }
+            ],
+            "replaced": []
+          },
+          {
+            "kind": "injection",
+            "place": "tickets",
+            "injectionKind": "inject",
+            "tokens": [
+              {
+                "type": "ticket",
+                "data": {
+                  "id": "t-2",
+                  "cuisine": "thai"
+                }
+              }
+            ],
+            "replaced": []
+          }
+        ],
+        "afterEach": [
+          {
+            "tickets": [
+              {
+                "type": "ticket",
+                "data": {
+                  "id": "t-1",
+                  "cuisine": "thai"
+                }
+              }
+            ]
+          },
+          {
+            "tickets": [
+              {
+                "type": "ticket",
+                "data": {
+                  "id": "t-1",
+                  "cuisine": "thai"
+                }
+              },
+              {
+                "type": "ticket",
+                "data": {
+                  "id": "t-2",
+                  "cuisine": "thai"
+                }
+              }
+            ]
+          }
+        ],
+        "checks": [],
+        "after": {
+          "tickets": [
+            {
+              "type": "ticket",
+              "data": {
+                "id": "t-1",
+                "cuisine": "thai"
+              }
+            },
+            {
+              "type": "ticket",
+              "data": {
+                "id": "t-2",
+                "cuisine": "thai"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "line": 9,
+        "kind": "inject",
+        "statement": "inject (spices) <- spice {\"cuisine\": \"thai\", \"heat\": 3}",
+        "records": [
+          {
+            "kind": "injection",
+            "place": "spices",
+            "injectionKind": "inject",
+            "tokens": [
+              {
+                "type": "spice",
+                "data": {
+                  "cuisine": "thai",
+                  "heat": 3
+                }
+              }
+            ],
+            "replaced": []
+          }
+        ],
+        "afterEach": [
+          {
+            "spices": [
+              {
+                "type": "spice",
+                "data": {
+                  "cuisine": "thai",
+                  "heat": 3
+                }
+              }
+            ],
+            "tickets": [
+              {
+                "type": "ticket",
+                "data": {
+                  "id": "t-1",
+                  "cuisine": "thai"
+                }
+              },
+              {
+                "type": "ticket",
+                "data": {
+                  "id": "t-2",
+                  "cuisine": "thai"
+                }
+              }
+            ]
+          }
+        ],
+        "checks": [],
+        "after": {
+          "spices": [
+            {
+              "type": "spice",
+              "data": {
+                "cuisine": "thai",
+                "heat": 3
+              }
+            }
+          ],
+          "tickets": [
+            {
+              "type": "ticket",
+              "data": {
+                "id": "t-1",
+                "cuisine": "thai"
+              }
+            },
+            {
+              "type": "ticket",
+              "data": {
+                "id": "t-2",
+                "cuisine": "thai"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "line": 12,
+        "kind": "fire",
+        "statement": "fire [cook] with (tickets) $t2 -> (pass) dish {\"ticket\": \"t-2\"}",
+        "records": [
+          {
+            "kind": "firing",
+            "transition": "cook",
+            "status": "completed",
+            "inputTokens": {
+              "tickets": [
+                {
+                  "type": "ticket",
+                  "data": {
+                    "id": "t-2",
+                    "cuisine": "thai"
+                  }
+                }
+              ],
+              "spices": [
+                {
+                  "type": "spice",
+                  "data": {
+                    "cuisine": "thai",
+                    "heat": 3
+                  }
+                }
+              ]
+            },
+            "outputTokens": {
+              "pass": [
+                {
+                  "type": "dish",
+                  "data": {
+                    "ticket": "t-2"
+                  }
+                }
+              ],
+              "receipts": [
+                {
+                  "type": "receipt",
+                  "data": {
+                    "ticket": "t-2"
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "afterEach": [
+          {
+            "pass": [
+              {
+                "type": "dish",
+                "data": {
+                  "ticket": "t-2"
+                }
+              }
+            ],
+            "receipts": [
+              {
+                "type": "receipt",
+                "data": {
+                  "ticket": "t-2"
+                }
+              }
+            ],
+            "spices": [
+              {
+                "type": "spice",
+                "data": {
+                  "cuisine": "thai",
+                  "heat": 3
+                }
+              }
+            ],
+            "tickets": [
+              {
+                "type": "ticket",
+                "data": {
+                  "id": "t-1",
+                  "cuisine": "thai"
+                }
+              }
+            ]
+          }
+        ],
+        "checks": [],
+        "after": {
+          "pass": [
+            {
+              "type": "dish",
+              "data": {
+                "ticket": "t-2"
+              }
+            }
+          ],
+          "receipts": [
+            {
+              "type": "receipt",
+              "data": {
+                "ticket": "t-2"
+              }
+            }
+          ],
+          "spices": [
+            {
+              "type": "spice",
+              "data": {
+                "cuisine": "thai",
+                "heat": 3
+              }
+            }
+          ],
+          "tickets": [
+            {
+              "type": "ticket",
+              "data": {
+                "id": "t-1",
+                "cuisine": "thai"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "line": 13,
+        "kind": "expect",
+        "statement": "expect (receipts) == receipt {\"ticket\": \"t-2\"}, (spices) count 1, (tickets) == $t1",
+        "records": [],
+        "afterEach": [],
+        "checks": [
+          {
+            "text": "(receipts) == receipt {\"ticket\": \"t-2\"}",
+            "ok": true,
+            "detail": "(receipts) holds receipt {\"ticket\": \"t-2\"}"
+          },
+          {
+            "text": "(spices) count 1",
+            "ok": true,
+            "detail": "(spices) holds 1"
+          },
+          {
+            "text": "(tickets) == $t1",
+            "ok": true,
+            "detail": "(tickets) holds ticket {\"cuisine\": \"thai\", \"id\": \"t-1\"}"
+          }
+        ],
+        "after": {
+          "pass": [
+            {
+              "type": "dish",
+              "data": {
+                "ticket": "t-2"
+              }
+            }
+          ],
+          "receipts": [
+            {
+              "type": "receipt",
+              "data": {
+                "ticket": "t-2"
+              }
+            }
+          ],
+          "spices": [
+            {
+              "type": "spice",
+              "data": {
+                "cuisine": "thai",
+                "heat": 3
+              }
+            }
+          ],
+          "tickets": [
+            {
+              "type": "ticket",
+              "data": {
+                "id": "t-1",
+                "cuisine": "thai"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "line": 16,
+        "kind": "fire",
+        "statement": "fire [serve] -> (served) +{\"table\": 4}",
+        "records": [
+          {
+            "kind": "firing",
+            "transition": "serve",
+            "status": "completed",
+            "inputTokens": {
+              "pass": [
+                {
+                  "type": "dish",
+                  "data": {
+                    "ticket": "t-2"
+                  }
+                }
+              ]
+            },
+            "outputTokens": {
+              "served": [
+                {
+                  "type": "dish",
+                  "data": {
+                    "ticket": "t-2",
+                    "table": 4
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "afterEach": [
+          {
+            "receipts": [
+              {
+                "type": "receipt",
+                "data": {
+                  "ticket": "t-2"
+                }
+              }
+            ],
+            "served": [
+              {
+                "type": "dish",
+                "data": {
+                  "ticket": "t-2",
+                  "table": 4
+                }
+              }
+            ],
+            "spices": [
+              {
+                "type": "spice",
+                "data": {
+                  "cuisine": "thai",
+                  "heat": 3
+                }
+              }
+            ],
+            "tickets": [
+              {
+                "type": "ticket",
+                "data": {
+                  "id": "t-1",
+                  "cuisine": "thai"
+                }
+              }
+            ]
+          }
+        ],
+        "checks": [],
+        "after": {
+          "receipts": [
+            {
+              "type": "receipt",
+              "data": {
+                "ticket": "t-2"
+              }
+            }
+          ],
+          "served": [
+            {
+              "type": "dish",
+              "data": {
+                "ticket": "t-2",
+                "table": 4
+              }
+            }
+          ],
+          "spices": [
+            {
+              "type": "spice",
+              "data": {
+                "cuisine": "thai",
+                "heat": 3
+              }
+            }
+          ],
+          "tickets": [
+            {
+              "type": "ticket",
+              "data": {
+                "id": "t-1",
+                "cuisine": "thai"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "line": 17,
+        "kind": "expect",
+        "statement": "expect (served) has {\"ticket\": \"t-2\", \"table\": 4}",
+        "records": [],
+        "afterEach": [],
+        "checks": [
+          {
+            "text": "(served) has {\"ticket\": \"t-2\", \"table\": 4}",
+            "ok": true,
+            "detail": "(served) holds dish {\"table\": 4, \"ticket\": \"t-2\"}"
+          }
+        ],
+        "after": {
+          "receipts": [
+            {
+              "type": "receipt",
+              "data": {
+                "ticket": "t-2"
+              }
+            }
+          ],
+          "served": [
+            {
+              "type": "dish",
+              "data": {
+                "ticket": "t-2",
+                "table": 4
+              }
+            }
+          ],
+          "spices": [
+            {
+              "type": "spice",
+              "data": {
+                "cuisine": "thai",
+                "heat": 3
+              }
+            }
+          ],
+          "tickets": [
+            {
+              "type": "ticket",
+              "data": {
+                "id": "t-1",
+                "cuisine": "thai"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "line": 20,
+        "kind": "fire",
+        "statement": "fire [split] -> (right_half) nothing",
+        "records": [
+          {
+            "kind": "firing",
+            "transition": "split",
+            "status": "completed",
+            "inputTokens": {
+              "served": [
+                {
+                  "type": "dish",
+                  "data": {
+                    "ticket": "t-2",
+                    "table": 4
+                  }
+                }
+              ]
+            },
+            "outputTokens": {
+              "left_half": [
+                {
+                  "type": "dish",
+                  "data": {
+                    "ticket": "t-2",
+                    "table": 4
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "afterEach": [
+          {
+            "left_half": [
+              {
+                "type": "dish",
+                "data": {
+                  "ticket": "t-2",
+                  "table": 4
+                }
+              }
+            ],
+            "receipts": [
+              {
+                "type": "receipt",
+                "data": {
+                  "ticket": "t-2"
+                }
+              }
+            ],
+            "spices": [
+              {
+                "type": "spice",
+                "data": {
+                  "cuisine": "thai",
+                  "heat": 3
+                }
+              }
+            ],
+            "tickets": [
+              {
+                "type": "ticket",
+                "data": {
+                  "id": "t-1",
+                  "cuisine": "thai"
+                }
+              }
+            ]
+          }
+        ],
+        "checks": [],
+        "after": {
+          "left_half": [
+            {
+              "type": "dish",
+              "data": {
+                "ticket": "t-2",
+                "table": 4
+              }
+            }
+          ],
+          "receipts": [
+            {
+              "type": "receipt",
+              "data": {
+                "ticket": "t-2"
+              }
+            }
+          ],
+          "spices": [
+            {
+              "type": "spice",
+              "data": {
+                "cuisine": "thai",
+                "heat": 3
+              }
+            }
+          ],
+          "tickets": [
+            {
+              "type": "ticket",
+              "data": {
+                "id": "t-1",
+                "cuisine": "thai"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "line": 21,
+        "kind": "expect",
+        "statement": "expect (left_half) count 1, (right_half) empty, (served) empty",
+        "records": [],
+        "afterEach": [],
+        "checks": [
+          {
+            "text": "(left_half) count 1",
+            "ok": true,
+            "detail": "(left_half) holds 1"
+          },
+          {
+            "text": "(right_half) empty",
+            "ok": true,
+            "detail": "(right_half) is empty"
+          },
+          {
+            "text": "(served) empty",
+            "ok": true,
+            "detail": "(served) is empty"
+          }
+        ],
+        "after": {
+          "left_half": [
+            {
+              "type": "dish",
+              "data": {
+                "ticket": "t-2",
+                "table": 4
+              }
+            }
+          ],
+          "receipts": [
+            {
+              "type": "receipt",
+              "data": {
+                "ticket": "t-2"
+              }
+            }
+          ],
+          "spices": [
+            {
+              "type": "spice",
+              "data": {
+                "cuisine": "thai",
+                "heat": 3
+              }
+            }
+          ],
+          "tickets": [
+            {
+              "type": "ticket",
+              "data": {
+                "id": "t-1",
+                "cuisine": "thai"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "failure": null
+  }
+]

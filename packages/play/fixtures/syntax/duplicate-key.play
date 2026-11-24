@@ -1,0 +1,2 @@
+play s
+inject (p) <- c {"a": 1, "a": 2}

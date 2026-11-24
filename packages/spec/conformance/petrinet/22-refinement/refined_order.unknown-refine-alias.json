@@ -1,0 +1,27 @@
+{
+  "diagnostic": {
+    "code": "PN202",
+    "column": 26,
+    "file": "refined_order.unknown-refine-alias.petrinet",
+    "help": "declare the alias with use before refining with it",
+    "line": 7,
+    "message": "refine references unknown alias ghost",
+    "span": {
+      "end": {
+        "byteOffset": 222,
+        "column": 31,
+        "line": 7
+      },
+      "source": "refined_order.unknown-refine-alias.petrinet",
+      "start": {
+        "byteOffset": 217,
+        "column": 26,
+        "line": 7
+      }
+    }
+  },
+  "source": {
+    "sourceId": "refined_order.unknown-refine-alias.petrinet",
+    "text": "composition refined_order_unknown_alias\n\nuse \"order_flow.petrinet\" as shop\nuse \"courier.petrinet\" as courier\nwire shop.(sending) -> courier.(pickup)\nwire courier.(dropped) -> shop.(delivered)\nrefine shop.[deliver] by ghost\n"
+  }
+}

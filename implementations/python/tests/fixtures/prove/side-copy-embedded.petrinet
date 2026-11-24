@@ -1,0 +1,20 @@
+// A page event carries its job, and [follow] copies the job, not the page,
+// into (jobs), which no step reads. The engine checks the copy against the
+// job's own domains. [follow]'s test names job.running, so the prover tries
+// each of its values; it passes every value of a build job.
+net side_copy_embedded "Follow a work page, and put its job aside"
+
+(items) -item-> [start] -item-> (started)
+@fo_in: (started) -item->? [follow]
+@fo_page: (page) -page-> [follow]
+@fo_out: [follow] -job-> (jobs)
+@end_in: (started) -item-> [end]
+@end_sig: (done) -signal-> [end]
+@end_out: [end] -item-> (finished)
+
+@fo_page predicate cel "job.kind != 'last' || job.running || !job.running"
+
+(page) port input page
+(done) port input signal
+domain job.kind "build" "last"
+domain job.running true false

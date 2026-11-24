@@ -1,0 +1,17 @@
+play refinement "A courier net refines the shop's abstract delivery"
+use "shop.petrinet" as shop
+use "courier.petrinet" as courier
+wire shop.(sending) -> courier.(pickup)
+wire courier.(dropped) -> shop.(delivered)
+refine shop.[deliver] by courier
+
+inject (shop.placed) <- {"id": "p-1"}
+fire [shop.send]
+// The refined [shop.deliver] is gone, so only the courier takes the parcel.
+expect enabled [courier.pick], (courier.pickup) count 1
+fire [courier.pick]
+fire [courier.drop] -> (courier.dropped) {"id": "p-1", "signed": true}
+// The courier's output port is the shop's (delivered).
+expect (shop.delivered) == receipt {"id": "p-1", "signed": true}
+fire [shop.settle]
+expect (shop.settled) count 1, quiescent

@@ -1,0 +1,4 @@
+{
+  "sourceId": "courier.petrinet",
+  "text": "net courier \"A courier delivers one order\"\n\n(pickup) -parcel-> [pick] -parcel-> (riding)\n(riding) -parcel-> [drop] -receipt-> (dropped)\n\n(pickup) port input parcel\n(dropped) port output receipt\n"
+}

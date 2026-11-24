@@ -1,0 +1,45 @@
+{
+  "diagnostic": {
+    "code": "PN202",
+    "column": 1,
+    "file": "desk.actor-conflicting-kind.petrinet",
+    "line": 11,
+    "message": "conflicting actor declarations for 'Clerk'",
+    "span": {
+      "source": "desk.actor-conflicting-kind.petrinet",
+      "start": {
+        "byteOffset": 143,
+        "line": 11,
+        "column": 1
+      },
+      "end": {
+        "byteOffset": 155,
+        "line": 11,
+        "column": 13
+      }
+    },
+    "help": "declare each actor once, as a person or as a system",
+    "related": [
+      {
+        "message": "first declaration was here",
+        "span": {
+          "source": "desk.actor-conflicting-kind.petrinet",
+          "start": {
+            "byteOffset": 10,
+            "line": 3,
+            "column": 1
+          },
+          "end": {
+            "byteOffset": 22,
+            "line": 3,
+            "column": 13
+          }
+        }
+      }
+    ]
+  },
+  "source": {
+    "sourceId": "desk.actor-conflicting-kind.petrinet",
+    "text": "net desk\n\nperson Clerk\nsystem Annex\n\n(sign) -state-> [flip] -state-> (sign)\n(open) -> [close] -> (shut)\n(sign) -state->? [close]\n\nperson Clerk\nsystem Clerk\n"
+  }
+}

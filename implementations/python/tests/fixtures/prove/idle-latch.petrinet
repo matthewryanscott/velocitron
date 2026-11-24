@@ -1,0 +1,46 @@
+// A latch copies the clock each time a VM goes quiet, and a busy look lets it
+// go again; the stop matures a wait after the latch. Each latch taken at the
+// stop's maturity would date the next maturity later still, without end.
+net idle_latch "Stop a VM a wait after it last went quiet"
+
+@arrive_in: (seen) -vm-> [arrive]
+[arrive] -vm-> (busy)
+
+@rest_in: (busy) -vm-> [rest]
+@rest_out: [rest] -vm-> (idle)
+@rest_look: (look) -look->? [rest]
+@rest_clock: (clock) -tick->? [rest]
+@rest_look predicate cel "up && !busy"
+@rest_out data cel "{'vm': binding.busy[0].vm, 'wait': binding.busy[0].wait, 'since': binding.clock[0].now}"
+[rest] annotation wait {"when": "binding.look.exists(l, l.up && l.busy)", "for": "the job in it to end"}
+
+@wake_in: (idle) -vm-> [wake]
+[wake] -vm-> (busy)
+@wake_look: (look) -look->? [wake]
+@wake_look predicate cel "up && busy"
+
+@stop_in: (idle) -vm-> [stop]
+[stop] -vm-> (stopped)
+@stop_look: (look) -look->? [stop]
+@stop_clock: (clock) -tick->? [stop]
+@stop_look predicate cel "up && !busy"
+[stop] timer clock (clock) cel "clock.now >= idle.since + idle.wait"
+[stop] timer bind idle (idle)
+[stop] timer maturity cel "idle.since + idle.wait"
+[stop] annotation wait {"when": "binding.look.exists(l, l.up && !l.busy)", "for": "the wait"}
+
+@leave_busy_in: (busy) -vm-> [leave_busy]
+[leave_busy] -vm-> (gone)
+@leave_busy_look: (look) -look->? [leave_busy]
+@leave_busy_look predicate cel "!up"
+@leave_idle_in: (idle) -vm-> [leave_idle]
+[leave_idle] -vm-> (gone)
+@leave_idle_look: (look) -look->? [leave_idle]
+@leave_idle_look predicate cel "!up"
+
+(seen) port input vm
+record "The look"
+(look) lives in "The look"
+(look) annotation fusion true
+(clock) annotation fusion true
+final (stopped), (gone)

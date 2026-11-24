@@ -1,0 +1,47 @@
+{
+  "author": "Matthew R. Scott",
+  "bugs": {
+    "url": "https://github.com/circuitmeridian/velocitron/issues"
+  },
+  "dependencies": {
+    "ajv": "8.20.0"
+  },
+  "description": "Shape-only loader for Velocitron contribution IR. Does not compile CEL or merge compositions.",
+  "devDependencies": {
+    "typescript": "7.0.2"
+  },
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "exports": {
+    ".": {
+      "import": "./index.js",
+      "types": "./index.d.ts"
+    },
+    "./package.json": "./package.json",
+    "./petrinet-contribution-ir.schema.json": "./petrinet-contribution-ir.schema.json"
+  },
+  "files": [
+    "index.d.ts",
+    "index.js",
+    "LICENSE",
+    "petrinet-contribution-ir.schema.json",
+    "README.md"
+  ],
+  "homepage": "https://github.com/circuitmeridian/velocitron",
+  "license": "MIT",
+  "name": "@velocitron/ir",
+  "private": true,
+  "repository": {
+    "directory": "packages/ir/typescript",
+    "type": "git",
+    "url": "git+https://github.com/circuitmeridian/velocitron.git"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "sideEffects": false,
+  "type": "module",
+  "version": "0.1.0"
+}

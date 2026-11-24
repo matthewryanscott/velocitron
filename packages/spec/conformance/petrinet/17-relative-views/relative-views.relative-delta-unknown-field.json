@@ -1,0 +1,26 @@
+{
+  "diagnostic": {
+    "code": "PN200",
+    "column": 1,
+    "file": "relative-views.relative-delta-unknown-field.petrinet",
+    "line": 9,
+    "message": "invalid view position contribution",
+    "span": {
+      "end": {
+        "byteOffset": 270,
+        "column": 61,
+        "line": 9
+      },
+      "source": "relative-views.relative-delta-unknown-field.petrinet",
+      "start": {
+        "byteOffset": 210,
+        "column": 1,
+        "line": 9
+      }
+    }
+  },
+  "source": {
+    "sourceId": "relative-views.relative-delta-unknown-field.petrinet",
+    "text": "net relative_views\n\n(seed) -pulse-> [emit] -pulse-> (out)\n@shared: (out) -pulse-> [echo]\n[emit] handler \"emit@relative_views\"\n[echo] handler \"echo@relative_views\"\n\nview laid position (seed) at {\"x\": 3, \"y\": 4}\nview laid position [echo] relative (seed) + {\"x\": 1, \"z\": 2}\n"
+  }
+}

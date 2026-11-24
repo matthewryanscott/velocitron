@@ -1,0 +1,11 @@
+net kitchen "Output rules of symbolic firing"
+
+(tickets) -ticket-> [cook] -dish-> (pass)
+@spice_in: (spices) -spice->? [cook]
+@receipt: [cook] -receipt-> (receipts)
+(pass) -dish-> [serve] -dish-> (served)
+(served) -dish-> [split] -dish-> (left_half)
+[split] -dish-> (right_half)
+
+@spice_in correlate cel "token.cuisine == binding.tickets[0].cuisine"
+@receipt data cel "{\"ticket\": binding.tickets[0].id}"

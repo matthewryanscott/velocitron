@@ -1,0 +1,26 @@
+{
+  "diagnostic": {
+    "code": "PN202",
+    "column": 1,
+    "file": "beside.beside-on-transition.petrinet",
+    "line": 7,
+    "message": "beside decorations apply to fusion places; [start] has no local copies to place",
+    "span": {
+      "end": {
+        "byteOffset": 135,
+        "column": 24,
+        "line": 7
+      },
+      "source": "beside.beside-on-transition.petrinet",
+      "start": {
+        "byteOffset": 112,
+        "column": 1,
+        "line": 7
+      }
+    }
+  },
+  "source": {
+    "sourceId": "beside.beside-on-transition.petrinet",
+    "text": "net beside\n\n(queued) -job-> [start] -job-> (running)\n(switch) -flag->? [start]\n(switch) annotation fusion true\n\ndecorate [start] beside\n"
+  }
+}

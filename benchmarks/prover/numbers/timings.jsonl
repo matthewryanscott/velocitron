@@ -1,0 +1,9 @@
+{"net": "mutex", "path": "reference", "seconds": 0.37, "peakMB": 42.0, "machine": "Linux-6.12.113+-x86_64-with-glibc2.39", "cel": "CelRustAdapter", "velocitron": null, "date": "2026-11-24"}
+{"net": "readers", "path": "reference", "seconds": 0.86, "peakMB": 68.0, "machine": "Linux-6.12.113+-x86_64-with-glibc2.39", "cel": "CelRustAdapter", "velocitron": null, "date": "2026-11-24"}
+{"net": "retry", "path": "reference", "seconds": 0.6, "peakMB": 67.0, "machine": "Linux-6.12.113+-x86_64-with-glibc2.39", "cel": "CelRustAdapter", "velocitron": null, "date": "2026-11-24"}
+{"net": "catalog", "path": "reference", "seconds": 0.5, "peakMB": 66.0, "machine": "Linux-6.12.113+-x86_64-with-glibc2.39", "cel": "CelRustAdapter", "velocitron": null, "date": "2026-11-24"}
+{"net": "lanes", "path": "reference", "seconds": 0.53, "peakMB": 67.0, "machine": "Linux-6.12.113+-x86_64-with-glibc2.39", "cel": "CelRustAdapter", "velocitron": null, "date": "2026-11-24"}
+{"net": "philosophers", "path": "reference", "seconds": 0.56, "peakMB": 67.0, "machine": "Linux-6.12.113+-x86_64-with-glibc2.39", "cel": "CelRustAdapter", "velocitron": null, "date": "2026-11-24"}
+{"net": "workshop", "path": "reference", "seconds": 3.1, "peakMB": 130.0, "machine": "Linux-6.12.113+-x86_64-with-glibc2.39", "cel": "CelRustAdapter", "velocitron": null, "date": "2026-11-24"}
+{"net": "desk/desk", "path": "reference", "seconds": 0.35, "peakMB": 42.0, "machine": "Linux-6.12.113+-x86_64-with-glibc2.39", "cel": "CelRustAdapter", "velocitron": null, "date": "2026-11-24"}
+{"net": "health/health", "path": "reference", "seconds": 1.1, "peakMB": 71.0, "machine": "Linux-6.12.113+-x86_64-with-glibc2.39", "cel": "CelRustAdapter", "velocitron": null, "date": "2026-11-24"}

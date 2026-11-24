@@ -1,0 +1,45 @@
+{
+  "diagnostic": {
+    "code": "PN202",
+    "column": 1,
+    "file": "checkout.invariant-name-taken.petrinet",
+    "line": 11,
+    "message": "two invariants are named 'lock'",
+    "span": {
+      "source": "checkout.invariant-name-taken.petrinet",
+      "start": {
+        "byteOffset": 285,
+        "line": 11,
+        "column": 1
+      },
+      "end": {
+        "byteOffset": 322,
+        "line": 11,
+        "column": 38
+      }
+    },
+    "help": "give each invariant its own name",
+    "related": [
+      {
+        "message": "first invariant was declared here",
+        "span": {
+          "source": "checkout.invariant-name-taken.petrinet",
+          "start": {
+            "byteOffset": 245,
+            "line": 10,
+            "column": 1
+          },
+          "end": {
+            "byteOffset": 284,
+            "line": 10,
+            "column": 40
+          }
+        }
+      }
+    ]
+  },
+  "source": {
+    "sourceId": "checkout.invariant-name-taken.petrinet",
+    "text": "net checkout\n\n(pending) -checkout-> [send] -checkout-> (sending)\n(free) -lock-> [send]\n(sending) -checkout-> [finish] -outcome-> (ended)\n@unlock: [finish] -lock-> (free)\n(ended) -outcome-> [close] -checkout-> (done)\n@unlock data {\"id\": \"desk\"}\n\ninvariant \"lock\" (free) + (sending) = 1\ninvariant \"lock\" (free) + (ended) = 1\n"
+  }
+}

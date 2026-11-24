@@ -1,0 +1,55 @@
+[project]
+name = "velocitron-petrinet"
+version = "0.1.0"
+description = "Compiles .petrinet text and contribution IR to canonical JSON. Does not fire nets, check plays, or own the CLI."
+readme = "README.md"
+authors = [
+    { name = "Matthew R. Scott" },
+]
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.12"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+    "jsonschema>=4.26.0",
+    "velocitron-spec",
+    "velocitron-ir",
+    "velocitron-cel",
+    "velocitron-dsl",
+    "velocitron-engine",
+    "velocitron-merge",
+]
+
+[tool.uv.sources]
+velocitron-spec = { path = "../../spec", editable = false }
+velocitron-ir = { path = "../../ir/python", editable = false }
+velocitron-cel = { path = "../../cel/python", editable = false }
+velocitron-dsl = { path = "../../dsl/python", editable = false }
+velocitron-engine = { path = "../../engine/python", editable = false }
+velocitron-merge = { path = "../../merge/python", editable = false }
+
+[project.urls]
+Homepage = "https://github.com/circuitmeridian/velocitron"
+Repository = "https://github.com/circuitmeridian/velocitron"
+Issues = "https://github.com/circuitmeridian/velocitron/issues"
+
+[dependency-groups]
+test = [
+    "pytest>=9.0",
+]
+
+[build-system]
+requires = ["hatchling==1.31.0"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/velocitron_petrinet"]
+dev-mode-exact = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

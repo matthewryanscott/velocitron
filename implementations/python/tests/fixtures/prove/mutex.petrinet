@@ -1,0 +1,15 @@
+// Two processes take turns in a critical section guarded by one lock.
+net mutex "Two processes share one lock"
+
+(idle1) -> [enter1] -> (crit1)
+(free) -> [enter1]
+(crit1) -> [exit1] -> (idle1)
+[exit1] -> (free)
+(idle2) -> [enter2] -> (crit2)
+(free) -> [enter2]
+(crit2) -> [exit2] -> (idle2)
+[exit2] -> (free)
+
+marking initial (idle1) <- 1
+marking initial (idle2) <- 1
+marking initial (free) <- 1

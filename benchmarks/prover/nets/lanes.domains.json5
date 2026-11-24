@@ -1,0 +1,9 @@
+// Many branches and editions, so the sorted copies outnumber the tokens
+// of the starting marking.
+{
+  instance: "copy",
+  domains: {
+    "copy.branch": ["main", "annex", "north", "south", "east", "west", "kiosk"],
+    "copy.edition": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+  },
+}

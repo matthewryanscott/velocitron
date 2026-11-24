@@ -1,0 +1,57 @@
+[project]
+name = "velocitron-play"
+version = "0.1.0"
+description = "Parser for Velocitron .play documents. Does not check plays against a net or render a walkthrough."
+readme = "README.md"
+authors = [
+    { name = "Matthew R. Scott" },
+]
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.12"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+    "antlr4-python3-runtime==4.13.2",
+]
+
+[project.urls]
+Homepage = "https://github.com/circuitmeridian/velocitron"
+Repository = "https://github.com/circuitmeridian/velocitron"
+Issues = "https://github.com/circuitmeridian/velocitron/issues"
+
+[dependency-groups]
+test = [
+    "pytest>=9.0",
+]
+
+[build-system]
+requires = ["hatchling==1.31.0"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/velocitron_play"]
+dev-mode-exact = true
+
+# The grammar copy is generated from packages/play/VelocitronPlay.g4.
+# A wheel includes it so a git-subdirectory install can read the grammar
+# without the rest of the checkout.
+[tool.hatch.build.targets.wheel.force-include]
+"src/velocitron_play/VelocitronPlay.g4" = "velocitron_play/VelocitronPlay.g4"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+extend-exclude = ["src/velocitron_play/generated"]
+
+[tool.ruff.format]
+# tools/antlr.py formats the parser while generating it; `check` guards it.
+exclude = ["src/velocitron_play/generated/*.py"]
+
+[tool.ruff.lint.per-file-ignores]
+"src/velocitron_play/generated/*.py" = ["F403", "F405"]

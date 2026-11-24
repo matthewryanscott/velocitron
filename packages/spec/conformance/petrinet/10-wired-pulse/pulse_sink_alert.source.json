@@ -1,0 +1,4 @@
+{
+  "sourceId": "pulse_sink_alert.petrinet",
+  "text": "net pulse_sink_alert \"Pulse sink\"\n\n(pulse_in) -alert-> [receive] -receipt-> (received)\n\n[receive] handler \"receive@sink\"\n(pulse_in) port input alert\n"
+}

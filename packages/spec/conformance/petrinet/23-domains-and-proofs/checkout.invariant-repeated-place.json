@@ -1,0 +1,26 @@
+{
+  "diagnostic": {
+    "code": "PN202",
+    "column": 20,
+    "file": "checkout.invariant-repeated-place.petrinet",
+    "line": 10,
+    "message": "invariant names (free) more than once",
+    "span": {
+      "source": "checkout.invariant-repeated-place.petrinet",
+      "start": {
+        "byteOffset": 264,
+        "line": 10,
+        "column": 20
+      },
+      "end": {
+        "byteOffset": 274,
+        "line": 10,
+        "column": 30
+      }
+    }
+  },
+  "source": {
+    "sourceId": "checkout.invariant-repeated-place.petrinet",
+    "text": "net checkout\n\n(pending) -checkout-> [send] -checkout-> (sending)\n(free) -lock-> [send]\n(sending) -checkout-> [finish] -outcome-> (ended)\n@unlock: [finish] -lock-> (free)\n(ended) -outcome-> [close] -checkout-> (done)\n@unlock data {\"id\": \"desk\"}\n\ninvariant (free) + 2 * (free) = 2\n"
+  }
+}

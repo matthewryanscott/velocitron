@@ -1,0 +1,45 @@
+{
+  "diagnostic": {
+    "code": "PN202",
+    "column": 1,
+    "file": "refined_order.conflicting-refine.petrinet",
+    "help": "refine each transition by exactly one net",
+    "line": 9,
+    "message": "conflicting refine facts for shop.[deliver]",
+    "related": [
+      {
+        "message": "first refine of shop.[deliver] was declared here",
+        "span": {
+          "end": {
+            "byteOffset": 250,
+            "column": 33,
+            "line": 8
+          },
+          "source": "refined_order.conflicting-refine.petrinet",
+          "start": {
+            "byteOffset": 218,
+            "column": 1,
+            "line": 8
+          }
+        }
+      }
+    ],
+    "span": {
+      "end": {
+        "byteOffset": 280,
+        "column": 30,
+        "line": 9
+      },
+      "source": "refined_order.conflicting-refine.petrinet",
+      "start": {
+        "byteOffset": 251,
+        "column": 1,
+        "line": 9
+      }
+    }
+  },
+  "source": {
+    "sourceId": "refined_order.conflicting-refine.petrinet",
+    "text": "composition refined_order_conflict\n\nuse \"order_flow.petrinet\" as shop\nuse \"courier.petrinet\" as courier\nuse \"courier.petrinet\" as bike\nwire shop.(sending) -> courier.(pickup)\nwire courier.(dropped) -> shop.(delivered)\nrefine shop.[deliver] by courier\nrefine shop.[deliver] by bike\n"
+  }
+}

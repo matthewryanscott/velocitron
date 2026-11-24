@@ -1,0 +1,6 @@
+// A hold is filed, then the loan is shelved when it comes back.
+composition desk
+
+use "hold.petrinet" as hold
+use "shelve.petrinet" as shelve
+wire hold.(loaned) -> shelve.(loaned)

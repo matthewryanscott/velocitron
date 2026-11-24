@@ -1,0 +1,34 @@
+// The benchmark set: the nets the prover's speed is measured on (CONTEXT.md,
+// Benchmark set). Run it with `tools/prover_bench.py`; its recorded numbers
+// are in numbers/.
+//
+// The nets live in nets/, each with its domains file. To change the
+// recorded counts, edit a net and record (`--record`): the change to
+// numbers/counts.jsonl is the review.
+//
+// mutex, readers, retry, catalog and philosophers end. workshop does not:
+// each failure stamps a new slip, so it is run at 20 000 markings and
+// marked heavy. desk is a composition, so its numbers are printed and
+// never fail the command. health is the sensor net the fast-path tests
+// compare across CEL backends.
+{
+  root: "nets",
+  nets: [
+    { net: "mutex.petrinet" },
+    { net: "readers.petrinet" },
+    { net: "retry.petrinet" },
+    { net: "catalog.petrinet" },
+    { net: "lanes.petrinet" },
+    { net: "philosophers.petrinet" },
+    {
+      net: "workshop.petrinet",
+      maxStates: 20000,
+      heavy: "each failure stamps a new slip, so the markings do not repeat; the first 20 000 stand for the run",
+    },
+    {
+      net: "desk/desk.petrinet",
+      measuredOnly: "a composition: a hold is filed and then shelved",
+    },
+    { net: "health/health.petrinet" },
+  ],
+}

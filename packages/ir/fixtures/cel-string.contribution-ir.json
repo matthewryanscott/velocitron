@@ -1,0 +1,39 @@
+{
+  "contributions": [
+    {
+      "id": {
+        "part": 0,
+        "source": "example.petrinet",
+        "statement": 0
+      },
+      "kind": "arc.produce-cel",
+      "ordinal": 0,
+      "span": {
+        "end": {
+          "byteOffset": 3,
+          "column": 4,
+          "line": 1
+        },
+        "source": "example.petrinet",
+        "start": {
+          "byteOffset": 0,
+          "column": 1,
+          "line": 1
+        }
+      },
+      "target": {
+        "name": "out",
+        "type": "arcHandle"
+      },
+      "value": {
+        "cel": "token.n + 1"
+      }
+    }
+  ],
+  "document": {
+    "id": "example.petrinet"
+  },
+  "documentKind": "net",
+  "format": "velocitron.petrinet/contribution-ir",
+  "version": 1
+}

@@ -1,0 +1,14 @@
+// An order is shipped, cancelled or refunded, by its status and amount.
+net orders "Ship, cancel or refund an order"
+
+(new_orders) -purchase-> [place_order] -purchase-> (orders)
+@ship_in: (orders) -purchase-> [ship]
+[ship] -purchase-> (shipped)
+@cancel_in: (orders) -purchase-> [cancel]
+[cancel] -purchase-> (cancelled)
+@refund_in: (orders) -purchase-> [refund]
+[refund] -purchase-> (refunded)
+
+@ship_in predicate cel "status == 'paid'"
+@cancel_in predicate cel "status == 'cancelled'"
+@refund_in predicate cel "status == 'cancelled' && amount > 100"

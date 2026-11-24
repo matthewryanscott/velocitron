@@ -1,0 +1,187 @@
+{
+  "$defs": {
+    "NetRef": {
+      "additionalProperties": false,
+      "description": "A reference to a net document, optionally aliased.",
+      "properties": {
+        "alias": {
+          "description": "Local name used by wires to refer to this net. A simple identifier (no '.') so that <alias>.<placeName> is unambiguous. If omitted, the alias defaults to the referenced net's `name` field.",
+          "minLength": 1,
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+          "type": "string"
+        },
+        "ref": {
+          "description": "Source-relative filesystem path to a net document conforming to spec/net-schema.md, or to another composition document. A referenced composition needs an explicit `alias`.",
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "ref"
+      ],
+      "type": "object"
+    },
+    "PlaceEndpoint": {
+      "additionalProperties": false,
+      "description": "One member of a share: an alias and a place name on the net referenced by that alias. The place need not be a port. When `net` names a composition, the place is named by its path inside that composition.",
+      "properties": {
+        "net": {
+          "description": "Alias of the referenced net or composition.",
+          "minLength": 1,
+          "type": "string"
+        },
+        "place": {
+          "description": "Name of the place on the referenced net.",
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "net",
+        "place"
+      ],
+      "type": "object"
+    },
+    "PortEndpoint": {
+      "additionalProperties": false,
+      "description": "One end of a wire: an alias and a port name on the net referenced by that alias.",
+      "properties": {
+        "net": {
+          "description": "Alias of the referenced net (matches some nets[].alias, or the derived default).",
+          "minLength": 1,
+          "type": "string"
+        },
+        "port": {
+          "description": "Name of the port (a place declaring a `port` facet) on the referenced net. When `net` names a composition, the port is named by its path inside that composition, `<inner alias>.<port>` (for example `gate.sending`).",
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "net",
+        "port"
+      ],
+      "type": "object"
+    },
+    "Refinement": {
+      "additionalProperties": false,
+      "description": "Replaces one transition of a referenced net with another referenced net (the refining net) during the merge. The merge removes the transition and its arcs; wires must join each place the transition took from to an input port of the refining net, and each place it gave to from an output port, with the same color.",
+      "properties": {
+        "by": {
+          "description": "Alias of the refining net. It must differ from `net` and name a net, not a composition.",
+          "minLength": 1,
+          "type": "string"
+        },
+        "net": {
+          "description": "Alias of the net that declares the refined transition.",
+          "minLength": 1,
+          "type": "string"
+        },
+        "transition": {
+          "description": "Name of the refined transition on the net referenced by `net`. When `net` names a composition, the transition is named by its path inside that composition, `<inner alias>.<transition>`.",
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "net",
+        "transition",
+        "by"
+      ],
+      "type": "object"
+    },
+    "Share": {
+      "additionalProperties": false,
+      "description": "Places of several referenced nets that are one place in the merged net, with no direction: a record or a lock that several nets read, take and give back. The members must accept the same colors. A shared place keeps the role its members had for proofs: when a member is annotated `fusion: true`, the environment still supplies it.",
+      "properties": {
+        "places": {
+          "items": {
+            "$ref": "#/$defs/PlaceEndpoint"
+          },
+          "minItems": 2,
+          "type": "array"
+        }
+      },
+      "required": [
+        "places"
+      ],
+      "type": "object"
+    },
+    "Wire": {
+      "additionalProperties": false,
+      "description": "A unidirectional cross-net arc from an output port to an input port.",
+      "properties": {
+        "from": {
+          "$ref": "#/$defs/PortEndpoint"
+        },
+        "to": {
+          "$ref": "#/$defs/PortEndpoint"
+        }
+      },
+      "required": [
+        "from",
+        "to"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "https://awesome-petri.dev/schemas/composition.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "A composition document: one or more referenced nets or compositions, aliased, joined by unidirectional wires between their ports and by shares of their places.",
+  "properties": {
+    "final": {
+      "description": "The final markings of the merged net, replacing the final places its nets declare. Each entry lists places that must all hold a token before the instance is finished. Optional.",
+      "items": {
+        "items": {
+          "$ref": "#/$defs/PlaceEndpoint"
+        },
+        "minItems": 1,
+        "type": "array"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "name": {
+      "description": "The composition's name, which the merged net takes. Without it, the merged net is named 'composition'.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "nets": {
+      "description": "The nets to merge. At least one is required; composition is meaningful with two or more.",
+      "items": {
+        "$ref": "#/$defs/NetRef"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "refinements": {
+      "description": "Transition refinements, applied by the merge. Optional; at most one refinement per transition.",
+      "items": {
+        "$ref": "#/$defs/Refinement"
+      },
+      "type": "array"
+    },
+    "shares": {
+      "description": "Places the referenced nets share, fused without a direction. Optional.",
+      "items": {
+        "$ref": "#/$defs/Share"
+      },
+      "type": "array"
+    },
+    "wires": {
+      "description": "Unidirectional wires joining an output port to an input port. An empty array yields a disjoint union (no cross-net flow).",
+      "items": {
+        "$ref": "#/$defs/Wire"
+      },
+      "minItems": 0,
+      "type": "array"
+    }
+  },
+  "required": [
+    "nets",
+    "wires"
+  ],
+  "title": "Composition",
+  "type": "object"
+}

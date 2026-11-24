@@ -1,0 +1,549 @@
+{
+  "format": "velocitron.petrinet/contribution-ir",
+  "version": 1,
+  "documentKind": "net",
+  "document": {
+    "id": "reading_cadence.petrinet"
+  },
+  "contributions": [
+    {
+      "id": {
+        "source": "reading_cadence.petrinet",
+        "statement": 0,
+        "part": 0
+      },
+      "kind": "document.net-header",
+      "ordinal": 0,
+      "span": {
+        "source": "reading_cadence.petrinet",
+        "start": {
+          "byteOffset": 0,
+          "line": 1,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 49,
+          "line": 1,
+          "column": 50
+        }
+      },
+      "target": {
+        "type": "document"
+      },
+      "value": {
+        "name": "reading_cadence",
+        "description": "A reading on its own timer."
+      }
+    },
+    {
+      "id": {
+        "source": "reading_cadence.petrinet",
+        "statement": 1,
+        "part": 0
+      },
+      "kind": "arc.declare",
+      "ordinal": 1,
+      "span": {
+        "source": "reading_cadence.petrinet",
+        "start": {
+          "byteOffset": 51,
+          "line": 3,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 87,
+          "line": 3,
+          "column": 37
+        }
+      },
+      "target": {
+        "type": "arc",
+        "id": {
+          "document": "reading_cadence.petrinet",
+          "statement": 1,
+          "part": 0
+        }
+      },
+      "value": {
+        "from": {
+          "type": "place",
+          "name": "tick_latch"
+        },
+        "to": {
+          "type": "transition",
+          "name": "on_tick"
+        },
+        "color": {
+          "kind": "explicit",
+          "value": "tick_latch"
+        },
+        "mode": "consume",
+        "transitionNameSpan": {
+          "source": "reading_cadence.petrinet",
+          "start": {
+            "byteOffset": 79,
+            "line": 3,
+            "column": 29
+          },
+          "end": {
+            "byteOffset": 86,
+            "line": 3,
+            "column": 36
+          }
+        }
+      }
+    },
+    {
+      "id": {
+        "source": "reading_cadence.petrinet",
+        "statement": 1,
+        "part": 1
+      },
+      "kind": "arc.declare",
+      "ordinal": 2,
+      "span": {
+        "source": "reading_cadence.petrinet",
+        "start": {
+          "byteOffset": 78,
+          "line": 3,
+          "column": 28
+        },
+        "end": {
+          "byteOffset": 114,
+          "line": 3,
+          "column": 64
+        }
+      },
+      "target": {
+        "type": "arc",
+        "id": {
+          "document": "reading_cadence.petrinet",
+          "statement": 1,
+          "part": 1
+        }
+      },
+      "value": {
+        "from": {
+          "type": "transition",
+          "name": "on_tick"
+        },
+        "to": {
+          "type": "place",
+          "name": "tick_latch"
+        },
+        "color": {
+          "kind": "explicit",
+          "value": "tick_latch"
+        },
+        "mode": "produce"
+      }
+    },
+    {
+      "id": {
+        "source": "reading_cadence.petrinet",
+        "statement": 2,
+        "part": 0
+      },
+      "kind": "arc.handle",
+      "ordinal": 3,
+      "span": {
+        "source": "reading_cadence.petrinet",
+        "start": {
+          "byteOffset": 115,
+          "line": 4,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 158,
+          "line": 4,
+          "column": 44
+        }
+      },
+      "target": {
+        "type": "arcHandle",
+        "name": "cadence_clock"
+      },
+      "value": {
+        "arcIds": [
+          {
+            "document": "reading_cadence.petrinet",
+            "statement": 2,
+            "part": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": {
+        "source": "reading_cadence.petrinet",
+        "statement": 2,
+        "part": 1
+      },
+      "kind": "arc.declare",
+      "ordinal": 4,
+      "span": {
+        "source": "reading_cadence.petrinet",
+        "start": {
+          "byteOffset": 131,
+          "line": 4,
+          "column": 17
+        },
+        "end": {
+          "byteOffset": 158,
+          "line": 4,
+          "column": 44
+        }
+      },
+      "target": {
+        "type": "arc",
+        "id": {
+          "document": "reading_cadence.petrinet",
+          "statement": 2,
+          "part": 1
+        }
+      },
+      "value": {
+        "from": {
+          "type": "place",
+          "name": "clock"
+        },
+        "to": {
+          "type": "transition",
+          "name": "on_tick"
+        },
+        "color": {
+          "kind": "explicit",
+          "value": "clock"
+        },
+        "mode": "read"
+      }
+    },
+    {
+      "id": {
+        "source": "reading_cadence.petrinet",
+        "statement": 3,
+        "part": 0
+      },
+      "kind": "arc.declare",
+      "ordinal": 5,
+      "span": {
+        "source": "reading_cadence.petrinet",
+        "start": {
+          "byteOffset": 159,
+          "line": 5,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 201,
+          "line": 5,
+          "column": 43
+        }
+      },
+      "target": {
+        "type": "arc",
+        "id": {
+          "document": "reading_cadence.petrinet",
+          "statement": 3,
+          "part": 0
+        }
+      },
+      "value": {
+        "from": {
+          "type": "transition",
+          "name": "on_tick"
+        },
+        "to": {
+          "type": "place",
+          "name": "refresh_due_out"
+        },
+        "color": {
+          "kind": "explicit",
+          "value": "refresh_due"
+        },
+        "mode": "produce"
+      }
+    },
+    {
+      "id": {
+        "source": "reading_cadence.petrinet",
+        "statement": 4,
+        "part": 0
+      },
+      "kind": "transition.handler",
+      "ordinal": 6,
+      "span": {
+        "source": "reading_cadence.petrinet",
+        "start": {
+          "byteOffset": 203,
+          "line": 7,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 238,
+          "line": 7,
+          "column": 36
+        }
+      },
+      "target": {
+        "type": "transition",
+        "name": "on_tick"
+      },
+      "value": {
+        "handler": "on_tick@cadence"
+      }
+    },
+    {
+      "id": {
+        "source": "reading_cadence.petrinet",
+        "statement": 5,
+        "part": 0
+      },
+      "kind": "transition.timer",
+      "ordinal": 7,
+      "span": {
+        "source": "reading_cadence.petrinet",
+        "start": {
+          "byteOffset": 239,
+          "line": 8,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 320,
+          "line": 8,
+          "column": 82
+        }
+      },
+      "target": {
+        "type": "transition",
+        "name": "on_tick"
+      },
+      "value": {
+        "clock": {
+          "type": "place",
+          "name": "clock"
+        },
+        "cel": "clock.now >= latch.fired_at + latch.cadence_s"
+      }
+    },
+    {
+      "id": {
+        "source": "reading_cadence.petrinet",
+        "statement": 6,
+        "part": 0
+      },
+      "kind": "transition.timer-bind",
+      "ordinal": 8,
+      "span": {
+        "source": "reading_cadence.petrinet",
+        "start": {
+          "byteOffset": 321,
+          "line": 9,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 360,
+          "line": 9,
+          "column": 40
+        }
+      },
+      "target": {
+        "type": "transition",
+        "name": "on_tick"
+      },
+      "value": {
+        "name": "latch",
+        "place": {
+          "type": "place",
+          "name": "tick_latch"
+        }
+      }
+    },
+    {
+      "id": {
+        "source": "reading_cadence.petrinet",
+        "statement": 7,
+        "part": 0
+      },
+      "kind": "place.port",
+      "ordinal": 9,
+      "span": {
+        "source": "reading_cadence.petrinet",
+        "start": {
+          "byteOffset": 362,
+          "line": 11,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 403,
+          "line": 11,
+          "column": 42
+        }
+      },
+      "target": {
+        "type": "place",
+        "name": "refresh_due_out"
+      },
+      "value": {
+        "direction": "output",
+        "color": "refresh_due"
+      }
+    },
+    {
+      "id": {
+        "source": "reading_cadence.petrinet",
+        "statement": 8,
+        "part": 0
+      },
+      "kind": "marking.append",
+      "ordinal": 10,
+      "span": {
+        "source": "reading_cadence.petrinet",
+        "start": {
+          "byteOffset": 405,
+          "line": 13,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 443,
+          "line": 13,
+          "column": 39
+        }
+      },
+      "target": {
+        "type": "place",
+        "name": "clock"
+      },
+      "value": {
+        "count": 1,
+        "token": {
+          "template": {
+            "type": "template",
+            "name": "clock_zero"
+          }
+        }
+      }
+    },
+    {
+      "id": {
+        "source": "reading_cadence.petrinet",
+        "statement": 9,
+        "part": 0
+      },
+      "kind": "marking.append",
+      "ordinal": 11,
+      "span": {
+        "source": "reading_cadence.petrinet",
+        "start": {
+          "byteOffset": 444,
+          "line": 14,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 482,
+          "line": 14,
+          "column": 39
+        }
+      },
+      "target": {
+        "type": "place",
+        "name": "tick_latch"
+      },
+      "value": {
+        "count": 1,
+        "token": {
+          "template": {
+            "type": "template",
+            "name": "latch"
+          }
+        }
+      }
+    },
+    {
+      "id": {
+        "source": "reading_cadence.petrinet",
+        "statement": 10,
+        "part": 0
+      },
+      "kind": "template.define",
+      "ordinal": 12,
+      "span": {
+        "source": "reading_cadence.petrinet",
+        "start": {
+          "byteOffset": 483,
+          "line": 15,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 512,
+          "line": 15,
+          "column": 30
+        }
+      },
+      "target": {
+        "type": "template",
+        "name": "clock_zero"
+      },
+      "value": {
+        "value": {
+          "type": "object",
+          "entries": [
+            {
+              "key": "now",
+              "value": {
+                "type": "number",
+                "lexeme": "0"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": {
+        "source": "reading_cadence.petrinet",
+        "statement": 11,
+        "part": 0
+      },
+      "kind": "template.define",
+      "ordinal": 13,
+      "span": {
+        "source": "reading_cadence.petrinet",
+        "start": {
+          "byteOffset": 513,
+          "line": 16,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 565,
+          "line": 16,
+          "column": 53
+        }
+      },
+      "target": {
+        "type": "template",
+        "name": "latch"
+      },
+      "value": {
+        "value": {
+          "type": "object",
+          "entries": [
+            {
+              "key": "fired_at",
+              "value": {
+                "type": "number",
+                "lexeme": "0"
+              }
+            },
+            {
+              "key": "cadence_s",
+              "value": {
+                "type": "number",
+                "lexeme": "300"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

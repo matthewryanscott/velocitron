@@ -1,0 +1,121 @@
+{
+  "arcs": [
+    {
+      "consume": {
+        "type": "parcel"
+      },
+      "from": {
+        "place": "placed"
+      },
+      "to": {
+        "transition": "send"
+      }
+    },
+    {
+      "from": {
+        "transition": "send"
+      },
+      "produce": {
+        "destination": "sending",
+        "type": "parcel"
+      },
+      "to": {
+        "place": "sending"
+      }
+    },
+    {
+      "consume": {
+        "type": "parcel"
+      },
+      "from": {
+        "place": "sending"
+      },
+      "to": {
+        "transition": "deliver"
+      }
+    },
+    {
+      "from": {
+        "transition": "deliver"
+      },
+      "produce": {
+        "destination": "delivered",
+        "type": "receipt"
+      },
+      "to": {
+        "place": "delivered"
+      }
+    },
+    {
+      "consume": {
+        "type": "receipt"
+      },
+      "from": {
+        "place": "delivered"
+      },
+      "to": {
+        "transition": "settle"
+      }
+    },
+    {
+      "from": {
+        "transition": "settle"
+      },
+      "produce": {
+        "destination": "settled",
+        "type": "receipt"
+      },
+      "to": {
+        "place": "settled"
+      }
+    }
+  ],
+  "description": "An order, sent and settled",
+  "initialMarking": {},
+  "name": "order_flow",
+  "places": [
+    {
+      "accepts": [
+        "parcel"
+      ],
+      "name": "placed"
+    },
+    {
+      "accepts": [
+        "parcel"
+      ],
+      "name": "sending",
+      "port": {
+        "direction": "output",
+        "type": "parcel"
+      }
+    },
+    {
+      "accepts": [
+        "receipt"
+      ],
+      "name": "delivered",
+      "port": {
+        "direction": "input",
+        "type": "receipt"
+      }
+    },
+    {
+      "accepts": [
+        "receipt"
+      ],
+      "name": "settled"
+    }
+  ],
+  "transitions": [
+    {
+      "name": "send"
+    },
+    {
+      "name": "deliver"
+    },
+    {
+      "name": "settle"
+    }
+  ]
+}

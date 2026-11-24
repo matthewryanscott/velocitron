@@ -1,0 +1,32 @@
+// Three seats, three forks. A diner takes the lower-numbered fork first,
+// then the other, eats, and puts both back. Ordering the forks avoids
+// the circular wait.
+net philosophers "Three diners share three forks"
+
+(thinking) -diner-> [take_low] -diner-> (one_fork)
+@low_fork: (forks) -fork-> [take_low]
+(one_fork) -diner-> [take_high] -diner-> (eating)
+@high_fork: (forks) -fork-> [take_high]
+(eating) -diner-> [drop] -diner-> (done)
+@drop_low: [drop] -fork-> (forks)
+@drop_high: [drop] -fork-> (forks)
+
+@low_fork correlate cel "token.fork == binding.thinking[0].seat"
+@high_fork correlate cel "token.fork == (binding.one_fork[0].seat == 3 ? 1 : binding.one_fork[0].seat + 1)"
+@drop_low data cel "{'fork': binding.eating[0].seat}"
+@drop_high data cel "{'fork': binding.eating[0].seat == 3 ? 1 : binding.eating[0].seat + 1}"
+
+(thinking) port input diner
+marking initial (forks) <- $f1
+marking initial (forks) <- $f2
+marking initial (forks) <- $f3
+marking initial (thinking) <- $d1
+marking initial (thinking) <- $d2
+marking initial (thinking) <- $d3
+$f1: fork {"fork": 1}
+$f2: fork {"fork": 2}
+$f3: fork {"fork": 3}
+$d1: diner {"seat": 1}
+$d2: diner {"seat": 2}
+$d3: diner {"seat": 3}
+final (done)

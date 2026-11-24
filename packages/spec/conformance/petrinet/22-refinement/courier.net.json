@@ -1,0 +1,89 @@
+{
+  "arcs": [
+    {
+      "consume": {
+        "type": "parcel"
+      },
+      "from": {
+        "place": "pickup"
+      },
+      "to": {
+        "transition": "pick"
+      }
+    },
+    {
+      "from": {
+        "transition": "pick"
+      },
+      "produce": {
+        "destination": "riding",
+        "type": "parcel"
+      },
+      "to": {
+        "place": "riding"
+      }
+    },
+    {
+      "consume": {
+        "type": "parcel"
+      },
+      "from": {
+        "place": "riding"
+      },
+      "to": {
+        "transition": "drop"
+      }
+    },
+    {
+      "from": {
+        "transition": "drop"
+      },
+      "produce": {
+        "destination": "dropped",
+        "type": "receipt"
+      },
+      "to": {
+        "place": "dropped"
+      }
+    }
+  ],
+  "description": "A courier delivers one order",
+  "initialMarking": {},
+  "name": "courier",
+  "places": [
+    {
+      "accepts": [
+        "parcel"
+      ],
+      "name": "pickup",
+      "port": {
+        "direction": "input",
+        "type": "parcel"
+      }
+    },
+    {
+      "accepts": [
+        "parcel"
+      ],
+      "name": "riding"
+    },
+    {
+      "accepts": [
+        "receipt"
+      ],
+      "name": "dropped",
+      "port": {
+        "direction": "output",
+        "type": "receipt"
+      }
+    }
+  ],
+  "transitions": [
+    {
+      "name": "pick"
+    },
+    {
+      "name": "drop"
+    }
+  ]
+}

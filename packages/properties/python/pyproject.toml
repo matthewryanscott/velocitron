@@ -1,0 +1,48 @@
+[project]
+name = "velocitron-properties"
+version = "0.1.0"
+description = "Checks declarative properties against a produced marking or a journal replay. Does not explore reachable markings."
+readme = "README.md"
+authors = [
+    { name = "Matthew R. Scott" },
+]
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.12"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+    "velocitron-cel",
+    "velocitron-engine",
+    "velocitron-journal",
+]
+
+[tool.uv.sources]
+velocitron-cel = { path = "../../cel/python", editable = false }
+velocitron-engine = { path = "../../engine/python", editable = false }
+velocitron-journal = { path = "../../journal/python", editable = false }
+
+[project.urls]
+Homepage = "https://github.com/circuitmeridian/velocitron"
+Repository = "https://github.com/circuitmeridian/velocitron"
+Issues = "https://github.com/circuitmeridian/velocitron/issues"
+
+[dependency-groups]
+test = [
+    "pytest>=9.0",
+]
+
+[build-system]
+requires = ["hatchling==1.31.0"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/velocitron_properties"]
+dev-mode-exact = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

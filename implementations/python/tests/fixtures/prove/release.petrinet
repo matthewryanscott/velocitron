@@ -1,0 +1,12 @@
+// A held request is released, but the verdict still says hold.
+net release "Hold, release, hold again"
+
+(requests) -request-> [open] -request-> (pending)
+@hold_verdict: (verdicts) -verdict->? [hold]
+(pending) -request-> [hold] -request-> (held)
+(held) -request-> [release] -request-> (pending)
+@send_verdict: (verdicts) -verdict->? [send]
+(pending) -request-> [send] -request-> (sent)
+
+@hold_verdict predicate cel "result == 'hold'"
+@send_verdict predicate cel "result == 'pass'"

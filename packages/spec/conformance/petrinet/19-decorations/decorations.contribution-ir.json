@@ -1,0 +1,540 @@
+{
+  "contributions": [
+    {
+      "id": {
+        "part": 0,
+        "source": "decorations.petrinet",
+        "statement": 0
+      },
+      "kind": "document.net-header",
+      "ordinal": 0,
+      "span": {
+        "end": {
+          "byteOffset": 15,
+          "column": 16,
+          "line": 1
+        },
+        "source": "decorations.petrinet",
+        "start": {
+          "byteOffset": 0,
+          "column": 1,
+          "line": 1
+        }
+      },
+      "target": {
+        "type": "document"
+      },
+      "value": {
+        "name": "decorations"
+      }
+    },
+    {
+      "id": {
+        "part": 0,
+        "source": "decorations.petrinet",
+        "statement": 1
+      },
+      "kind": "arc.declare",
+      "ordinal": 1,
+      "span": {
+        "end": {
+          "byteOffset": 40,
+          "column": 24,
+          "line": 3
+        },
+        "source": "decorations.petrinet",
+        "start": {
+          "byteOffset": 17,
+          "column": 1,
+          "line": 3
+        }
+      },
+      "target": {
+        "id": {
+          "document": "decorations.petrinet",
+          "part": 0,
+          "statement": 1
+        },
+        "type": "arc"
+      },
+      "value": {
+        "color": {
+          "kind": "explicit",
+          "value": "job"
+        },
+        "from": {
+          "name": "queued",
+          "type": "place"
+        },
+        "mode": "consume",
+        "to": {
+          "name": "start",
+          "type": "transition"
+        },
+        "transitionNameSpan": {
+          "end": {
+            "byteOffset": 39,
+            "column": 23,
+            "line": 3
+          },
+          "source": "decorations.petrinet",
+          "start": {
+            "byteOffset": 34,
+            "column": 18,
+            "line": 3
+          }
+        }
+      }
+    },
+    {
+      "id": {
+        "part": 1,
+        "source": "decorations.petrinet",
+        "statement": 1
+      },
+      "kind": "arc.declare",
+      "ordinal": 2,
+      "span": {
+        "end": {
+          "byteOffset": 57,
+          "column": 41,
+          "line": 3
+        },
+        "source": "decorations.petrinet",
+        "start": {
+          "byteOffset": 33,
+          "column": 17,
+          "line": 3
+        }
+      },
+      "target": {
+        "id": {
+          "document": "decorations.petrinet",
+          "part": 1,
+          "statement": 1
+        },
+        "type": "arc"
+      },
+      "value": {
+        "color": {
+          "kind": "explicit",
+          "value": "job"
+        },
+        "from": {
+          "name": "start",
+          "type": "transition"
+        },
+        "mode": "produce",
+        "to": {
+          "name": "running",
+          "type": "place"
+        }
+      }
+    },
+    {
+      "id": {
+        "part": 0,
+        "source": "decorations.petrinet",
+        "statement": 2
+      },
+      "kind": "arc.handle",
+      "ordinal": 3,
+      "span": {
+        "end": {
+          "byteOffset": 93,
+          "column": 36,
+          "line": 4
+        },
+        "source": "decorations.petrinet",
+        "start": {
+          "byteOffset": 58,
+          "column": 1,
+          "line": 4
+        }
+      },
+      "target": {
+        "name": "done_in",
+        "type": "arcHandle"
+      },
+      "value": {
+        "arcIds": [
+          {
+            "document": "decorations.petrinet",
+            "part": 1,
+            "statement": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": {
+        "part": 1,
+        "source": "decorations.petrinet",
+        "statement": 2
+      },
+      "kind": "arc.declare",
+      "ordinal": 4,
+      "span": {
+        "end": {
+          "byteOffset": 93,
+          "column": 36,
+          "line": 4
+        },
+        "source": "decorations.petrinet",
+        "start": {
+          "byteOffset": 68,
+          "column": 11,
+          "line": 4
+        }
+      },
+      "target": {
+        "id": {
+          "document": "decorations.petrinet",
+          "part": 1,
+          "statement": 2
+        },
+        "type": "arc"
+      },
+      "value": {
+        "color": {
+          "kind": "explicit",
+          "value": "job"
+        },
+        "from": {
+          "name": "running",
+          "type": "place"
+        },
+        "mode": "consume",
+        "to": {
+          "name": "finish",
+          "type": "transition"
+        },
+        "transitionNameSpan": {
+          "end": {
+            "byteOffset": 92,
+            "column": 35,
+            "line": 4
+          },
+          "source": "decorations.petrinet",
+          "start": {
+            "byteOffset": 86,
+            "column": 29,
+            "line": 4
+          }
+        }
+      }
+    },
+    {
+      "id": {
+        "part": 0,
+        "source": "decorations.petrinet",
+        "statement": 3
+      },
+      "kind": "arc.declare",
+      "ordinal": 5,
+      "span": {
+        "end": {
+          "byteOffset": 120,
+          "column": 27,
+          "line": 5
+        },
+        "source": "decorations.petrinet",
+        "start": {
+          "byteOffset": 94,
+          "column": 1,
+          "line": 5
+        }
+      },
+      "target": {
+        "id": {
+          "document": "decorations.petrinet",
+          "part": 0,
+          "statement": 3
+        },
+        "type": "arc"
+      },
+      "value": {
+        "color": {
+          "kind": "explicit",
+          "value": "receipt"
+        },
+        "from": {
+          "name": "finish",
+          "type": "transition"
+        },
+        "mode": "produce",
+        "to": {
+          "name": "done",
+          "type": "place"
+        }
+      }
+    },
+    {
+      "id": {
+        "part": 0,
+        "source": "decorations.petrinet",
+        "statement": 4
+      },
+      "kind": "arc.predicate",
+      "ordinal": 6,
+      "span": {
+        "end": {
+          "byteOffset": 163,
+          "column": 43,
+          "line": 6
+        },
+        "source": "decorations.petrinet",
+        "start": {
+          "byteOffset": 121,
+          "column": 1,
+          "line": 6
+        }
+      },
+      "target": {
+        "name": "done_in",
+        "type": "arcHandle"
+      },
+      "value": {
+        "cel": "job.exitCode == 0",
+        "kind": "cel"
+      }
+    },
+    {
+      "id": {
+        "part": 0,
+        "source": "decorations.petrinet",
+        "statement": 5
+      },
+      "kind": "decoration.highlight",
+      "ordinal": 7,
+      "span": {
+        "end": {
+          "byteOffset": 199,
+          "column": 35,
+          "line": 8
+        },
+        "source": "decorations.petrinet",
+        "start": {
+          "byteOffset": 165,
+          "column": 1,
+          "line": 8
+        }
+      },
+      "target": {
+        "name": "start",
+        "type": "transition"
+      },
+      "value": {
+        "label": "R2.11"
+      }
+    },
+    {
+      "id": {
+        "part": 0,
+        "source": "decorations.petrinet",
+        "statement": 6
+      },
+      "kind": "decoration.highlight",
+      "ordinal": 8,
+      "span": {
+        "end": {
+          "byteOffset": 228,
+          "column": 29,
+          "line": 9
+        },
+        "source": "decorations.petrinet",
+        "start": {
+          "byteOffset": 200,
+          "column": 1,
+          "line": 9
+        }
+      },
+      "target": {
+        "name": "running",
+        "type": "place"
+      },
+      "value": {}
+    },
+    {
+      "id": {
+        "part": 0,
+        "source": "decorations.petrinet",
+        "statement": 7
+      },
+      "kind": "decoration.note",
+      "ordinal": 9,
+      "span": {
+        "end": {
+          "byteOffset": 275,
+          "column": 47,
+          "line": 10
+        },
+        "source": "decorations.petrinet",
+        "start": {
+          "byteOffset": 229,
+          "column": 1,
+          "line": 10
+        }
+      },
+      "target": {
+        "name": "running",
+        "type": "place"
+      },
+      "value": {
+        "text": "one worker at a time"
+      }
+    },
+    {
+      "id": {
+        "part": 0,
+        "source": "decorations.petrinet",
+        "statement": 8
+      },
+      "kind": "decoration.summary",
+      "ordinal": 10,
+      "span": {
+        "end": {
+          "byteOffset": 313,
+          "column": 38,
+          "line": 11
+        },
+        "source": "decorations.petrinet",
+        "start": {
+          "byteOffset": 276,
+          "column": 1,
+          "line": 11
+        }
+      },
+      "target": {
+        "name": "done_in",
+        "type": "arcHandle"
+      },
+      "value": {
+        "text": "succeeded"
+      }
+    },
+    {
+      "id": {
+        "part": 0,
+        "source": "decorations.petrinet",
+        "statement": 9
+      },
+      "kind": "decoration.note",
+      "ordinal": 11,
+      "span": {
+        "end": {
+          "byteOffset": 347,
+          "column": 34,
+          "line": 12
+        },
+        "source": "decorations.petrinet",
+        "start": {
+          "byteOffset": 314,
+          "column": 1,
+          "line": 12
+        }
+      },
+      "target": {
+        "name": "done_in",
+        "type": "arcHandle"
+      },
+      "value": {
+        "text": "see R2.3"
+      }
+    },
+    {
+      "id": {
+        "part": 0,
+        "source": "decorations.petrinet",
+        "statement": 10
+      },
+      "kind": "decoration.summary",
+      "ordinal": 12,
+      "span": {
+        "end": {
+          "byteOffset": 394,
+          "column": 47,
+          "line": 13
+        },
+        "source": "decorations.petrinet",
+        "start": {
+          "byteOffset": 348,
+          "column": 1,
+          "line": 13
+        }
+      },
+      "target": {
+        "name": "finish",
+        "type": "transition"
+      },
+      "value": {
+        "text": "writes the receipt"
+      }
+    },
+    {
+      "id": {
+        "part": 0,
+        "source": "decorations.petrinet",
+        "statement": 11
+      },
+      "kind": "decoration.quiet",
+      "ordinal": 13,
+      "span": {
+        "end": {
+          "byteOffset": 419,
+          "column": 25,
+          "line": 14
+        },
+        "source": "decorations.petrinet",
+        "start": {
+          "byteOffset": 395,
+          "column": 1,
+          "line": 14
+        }
+      },
+      "target": {
+        "name": "job",
+        "type": "color"
+      },
+      "value": {}
+    },
+    {
+      "id": {
+        "part": 0,
+        "source": "decorations.petrinet",
+        "statement": 12
+      },
+      "kind": "decoration.show",
+      "ordinal": 14,
+      "span": {
+        "end": {
+          "byteOffset": 461,
+          "column": 42,
+          "line": 15
+        },
+        "source": "decorations.petrinet",
+        "start": {
+          "byteOffset": 420,
+          "column": 1,
+          "line": 15
+        }
+      },
+      "target": {
+        "name": "job",
+        "type": "color"
+      },
+      "value": {
+        "fields": [
+          "id",
+          "owner.name"
+        ]
+      }
+    }
+  ],
+  "document": {
+    "id": "decorations.petrinet"
+  },
+  "documentKind": "net",
+  "format": "velocitron.petrinet/contribution-ir",
+  "version": 1
+}

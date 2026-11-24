@@ -1,0 +1,23 @@
+// The hold's life as five small nets. The hold moves through wires. The
+// shelf slot, the notices, and the edition list are shared places.
+
+composition hold_lifecycle
+
+use "desk/request.petrinet" as request
+use "desk/shelf.petrinet" as shelf
+use "desk/checkout.petrinet" as checkout
+use "desk/notice.petrinet" as notice
+use "desk/edition.petrinet" as edition
+
+wire request.(queued) -> shelf.(queued)
+wire request.(queued) -> edition.(queued)
+wire shelf.(recalled) -> edition.(recalled)
+wire shelf.(lending) -> checkout.(lending)
+wire notice.(lending) -> checkout.(lending)
+wire checkout.(due) -> notice.(due)
+wire checkout.(due) -> edition.(due)
+
+share checkout.(withdrawn) ~ edition.(withdrawn)
+share checkout.(shelf_slot) ~ shelf.(shelf_slot) ~ notice.(shelf_slot)
+share checkout.(editions) ~ edition.(editions)
+share shelf.(notices) ~ checkout.(notices) ~ notice.(notices)

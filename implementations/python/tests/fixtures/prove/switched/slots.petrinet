@@ -1,0 +1,14 @@
+// At a copy, the home desk lends a copy it owns and skips one it does not.
+net slots "A copy is lent only for the home desk"
+
+(copies) -copy-> [lend] -copy-> (loaned)
+(copies) -copy-> [skip] -copy-> (skipped)
+@old_owns: (switch) -switch->? [lend]
+@new_owns: (switch) -switch->? [skip]
+
+@old_owns predicate cel "owner == 'old'"
+@new_owns predicate cel "owner == 'new'"
+
+(switch) port input switch
+(switch) annotation fusion true
+domain switch.owner "old" "new"

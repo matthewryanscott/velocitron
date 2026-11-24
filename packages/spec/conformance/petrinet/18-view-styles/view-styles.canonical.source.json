@@ -1,0 +1,4 @@
+{
+  "sourceId": "view-styles.canonical.petrinet",
+  "text": "net view_styles\n\n(seed) -pulse-> [emit]\n[emit] -pulse-> (out)\n\n[emit] handler \"emit@view_styles\"\n\nview default splines curved\nview default detail summary\nview default position (seed) at {\"x\":0,\"y\":0}\nview default position (out) relative (seed) + {\"x\":200,\"y\":0}\nview sketch detail structure\nextensions {}\n"
+}

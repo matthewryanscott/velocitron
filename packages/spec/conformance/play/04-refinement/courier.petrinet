@@ -1,0 +1,6 @@
+net courier
+
+(pickup) -parcel-> [pick] -parcel-> (riding)
+(riding) -parcel-> [drop] -receipt-> (dropped)
+(pickup) port input parcel
+(dropped) port output receipt

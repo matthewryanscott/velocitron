@@ -1,0 +1,27 @@
+{
+  "diagnostic": {
+    "code": "PN202",
+    "column": 8,
+    "file": "refined_order.unwired-refinement.petrinet",
+    "help": "wire the place to a port of the refining net",
+    "line": 6,
+    "message": "refine shop.[deliver] by courier: [deliver] gives receipt to (delivered), but (delivered) is not wired from an output port of courier",
+    "span": {
+      "end": {
+        "byteOffset": 164,
+        "column": 22,
+        "line": 6
+      },
+      "source": "refined_order.unwired-refinement.petrinet",
+      "start": {
+        "byteOffset": 150,
+        "column": 8,
+        "line": 6
+      }
+    }
+  },
+  "source": {
+    "sourceId": "refined_order.unwired-refinement.petrinet",
+    "text": "composition refined_order_unwired\n\nuse \"order_flow.petrinet\" as shop\nuse \"courier.petrinet\" as courier\nwire shop.(sending) -> courier.(pickup)\nrefine shop.[deliver] by courier\n"
+  }
+}

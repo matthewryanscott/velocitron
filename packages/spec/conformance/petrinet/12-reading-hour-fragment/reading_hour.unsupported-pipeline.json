@@ -1,0 +1,26 @@
+{
+  "diagnostic": {
+    "code": "PN101",
+    "column": 1,
+    "file": "bad_read_aloud.petrinet",
+    "line": 7,
+    "message": "extraneous input 'pipeline' expecting {<EOF>, 'use', 'wire', 'share', 'refine', 'final'}",
+    "span": {
+      "source": "bad_read_aloud.petrinet",
+      "start": {
+        "byteOffset": 148,
+        "line": 7,
+        "column": 1
+      },
+      "end": {
+        "byteOffset": 156,
+        "line": 7,
+        "column": 9
+      }
+    }
+  },
+  "source": {
+    "sourceId": "bad_read_aloud.petrinet",
+    "text": "composition bad_read_aloud\n\nuse \"reading_cadence.petrinet\" as cadence\nuse \"reading_pick.petrinet\" as curate\nuse \"reading_voice.petrinet\" as speaks\n\npipeline cadence -> curate -> speaks\n"
+  }
+}

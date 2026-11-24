@@ -1,0 +1,27 @@
+{
+  "diagnostic": {
+    "code": "PN202",
+    "column": 1,
+    "file": "decorations.unknown-place.petrinet",
+    "help": "declare the place before decorating it",
+    "line": 8,
+    "message": "decoration references unknown place 'ghost'; presentation facts cannot declare semantic objects",
+    "span": {
+      "end": {
+        "byteOffset": 191,
+        "column": 27,
+        "line": 8
+      },
+      "source": "decorations.unknown-place.petrinet",
+      "start": {
+        "byteOffset": 165,
+        "column": 1,
+        "line": 8
+      }
+    }
+  },
+  "source": {
+    "sourceId": "decorations.unknown-place.petrinet",
+    "text": "net decorations\n\n(queued) -job-> [start] -job-> (running)\n@done_in: (running) -job-> [finish]\n[finish] -receipt-> (done)\n@done_in predicate cel \"job.exitCode == 0\"\n\ndecorate (ghost) highlight\n"
+  }
+}

@@ -1,0 +1,48 @@
+// ============================================================================
+// velocitron example play, against kitchen-sink.petrinet
+// ----------------------------------------------------------------------------
+// A play lists steps against a net and proves each one with the real
+// engine, without handlers (symbolic firing). Check and render it with:
+//
+//   velocitron play check skills/velocitron/kitchen-sink.play
+//   velocitron play walk  skills/velocitron/kitchen-sink.play -o walk.md
+//
+// `///` lines are Markdown prose for the walkthrough; `//` lines are comments.
+// ============================================================================
+
+play review_sla "A document review escalates once it is overdue"
+net "kitchen-sink.petrinet"
+// `marking initial` is the default: the net's own initial marking.
+
+/// Region C of the kitchen sink. A queued document is assigned for review,
+/// and the assignment escalates when the clock passes its due time.
+
+$due: assignment {"docId": "doc-1", "dueAt": 1000}
+
+/// `[assign_review]` turns a `doc` into an `assignment`. The net has no data
+/// template for it and the colors differ, so the carry rule cannot fill it:
+/// the step states the assignment.
+@assigned: fire [assign_review] -> (assignments) $due "assign the review"
+expect (review_queue) empty, (assignments) == $due, not enabled [escalate_review]
+
+/// A advance replaces the clock token's `now`. It fires nothing by itself.
+advance 999
+expect not enabled [escalate_review]
+
+advance +1s "the review is due"
+expect enabled [escalate_review]
+fire [escalate_review] -> (escalations) escalation {"docId": "doc-1"} "escalate it"
+expect (assignments) empty, (escalations) count 1
+
+path shipment "A guarded transition fires under an assumed answer" from @assigned
+
+/// `[form_shipment]` has two accepted orders, stock for their sku and no open
+/// shipment for their customer, but its guard is a named handler. A play
+/// registers no handlers, so the transition is not enabled — until the path
+/// assumes the guard's answer.
+expect not enabled [form_shipment], enabled [accept_order]
+fire [accept_order] -> (accepted_orders) accepted_order {"customerId": "cust-1", "sku": "WIDGET-1"} "a new order is accepted"
+expect (accepted_orders) count 3
+assume [form_shipment] guard true
+@shipped: fire [form_shipment] "the assumed answer opens the warehouse"
+expect (shipments) count 1

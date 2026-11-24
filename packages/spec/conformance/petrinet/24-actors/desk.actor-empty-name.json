@@ -1,0 +1,26 @@
+{
+  "diagnostic": {
+    "code": "PN202",
+    "column": 14,
+    "file": "desk.actor-empty-name.petrinet",
+    "line": 10,
+    "message": "an actor name must not be empty",
+    "span": {
+      "source": "desk.actor-empty-name.petrinet",
+      "start": {
+        "byteOffset": 143,
+        "line": 10,
+        "column": 14
+      },
+      "end": {
+        "byteOffset": 145,
+        "line": 10,
+        "column": 16
+      }
+    }
+  },
+  "source": {
+    "sourceId": "desk.actor-empty-name.petrinet",
+    "text": "net desk\n\nperson Clerk\nsystem Annex\n\n(sign) -state-> [flip] -state-> (sign)\n(open) -> [close] -> (shut)\n(sign) -state->? [close]\n\n[flip] actor \"\"\n"
+  }
+}

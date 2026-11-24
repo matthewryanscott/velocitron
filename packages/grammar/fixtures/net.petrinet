@@ -1,0 +1,3 @@
+net coin_deposit "Coin deposit"
+
+(coin_slot) -coin-> [accept_coin] -coin-> (cash_box)

@@ -1,0 +1,4 @@
+{
+  "sourceId": "beside.canonical.petrinet",
+  "text": "net beside\n\n(queued) -job-> [start]\n[start] -job-> (running)\n(running) -job-> [finish]\n[finish] -job-> (done)\n(switch) -flag->? [start]\n(switch) -flag->? [finish]\n(budget) -credit->? [start]\n\n(switch) annotation fusion true\n(budget) annotation fusion true\n\ndecorate (budget) beside\ndecorate (switch) beside left\nextensions {}\n"
+}

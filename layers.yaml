@@ -1,0 +1,97 @@
+# Layer allow-list for tools/layer_lint.py.
+#
+# `allow` names layers this layer may import. A layer may always import
+# itself. An empty `allow` means the layer imports no other Velocitron layer.
+# Add a layer here before its code imports anything. See docs/layers.md.
+
+layers:
+  spec:
+    python: velocitron_spec
+    typescript: "@velocitron/spec"
+    allow: []
+  ir:
+    python: velocitron_ir
+    typescript: "@velocitron/ir"
+    allow: []
+  grammar:
+    python: velocitron_grammar
+    typescript: "@velocitron/grammar"
+    allow: []
+  cel:
+    python: velocitron_cel
+    typescript: "@velocitron/cel"
+    allow: []
+  dsl:
+    python: velocitron_dsl
+    typescript: "@velocitron/dsl"
+    allow: [viz]
+  play:
+    python: velocitron_play
+    typescript: "@velocitron/play"
+    allow: []
+  engine:
+    python: velocitron_engine
+    typescript: "@velocitron/engine"
+    allow: []
+  journal:
+    python: velocitron_journal
+    typescript: "@velocitron/journal"
+    allow: [engine]
+  runtime:
+    python: velocitron_runtime
+    typescript: "@velocitron/runtime"
+    allow: [cel, engine, journal]
+  kernel:
+    python: velocitron_kernel
+    allow: []
+  analysis:
+    python: velocitron_analysis
+    typescript: "@velocitron/analysis"
+    allow: [cel, engine, kernel, petrinet, merge, runtime]
+  properties:
+    python: velocitron_properties
+    typescript: "@velocitron/properties"
+    allow: [cel, engine, journal]
+  explain:
+    python: velocitron_explain
+    typescript: "@velocitron/explain"
+    allow: [cel, engine]
+  equiv:
+    python: velocitron_equiv
+    typescript: "@velocitron/equiv"
+    allow: [analysis, dsl, engine, merge, petrinet]
+  codegen:
+    python: velocitron_codegen
+    typescript: "@velocitron/codegen"
+    allow: [dsl, engine, merge, petrinet, viz]
+  netbase:
+    python: velocitron_netbase
+    typescript: "@velocitron/netbase"
+    allow: [cel, codegen, engine, runtime]
+  replay:
+    python: velocitron_replay
+    typescript: "@velocitron/replay"
+    allow: [cel, engine, journal, netbase, petrinet]
+  merge:
+    python: velocitron_merge
+    typescript: "@velocitron/merge"
+    allow: [engine]
+  petrinet:
+    python: velocitron_petrinet
+    typescript: "@velocitron/petrinet"
+    allow: [spec, ir, grammar, cel, dsl, engine, merge]
+  viz:
+    python: velocitron_viz
+    typescript: "@velocitron/viz"
+    allow: [engine]
+  play-check:
+    python: velocitron_play_check
+    typescript: "@velocitron/play-check"
+    allow: [analysis, cel, dsl, play, engine, merge, petrinet, viz]
+  skill:
+    python: velocitron_skill
+    allow: []
+  cli:
+    python: velocitron_cli
+    typescript: "@velocitron/cli"
+    allow: [analysis, cel, codegen, dsl, engine, equiv, explain, merge, petrinet, play, play-check, runtime, skill, viz]

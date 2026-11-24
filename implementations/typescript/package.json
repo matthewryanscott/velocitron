@@ -1,0 +1,55 @@
+{
+  "author": "Matthew R. Scott",
+  "bugs": {
+    "url": "https://github.com/circuitmeridian/velocitron/issues"
+  },
+  "dependencies": {
+    "@velocitron/analysis": "workspace:*",
+    "@velocitron/cel": "workspace:*",
+    "@velocitron/cli": "workspace:*",
+    "@velocitron/codegen": "workspace:*",
+    "@velocitron/dsl": "workspace:*",
+    "@velocitron/engine": "workspace:*",
+    "@velocitron/equiv": "workspace:*",
+    "@velocitron/explain": "workspace:*",
+    "@velocitron/journal": "workspace:*",
+    "@velocitron/merge": "workspace:*",
+    "@velocitron/netbase": "workspace:*",
+    "@velocitron/petrinet": "workspace:*",
+    "@velocitron/properties": "workspace:*",
+    "@velocitron/replay": "workspace:*",
+    "@velocitron/runtime": "workspace:*",
+    "ajv": "8.20.0"
+  },
+  "description": "Cross-package TypeScript tests and schema generators. Not a library.",
+  "devDependencies": {
+    "typescript": "7.0.2",
+    "vitest": "4.1.10"
+  },
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "homepage": "https://github.com/circuitmeridian/velocitron",
+  "license": "MIT",
+  "name": "@velocitron/typescript-tests",
+  "private": true,
+  "repository": {
+    "directory": "implementations/typescript",
+    "type": "git",
+    "url": "git+https://github.com/circuitmeridian/velocitron.git"
+  },
+  "scripts": {
+    "audit:browser": "python3 ../../tools/release_checks.py --audit-source-browser-seam",
+    "check:generated": "python3 ../../tools/antlr.py check-typescript && node tools/generate-schemas.mjs --check && node tools/generate-ir-schema.mjs --check",
+    "check:ir-schema": "node tools/generate-ir-schema.mjs --check",
+    "check:schema": "node tools/generate-schemas.mjs --check",
+    "generate": "python3 ../../tools/antlr.py generate-typescript && node tools/generate-schemas.mjs && node tools/generate-ir-schema.mjs",
+    "generate:ir-schema": "node tools/generate-ir-schema.mjs",
+    "generate:schema": "node tools/generate-schemas.mjs",
+    "test": "vitest run",
+    "test:schema": "vitest run tests/schema",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "type": "module",
+  "version": "0.1.0"
+}

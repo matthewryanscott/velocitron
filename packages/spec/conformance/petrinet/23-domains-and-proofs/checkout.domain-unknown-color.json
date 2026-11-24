@@ -1,0 +1,27 @@
+{
+  "diagnostic": {
+    "code": "PN202",
+    "column": 1,
+    "file": "checkout.domain-unknown-color.petrinet",
+    "line": 10,
+    "message": "domain refers to unknown color 'verdict'; no place accepts it",
+    "span": {
+      "source": "checkout.domain-unknown-color.petrinet",
+      "start": {
+        "byteOffset": 245,
+        "line": 10,
+        "column": 1
+      },
+      "end": {
+        "byteOffset": 273,
+        "line": 10,
+        "column": 29
+      }
+    },
+    "help": "name a color that a place accepts"
+  },
+  "source": {
+    "sourceId": "checkout.domain-unknown-color.petrinet",
+    "text": "net checkout\n\n(pending) -checkout-> [send] -checkout-> (sending)\n(free) -lock-> [send]\n(sending) -checkout-> [finish] -outcome-> (ended)\n@unlock: [finish] -lock-> (free)\n(ended) -outcome-> [close] -checkout-> (done)\n@unlock data {\"id\": \"desk\"}\n\ndomain verdict.result \"pass\"\n"
+  }
+}

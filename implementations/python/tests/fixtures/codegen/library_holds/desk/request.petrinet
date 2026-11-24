@@ -1,0 +1,32 @@
+// A wish becomes a queued hold, a reorder from the catalog asks again, or a
+// duplicate wish is declined on the spot.
+
+net hold_request "A wish, a reorder, or a duplicate"
+
+[file_hold] handler "file_hold@request"
+[reopen] handler "reopen@request"
+
+@file_in: (wishes) -wish-> [file_hold] -hold-> (queued)
+@reopen_in: (reorder) -reorder-> [reopen] -hold-> (queued)
+@decline_in: (wishes) -wish-> [decline]
+@decline_out: [decline] -note-> (declined)
+
+@file_in predicate cel "fresh"
+@decline_in predicate cel "!fresh"
+@decline_out data cel "{'isbn': binding.wishes[0].isbn, 'reason': 'duplicate'}"
+
+(queued) port output hold
+(reorder) port input reorder
+(wishes) port input wish
+
+person Patron
+system "circulation desk"
+net actor "circulation desk"
+(wishes) actor Patron
+(queued) description "waiting for the shelf"
+[file_hold] description "File the patron's wish as a hold"
+[reopen] description "A reorder from the union catalog asks for the title again"
+[decline] description "Decline a duplicate wish"
+
+domain wish.fresh true false
+final (queued), (declined)

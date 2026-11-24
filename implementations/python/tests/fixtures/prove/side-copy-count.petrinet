@@ -1,0 +1,15 @@
+// redelivery.petrinet's loop, where [escalate] also puts a try into
+// (noted), which no step reads: the tries are still only counted.
+net side_copy_count "Send until the third try escalates, and note a try"
+
+(pending) -> [send] -> (sent)
+(sent) -> [redeliver] -> (pending)
+[redeliver] -try-> (tries)
+(sent) -> [finish] -> (done)
+(sent) -> [escalate] -> (done)
+@third: (tries) -try->? [escalate]
+@third weight 3
+[escalate] -try-> (noted)
+
+final (done)
+marking initial (pending) <- 1

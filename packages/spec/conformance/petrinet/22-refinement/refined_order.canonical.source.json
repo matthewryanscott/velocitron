@@ -1,0 +1,4 @@
+{
+  "sourceId": "refined_order.canonical.petrinet",
+  "text": "composition refined_order\n\nuse \"order_flow.petrinet\" as shop\nuse \"courier.petrinet\" as courier\nwire shop.(sending) -> courier.(pickup)\nwire courier.(dropped) -> shop.(delivered)\nrefine shop.[deliver] by courier\n"
+}

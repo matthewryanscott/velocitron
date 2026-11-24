@@ -1,0 +1,4 @@
+{
+  "sourceId": "checkout.petrinet",
+  "text": "net checkout\n\n(pending) -checkout-> [send] -checkout-> (sending)\n(free) -lock-> [send]\n(sending) -checkout-> [finish] -outcome-> (ended)\n@unlock: [finish] -lock-> (free)\n(ended) -outcome-> [close] -checkout-> (done)\n@unlock data {\"id\": \"desk\"}\n\ndomain outcome.outcome \"returned\" \"failed\"\ndomain outcome.checkout.tries 0 1 2.5\ndomain checkout.urgent true false\nfinal (done), (sending) + (ended)\ninvariant \"lock\" (free) + (sending) + (ended) = 1\ninvariant 2 * (pending) + (done)\n"
+}

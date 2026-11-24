@@ -1,0 +1,16 @@
+// The instance arrives at an input port, and the transitions that take it
+// there are its choice: retry on a retry answer, keep on any other.
+net port_choice "Take a teardown at the port by its answer"
+
+@retry_in: (asked) -teardown-> [retry]
+[retry] -teardown-> (retried)
+@retry_answer: (answer) -answer->? [retry]
+@retry_answer predicate cel "choice == 'retry'"
+
+@keep_in: (asked) -teardown-> [keep]
+[keep] -teardown-> (kept)
+@keep_answer: (answer) -answer->? [keep]
+@keep_answer predicate cel "choice != 'retry'"
+
+(asked) port input teardown
+final (retried), (kept)

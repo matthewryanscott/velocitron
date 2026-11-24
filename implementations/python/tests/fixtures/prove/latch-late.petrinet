@@ -1,0 +1,25 @@
+// A VM opens at its start time, a latch then copies the clock, and only the
+// stop's timer ends the instance. The latch copies 600, the clock's last
+// listed time, so the stop is due past every time listed.
+net latch_late "Stop a wait after the latch"
+
+(seen) -vm-> [open] -vm-> (open)
+@open_clock: (clock) -tick->? [open]
+[open] timer clock (clock) cel "clock.now >= seen.startAt"
+[open] timer bind seen (seen)
+
+@rest_in: (open) -vm-> [rest]
+@rest_out: [rest] -vm-> (idle)
+@rest_clock: (clock) -tick->? [rest]
+@rest_out data cel "{'vm': binding.open[0].vm, 'wait': binding.open[0].wait, 'since': binding.clock[0].now}"
+
+@stop_in: (idle) -vm-> [stop]
+[stop] -vm-> (stopped)
+@stop_clock: (clock) -tick->? [stop]
+[stop] timer clock (clock) cel "clock.now >= idle.since + idle.wait"
+[stop] timer bind idle (idle)
+[stop] timer maturity cel "idle.since + idle.wait"
+
+(seen) port input vm
+(clock) annotation fusion true
+final (stopped)

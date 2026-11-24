@@ -1,0 +1,429 @@
+{
+  "format": "velocitron.petrinet/contribution-ir",
+  "version": 1,
+  "documentKind": "net",
+  "document": {
+    "id": "condition.petrinet"
+  },
+  "contributions": [
+    {
+      "id": {
+        "source": "condition.petrinet",
+        "statement": 0,
+        "part": 0
+      },
+      "kind": "document.net-header",
+      "ordinal": 0,
+      "span": {
+        "source": "condition.petrinet",
+        "start": {
+          "byteOffset": 0,
+          "line": 1,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 13,
+          "line": 1,
+          "column": 14
+        }
+      },
+      "target": {
+        "type": "document"
+      },
+      "value": {
+        "name": "condition"
+      }
+    },
+    {
+      "id": {
+        "source": "condition.petrinet",
+        "statement": 1,
+        "part": 0
+      },
+      "kind": "actor.declare",
+      "ordinal": 1,
+      "span": {
+        "source": "condition.petrinet",
+        "start": {
+          "byteOffset": 15,
+          "line": 3,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 40,
+          "line": 3,
+          "column": 26
+        }
+      },
+      "target": {
+        "type": "document",
+        "kind": "net"
+      },
+      "value": {
+        "name": "circulation desk",
+        "kind": "system"
+      }
+    },
+    {
+      "id": {
+        "source": "condition.petrinet",
+        "statement": 2,
+        "part": 0
+      },
+      "kind": "arc.declare",
+      "ordinal": 2,
+      "span": {
+        "source": "condition.petrinet",
+        "start": {
+          "byteOffset": 42,
+          "line": 5,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 67,
+          "line": 5,
+          "column": 26
+        }
+      },
+      "target": {
+        "type": "arc",
+        "id": {
+          "document": "condition.petrinet",
+          "statement": 2,
+          "part": 0
+        }
+      },
+      "value": {
+        "from": {
+          "type": "place",
+          "name": "returns"
+        },
+        "to": {
+          "type": "transition",
+          "name": "check"
+        },
+        "color": {
+          "kind": "explicit",
+          "value": "copy"
+        },
+        "mode": "consume",
+        "transitionNameSpan": {
+          "source": "condition.petrinet",
+          "start": {
+            "byteOffset": 61,
+            "line": 5,
+            "column": 20
+          },
+          "end": {
+            "byteOffset": 66,
+            "line": 5,
+            "column": 25
+          }
+        }
+      }
+    },
+    {
+      "id": {
+        "source": "condition.petrinet",
+        "statement": 2,
+        "part": 1
+      },
+      "kind": "arc.declare",
+      "ordinal": 3,
+      "span": {
+        "source": "condition.petrinet",
+        "start": {
+          "byteOffset": 60,
+          "line": 5,
+          "column": 19
+        },
+        "end": {
+          "byteOffset": 85,
+          "line": 5,
+          "column": 44
+        }
+      },
+      "target": {
+        "type": "arc",
+        "id": {
+          "document": "condition.petrinet",
+          "statement": 2,
+          "part": 1
+        }
+      },
+      "value": {
+        "from": {
+          "type": "transition",
+          "name": "check"
+        },
+        "to": {
+          "type": "place",
+          "name": "shelved"
+        },
+        "color": {
+          "kind": "explicit",
+          "value": "copy"
+        },
+        "mode": "produce"
+      }
+    },
+    {
+      "id": {
+        "source": "condition.petrinet",
+        "statement": 3,
+        "part": 0
+      },
+      "kind": "arc.handle",
+      "ordinal": 4,
+      "span": {
+        "source": "condition.petrinet",
+        "start": {
+          "byteOffset": 86,
+          "line": 6,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 123,
+          "line": 6,
+          "column": 38
+        }
+      },
+      "target": {
+        "type": "arcHandle",
+        "name": "in"
+      },
+      "value": {
+        "arcIds": [
+          {
+            "document": "condition.petrinet",
+            "statement": 3,
+            "part": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": {
+        "source": "condition.petrinet",
+        "statement": 3,
+        "part": 1
+      },
+      "kind": "arc.declare",
+      "ordinal": 5,
+      "span": {
+        "source": "condition.petrinet",
+        "start": {
+          "byteOffset": 91,
+          "line": 6,
+          "column": 6
+        },
+        "end": {
+          "byteOffset": 123,
+          "line": 6,
+          "column": 38
+        }
+      },
+      "target": {
+        "type": "arc",
+        "id": {
+          "document": "condition.petrinet",
+          "statement": 3,
+          "part": 1
+        }
+      },
+      "value": {
+        "from": {
+          "type": "place",
+          "name": "condition"
+        },
+        "to": {
+          "type": "transition",
+          "name": "check"
+        },
+        "color": {
+          "kind": "explicit",
+          "value": "condition"
+        },
+        "mode": "consume",
+        "transitionNameSpan": {
+          "source": "condition.petrinet",
+          "start": {
+            "byteOffset": 117,
+            "line": 6,
+            "column": 32
+          },
+          "end": {
+            "byteOffset": 122,
+            "line": 6,
+            "column": 37
+          }
+        }
+      }
+    },
+    {
+      "id": {
+        "source": "condition.petrinet",
+        "statement": 4,
+        "part": 0
+      },
+      "kind": "arc.handle",
+      "ordinal": 6,
+      "span": {
+        "source": "condition.petrinet",
+        "start": {
+          "byteOffset": 124,
+          "line": 7,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 162,
+          "line": 7,
+          "column": 39
+        }
+      },
+      "target": {
+        "type": "arcHandle",
+        "name": "out"
+      },
+      "value": {
+        "arcIds": [
+          {
+            "document": "condition.petrinet",
+            "statement": 4,
+            "part": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": {
+        "source": "condition.petrinet",
+        "statement": 4,
+        "part": 1
+      },
+      "kind": "arc.declare",
+      "ordinal": 7,
+      "span": {
+        "source": "condition.petrinet",
+        "start": {
+          "byteOffset": 130,
+          "line": 7,
+          "column": 7
+        },
+        "end": {
+          "byteOffset": 162,
+          "line": 7,
+          "column": 39
+        }
+      },
+      "target": {
+        "type": "arc",
+        "id": {
+          "document": "condition.petrinet",
+          "statement": 4,
+          "part": 1
+        }
+      },
+      "value": {
+        "from": {
+          "type": "transition",
+          "name": "check"
+        },
+        "to": {
+          "type": "place",
+          "name": "condition"
+        },
+        "color": {
+          "kind": "explicit",
+          "value": "condition"
+        },
+        "mode": "produce"
+      }
+    },
+    {
+      "id": {
+        "source": "condition.petrinet",
+        "statement": 5,
+        "part": 0
+      },
+      "kind": "arc.produce-cel",
+      "ordinal": 8,
+      "span": {
+        "source": "condition.petrinet",
+        "start": {
+          "byteOffset": 163,
+          "line": 8,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 231,
+          "line": 8,
+          "column": 69
+        }
+      },
+      "target": {
+        "type": "arcHandle",
+        "name": "out"
+      },
+      "value": {
+        "cel": "{'isbn': binding.condition[0].isbn, 'damaged': true}"
+      }
+    },
+    {
+      "id": {
+        "source": "condition.petrinet",
+        "statement": 6,
+        "part": 0
+      },
+      "kind": "documentation.annotation",
+      "ordinal": 9,
+      "span": {
+        "source": "condition.petrinet",
+        "start": {
+          "byteOffset": 233,
+          "line": 10,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 329,
+          "line": 10,
+          "column": 97
+        }
+      },
+      "target": {
+        "type": "place",
+        "name": "condition"
+      },
+      "value": {
+        "key": "kept",
+        "value": {
+          "type": "object",
+          "entries": [
+            {
+              "key": "by",
+              "value": {
+                "type": "string",
+                "value": "circulation desk"
+              }
+            },
+            {
+              "key": "start",
+              "value": {
+                "type": "object",
+                "entries": [
+                  {
+                    "key": "cel",
+                    "value": {
+                      "type": "string",
+                      "value": "{'isbn': instance.isbn, 'damaged': false}"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

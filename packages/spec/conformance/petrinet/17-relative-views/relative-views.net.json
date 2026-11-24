@@ -1,0 +1,95 @@
+{
+  "annotations": {
+    "petrinet.dsl/v1": {
+      "arcHandles": {},
+      "extensions": {},
+      "markings": {},
+      "views": {
+        "laid": {
+          "positions": {
+            "place:out": {
+              "delta": {
+                "x": 5,
+                "y": 5
+              },
+              "from": "transition:emit"
+            },
+            "place:seed": {
+              "x": 3,
+              "y": 4
+            },
+            "transition:emit": {
+              "delta": {
+                "x": 10,
+                "y": 5
+              },
+              "from": "place:seed"
+            }
+          },
+          "routes": {}
+        }
+      }
+    }
+  },
+  "arcs": [
+    {
+      "consume": {
+        "type": "pulse"
+      },
+      "from": {
+        "place": "seed"
+      },
+      "to": {
+        "transition": "emit"
+      }
+    },
+    {
+      "from": {
+        "transition": "emit"
+      },
+      "produce": {
+        "destination": "out",
+        "type": "pulse"
+      },
+      "to": {
+        "place": "out"
+      }
+    },
+    {
+      "consume": {
+        "type": "pulse"
+      },
+      "from": {
+        "place": "out"
+      },
+      "to": {
+        "transition": "echo"
+      }
+    }
+  ],
+  "name": "relative_views",
+  "places": [
+    {
+      "accepts": [
+        "pulse"
+      ],
+      "name": "seed"
+    },
+    {
+      "accepts": [
+        "pulse"
+      ],
+      "name": "out"
+    }
+  ],
+  "transitions": [
+    {
+      "handler": "emit@relative_views",
+      "name": "emit"
+    },
+    {
+      "handler": "echo@relative_views",
+      "name": "echo"
+    }
+  ]
+}

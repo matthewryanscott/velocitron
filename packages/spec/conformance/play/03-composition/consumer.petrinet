@@ -1,0 +1,8 @@
+net consumer
+
+(in) -task-> [take]
+(in) port input task
+@slot: (slots) -slot->? [take]
+@slot correlate cel "token.lane == binding[\"in\"][0].lane"
+@result: [take] -result-> (done)
+@result data cel "{\"of\": binding[\"in\"][0].id, \"slot\": binding.slots[0].name}"

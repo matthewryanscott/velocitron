@@ -1,0 +1,9 @@
+// A job is taken, worked on by one abstract transition, and finished.
+net outer "Take, work, finish"
+
+(requests) -job-> [take] -job-> (queue)
+(queue) -job-> [work] -job-> (result)
+(result) -job-> [finish] -job-> (done)
+
+(queue) port output job
+(result) port input job

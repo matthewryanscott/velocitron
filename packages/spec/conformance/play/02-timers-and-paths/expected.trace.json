@@ -1,0 +1,1054 @@
+[
+  {
+    "play": "timers_and_paths",
+    "path": "trunk",
+    "status": "passed",
+    "inherited": 0,
+    "initial": {},
+    "steps": [
+      {
+        "line": 7,
+        "kind": "inject",
+        "statement": "inject (queue) <- $job",
+        "records": [
+          {
+            "kind": "injection",
+            "place": "queue",
+            "injectionKind": "inject",
+            "tokens": [
+              {
+                "type": "job",
+                "data": {
+                  "id": "j-1",
+                  "nextAt": 600,
+                  "deadline": 3600
+                }
+              }
+            ],
+            "replaced": []
+          }
+        ],
+        "afterEach": [
+          {
+            "queue": [
+              {
+                "type": "job",
+                "data": {
+                  "id": "j-1",
+                  "nextAt": 600,
+                  "deadline": 3600
+                }
+              }
+            ]
+          }
+        ],
+        "checks": [],
+        "after": {
+          "queue": [
+            {
+              "type": "job",
+              "data": {
+                "id": "j-1",
+                "nextAt": 600,
+                "deadline": 3600
+              }
+            }
+          ]
+        }
+      },
+      {
+        "line": 8,
+        "kind": "advance",
+        "statement": "advance 0",
+        "records": [
+          {
+            "kind": "injection",
+            "place": "clock",
+            "injectionKind": "update",
+            "tokens": [
+              {
+                "type": "tick",
+                "data": {
+                  "now": 0
+                }
+              }
+            ],
+            "replaced": []
+          }
+        ],
+        "afterEach": [
+          {
+            "clock": [
+              {
+                "type": "tick",
+                "data": {
+                  "now": 0
+                }
+              }
+            ],
+            "queue": [
+              {
+                "type": "job",
+                "data": {
+                  "id": "j-1",
+                  "nextAt": 600,
+                  "deadline": 3600
+                }
+              }
+            ]
+          }
+        ],
+        "checks": [],
+        "after": {
+          "clock": [
+            {
+              "type": "tick",
+              "data": {
+                "now": 0
+              }
+            }
+          ],
+          "queue": [
+            {
+              "type": "job",
+              "data": {
+                "id": "j-1",
+                "nextAt": 600,
+                "deadline": 3600
+              }
+            }
+          ]
+        }
+      },
+      {
+        "line": 9,
+        "kind": "fire",
+        "statement": "fire [try]",
+        "records": [
+          {
+            "kind": "firing",
+            "transition": "try",
+            "status": "completed",
+            "inputTokens": {
+              "queue": [
+                {
+                  "type": "job",
+                  "data": {
+                    "id": "j-1",
+                    "nextAt": 600,
+                    "deadline": 3600
+                  }
+                }
+              ]
+            },
+            "outputTokens": {
+              "waiting": [
+                {
+                  "type": "job",
+                  "data": {
+                    "id": "j-1",
+                    "nextAt": 600,
+                    "deadline": 3600
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "afterEach": [
+          {
+            "clock": [
+              {
+                "type": "tick",
+                "data": {
+                  "now": 0
+                }
+              }
+            ],
+            "waiting": [
+              {
+                "type": "job",
+                "data": {
+                  "id": "j-1",
+                  "nextAt": 600,
+                  "deadline": 3600
+                }
+              }
+            ]
+          }
+        ],
+        "checks": [],
+        "after": {
+          "clock": [
+            {
+              "type": "tick",
+              "data": {
+                "now": 0
+              }
+            }
+          ],
+          "waiting": [
+            {
+              "type": "job",
+              "data": {
+                "id": "j-1",
+                "nextAt": 600,
+                "deadline": 3600
+              }
+            }
+          ]
+        }
+      },
+      {
+        "line": 10,
+        "kind": "expect",
+        "statement": "expect not enabled [retry] [give_up]",
+        "records": [],
+        "afterEach": [],
+        "checks": [
+          {
+            "text": "not enabled [retry] [give_up]",
+            "ok": true,
+            "detail": "enabled now: nothing"
+          }
+        ],
+        "after": {
+          "clock": [
+            {
+              "type": "tick",
+              "data": {
+                "now": 0
+              }
+            }
+          ],
+          "waiting": [
+            {
+              "type": "job",
+              "data": {
+                "id": "j-1",
+                "nextAt": 600,
+                "deadline": 3600
+              }
+            }
+          ]
+        }
+      },
+      {
+        "line": 12,
+        "kind": "advance",
+        "statement": "advance +10m",
+        "records": [
+          {
+            "kind": "injection",
+            "place": "clock",
+            "injectionKind": "update",
+            "tokens": [
+              {
+                "type": "tick",
+                "data": {
+                  "now": 600
+                }
+              }
+            ],
+            "replaced": [
+              {
+                "type": "tick",
+                "data": {
+                  "now": 0
+                }
+              }
+            ]
+          },
+          {
+            "kind": "firing",
+            "transition": "retry",
+            "status": "completed",
+            "inputTokens": {
+              "waiting": [
+                {
+                  "type": "job",
+                  "data": {
+                    "id": "j-1",
+                    "nextAt": 600,
+                    "deadline": 3600
+                  }
+                }
+              ],
+              "clock": [
+                {
+                  "type": "tick",
+                  "data": {
+                    "now": 600
+                  }
+                }
+              ]
+            },
+            "outputTokens": {
+              "queue": [
+                {
+                  "type": "job",
+                  "data": {
+                    "id": "j-1",
+                    "nextAt": 600,
+                    "deadline": 3600
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "afterEach": [
+          {
+            "clock": [
+              {
+                "type": "tick",
+                "data": {
+                  "now": 600
+                }
+              }
+            ],
+            "waiting": [
+              {
+                "type": "job",
+                "data": {
+                  "id": "j-1",
+                  "nextAt": 600,
+                  "deadline": 3600
+                }
+              }
+            ]
+          },
+          {
+            "clock": [
+              {
+                "type": "tick",
+                "data": {
+                  "now": 600
+                }
+              }
+            ],
+            "queue": [
+              {
+                "type": "job",
+                "data": {
+                  "id": "j-1",
+                  "nextAt": 600,
+                  "deadline": 3600
+                }
+              }
+            ]
+          }
+        ],
+        "checks": [],
+        "after": {
+          "clock": [
+            {
+              "type": "tick",
+              "data": {
+                "now": 600
+              }
+            }
+          ],
+          "queue": [
+            {
+              "type": "job",
+              "data": {
+                "id": "j-1",
+                "nextAt": 600,
+                "deadline": 3600
+              }
+            }
+          ]
+        }
+      },
+      {
+        "line": 13,
+        "kind": "expect",
+        "statement": "expect (queue) == $job",
+        "records": [],
+        "afterEach": [],
+        "checks": [
+          {
+            "text": "(queue) == $job",
+            "ok": true,
+            "detail": "(queue) holds job {\"deadline\": 3600, \"id\": \"j-1\", \"nextAt\": 600}"
+          }
+        ],
+        "after": {
+          "clock": [
+            {
+              "type": "tick",
+              "data": {
+                "now": 600
+              }
+            }
+          ],
+          "queue": [
+            {
+              "type": "job",
+              "data": {
+                "id": "j-1",
+                "nextAt": 600,
+                "deadline": 3600
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "failure": null
+  },
+  {
+    "play": "timers_and_paths",
+    "path": "deadline",
+    "status": "passed",
+    "inherited": 3,
+    "initial": {},
+    "steps": [
+      {
+        "line": 7,
+        "kind": "inject",
+        "statement": "inject (queue) <- $job",
+        "records": [
+          {
+            "kind": "injection",
+            "place": "queue",
+            "injectionKind": "inject",
+            "tokens": [
+              {
+                "type": "job",
+                "data": {
+                  "id": "j-1",
+                  "nextAt": 600,
+                  "deadline": 3600
+                }
+              }
+            ],
+            "replaced": []
+          }
+        ],
+        "afterEach": [
+          {
+            "queue": [
+              {
+                "type": "job",
+                "data": {
+                  "id": "j-1",
+                  "nextAt": 600,
+                  "deadline": 3600
+                }
+              }
+            ]
+          }
+        ],
+        "checks": [],
+        "after": {
+          "queue": [
+            {
+              "type": "job",
+              "data": {
+                "id": "j-1",
+                "nextAt": 600,
+                "deadline": 3600
+              }
+            }
+          ]
+        }
+      },
+      {
+        "line": 8,
+        "kind": "advance",
+        "statement": "advance 0",
+        "records": [
+          {
+            "kind": "injection",
+            "place": "clock",
+            "injectionKind": "update",
+            "tokens": [
+              {
+                "type": "tick",
+                "data": {
+                  "now": 0
+                }
+              }
+            ],
+            "replaced": []
+          }
+        ],
+        "afterEach": [
+          {
+            "clock": [
+              {
+                "type": "tick",
+                "data": {
+                  "now": 0
+                }
+              }
+            ],
+            "queue": [
+              {
+                "type": "job",
+                "data": {
+                  "id": "j-1",
+                  "nextAt": 600,
+                  "deadline": 3600
+                }
+              }
+            ]
+          }
+        ],
+        "checks": [],
+        "after": {
+          "clock": [
+            {
+              "type": "tick",
+              "data": {
+                "now": 0
+              }
+            }
+          ],
+          "queue": [
+            {
+              "type": "job",
+              "data": {
+                "id": "j-1",
+                "nextAt": 600,
+                "deadline": 3600
+              }
+            }
+          ]
+        }
+      },
+      {
+        "line": 9,
+        "kind": "fire",
+        "statement": "fire [try]",
+        "records": [
+          {
+            "kind": "firing",
+            "transition": "try",
+            "status": "completed",
+            "inputTokens": {
+              "queue": [
+                {
+                  "type": "job",
+                  "data": {
+                    "id": "j-1",
+                    "nextAt": 600,
+                    "deadline": 3600
+                  }
+                }
+              ]
+            },
+            "outputTokens": {
+              "waiting": [
+                {
+                  "type": "job",
+                  "data": {
+                    "id": "j-1",
+                    "nextAt": 600,
+                    "deadline": 3600
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "afterEach": [
+          {
+            "clock": [
+              {
+                "type": "tick",
+                "data": {
+                  "now": 0
+                }
+              }
+            ],
+            "waiting": [
+              {
+                "type": "job",
+                "data": {
+                  "id": "j-1",
+                  "nextAt": 600,
+                  "deadline": 3600
+                }
+              }
+            ]
+          }
+        ],
+        "checks": [],
+        "after": {
+          "clock": [
+            {
+              "type": "tick",
+              "data": {
+                "now": 0
+              }
+            }
+          ],
+          "waiting": [
+            {
+              "type": "job",
+              "data": {
+                "id": "j-1",
+                "nextAt": 600,
+                "deadline": 3600
+              }
+            }
+          ]
+        }
+      },
+      {
+        "line": 17,
+        "kind": "advance",
+        "statement": "advance 1h",
+        "records": [
+          {
+            "kind": "injection",
+            "place": "clock",
+            "injectionKind": "update",
+            "tokens": [
+              {
+                "type": "tick",
+                "data": {
+                  "now": 3600
+                }
+              }
+            ],
+            "replaced": [
+              {
+                "type": "tick",
+                "data": {
+                  "now": 0
+                }
+              }
+            ]
+          },
+          {
+            "kind": "firing",
+            "transition": "give_up",
+            "status": "completed",
+            "inputTokens": {
+              "waiting": [
+                {
+                  "type": "job",
+                  "data": {
+                    "id": "j-1",
+                    "nextAt": 600,
+                    "deadline": 3600
+                  }
+                }
+              ],
+              "clock": [
+                {
+                  "type": "tick",
+                  "data": {
+                    "now": 3600
+                  }
+                }
+              ]
+            },
+            "outputTokens": {
+              "failed": [
+                {
+                  "type": "job",
+                  "data": {
+                    "id": "j-1",
+                    "nextAt": 600,
+                    "deadline": 3600
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "afterEach": [
+          {
+            "clock": [
+              {
+                "type": "tick",
+                "data": {
+                  "now": 3600
+                }
+              }
+            ],
+            "waiting": [
+              {
+                "type": "job",
+                "data": {
+                  "id": "j-1",
+                  "nextAt": 600,
+                  "deadline": 3600
+                }
+              }
+            ]
+          },
+          {
+            "clock": [
+              {
+                "type": "tick",
+                "data": {
+                  "now": 3600
+                }
+              }
+            ],
+            "failed": [
+              {
+                "type": "job",
+                "data": {
+                  "id": "j-1",
+                  "nextAt": 600,
+                  "deadline": 3600
+                }
+              }
+            ]
+          }
+        ],
+        "checks": [],
+        "after": {
+          "clock": [
+            {
+              "type": "tick",
+              "data": {
+                "now": 3600
+              }
+            }
+          ],
+          "failed": [
+            {
+              "type": "job",
+              "data": {
+                "id": "j-1",
+                "nextAt": 600,
+                "deadline": 3600
+              }
+            }
+          ]
+        }
+      },
+      {
+        "line": 18,
+        "kind": "expect",
+        "statement": "expect (failed) == $job, quiescent",
+        "records": [],
+        "afterEach": [],
+        "checks": [
+          {
+            "text": "(failed) == $job",
+            "ok": true,
+            "detail": "(failed) holds job {\"deadline\": 3600, \"id\": \"j-1\", \"nextAt\": 600}"
+          },
+          {
+            "text": "quiescent",
+            "ok": true,
+            "detail": "enabled now: nothing"
+          }
+        ],
+        "after": {
+          "clock": [
+            {
+              "type": "tick",
+              "data": {
+                "now": 3600
+              }
+            }
+          ],
+          "failed": [
+            {
+              "type": "job",
+              "data": {
+                "id": "j-1",
+                "nextAt": 600,
+                "deadline": 3600
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "failure": null
+  },
+  {
+    "play": "timers_and_paths",
+    "path": "too_early",
+    "status": "failed",
+    "inherited": 3,
+    "initial": {},
+    "steps": [
+      {
+        "line": 7,
+        "kind": "inject",
+        "statement": "inject (queue) <- $job",
+        "records": [
+          {
+            "kind": "injection",
+            "place": "queue",
+            "injectionKind": "inject",
+            "tokens": [
+              {
+                "type": "job",
+                "data": {
+                  "id": "j-1",
+                  "nextAt": 600,
+                  "deadline": 3600
+                }
+              }
+            ],
+            "replaced": []
+          }
+        ],
+        "afterEach": [
+          {
+            "queue": [
+              {
+                "type": "job",
+                "data": {
+                  "id": "j-1",
+                  "nextAt": 600,
+                  "deadline": 3600
+                }
+              }
+            ]
+          }
+        ],
+        "checks": [],
+        "after": {
+          "queue": [
+            {
+              "type": "job",
+              "data": {
+                "id": "j-1",
+                "nextAt": 600,
+                "deadline": 3600
+              }
+            }
+          ]
+        }
+      },
+      {
+        "line": 8,
+        "kind": "advance",
+        "statement": "advance 0",
+        "records": [
+          {
+            "kind": "injection",
+            "place": "clock",
+            "injectionKind": "update",
+            "tokens": [
+              {
+                "type": "tick",
+                "data": {
+                  "now": 0
+                }
+              }
+            ],
+            "replaced": []
+          }
+        ],
+        "afterEach": [
+          {
+            "clock": [
+              {
+                "type": "tick",
+                "data": {
+                  "now": 0
+                }
+              }
+            ],
+            "queue": [
+              {
+                "type": "job",
+                "data": {
+                  "id": "j-1",
+                  "nextAt": 600,
+                  "deadline": 3600
+                }
+              }
+            ]
+          }
+        ],
+        "checks": [],
+        "after": {
+          "clock": [
+            {
+              "type": "tick",
+              "data": {
+                "now": 0
+              }
+            }
+          ],
+          "queue": [
+            {
+              "type": "job",
+              "data": {
+                "id": "j-1",
+                "nextAt": 600,
+                "deadline": 3600
+              }
+            }
+          ]
+        }
+      },
+      {
+        "line": 9,
+        "kind": "fire",
+        "statement": "fire [try]",
+        "records": [
+          {
+            "kind": "firing",
+            "transition": "try",
+            "status": "completed",
+            "inputTokens": {
+              "queue": [
+                {
+                  "type": "job",
+                  "data": {
+                    "id": "j-1",
+                    "nextAt": 600,
+                    "deadline": 3600
+                  }
+                }
+              ]
+            },
+            "outputTokens": {
+              "waiting": [
+                {
+                  "type": "job",
+                  "data": {
+                    "id": "j-1",
+                    "nextAt": 600,
+                    "deadline": 3600
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "afterEach": [
+          {
+            "clock": [
+              {
+                "type": "tick",
+                "data": {
+                  "now": 0
+                }
+              }
+            ],
+            "waiting": [
+              {
+                "type": "job",
+                "data": {
+                  "id": "j-1",
+                  "nextAt": 600,
+                  "deadline": 3600
+                }
+              }
+            ]
+          }
+        ],
+        "checks": [],
+        "after": {
+          "clock": [
+            {
+              "type": "tick",
+              "data": {
+                "now": 0
+              }
+            }
+          ],
+          "waiting": [
+            {
+              "type": "job",
+              "data": {
+                "id": "j-1",
+                "nextAt": 600,
+                "deadline": 3600
+              }
+            }
+          ]
+        }
+      },
+      {
+        "line": 22,
+        "kind": "advance",
+        "statement": "advance 5m",
+        "records": [
+          {
+            "kind": "injection",
+            "place": "clock",
+            "injectionKind": "update",
+            "tokens": [
+              {
+                "type": "tick",
+                "data": {
+                  "now": 300
+                }
+              }
+            ],
+            "replaced": [
+              {
+                "type": "tick",
+                "data": {
+                  "now": 0
+                }
+              }
+            ]
+          }
+        ],
+        "afterEach": [
+          {
+            "clock": [
+              {
+                "type": "tick",
+                "data": {
+                  "now": 300
+                }
+              }
+            ],
+            "waiting": [
+              {
+                "type": "job",
+                "data": {
+                  "id": "j-1",
+                  "nextAt": 600,
+                  "deadline": 3600
+                }
+              }
+            ]
+          }
+        ],
+        "checks": [],
+        "after": {
+          "clock": [
+            {
+              "type": "tick",
+              "data": {
+                "now": 300
+              }
+            }
+          ],
+          "waiting": [
+            {
+              "type": "job",
+              "data": {
+                "id": "j-1",
+                "nextAt": 600,
+                "deadline": 3600
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "failure": {
+      "line": 23,
+      "statement": "fire [retry]",
+      "code": "SC301",
+      "message": "[retry] is not enabled",
+      "details": [
+        "timer `clock.now >= job.nextAt` is false (clock.now = 300, job.nextAt = 600)",
+        "enabled now: nothing"
+      ]
+    }
+  }
+]

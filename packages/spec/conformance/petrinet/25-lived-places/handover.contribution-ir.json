@@ -1,0 +1,497 @@
+{
+  "format": "velocitron.petrinet/contribution-ir",
+  "version": 1,
+  "documentKind": "net",
+  "document": {
+    "id": "handover.petrinet"
+  },
+  "contributions": [
+    {
+      "id": {
+        "source": "handover.petrinet",
+        "statement": 0,
+        "part": 0
+      },
+      "kind": "document.net-header",
+      "ordinal": 0,
+      "span": {
+        "source": "handover.petrinet",
+        "start": {
+          "byteOffset": 0,
+          "line": 1,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 12,
+          "line": 1,
+          "column": 13
+        }
+      },
+      "target": {
+        "type": "document"
+      },
+      "value": {
+        "name": "handover"
+      }
+    },
+    {
+      "id": {
+        "source": "handover.petrinet",
+        "statement": 1,
+        "part": 0
+      },
+      "kind": "actor.declare",
+      "ordinal": 1,
+      "span": {
+        "source": "handover.petrinet",
+        "start": {
+          "byteOffset": 14,
+          "line": 3,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 26,
+          "line": 3,
+          "column": 13
+        }
+      },
+      "target": {
+        "type": "document",
+        "kind": "net"
+      },
+      "value": {
+        "name": "Clerk",
+        "kind": "person"
+      }
+    },
+    {
+      "id": {
+        "source": "handover.petrinet",
+        "statement": 2,
+        "part": 0
+      },
+      "kind": "actor.declare",
+      "ordinal": 2,
+      "span": {
+        "source": "handover.petrinet",
+        "start": {
+          "byteOffset": 27,
+          "line": 4,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 47,
+          "line": 4,
+          "column": 21
+        }
+      },
+      "target": {
+        "type": "document",
+        "kind": "net"
+      },
+      "value": {
+        "name": "Branch home",
+        "kind": "record"
+      }
+    },
+    {
+      "id": {
+        "source": "handover.petrinet",
+        "statement": 3,
+        "part": 0
+      },
+      "kind": "arc.declare",
+      "ordinal": 3,
+      "span": {
+        "source": "handover.petrinet",
+        "start": {
+          "byteOffset": 49,
+          "line": 6,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 73,
+          "line": 6,
+          "column": 25
+        }
+      },
+      "target": {
+        "type": "arc",
+        "id": {
+          "document": "handover.petrinet",
+          "statement": 3,
+          "part": 0
+        }
+      },
+      "value": {
+        "from": {
+          "type": "place",
+          "name": "switch"
+        },
+        "to": {
+          "type": "transition",
+          "name": "flip"
+        },
+        "color": {
+          "kind": "explicit",
+          "value": "route"
+        },
+        "mode": "consume",
+        "transitionNameSpan": {
+          "source": "handover.petrinet",
+          "start": {
+            "byteOffset": 68,
+            "line": 6,
+            "column": 20
+          },
+          "end": {
+            "byteOffset": 72,
+            "line": 6,
+            "column": 24
+          }
+        }
+      }
+    },
+    {
+      "id": {
+        "source": "handover.petrinet",
+        "statement": 3,
+        "part": 1
+      },
+      "kind": "arc.declare",
+      "ordinal": 4,
+      "span": {
+        "source": "handover.petrinet",
+        "start": {
+          "byteOffset": 67,
+          "line": 6,
+          "column": 19
+        },
+        "end": {
+          "byteOffset": 91,
+          "line": 6,
+          "column": 43
+        }
+      },
+      "target": {
+        "type": "arc",
+        "id": {
+          "document": "handover.petrinet",
+          "statement": 3,
+          "part": 1
+        }
+      },
+      "value": {
+        "from": {
+          "type": "transition",
+          "name": "flip"
+        },
+        "to": {
+          "type": "place",
+          "name": "switch"
+        },
+        "color": {
+          "kind": "explicit",
+          "value": "route"
+        },
+        "mode": "produce"
+      }
+    },
+    {
+      "id": {
+        "source": "handover.petrinet",
+        "statement": 4,
+        "part": 0
+      },
+      "kind": "arc.declare",
+      "ordinal": 5,
+      "span": {
+        "source": "handover.petrinet",
+        "start": {
+          "byteOffset": 92,
+          "line": 7,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 110,
+          "line": 7,
+          "column": 19
+        }
+      },
+      "target": {
+        "type": "arc",
+        "id": {
+          "document": "handover.petrinet",
+          "statement": 4,
+          "part": 0
+        }
+      },
+      "value": {
+        "from": {
+          "type": "place",
+          "name": "outbox"
+        },
+        "to": {
+          "type": "transition",
+          "name": "send"
+        },
+        "color": {
+          "kind": "explicit",
+          "value": "token"
+        },
+        "mode": "consume",
+        "transitionNameSpan": {
+          "source": "handover.petrinet",
+          "start": {
+            "byteOffset": 105,
+            "line": 7,
+            "column": 14
+          },
+          "end": {
+            "byteOffset": 109,
+            "line": 7,
+            "column": 18
+          }
+        }
+      }
+    },
+    {
+      "id": {
+        "source": "handover.petrinet",
+        "statement": 4,
+        "part": 1
+      },
+      "kind": "arc.declare",
+      "ordinal": 6,
+      "span": {
+        "source": "handover.petrinet",
+        "start": {
+          "byteOffset": 104,
+          "line": 7,
+          "column": 13
+        },
+        "end": {
+          "byteOffset": 122,
+          "line": 7,
+          "column": 31
+        }
+      },
+      "target": {
+        "type": "arc",
+        "id": {
+          "document": "handover.petrinet",
+          "statement": 4,
+          "part": 1
+        }
+      },
+      "value": {
+        "from": {
+          "type": "transition",
+          "name": "send"
+        },
+        "to": {
+          "type": "place",
+          "name": "loaned"
+        },
+        "color": {
+          "kind": "explicit",
+          "value": "token"
+        },
+        "mode": "produce"
+      }
+    },
+    {
+      "id": {
+        "source": "handover.petrinet",
+        "statement": 5,
+        "part": 0
+      },
+      "kind": "arc.declare",
+      "ordinal": 7,
+      "span": {
+        "source": "handover.petrinet",
+        "start": {
+          "byteOffset": 123,
+          "line": 8,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 148,
+          "line": 8,
+          "column": 26
+        }
+      },
+      "target": {
+        "type": "arc",
+        "id": {
+          "document": "handover.petrinet",
+          "statement": 5,
+          "part": 0
+        }
+      },
+      "value": {
+        "from": {
+          "type": "place",
+          "name": "switch"
+        },
+        "to": {
+          "type": "transition",
+          "name": "send"
+        },
+        "color": {
+          "kind": "explicit",
+          "value": "route"
+        },
+        "mode": "read"
+      }
+    },
+    {
+      "id": {
+        "source": "handover.petrinet",
+        "statement": 6,
+        "part": 0
+      },
+      "kind": "documentation.annotation",
+      "ordinal": 8,
+      "span": {
+        "source": "handover.petrinet",
+        "start": {
+          "byteOffset": 150,
+          "line": 10,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 170,
+          "line": 10,
+          "column": 21
+        }
+      },
+      "target": {
+        "type": "place",
+        "name": "switch"
+      },
+      "value": {
+        "key": "actor",
+        "value": {
+          "type": "string",
+          "value": "Clerk"
+        }
+      }
+    },
+    {
+      "id": {
+        "source": "handover.petrinet",
+        "statement": 7,
+        "part": 0
+      },
+      "kind": "documentation.annotation",
+      "ordinal": 9,
+      "span": {
+        "source": "handover.petrinet",
+        "start": {
+          "byteOffset": 171,
+          "line": 11,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 202,
+          "line": 11,
+          "column": 32
+        }
+      },
+      "target": {
+        "type": "place",
+        "name": "switch"
+      },
+      "value": {
+        "key": "lives",
+        "value": {
+          "type": "string",
+          "value": "Branch home"
+        }
+      }
+    },
+    {
+      "id": {
+        "source": "handover.petrinet",
+        "statement": 8,
+        "part": 0
+      },
+      "kind": "documentation.annotation",
+      "ordinal": 10,
+      "span": {
+        "source": "handover.petrinet",
+        "start": {
+          "byteOffset": 203,
+          "line": 12,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 251,
+          "line": 12,
+          "column": 49
+        }
+      },
+      "target": {
+        "type": "place",
+        "name": "switch"
+      },
+      "value": {
+        "key": "reads_as",
+        "value": {
+          "type": "object",
+          "entries": [
+            {
+              "key": "cel",
+              "value": {
+                "type": "string",
+                "value": "token.owner + ' owns it'"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": {
+        "source": "handover.petrinet",
+        "statement": 9,
+        "part": 0
+      },
+      "kind": "documentation.annotation",
+      "ordinal": 11,
+      "span": {
+        "source": "handover.petrinet",
+        "start": {
+          "byteOffset": 252,
+          "line": 13,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 288,
+          "line": 13,
+          "column": 37
+        }
+      },
+      "target": {
+        "type": "place",
+        "name": "loaned"
+      },
+      "value": {
+        "key": "lives",
+        "value": {
+          "type": "object",
+          "entries": [
+            {
+              "key": "cel",
+              "value": {
+                "type": "string",
+                "value": "token.branch"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

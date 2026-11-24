@@ -1,0 +1,4 @@
+{
+  "sourceId": "decorations.petrinet",
+  "text": "net decorations\n\n(queued) -job-> [start] -job-> (running)\n@done_in: (running) -job-> [finish]\n[finish] -receipt-> (done)\n@done_in predicate cel \"job.exitCode == 0\"\n\ndecorate [start] highlight \"R2.11\"\ndecorate (running) highlight\ndecorate (running) note \"one worker at a time\"\ndecorate @done_in summary \"succeeded\"\ndecorate @done_in note \"see R2.3\"\ndecorate [finish] summary \"writes the receipt\"\ndecorate color job quiet\ndecorate color job show \"id\" \"owner.name\"\n"
+}

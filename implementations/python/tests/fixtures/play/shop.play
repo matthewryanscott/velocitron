@@ -1,0 +1,26 @@
+play shop "One purchase through the shop"
+net "shop.petrinet"
+
+/// A purchase arrives in the initial marking. The stock holds one item
+/// of its sku.
+
+$o1: purchase {"id": "o-1", "sku": "a", "dueAt": 100}
+
+/// Accepting moves the purchase; the carry rule keeps its data.
+@accepted: fire [accept] "the shop accepts the purchase"
+expect (accepted) == $o1, enabled [ship]
+
+/// Shipping reads the item and gives a parcel; the net fixes the receipt.
+fire [ship] -> (shipped) parcel {"order": "o-1"} "the purchase ships"
+expect (receipts) count 1
+
+path late "The purchase is not shipped in time" from @accepted
+
+advance 150 "past the deadline"
+expect next [expire]
+fire [expire]
+
+path held "A hold stops shipping" from @accepted
+
+inject (holds) <- hold {"why": "fraud check"}
+fire [ship] -> (shipped) parcel {}

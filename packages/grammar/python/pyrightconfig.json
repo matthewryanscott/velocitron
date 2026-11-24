@@ -1,0 +1,43 @@
+{
+  "exclude": [
+    ".venv",
+    ".pytest_cache",
+    "src/velocitron_grammar/generated"
+  ],
+  "executionEnvironments": [
+    {
+      "extraPaths": [
+        "src"
+      ],
+      "root": "src"
+    },
+    {
+      "extraPaths": [
+        "src"
+      ],
+      "reportMissingImports": "none",
+      "reportPrivateUsage": "none",
+      "reportUnknownArgumentType": "none",
+      "reportUnknownLambdaType": "none",
+      "reportUnknownMemberType": "none",
+      "reportUnknownParameterType": "none",
+      "reportUnknownVariableType": "none",
+      "reportUnusedFunction": "none",
+      "reportUnusedImport": "none",
+      "reportUnusedVariable": "none",
+      "root": "tests"
+    }
+  ],
+  "extraPaths": [
+    "src"
+  ],
+  "include": [
+    "src",
+    "tests"
+  ],
+  "pythonVersion": "3.12",
+  "reportMissingTypeStubs": false,
+  "typeCheckingMode": "strict",
+  "venv": ".venv",
+  "venvPath": "."
+}

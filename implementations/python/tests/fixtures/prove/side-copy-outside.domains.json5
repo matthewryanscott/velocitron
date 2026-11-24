@@ -1,0 +1,4 @@
+// For side-copy.petrinet: the copied field gets a value outside the net's
+// declared domain (page.running is true or false), so the engine refuses
+// the copy of a page event that holds it (ADR 0065, Limit).
+{ domains: { "page.running": [true, false, "unset"] } }

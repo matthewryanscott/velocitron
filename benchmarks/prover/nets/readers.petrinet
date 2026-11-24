@@ -1,0 +1,27 @@
+// A shelf is either being read or rewritten. Readers share it. A writer
+// takes it only when no reader holds it, matched by the copy's isbn.
+net readers "Readers share a shelf; a writer waits for them"
+
+@read_in: (idle) -patron-> [read]
+@read_out: [read] -patron-> (reading)
+@write_in: (idle) -patron-> [write]
+@write_out: [write] -patron-> (writing)
+@read_book: (shelf) -copy->? [read]
+@write_book: (shelf) -copy-> [write]
+@busy: (reading) -patron->0 [write]
+(reading) -patron-> [stop_read] -patron-> (done)
+(writing) -patron-> [stop_write] -patron-> (done)
+[stop_write] -copy-> (shelf)
+
+@read_in predicate cel "role == 'read'"
+@write_in predicate cel "role == 'write'"
+@read_book correlate cel "token.isbn == binding.idle[0].isbn"
+@write_book correlate cel "token.isbn == binding.idle[0].isbn"
+@busy correlate cel "token.isbn == binding.idle[0].isbn"
+
+(idle) port input patron
+marking initial (shelf) <- $left
+marking initial (shelf) <- $right
+$left: copy {"isbn": "978-014"}
+$right: copy {"isbn": "978-015"}
+final (done)

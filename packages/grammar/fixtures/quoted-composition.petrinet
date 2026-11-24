@@ -1,0 +1,3 @@
+composition "wired-pulse"
+
+use "pulse_source.petrinet" as source

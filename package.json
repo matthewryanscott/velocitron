@@ -1,0 +1,16 @@
+{
+  "engines": {
+    "node": ">=24.15.0",
+    "pnpm": ">=11.13.1"
+  },
+  "name": "velocitron-workspace",
+  "packageManager": "pnpm@11.13.1",
+  "private": true,
+  "scripts": {
+    "audit:browser": "pnpm --filter @velocitron/typescript-tests run audit:browser",
+    "build": "pnpm -r --filter !@velocitron/typescript-tests run build",
+    "check:generated": "pnpm --filter @velocitron/typescript-tests run check:generated",
+    "test": "pnpm --filter @velocitron/typescript-tests --filter @velocitron/ir --filter @velocitron/grammar --filter @velocitron/cel --filter @velocitron/dsl --filter @velocitron/petrinet --filter @velocitron/merge --filter @velocitron/play --filter @velocitron/play-check --filter @velocitron/engine --filter @velocitron/journal --filter @velocitron/runtime --filter @velocitron/viz --filter @velocitron/analysis --filter @velocitron/properties --filter @velocitron/explain --filter @velocitron/equiv --filter @velocitron/codegen --filter @velocitron/netbase --filter @velocitron/replay --filter @velocitron/cli run test",
+    "typecheck": "pnpm --filter @velocitron/typescript-tests --filter @velocitron/ir --filter @velocitron/grammar --filter @velocitron/cel --filter @velocitron/dsl --filter @velocitron/petrinet --filter @velocitron/merge --filter @velocitron/play --filter @velocitron/play-check --filter @velocitron/engine --filter @velocitron/journal --filter @velocitron/runtime --filter @velocitron/viz --filter @velocitron/analysis --filter @velocitron/properties --filter @velocitron/explain --filter @velocitron/equiv --filter @velocitron/codegen --filter @velocitron/netbase --filter @velocitron/replay --filter @velocitron/cli run typecheck"
+  }
+}

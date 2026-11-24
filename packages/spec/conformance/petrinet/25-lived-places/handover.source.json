@@ -1,0 +1,4 @@
+{
+  "sourceId": "handover.petrinet",
+  "text": "net handover\n\nperson Clerk\nrecord \"Branch home\"\n\n(switch) -route-> [flip] -route-> (switch)\n(outbox) -> [send] -> (loaned)\n(switch) -route->? [send]\n\n(switch) actor Clerk\n(switch) lives in \"Branch home\"\n(switch) reads as cel \"token.owner + ' owns it'\"\n(loaned) lives in cel \"token.branch\"\n"
+}

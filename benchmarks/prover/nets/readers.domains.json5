@@ -1,0 +1,9 @@
+// Patrons arrive wanting one of two copies. The writer is the patron
+// whose role is "write"; readers are everyone else.
+{
+  instance: "patron",
+  domains: {
+    "patron.isbn": ["978-014", "978-015"],
+    "patron.role": ["read", "write"],
+  },
+}

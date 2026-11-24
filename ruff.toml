@@ -1,0 +1,3 @@
+# Ruff's defaults for files outside implementations/python, which has its own
+# config. Without this file Ruff walks above the repository and can pick up a
+# contributor's personal ruff.toml.

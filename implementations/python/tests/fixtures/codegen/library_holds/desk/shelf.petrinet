@@ -1,0 +1,66 @@
+// A queued hold is lent from the main shelf, recalled from the annex, or left
+// until a return. The patron may clear their own wait. That step is theirs.
+
+net hold_shelf "Lend, recall, or wait for a return"
+
+@lend_in: (queued) -hold-> [lend] -hold-> (lending)
+@lend_slot: (shelf_slot) -slot-> [lend]
+@lend_home: (branch_home) -route->? [lend]
+
+@recall_in: (queued) -hold-> [recall] -hold-> (recalled)
+@recall_note: [recall] -note-> (notices)
+@recall_home: (branch_home) -route->? [recall]
+
+@wait_in: (queued) -hold-> [wait_return] -hold-> (waiting_return)
+@wait_note: [wait_return] -note-> (notices)
+@wait_home: (branch_home) -route->? [wait_return]
+
+@clear_in: (waiting_return) -hold-> [clear_wait] -hold-> (queued)
+@clear_note: (notices) -note-> [clear_wait]
+@clear_out: [clear_wait] -note-> (notices)
+
+@returned_in: (waiting_return) -hold-> [return_arrived] -hold-> (queued)
+@returned_slot_in: (shelf_slot) -slot-> [return_arrived]
+@returned_slot_out: [return_arrived] -slot-> (shelf_slot)
+
+@lend_slot correlate cel "token.isbn == binding.queued[0].isbn && token.free"
+@lend_home predicate cel "branch == 'main' && confirmed"
+@lend_home correlate cel "token.isbn == binding.queued[0].isbn"
+@recall_home predicate cel "branch == 'annex' && confirmed"
+@recall_home correlate cel "token.isbn == binding.queued[0].isbn"
+@recall_note data cel "{'kind': 'recall', 'isbn': binding.queued[0].isbn}"
+@wait_home predicate cel "!confirmed"
+@wait_home correlate cel "token.isbn == binding.queued[0].isbn"
+@wait_note data cel "{'kind': 'waiting_return', 'isbn': binding.queued[0].isbn}"
+@clear_note predicate cel "kind == 'waiting_return'"
+@clear_note correlate cel "token.isbn == binding.waiting_return[0].isbn"
+@clear_out data cel "{'kind': 'cleared', 'isbn': binding.waiting_return[0].isbn}"
+@returned_slot_in correlate cel "token.isbn == binding.waiting_return[0].isbn"
+@returned_slot_out data cel "{'isbn': binding.shelf_slot[0].isbn, 'free': true}"
+
+[lend] annotation wait {"when": "binding.branch_home.exists(h, h.isbn == binding.queued[0].isbn && h.branch == 'main' && !h.confirmed)", "for": "the main branch to confirm the copy"}
+
+(shelf_slot) kept by "circulation desk" starts as cel "{'isbn': instance.isbn, 'free': true}"
+
+[clear_wait] actor Patron
+
+(queued) port input hold
+(recalled) port output hold
+(lending) port output hold
+(branch_home) port input route
+
+person Patron
+system "circulation desk"
+net actor "circulation desk"
+(branch_home) actor Patron
+
+record "Branch home"
+(branch_home) lives in "Branch home"
+(branch_home) reads as cel "token.isbn + ' at ' + token.branch"
+(branch_home) description "which branch holds the copy, and whether it has confirmed"
+(notices) description "notes to the desk"
+(lending) description "ready to leave the shelf"
+
+domain route.branch "main" "annex"
+domain route.confirmed true false
+final (lending), (recalled)

@@ -1,0 +1,4 @@
+{
+  "sourceId": "reading_pick.petrinet",
+  "text": "net reading_pick \"The due passage gets picked\"\n\n(refresh_due_in) -refresh_due-> [curate] -speak_req-> (speak_request)\n\n[curate] handler \"curate@curate\"\n(refresh_due_in) port input refresh_due\n(speak_request) port output speak_req\n"
+}

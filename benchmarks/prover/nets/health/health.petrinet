@@ -1,0 +1,116 @@
+// A sensor the monitor watches. One token per sensor, with a kind and a
+// key. The monitor keeps one reading per key: ok, bad, or gone (the sensor
+// was removed). The net reads that record; it never probes.
+//
+// ok → suspect → broken → ok. A bad reading makes the sensor suspect, with
+// two minutes' grace. If the reading clears within the grace, the sensor is
+// ok again and nothing rang. Two minutes on and still bad: broken, and it
+// rings exactly once. When the reading clears, the recovery is a log line
+// and the sensor is ok again.
+
+net health "A condition: ok, suspect for two minutes, broken with one ring, ok again when the probe clears"
+
+// The monitor watches a sensor: one token, starting ok
+@watch_in: (watched) -condition-> [watch]
+@watch_out: [watch] -condition-> (ok)
+@watch_out data cel "{'key': binding.watched[0].key, 'kind': binding.watched[0].kind, 'brokenAt': 0}"
+
+// The probe reads bad: suspect, with two minutes' grace
+@notice_in: (ok) -condition-> [notice]
+@notice_out: [notice] -condition-> (suspect)
+@notice_probe: (probes) -reading->? [notice]
+@notice_clock: (clock) -tick->? [notice]
+@notice_probe predicate cel "state == 'bad'"
+@notice_probe correlate cel "token.key == binding.ok[0].key"
+@notice_out data cel "{'key': binding.ok[0].key, 'kind': binding.ok[0].kind, 'brokenAt': double(binding.clock[0].now) + 120.0}"
+[notice] annotation wait {"when": "binding.probes.exists(r, r.key == binding.ok[0].key && r.state == 'ok')", "for": "the probe to read bad or gone"}
+
+// Within the grace the probe clears: ok again, and nothing rang
+@clear_in: (suspect) -condition-> [clear]
+@clear_out: [clear] -condition-> (ok)
+@clear_probe: (probes) -reading->? [clear]
+@clear_probe predicate cel "state != 'bad'"
+@clear_probe correlate cel "token.key == binding.suspect[0].key"
+@clear_out data cel "{'key': binding.suspect[0].key, 'kind': binding.suspect[0].kind, 'brokenAt': 0}"
+
+// Two minutes on and still bad: broken; ring once
+@break_in: (suspect) -condition-> [break]
+@break_out: [break] -condition-> (broken)
+@break_probe: (probes) -reading->? [break]
+@break_clock: (clock) -tick->? [break]
+@break_probe predicate cel "state == 'bad'"
+@break_probe correlate cel "token.key == binding.suspect[0].key"
+@break_out data cel "{'key': binding.suspect[0].key, 'kind': binding.suspect[0].kind, 'brokenAt': binding.suspect[0].brokenAt}"
+[break] timer clock (clock) cel "clock.now >= condition.brokenAt"
+[break] timer bind condition (suspect)
+[break] timer maturity cel "condition.brokenAt"
+
+// The probe clears: ok again, with a log line on the condition's note
+@recover_in: (broken) -condition-> [recover]
+@recover_out: [recover] -condition-> (ok)
+@recover_probe: (probes) -reading->? [recover]
+@recover_probe predicate cel "state != 'bad'"
+@recover_probe correlate cel "token.key == binding.broken[0].key"
+@recover_out data cel "{'key': binding.broken[0].key, 'kind': binding.broken[0].kind, 'brokenAt': 0}"
+
+// The sensor was removed: retired
+@retire_in: (ok) -condition-> [retire]
+[retire] -condition-> (retired)
+@retire_probe: (probes) -reading->? [retire]
+@retire_probe predicate cel "state == 'gone'"
+@retire_probe correlate cel "token.key == binding.ok[0].key"
+
+(watched) port input condition
+(retired) port output condition
+
+[watch] handler "watch@health"
+[notice] handler "notice@health"
+[clear] handler "clear@health"
+[break] handler "ring_broken@health"
+[recover] handler "log_recovery@health"
+[retire] handler "retire@health"
+
+person Clerk
+system Monitor
+system Bell
+record "Readings"
+net actor Monitor
+[break] actor Bell
+[recover] actor Bell
+(watched) actor Monitor
+(probes) actor Monitor
+(probes) lives in "Readings"
+(probes) reads as cel "token.key + ': ' + token.state"
+
+(watched) description "a sensor the monitor watches"
+(ok) description "ok: nothing to see"
+(suspect) description "the reading was bad; two minutes' grace"
+(broken) description "broken: it rang once"
+(retired) description "the sensor was removed"
+(probes) description "the monitor's last reading per sensor: ok, bad, or gone"
+(clock) description "the clock"
+[watch] description "watch it, starting ok"
+[notice] description "the reading is bad: suspect, two minutes' grace"
+[clear] description "cleared within the grace: nothing rang"
+[break] description "still bad after the grace: broken; ring once"
+[recover] description "the reading clears: ok again; a log line"
+[retire] description "the sensor was removed"
+
+(clock) annotation fusion true
+(probes) annotation fusion true
+decorate (clock) beside right
+decorate (probes) beside left
+decorate color condition show "kind" "key" "brokenAt"
+decorate color reading show "key" "state"
+decorate @notice_probe summary "the probe reads bad"
+decorate @clear_probe summary "the probe cleared"
+decorate @break_probe summary "still bad"
+decorate @recover_probe summary "the probe cleared"
+decorate @retire_probe summary "the subject is gone"
+decorate @notice_out summary "broken in 2 minutes unless it clears"
+decorate [break] summary "2 minutes pass"
+domain condition.kind "heat" "door" "power" "noise" "level" "flow" "seal" "light"
+domain reading.state "ok" "bad" "gone"
+final (retired)
+view default detail summary
+view default splines spline

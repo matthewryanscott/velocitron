@@ -1,0 +1,13 @@
+play composition "A play across two composed nets"
+use "producer.petrinet" as prod
+use "consumer.petrinet" as cons
+wire prod.(out) -> cons.(in)
+
+inject (prod.work) <- {"id": "w-1", "lane": "b"}
+inject (cons.slots) <- slot {"name": "s-a", "lane": "a"}, slot {"name": "s-b", "lane": "b"}
+fire [prod.make]
+// The fused port answers to both member names.
+expect (prod.out) count 1, (cons.in) == task {"id": "w-1", "lane": "b"}
+// The consumer's CEL names its own places: binding["in"] is the fused port.
+fire [cons.take]
+expect (cons.done) == result {"of": "w-1", "slot": "s-b"}, (cons.slots) count 2, quiescent

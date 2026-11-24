@@ -1,0 +1,457 @@
+{
+  "contributions": [
+    {
+      "id": {
+        "part": 0,
+        "source": "relative-views.petrinet",
+        "statement": 0
+      },
+      "kind": "document.net-header",
+      "ordinal": 0,
+      "span": {
+        "end": {
+          "byteOffset": 18,
+          "column": 19,
+          "line": 1
+        },
+        "source": "relative-views.petrinet",
+        "start": {
+          "byteOffset": 0,
+          "column": 1,
+          "line": 1
+        }
+      },
+      "target": {
+        "type": "document"
+      },
+      "value": {
+        "name": "relative_views"
+      }
+    },
+    {
+      "id": {
+        "part": 0,
+        "source": "relative-views.petrinet",
+        "statement": 1
+      },
+      "kind": "arc.declare",
+      "ordinal": 1,
+      "span": {
+        "end": {
+          "byteOffset": 42,
+          "column": 23,
+          "line": 3
+        },
+        "source": "relative-views.petrinet",
+        "start": {
+          "byteOffset": 20,
+          "column": 1,
+          "line": 3
+        }
+      },
+      "target": {
+        "id": {
+          "document": "relative-views.petrinet",
+          "part": 0,
+          "statement": 1
+        },
+        "type": "arc"
+      },
+      "value": {
+        "color": {
+          "kind": "explicit",
+          "value": "pulse"
+        },
+        "from": {
+          "name": "seed",
+          "type": "place"
+        },
+        "mode": "consume",
+        "to": {
+          "name": "emit",
+          "type": "transition"
+        },
+        "transitionNameSpan": {
+          "end": {
+            "byteOffset": 41,
+            "column": 22,
+            "line": 3
+          },
+          "source": "relative-views.petrinet",
+          "start": {
+            "byteOffset": 37,
+            "column": 18,
+            "line": 3
+          }
+        }
+      }
+    },
+    {
+      "id": {
+        "part": 1,
+        "source": "relative-views.petrinet",
+        "statement": 1
+      },
+      "kind": "arc.declare",
+      "ordinal": 2,
+      "span": {
+        "end": {
+          "byteOffset": 57,
+          "column": 38,
+          "line": 3
+        },
+        "source": "relative-views.petrinet",
+        "start": {
+          "byteOffset": 36,
+          "column": 17,
+          "line": 3
+        }
+      },
+      "target": {
+        "id": {
+          "document": "relative-views.petrinet",
+          "part": 1,
+          "statement": 1
+        },
+        "type": "arc"
+      },
+      "value": {
+        "color": {
+          "kind": "explicit",
+          "value": "pulse"
+        },
+        "from": {
+          "name": "emit",
+          "type": "transition"
+        },
+        "mode": "produce",
+        "to": {
+          "name": "out",
+          "type": "place"
+        }
+      }
+    },
+    {
+      "id": {
+        "part": 0,
+        "source": "relative-views.petrinet",
+        "statement": 2
+      },
+      "kind": "arc.handle",
+      "ordinal": 3,
+      "span": {
+        "end": {
+          "byteOffset": 88,
+          "column": 31,
+          "line": 4
+        },
+        "source": "relative-views.petrinet",
+        "start": {
+          "byteOffset": 58,
+          "column": 1,
+          "line": 4
+        }
+      },
+      "target": {
+        "name": "shared",
+        "type": "arcHandle"
+      },
+      "value": {
+        "arcIds": [
+          {
+            "document": "relative-views.petrinet",
+            "part": 1,
+            "statement": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": {
+        "part": 1,
+        "source": "relative-views.petrinet",
+        "statement": 2
+      },
+      "kind": "arc.declare",
+      "ordinal": 4,
+      "span": {
+        "end": {
+          "byteOffset": 88,
+          "column": 31,
+          "line": 4
+        },
+        "source": "relative-views.petrinet",
+        "start": {
+          "byteOffset": 67,
+          "column": 10,
+          "line": 4
+        }
+      },
+      "target": {
+        "id": {
+          "document": "relative-views.petrinet",
+          "part": 1,
+          "statement": 2
+        },
+        "type": "arc"
+      },
+      "value": {
+        "color": {
+          "kind": "explicit",
+          "value": "pulse"
+        },
+        "from": {
+          "name": "out",
+          "type": "place"
+        },
+        "mode": "consume",
+        "to": {
+          "name": "echo",
+          "type": "transition"
+        },
+        "transitionNameSpan": {
+          "end": {
+            "byteOffset": 87,
+            "column": 30,
+            "line": 4
+          },
+          "source": "relative-views.petrinet",
+          "start": {
+            "byteOffset": 83,
+            "column": 26,
+            "line": 4
+          }
+        }
+      }
+    },
+    {
+      "id": {
+        "part": 0,
+        "source": "relative-views.petrinet",
+        "statement": 3
+      },
+      "kind": "transition.handler",
+      "ordinal": 5,
+      "span": {
+        "end": {
+          "byteOffset": 125,
+          "column": 37,
+          "line": 5
+        },
+        "source": "relative-views.petrinet",
+        "start": {
+          "byteOffset": 89,
+          "column": 1,
+          "line": 5
+        }
+      },
+      "target": {
+        "name": "emit",
+        "type": "transition"
+      },
+      "value": {
+        "handler": "emit@relative_views"
+      }
+    },
+    {
+      "id": {
+        "part": 0,
+        "source": "relative-views.petrinet",
+        "statement": 4
+      },
+      "kind": "transition.handler",
+      "ordinal": 6,
+      "span": {
+        "end": {
+          "byteOffset": 162,
+          "column": 37,
+          "line": 6
+        },
+        "source": "relative-views.petrinet",
+        "start": {
+          "byteOffset": 126,
+          "column": 1,
+          "line": 6
+        }
+      },
+      "target": {
+        "name": "echo",
+        "type": "transition"
+      },
+      "value": {
+        "handler": "echo@relative_views"
+      }
+    },
+    {
+      "id": {
+        "part": 0,
+        "source": "relative-views.petrinet",
+        "statement": 5
+      },
+      "kind": "view.position",
+      "ordinal": 7,
+      "span": {
+        "end": {
+          "byteOffset": 209,
+          "column": 46,
+          "line": 8
+        },
+        "source": "relative-views.petrinet",
+        "start": {
+          "byteOffset": 164,
+          "column": 1,
+          "line": 8
+        }
+      },
+      "target": {
+        "name": "laid",
+        "type": "view"
+      },
+      "value": {
+        "position": {
+          "entries": [
+            {
+              "key": "x",
+              "value": {
+                "lexeme": "3",
+                "type": "number"
+              }
+            },
+            {
+              "key": "y",
+              "value": {
+                "lexeme": "4",
+                "type": "number"
+              }
+            }
+          ],
+          "type": "object"
+        },
+        "subject": {
+          "name": "seed",
+          "type": "place"
+        }
+      }
+    },
+    {
+      "id": {
+        "part": 0,
+        "source": "relative-views.petrinet",
+        "statement": 6
+      },
+      "kind": "view.position",
+      "ordinal": 8,
+      "span": {
+        "end": {
+          "byteOffset": 271,
+          "column": 62,
+          "line": 9
+        },
+        "source": "relative-views.petrinet",
+        "start": {
+          "byteOffset": 210,
+          "column": 1,
+          "line": 9
+        }
+      },
+      "target": {
+        "name": "laid",
+        "type": "view"
+      },
+      "value": {
+        "position": {
+          "delta": {
+            "entries": [
+              {
+                "key": "x",
+                "value": {
+                  "lexeme": "10",
+                  "type": "number"
+                }
+              },
+              {
+                "key": "y",
+                "value": {
+                  "lexeme": "5",
+                  "type": "number"
+                }
+              }
+            ],
+            "type": "object"
+          },
+          "from": {
+            "name": "seed",
+            "type": "place"
+          }
+        },
+        "subject": {
+          "name": "emit",
+          "type": "transition"
+        }
+      }
+    },
+    {
+      "id": {
+        "part": 0,
+        "source": "relative-views.petrinet",
+        "statement": 7
+      },
+      "kind": "view.position",
+      "ordinal": 9,
+      "span": {
+        "end": {
+          "byteOffset": 331,
+          "column": 60,
+          "line": 10
+        },
+        "source": "relative-views.petrinet",
+        "start": {
+          "byteOffset": 272,
+          "column": 1,
+          "line": 10
+        }
+      },
+      "target": {
+        "name": "laid",
+        "type": "view"
+      },
+      "value": {
+        "position": {
+          "delta": {
+            "entries": [
+              {
+                "key": "x",
+                "value": {
+                  "lexeme": "5",
+                  "type": "number"
+                }
+              },
+              {
+                "key": "y",
+                "value": {
+                  "lexeme": "5",
+                  "type": "number"
+                }
+              }
+            ],
+            "type": "object"
+          },
+          "from": {
+            "name": "emit",
+            "type": "transition"
+          }
+        },
+        "subject": {
+          "name": "out",
+          "type": "place"
+        }
+      }
+    }
+  ],
+  "document": {
+    "id": "relative-views.petrinet"
+  },
+  "documentKind": "net",
+  "format": "velocitron.petrinet/contribution-ir",
+  "version": 1
+}

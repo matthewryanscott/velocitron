@@ -1,0 +1,26 @@
+// A request is opened and checked before it meets the gate. The gate's verdict
+// is a record the outside world may change at any time; a held request goes on
+// once the verdict no longer holds it. A sent request is shelved, and may be
+// checked again.
+net late_gate "Check a request, send or hold it on the verdict, shelve it"
+
+(requests) -request-> [open] -request-> (opened)
+(opened) -request-> [check] -request-> (pending)
+(pending) -request-> [send] -request-> (sent)
+(pending) -request-> [hold] -request-> (held)
+(held) -request-> [passed] -request-> (pending)
+(sent) -request-> [shelve] -request-> (shelved)
+(shelved) -request-> [finish] -request-> (done)
+(shelved) -request-> [again] -request-> (opened)
+@send_verdict: (verdicts) -verdict->? [send]
+@hold_verdict: (verdicts) -verdict->? [hold]
+@passed_verdict: (verdicts) -verdict->? [passed]
+
+@send_verdict predicate cel "result != 'hold'"
+@hold_verdict predicate cel "result == 'hold'"
+@passed_verdict predicate cel "result != 'hold'"
+
+(verdicts) annotation fusion true
+domain verdict.result "pass" "hold" "released"
+record "Shelf note"
+(verdicts) lives in "Shelf note"

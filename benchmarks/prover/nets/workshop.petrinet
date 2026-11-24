@@ -1,0 +1,27 @@
+// Each failure stamps a new slip and sends the job back, an hour later.
+// The slips are kept, so the markings do not repeat, and the state cap
+// stops the run.
+net workshop "A workshop stamps a new slip each time a job fails"
+
+@start_in: (open) -job-> [start]
+@start_out: [start] -job-> (working)
+@fail_in: (working) -job-> [fail]
+@fail_out: [fail] -job-> (open)
+@fail_slip: [fail] -slip-> (slips)
+@fail_clock: (clock) -tick->? [fail]
+
+@fail_out data cel "{'id': binding.working[0].id, 'kind': binding.working[0].kind, 'since': binding.clock[0].now}"
+@fail_slip data cel "{'id': binding.working[0].id, 'kind': binding.working[0].kind, 'at': binding.clock[0].now}"
+[fail] timer clock (clock) cel "clock.now >= job.since + 1"
+[fail] timer bind job (working)
+
+(open) port input job
+(clock) annotation fusion true
+marking initial (open) <- $a
+marking initial (open) <- $b
+marking initial (open) <- $c
+marking initial (open) <- $d
+$a: job {"id": "a", "kind": "plane", "since": 0}
+$b: job {"id": "b", "kind": "sand", "since": 0}
+$c: job {"id": "c", "kind": "glue", "since": 0}
+$d: job {"id": "d", "kind": "clamp", "since": 0}

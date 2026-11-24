@@ -1,0 +1,4 @@
+net producer
+
+(work) -task-> [make] -task-> (out)
+(out) port output task

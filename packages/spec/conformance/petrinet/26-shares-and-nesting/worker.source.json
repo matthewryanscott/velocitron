@@ -1,0 +1,4 @@
+{
+  "sourceId": "worker.petrinet",
+  "text": "net worker \"The work, in detail\"\n(start) -job-> [do] -job-> (end)\n(start) port input job\n(end) port output job\n"
+}

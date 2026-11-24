@@ -1,0 +1,7 @@
+net shop
+
+(placed) -parcel-> [send] -parcel-> (sending)
+(sending) -parcel-> [deliver] -receipt-> (delivered)
+(delivered) -receipt-> [settle] -receipt-> (settled)
+(sending) port output parcel
+(delivered) port input receipt

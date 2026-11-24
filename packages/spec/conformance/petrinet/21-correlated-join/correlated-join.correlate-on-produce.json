@@ -1,0 +1,45 @@
+{
+  "diagnostic": {
+    "code": "PN202",
+    "column": 1,
+    "file": "correlated-join.correlate-on-produce.petrinet",
+    "help": "move correlate to a named input arc",
+    "line": 6,
+    "message": "correlate must target exactly one input arc (->, ->?, ->0); @shipped names no input arc",
+    "related": [
+      {
+        "message": "arc @shipped was declared here",
+        "span": {
+          "end": {
+            "byteOffset": 95,
+            "column": 39,
+            "line": 4
+          },
+          "source": "correlated-join.correlate-on-produce.petrinet",
+          "start": {
+            "byteOffset": 57,
+            "column": 1,
+            "line": 4
+          }
+        }
+      }
+    ],
+    "span": {
+      "end": {
+        "byteOffset": 164,
+        "column": 68,
+        "line": 6
+      },
+      "source": "correlated-join.correlate-on-produce.petrinet",
+      "start": {
+        "byteOffset": 97,
+        "column": 1,
+        "line": 6
+      }
+    }
+  },
+  "source": {
+    "sourceId": "correlated-join.correlate-on-produce.petrinet",
+    "text": "net correlated_join_invalid\n\n(orders) -purchase-> [ship]\n@shipped: [ship] -shipment-> (shipped)\n\n@shipped correlate cel \"token.account == binding.orders[0].account\"\n"
+  }
+}

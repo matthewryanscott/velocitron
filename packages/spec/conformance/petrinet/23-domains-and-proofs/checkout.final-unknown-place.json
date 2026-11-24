@@ -1,0 +1,26 @@
+{
+  "diagnostic": {
+    "code": "PN202",
+    "column": 7,
+    "file": "checkout.final-unknown-place.petrinet",
+    "line": 10,
+    "message": "final refers to unknown place (gone)",
+    "span": {
+      "source": "checkout.final-unknown-place.petrinet",
+      "start": {
+        "byteOffset": 251,
+        "line": 10,
+        "column": 7
+      },
+      "end": {
+        "byteOffset": 257,
+        "line": 10,
+        "column": 13
+      }
+    }
+  },
+  "source": {
+    "sourceId": "checkout.final-unknown-place.petrinet",
+    "text": "net checkout\n\n(pending) -checkout-> [send] -checkout-> (sending)\n(free) -lock-> [send]\n(sending) -checkout-> [finish] -outcome-> (ended)\n@unlock: [finish] -lock-> (free)\n(ended) -outcome-> [close] -checkout-> (done)\n@unlock data {\"id\": \"desk\"}\n\nfinal (gone)\n"
+  }
+}

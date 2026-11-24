@@ -1,0 +1,26 @@
+{
+  "diagnostic": {
+    "code": "PN202",
+    "column": 33,
+    "file": "checkout.domain-repeated-value.petrinet",
+    "line": 10,
+    "message": "domain outcome.outcome repeats the value \"failed\"",
+    "span": {
+      "source": "checkout.domain-repeated-value.petrinet",
+      "start": {
+        "byteOffset": 277,
+        "line": 10,
+        "column": 33
+      },
+      "end": {
+        "byteOffset": 285,
+        "line": 10,
+        "column": 41
+      }
+    }
+  },
+  "source": {
+    "sourceId": "checkout.domain-repeated-value.petrinet",
+    "text": "net checkout\n\n(pending) -checkout-> [send] -checkout-> (sending)\n(free) -lock-> [send]\n(sending) -checkout-> [finish] -outcome-> (ended)\n@unlock: [finish] -lock-> (free)\n(ended) -outcome-> [close] -checkout-> (done)\n@unlock data {\"id\": \"desk\"}\n\ndomain outcome.outcome \"failed\" \"failed\"\n"
+  }
+}

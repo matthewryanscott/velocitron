@@ -1,0 +1,17 @@
+// A copy is sorted into a bin from its edition, then lent or sent to
+// repair according to the bin. The bins are computed, so a choice sees
+// more tokens than the run starts with.
+net lanes "A copy is sorted into a bin, then lent or repaired"
+
+@sort_in: (waiting) -copy-> [sort]
+@sort_out: [sort] -copy-> (sorted)
+@sort_out data cel "{'branch': binding.waiting[0].branch, 'bin': binding.waiting[0].edition}"
+@lend_in: (sorted) -copy-> [lend]
+@lend_out: [lend] -copy-> (loaned)
+@repair_in: (sorted) -copy-> [repair]
+@repair_out: [repair] -copy-> (mending)
+@lend_in predicate cel "bin < 6"
+@repair_in predicate cel "bin >= 6"
+
+(waiting) port input copy
+final (loaned), (mending)

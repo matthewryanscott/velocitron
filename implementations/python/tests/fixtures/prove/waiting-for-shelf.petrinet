@@ -1,0 +1,26 @@
+// A hold is cancelled when the annex owns the copy, filled when the main
+// branch owns it and has confirmed, and sent to repair when the copy is
+// damaged. Until the main branch confirms, the hold waits on purpose.
+net waiting_for_shelf "A hold waits until the main branch confirms the copy"
+
+(requests) -hold-> [open] -hold-> (waiting)
+(waiting) -hold-> [cancel] -hold-> (cancelled)
+(waiting) -hold-> [fill] -hold-> (filled)
+(waiting) -hold-> [repair] -hold-> (in_repair)
+@cancel_home: (home) -route->? [cancel]
+@fill_home: (home) -route->? [fill]
+@repair_home: (home) -route->? [repair]
+
+@cancel_home predicate cel "branch == 'annex' && !damaged"
+@cancel_home correlate cel "token.isbn == binding.waiting[0].isbn"
+@fill_home predicate cel "branch == 'main' && confirmed && !damaged"
+@fill_home correlate cel "token.isbn == binding.waiting[0].isbn"
+@repair_home predicate cel "damaged"
+@repair_home correlate cel "token.isbn == binding.waiting[0].isbn"
+[fill] annotation wait {"when": "binding.home.exists(h, h.isbn == binding.waiting[0].isbn && h.branch == 'main' && !h.confirmed && !h.damaged)", "for": "the main branch to confirm the copy"}
+
+record "Branch home"
+(home) lives in "Branch home"
+domain route.branch "main" "annex"
+domain route.confirmed true false
+domain route.damaged true false

@@ -1,0 +1,39 @@
+{
+  "name": "pair",
+  "nets": [
+    {
+      "alias": "take",
+      "ref": "take.petrinet"
+    },
+    {
+      "alias": "give",
+      "ref": "give.petrinet"
+    }
+  ],
+  "shares": [
+    {
+      "places": [
+        {
+          "net": "take",
+          "place": "lock"
+        },
+        {
+          "net": "give",
+          "place": "lock"
+        }
+      ]
+    }
+  ],
+  "wires": [
+    {
+      "from": {
+        "net": "take",
+        "port": "busy"
+      },
+      "to": {
+        "net": "give",
+        "port": "busy"
+      }
+    }
+  ]
+}

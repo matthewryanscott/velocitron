@@ -1,0 +1,25 @@
+// A latch dates when the VM went idle from the clock; the stop is due a
+// wait later, a sum the timer states: `clock.now >= idle.since + idle.wait`.
+net idle_since "Stop a VM a wait after it went idle"
+
+@rest_in: (seen) -vm-> [rest]
+@rest_out: [rest] -vm-> (idle)
+@rest_clock: (clock) -tick->? [rest]
+@rest_out data cel "{'vm': binding.seen[0].vm, 'wait': binding.seen[0].wait, 'since': binding.clock[0].now}"
+
+@stop_in: (idle) -vm-> [stop]
+[stop] -vm-> (stopped)
+@stop_look: (look) -look->? [stop]
+@stop_clock: (clock) -tick->? [stop]
+@stop_look predicate cel "up"
+[stop] timer clock (clock) cel "clock.now >= idle.since + idle.wait"
+[stop] timer bind idle (idle)
+[stop] annotation wait {"when": "binding.look.exists(l, l.up)", "for": "the wait"}
+
+@leave_in: (idle) -vm-> [leave]
+[leave] -vm-> (gone)
+@leave_look: (look) -look->? [leave]
+@leave_look predicate cel "!up"
+
+(seen) port input vm
+final (stopped), (gone)

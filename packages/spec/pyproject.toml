@@ -1,0 +1,49 @@
+[project]
+name = "velocitron-spec"
+version = "0.1.0"
+description = "Portable Velocitron contracts: JSON Schemas, normative prose, and conformance fixtures."
+readme = "README.md"
+authors = [
+    { name = "Matthew R. Scott" },
+]
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.12"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/circuitmeridian/velocitron"
+Repository = "https://github.com/circuitmeridian/velocitron"
+Issues = "https://github.com/circuitmeridian/velocitron/issues"
+
+[build-system]
+requires = ["hatchling==1.31.0"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/velocitron_spec"]
+dev-mode-exact = true
+
+# The canonical files stay at the package root. A wheel copies them into the
+# import package so a git-subdirectory install can read them without the
+# rest of the monorepo. Schema $id URLs are unchanged.
+[tool.hatch.build.targets.wheel.force-include]
+"net.schema.json" = "velocitron_spec/schemas/net.schema.json"
+"composition.schema.json" = "velocitron_spec/schemas/composition.schema.json"
+"petrinet-contribution-ir.schema.json" = "velocitron_spec/schemas/petrinet-contribution-ir.schema.json"
+"conformance" = "velocitron_spec/conformance"
+"composition.md" = "velocitron_spec/prose/composition.md"
+"firing-semantics.md" = "velocitron_spec/prose/firing-semantics.md"
+"handler-contract.md" = "velocitron_spec/prose/handler-contract.md"
+"net-schema.md" = "velocitron_spec/prose/net-schema.md"
+"petrinet-language.md" = "velocitron_spec/prose/petrinet-language.md"
+"play-language.md" = "velocitron_spec/prose/play-language.md"
+"projection-adapter.md" = "velocitron_spec/prose/projection-adapter.md"
+"proofs.md" = "velocitron_spec/prose/proofs.md"
+"properties.md" = "velocitron_spec/prose/properties.md"

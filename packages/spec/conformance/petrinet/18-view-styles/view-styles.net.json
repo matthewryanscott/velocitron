@@ -1,0 +1,80 @@
+{
+  "annotations": {
+    "petrinet.dsl/v1": {
+      "arcHandles": {},
+      "extensions": {},
+      "markings": {},
+      "views": {
+        "default": {
+          "detail": "summary",
+          "positions": {
+            "place:out": {
+              "delta": {
+                "x": 200,
+                "y": 0
+              },
+              "from": "place:seed"
+            },
+            "place:seed": {
+              "x": 0,
+              "y": 0
+            }
+          },
+          "routes": {},
+          "splines": "curved"
+        },
+        "sketch": {
+          "detail": "structure",
+          "positions": {},
+          "routes": {}
+        }
+      }
+    }
+  },
+  "arcs": [
+    {
+      "consume": {
+        "type": "pulse"
+      },
+      "from": {
+        "place": "seed"
+      },
+      "to": {
+        "transition": "emit"
+      }
+    },
+    {
+      "from": {
+        "transition": "emit"
+      },
+      "produce": {
+        "destination": "out",
+        "type": "pulse"
+      },
+      "to": {
+        "place": "out"
+      }
+    }
+  ],
+  "name": "view_styles",
+  "places": [
+    {
+      "accepts": [
+        "pulse"
+      ],
+      "name": "seed"
+    },
+    {
+      "accepts": [
+        "pulse"
+      ],
+      "name": "out"
+    }
+  ],
+  "transitions": [
+    {
+      "handler": "emit@view_styles",
+      "name": "emit"
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+play s
+net "n.petrinet"
+show "sequence" id
+person Ops

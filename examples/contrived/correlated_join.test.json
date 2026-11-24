@@ -1,0 +1,78 @@
+{
+  "description": "Correlated read, consume and inhibit arcs join each ready order to its own account's settings and a courier for its region: order A is paused, so 'ship' first takes order B with the B settings and the east courier; 'lift_pause' then clears the pause and 'ship' takes order A with the A settings and the west courier. The draft order C never matches, so the net quiesces with it waiting.",
+  "expectedFinalMarking": {
+    "couriers": [
+      {
+        "data": {
+          "region": "east"
+        },
+        "type": "courier"
+      },
+      {
+        "data": {
+          "region": "west"
+        },
+        "type": "courier"
+      }
+    ],
+    "orders": [
+      {
+        "data": {
+          "account": "C",
+          "region": "west",
+          "status": "draft"
+        },
+        "type": "purchase"
+      }
+    ],
+    "settings": [
+      {
+        "data": {
+          "account": "B",
+          "carrier": "van"
+        },
+        "type": "setting"
+      },
+      {
+        "data": {
+          "account": "A",
+          "carrier": "post"
+        },
+        "type": "setting"
+      }
+    ],
+    "shipped": [
+      {
+        "data": {
+          "account": "B",
+          "carrier": "van",
+          "region": "east"
+        },
+        "type": "shipment"
+      },
+      {
+        "data": {
+          "account": "A",
+          "carrier": "post",
+          "region": "west"
+        },
+        "type": "shipment"
+      }
+    ]
+  },
+  "expectedFiringSequence": [
+    {
+      "status": "completed",
+      "transition": "ship"
+    },
+    {
+      "status": "completed",
+      "transition": "lift_pause"
+    },
+    {
+      "status": "completed",
+      "transition": "ship"
+    }
+  ],
+  "maxSteps": 10
+}

@@ -1,0 +1,2 @@
+// The reminder is due at 1000; the clock may also show 1060, past it.
+{ domains: { "tick.now": [0, 1000, 1060], "job.remindAt": [1000] } }

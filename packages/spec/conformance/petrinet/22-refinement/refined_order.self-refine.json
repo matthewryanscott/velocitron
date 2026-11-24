@@ -1,0 +1,27 @@
+{
+  "diagnostic": {
+    "code": "PN202",
+    "column": 26,
+    "file": "refined_order.self-refine.petrinet",
+    "help": "refine with the alias of another net",
+    "line": 7,
+    "message": "refine shop.[deliver] by shop: a net cannot refine its own transition",
+    "span": {
+      "end": {
+        "byteOffset": 212,
+        "column": 30,
+        "line": 7
+      },
+      "source": "refined_order.self-refine.petrinet",
+      "start": {
+        "byteOffset": 208,
+        "column": 26,
+        "line": 7
+      }
+    }
+  },
+  "source": {
+    "sourceId": "refined_order.self-refine.petrinet",
+    "text": "composition refined_order_self\n\nuse \"order_flow.petrinet\" as shop\nuse \"courier.petrinet\" as courier\nwire shop.(sending) -> courier.(pickup)\nwire courier.(dropped) -> shop.(delivered)\nrefine shop.[deliver] by shop\n"
+  }
+}

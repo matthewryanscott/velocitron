@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "version": "0.1.0",
+  "artifacts": [
+    {
+      "files": [
+        "velocitron_cli-0.1.0.dist-info/METADATA",
+        "velocitron_cli-0.1.0.dist-info/RECORD",
+        "velocitron_cli-0.1.0.dist-info/WHEEL",
+        "velocitron_cli-0.1.0.dist-info/entry_points.txt",
+        "velocitron_cli-0.1.0.dist-info/licenses/LICENSE",
+        "velocitron_cli/__init__.py",
+        "velocitron_cli/__main__.py",
+        "velocitron_cli/check.py",
+        "velocitron_cli/codegen.py",
+        "velocitron_cli/dispatch.py",
+        "velocitron_cli/host.py",
+        "velocitron_cli/prove.py",
+        "velocitron_cli/viz.py"
+      ],
+      "format": "zip",
+      "kind": "python-wheel",
+      "packageName": "velocitron-cli",
+      "path": "python/velocitron_cli-0.1.0-py3-none-any.whl"
+    },
+    {
+      "files": [
+        "velocitron_cli-0.1.0/.gitignore",
+        "velocitron_cli-0.1.0/LICENSE",
+        "velocitron_cli-0.1.0/PKG-INFO",
+        "velocitron_cli-0.1.0/README.md",
+        "velocitron_cli-0.1.0/pyproject.toml",
+        "velocitron_cli-0.1.0/pyrightconfig.json",
+        "velocitron_cli-0.1.0/src/velocitron_cli/__init__.py",
+        "velocitron_cli-0.1.0/src/velocitron_cli/__main__.py",
+        "velocitron_cli-0.1.0/src/velocitron_cli/check.py",
+        "velocitron_cli-0.1.0/src/velocitron_cli/codegen.py",
+        "velocitron_cli-0.1.0/src/velocitron_cli/dispatch.py",
+        "velocitron_cli-0.1.0/src/velocitron_cli/host.py",
+        "velocitron_cli-0.1.0/src/velocitron_cli/prove.py",
+        "velocitron_cli-0.1.0/src/velocitron_cli/viz.py",
+        "velocitron_cli-0.1.0/tests/test_cli.py",
+        "velocitron_cli-0.1.0/tests/test_packaged_install.py",
+        "velocitron_cli-0.1.0/uv.lock"
+      ],
+      "format": "tar-gz",
+      "kind": "python-sdist",
+      "packageName": "velocitron-cli",
+      "path": "python/velocitron_cli-0.1.0.tar.gz"
+    }
+  ]
+}

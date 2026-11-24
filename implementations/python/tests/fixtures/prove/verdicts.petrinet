@@ -1,0 +1,18 @@
+// A verdict's result is set only by the two checks, so it holds no other value.
+net verdicts "Approve or escalate a request, then act on the verdict"
+
+@small_in: (requests) -request-> [approve]
+@big_in: (requests) -request-> [escalate]
+@approved: [approve] -verdict-> (verdicts)
+@escalated: [escalate] -verdict-> (verdicts)
+@ship_in: (verdicts) -verdict-> [ship]
+[ship] -> (shipped)
+@review_in: (verdicts) -verdict-> [review]
+[review] -> (reviewed)
+
+@small_in predicate cel "amount <= 100"
+@big_in predicate cel "amount > 100"
+@approved data cel "{'result': 'approved', 'request': binding.requests[0].id}"
+@escalated data {"result": "escalated"}
+@ship_in predicate cel "result == 'approved'"
+@review_in predicate cel "result == 'escalated'"

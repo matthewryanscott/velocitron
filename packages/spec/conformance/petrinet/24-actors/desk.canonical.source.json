@@ -1,0 +1,4 @@
+{
+  "sourceId": "desk.petrinet",
+  "text": "net desk\n\n(sign) -state-> [flip] -state-> (sign)\n(open) -token-> [close] -token-> (shut)\n(sign) -state->? [close]\n\n(sign) actor Clerk\n[flip] actor Clerk\n[close] annotation note \"kept\"\nperson Clerk\nsystem Annex\nsystem Catalog\n"
+}

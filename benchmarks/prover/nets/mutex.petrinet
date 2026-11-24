@@ -1,0 +1,17 @@
+// Two workers share one permit. Each takes it, works, and puts it back.
+// The permit starts free, so the run ends when both have finished.
+net mutex "Two workers share one permit"
+
+(ready) -worker-> [enter] -worker-> (inside)
+(free) -permit-> [enter]
+(inside) -worker-> [leave] -worker-> (done)
+[leave] -permit-> (free)
+
+(ready) port input worker
+marking initial (free) <- $permit
+$permit: permit {}
+marking initial (ready) <- $one
+marking initial (ready) <- $two
+$one: worker {"name": "one"}
+$two: worker {"name": "two"}
+final (done)

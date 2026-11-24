@@ -1,0 +1,2 @@
+// The clock's times and the one wait; `since` is copied from the clock.
+{ domains: { "tick.now": [0, 600], "vm.wait": [600] } }

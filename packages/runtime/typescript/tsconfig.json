@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "noEmit": true
+  },
+  "extends": "../../../tsconfig.base.json",
+  "files": ["types-consumer.ts"]
+}

@@ -1,0 +1,33 @@
+{
+  "exclude": [
+    ".venv",
+    ".pytest_cache",
+    "tests/fixtures/codegen/golden/bad_library_holds_composition_subclass.py",
+    "tests/fixtures/codegen/golden/velocitron_nets/bad_subclass.py"
+  ],
+  "include": [
+    "tests"
+  ],
+  "pythonVersion": "3.14",
+  "reportMissingTypeStubs": false,
+  "typeCheckingMode": "strict",
+  "venv": ".venv",
+  "venvPath": ".",
+  "executionEnvironments": [
+    {
+      "root": "tests",
+      "reportMissingImports": "none",
+      "reportPrivateUsage": "none",
+      "reportUnknownArgumentType": "none",
+      "reportUnknownLambdaType": "none",
+      "reportUnknownMemberType": "none",
+      "reportUnknownParameterType": "none",
+      "reportUnknownVariableType": "none",
+      "reportUntypedBaseClass": "none",
+      "reportUnusedClass": "none",
+      "reportUnusedFunction": "none",
+      "reportUnusedImport": "none",
+      "reportUnusedVariable": "none"
+    }
+  ]
+}

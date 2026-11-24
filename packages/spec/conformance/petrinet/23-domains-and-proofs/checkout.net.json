@@ -1,0 +1,185 @@
+{
+  "name": "checkout",
+  "places": [
+    {
+      "name": "pending",
+      "accepts": [
+        "checkout"
+      ]
+    },
+    {
+      "name": "sending",
+      "accepts": [
+        "checkout"
+      ]
+    },
+    {
+      "name": "free",
+      "accepts": [
+        "lock"
+      ]
+    },
+    {
+      "name": "ended",
+      "accepts": [
+        "outcome"
+      ]
+    },
+    {
+      "name": "done",
+      "accepts": [
+        "checkout"
+      ]
+    }
+  ],
+  "transitions": [
+    {
+      "name": "send"
+    },
+    {
+      "name": "finish"
+    },
+    {
+      "name": "close"
+    }
+  ],
+  "arcs": [
+    {
+      "from": {
+        "place": "pending"
+      },
+      "to": {
+        "transition": "send"
+      },
+      "consume": {
+        "type": "checkout"
+      }
+    },
+    {
+      "from": {
+        "transition": "send"
+      },
+      "to": {
+        "place": "sending"
+      },
+      "produce": {
+        "destination": "sending",
+        "type": "checkout"
+      }
+    },
+    {
+      "from": {
+        "place": "free"
+      },
+      "to": {
+        "transition": "send"
+      },
+      "consume": {
+        "type": "lock"
+      }
+    },
+    {
+      "from": {
+        "place": "sending"
+      },
+      "to": {
+        "transition": "finish"
+      },
+      "consume": {
+        "type": "checkout"
+      }
+    },
+    {
+      "from": {
+        "transition": "finish"
+      },
+      "to": {
+        "place": "ended"
+      },
+      "produce": {
+        "destination": "ended",
+        "type": "outcome"
+      }
+    },
+    {
+      "from": {
+        "transition": "finish"
+      },
+      "to": {
+        "place": "free"
+      },
+      "produce": {
+        "destination": "free",
+        "type": "lock",
+        "data": {
+          "id": "desk"
+        }
+      }
+    },
+    {
+      "from": {
+        "place": "ended"
+      },
+      "to": {
+        "transition": "close"
+      },
+      "consume": {
+        "type": "outcome"
+      }
+    },
+    {
+      "from": {
+        "transition": "close"
+      },
+      "to": {
+        "place": "done"
+      },
+      "produce": {
+        "destination": "done",
+        "type": "checkout"
+      }
+    }
+  ],
+  "initialMarking": {},
+  "domains": {
+    "outcome.outcome": [
+      "returned",
+      "failed"
+    ],
+    "outcome.checkout.tries": [
+      0,
+      1,
+      2.5
+    ],
+    "checkout.urgent": [
+      true,
+      false
+    ]
+  },
+  "proofs": {
+    "final": [
+      "done",
+      [
+        "sending",
+        "ended"
+      ]
+    ],
+    "invariants": [
+      {
+        "weights": {
+          "free": 1,
+          "sending": 1,
+          "ended": 1
+        },
+        "constant": 1,
+        "name": "lock"
+      },
+      {
+        "weights": {
+          "pending": 2,
+          "done": 1
+        }
+      }
+    ]
+  }
+}

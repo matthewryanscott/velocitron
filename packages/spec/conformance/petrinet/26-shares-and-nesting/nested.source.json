@@ -1,0 +1,4 @@
+{
+  "sourceId": "nested.petrinet",
+  "text": "composition nested\nuse \"pair.petrinet\" as pair\nuse \"worker.petrinet\" as worker\nwire pair.(take.busy) -> worker.(start)\nwire worker.(end) -> pair.(give.worked)\nrefine pair.[give.work] by worker\n"
+}

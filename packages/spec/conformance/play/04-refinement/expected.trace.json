@@ -1,0 +1,367 @@
+[
+  {
+    "play": "refinement",
+    "path": "trunk",
+    "status": "passed",
+    "inherited": 0,
+    "initial": {},
+    "steps": [
+      {
+        "line": 8,
+        "kind": "inject",
+        "statement": "inject (shop.placed) <- {\"id\": \"p-1\"}",
+        "records": [
+          {
+            "kind": "injection",
+            "place": "shop.placed",
+            "injectionKind": "inject",
+            "tokens": [
+              {
+                "type": "parcel",
+                "data": {
+                  "id": "p-1"
+                }
+              }
+            ],
+            "replaced": []
+          }
+        ],
+        "afterEach": [
+          {
+            "shop.placed": [
+              {
+                "type": "parcel",
+                "data": {
+                  "id": "p-1"
+                }
+              }
+            ]
+          }
+        ],
+        "checks": [],
+        "after": {
+          "shop.placed": [
+            {
+              "type": "parcel",
+              "data": {
+                "id": "p-1"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "line": 9,
+        "kind": "fire",
+        "statement": "fire [shop.send]",
+        "records": [
+          {
+            "kind": "firing",
+            "transition": "shop.send",
+            "status": "completed",
+            "inputTokens": {
+              "shop.placed": [
+                {
+                  "type": "parcel",
+                  "data": {
+                    "id": "p-1"
+                  }
+                }
+              ]
+            },
+            "outputTokens": {
+              "shop.sending": [
+                {
+                  "type": "parcel",
+                  "data": {
+                    "id": "p-1"
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "afterEach": [
+          {
+            "shop.sending": [
+              {
+                "type": "parcel",
+                "data": {
+                  "id": "p-1"
+                }
+              }
+            ]
+          }
+        ],
+        "checks": [],
+        "after": {
+          "shop.sending": [
+            {
+              "type": "parcel",
+              "data": {
+                "id": "p-1"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "line": 11,
+        "kind": "expect",
+        "statement": "expect enabled [courier.pick], (courier.pickup) count 1",
+        "records": [],
+        "afterEach": [],
+        "checks": [
+          {
+            "text": "enabled [courier.pick]",
+            "ok": true,
+            "detail": "enabled now: [courier.pick]"
+          },
+          {
+            "text": "(courier.pickup) count 1",
+            "ok": true,
+            "detail": "(shop.sending) holds 1"
+          }
+        ],
+        "after": {
+          "shop.sending": [
+            {
+              "type": "parcel",
+              "data": {
+                "id": "p-1"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "line": 12,
+        "kind": "fire",
+        "statement": "fire [courier.pick]",
+        "records": [
+          {
+            "kind": "firing",
+            "transition": "courier.pick",
+            "status": "completed",
+            "inputTokens": {
+              "shop.sending": [
+                {
+                  "type": "parcel",
+                  "data": {
+                    "id": "p-1"
+                  }
+                }
+              ]
+            },
+            "outputTokens": {
+              "courier.riding": [
+                {
+                  "type": "parcel",
+                  "data": {
+                    "id": "p-1"
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "afterEach": [
+          {
+            "courier.riding": [
+              {
+                "type": "parcel",
+                "data": {
+                  "id": "p-1"
+                }
+              }
+            ]
+          }
+        ],
+        "checks": [],
+        "after": {
+          "courier.riding": [
+            {
+              "type": "parcel",
+              "data": {
+                "id": "p-1"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "line": 13,
+        "kind": "fire",
+        "statement": "fire [courier.drop] -> (courier.dropped) {\"id\": \"p-1\", \"signed\": true}",
+        "records": [
+          {
+            "kind": "firing",
+            "transition": "courier.drop",
+            "status": "completed",
+            "inputTokens": {
+              "courier.riding": [
+                {
+                  "type": "parcel",
+                  "data": {
+                    "id": "p-1"
+                  }
+                }
+              ]
+            },
+            "outputTokens": {
+              "courier.dropped": [
+                {
+                  "type": "receipt",
+                  "data": {
+                    "id": "p-1",
+                    "signed": true
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "afterEach": [
+          {
+            "courier.dropped": [
+              {
+                "type": "receipt",
+                "data": {
+                  "id": "p-1",
+                  "signed": true
+                }
+              }
+            ]
+          }
+        ],
+        "checks": [],
+        "after": {
+          "courier.dropped": [
+            {
+              "type": "receipt",
+              "data": {
+                "id": "p-1",
+                "signed": true
+              }
+            }
+          ]
+        }
+      },
+      {
+        "line": 15,
+        "kind": "expect",
+        "statement": "expect (shop.delivered) == receipt {\"id\": \"p-1\", \"signed\": true}",
+        "records": [],
+        "afterEach": [],
+        "checks": [
+          {
+            "text": "(shop.delivered) == receipt {\"id\": \"p-1\", \"signed\": true}",
+            "ok": true,
+            "detail": "(courier.dropped) holds receipt {\"id\": \"p-1\", \"signed\": true}"
+          }
+        ],
+        "after": {
+          "courier.dropped": [
+            {
+              "type": "receipt",
+              "data": {
+                "id": "p-1",
+                "signed": true
+              }
+            }
+          ]
+        }
+      },
+      {
+        "line": 16,
+        "kind": "fire",
+        "statement": "fire [shop.settle]",
+        "records": [
+          {
+            "kind": "firing",
+            "transition": "shop.settle",
+            "status": "completed",
+            "inputTokens": {
+              "courier.dropped": [
+                {
+                  "type": "receipt",
+                  "data": {
+                    "id": "p-1",
+                    "signed": true
+                  }
+                }
+              ]
+            },
+            "outputTokens": {
+              "shop.settled": [
+                {
+                  "type": "receipt",
+                  "data": {
+                    "id": "p-1",
+                    "signed": true
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "afterEach": [
+          {
+            "shop.settled": [
+              {
+                "type": "receipt",
+                "data": {
+                  "id": "p-1",
+                  "signed": true
+                }
+              }
+            ]
+          }
+        ],
+        "checks": [],
+        "after": {
+          "shop.settled": [
+            {
+              "type": "receipt",
+              "data": {
+                "id": "p-1",
+                "signed": true
+              }
+            }
+          ]
+        }
+      },
+      {
+        "line": 17,
+        "kind": "expect",
+        "statement": "expect (shop.settled) count 1, quiescent",
+        "records": [],
+        "afterEach": [],
+        "checks": [
+          {
+            "text": "(shop.settled) count 1",
+            "ok": true,
+            "detail": "(shop.settled) holds 1"
+          },
+          {
+            "text": "quiescent",
+            "ok": true,
+            "detail": "enabled now: nothing"
+          }
+        ],
+        "after": {
+          "shop.settled": [
+            {
+              "type": "receipt",
+              "data": {
+                "id": "p-1",
+                "signed": true
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "failure": null
+  }
+]

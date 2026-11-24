@@ -1,0 +1,42 @@
+{
+  "name": "nested",
+  "nets": [
+    {
+      "alias": "pair",
+      "ref": "pair.petrinet"
+    },
+    {
+      "alias": "worker",
+      "ref": "worker.petrinet"
+    }
+  ],
+  "refinements": [
+    {
+      "by": "worker",
+      "net": "pair",
+      "transition": "give.work"
+    }
+  ],
+  "wires": [
+    {
+      "from": {
+        "net": "pair",
+        "port": "take.busy"
+      },
+      "to": {
+        "net": "worker",
+        "port": "start"
+      }
+    },
+    {
+      "from": {
+        "net": "worker",
+        "port": "end"
+      },
+      "to": {
+        "net": "pair",
+        "port": "give.worked"
+      }
+    }
+  ]
+}

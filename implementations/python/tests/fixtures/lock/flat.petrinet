@@ -1,0 +1,9 @@
+composition flat
+use "take.petrinet" as take
+use "give.petrinet" as give
+use "worker.petrinet" as worker
+wire take.(busy) -> give.(busy)
+share take.(lock) ~ give.(lock)
+wire take.(busy) -> worker.(start)
+wire worker.(end) -> give.(worked)
+refine give.[work] by worker
