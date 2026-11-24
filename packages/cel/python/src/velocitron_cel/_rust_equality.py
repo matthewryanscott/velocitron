@@ -1,23 +1,23 @@
-"""Cross-type numeric equality for the Rust CEL backend.
+"""Map-key equality for the Rust CEL backend.
 
-The locked ``common-expression-language`` 0.6.0 orders ``int``, ``uint``, and
-``double`` on one number line (``1 <= 1.0`` is true) but its ``==`` is
-type-strict, so ``1 == 1.0`` is false. Later crate releases delegate scalar
-``Val::equals`` to that comparer; map keys stay type-tagged either way, so
-``1`` and ``1u`` are different keys and a ``double`` is not a lookup key.
+``common-expression-language`` 0.10.0 (cel-rust 0.14.5) compares scalar
+``int``, ``uint``, and ``double`` on one number line, so ``1 == 1.0`` is
+true, and list elements and map values use that equality. Map keys stay
+type-tagged. In the crate, ``{1: 'a'} == {1u: 'a'}`` is false, ``1u`` does
+not find the key ``1``, and a ``double`` is rejected as a key:
+``{1: 'a'}[1.0]`` and ``1.0 in {1: 'a'}`` fail instead of selecting ``'a'``.
 The interpreter special-cases ``==``, ``!=``, ``in``, and indexing before
 overload lookup, so a registered function cannot replace the operators.
 
-This module rewrites those four operators. The helpers compare numbers the
-way the CEL conformance ``*_lossy_double`` cases do: convert an integer to
-double once the double is inside that integer type's range. ``NaN`` equals
-nothing, including itself, and ``-0.0`` equals ``0``. Lists, maps, and map
-lookup use the same relation. A bool is not a number. Arithmetic is not
-rewritten, so ``1 + 1.0`` still has no overload.
-
-An upstream fix is numeric ``==`` plus numeric map keys in the cel crate.
-The published wheel cannot be patched in place, and a newer wheel would
-still leave map keys type-strict.
+This module still rewrites those four operators. ``==`` and ``!=`` hand the
+values back to the crate. A ``uint`` arrives in Python as an ``int`` (Python
+has one integer type), so the crate then sees one key type and its own
+scalar equality, which matches the conformance rows, including a map whose
+keys were ``int`` and ``uint``. ``in`` and indexing do the same, except when
+the key is a ``double``: the helper compares that double with the stored
+keys the way the CEL conformance ``*_lossy_double`` cases do, and a missing
+double key is false for ``in`` rather than an error. A bool is not a
+number. Arithmetic is not rewritten, so ``1 + 1.0`` still has no overload.
 """
 
 from __future__ import annotations
@@ -253,7 +253,12 @@ def _native(op: str) -> Any:
     if program is None:
         import cel  # pyright: ignore[reportMissingImports]
 
-        source = {"==": "___a == ___b", "in": "___a in ___b", "[]": "___a[___b]"}[op]
+        source = {
+            "==": "___a == ___b",
+            "!=": "___a != ___b",
+            "in": "___a in ___b",
+            "[]": "___a[___b]",
+        }[op]
         program = cel.compile(source)  # pyright: ignore[reportUnknownMemberType]
         _programs[op] = program
     return program
@@ -319,91 +324,44 @@ def _mapping(value: Any) -> dict[Any, Any] | None:
     return None
 
 
-def _sequence(value: Any) -> list[Any] | None:
-    if isinstance(value, list):
-        return cast("list[Any]", value)
-    return None
-
-
 def _eq(left: Any, right: Any) -> bool:
-    return _structural_eq(left, right)
+    # 0.10.0's scalar equality, after a uint has become a Python int.
+    return bool(_delegate("==", left, right))
 
 
 def _ne(left: Any, right: Any) -> bool:
-    return not _eq(left, right)
+    return bool(_delegate("!=", left, right))
 
 
-def _structural_eq(left: Any, right: Any) -> bool:
-    """CEL equality. Numbers use the conformance relation, not the crate's ``==``."""
-    if isinstance(left, bool) or isinstance(right, bool):
-        return (
-            isinstance(left, bool)
-            and isinstance(right, bool)
-            and bool(left) == bool(right)
-        )
-    if _is_number(left) or _is_number(right):
-        if not (_is_number(left) and _is_number(right)):
-            return False
-        return _numbers_equal(left, right)
-    left_map = _mapping(left)
-    right_map = _mapping(right)
-    if left_map is not None and right_map is not None:
-        if len(left_map) != len(right_map):
-            return False
-        used = [False] * len(right_map)
-        pairs = list(right_map.items())
-        for key, value in left_map.items():
-            matched = False
-            for index, (other_key, other_value) in enumerate(pairs):
-                if used[index]:
-                    continue
-                if _structural_eq(key, other_key) and _structural_eq(
-                    value, other_value
-                ):
-                    used[index] = True
-                    matched = True
-                    break
-            if not matched:
-                return False
-        return True
-    left_list = _sequence(left)
-    right_list = _sequence(right)
-    if left_list is not None and right_list is not None:
-        return len(left_list) == len(right_list) and all(
-            _structural_eq(item, other) for item, other in zip(left_list, right_list)
-        )
-    if (
-        left_map is not None
-        or right_map is not None
-        or left_list is not None
-        or right_list is not None
-    ):
-        return False
-    if left is None or right is None:
-        return left is None and right is None
-    if isinstance(left, (str, bytes)) or isinstance(right, (str, bytes)):
-        return type(left) is type(right) and left == right
-    # Timestamps, durations, and other crate values keep the crate's equality.
-    return bool(_delegate("==", left, right))
+def _double_key(needle: Any, mapping: dict[Any, Any]) -> tuple[bool, Any]:
+    """``(True, value)`` when a stored key matches ``needle``.
+
+    The crate rejects a double as a map key. ``needle`` is compared with
+    each stored key by the conformance lossy-double rule. The value may
+    itself be null, so a miss is a separate flag.
+    """
+    for stored, value in mapping.items():
+        if _is_number(stored) and _numbers_equal(needle, stored):
+            return True, value
+    return False, None
 
 
 def _contains(needle: Any, haystack: Any) -> bool:
     mapping = _mapping(haystack)
-    if mapping is not None:
-        return any(_structural_eq(needle, key) for key in mapping)
-    items = _sequence(haystack)
-    if items is not None:
-        return any(_structural_eq(needle, item) for item in items)
+    # A double needle must not reach the crate: ``1.0 in {1: 'a'}`` is true
+    # and ``2.0 in {1: 'a'}`` is false, not a type error.
+    if mapping is not None and isinstance(needle, float):
+        return _double_key(needle, mapping)[0]
     return bool(_delegate("in", needle, haystack))
 
 
 def _index(container: Any, key: Any) -> Any:
     mapping = _mapping(container)
-    if mapping is not None:
-        for stored, value in mapping.items():
-            if _structural_eq(key, stored):
-                return value
-        raise RuntimeError(f"no such key: {key}")
+    if mapping is not None and isinstance(key, float):
+        found, value = _double_key(key, mapping)
+        if not found:
+            raise RuntimeError(f"no such key: {key}")
+        return value
     return _delegate("[]", container, key)
 
 
