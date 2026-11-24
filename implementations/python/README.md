@@ -13,11 +13,13 @@ uv run pytest
 ```
 
 Optional CEL backends are extras on this project and forward to
-`velocitron-cel`:
+`velocitron-cel`. Auto-detection uses Rust when that extra is installed,
+and otherwise bundled celpy. `cel-cpp` stays installable as a conformance
+reference and is selected by passing `CelExprAdapter()` (ADR 0066).
 
 ```console
 uv sync --extra cel-rust
-uv sync --extra cel-cpp --extra cel-rust
+uv sync --extra cel-cpp
 ```
 
 The `velocitron` and `velocitron-viz` console scripts come from the

@@ -3,7 +3,9 @@
 ``compile`` checks syntax. ``eval`` returns a Python value or raises
 :class:`CelEvalError`. ``CelpyAdapter`` is the bundled celpy backend.
 ``CelExprAdapter`` and ``CelRustAdapter`` are optional extras, imported only
-when a method runs. ``get_default_adapter`` picks Rust, then C++, then celpy.
+when a method runs. ``get_default_adapter`` picks Rust, then celpy.
+``CelExprAdapter`` is not selected; pass it to use the C++ reference
+binding (ADR 0066).
 
 This package is the source of truth for the adapter, the result cache
 (``CachingCelAdapter``), and ``slow_backend_hint``. It does not import
@@ -179,6 +181,10 @@ def _cel_expr_to_native(value: Any) -> Any:
 class CelExprAdapter(CelAdapter):
     """Adapter over ``cel-expr-python`` (the official C++ CEL binding).
 
+    A compatibility and conformance reference (ADR 0066).
+    ``get_default_adapter`` returns Rust or celpy. Pass an instance of this
+    class to select the C++ binding.
+
     The C++ binding is imported lazily inside ``compile`` / ``eval`` so the
     adapter constructs (and ``velocitron_cel`` imports) successfully without
     the optional extra installed. Methods raise ``ImportError`` only when
@@ -257,18 +263,15 @@ class CelRustAdapter(CelAdapter):
 
 
 def get_default_adapter() -> CelAdapter:
-    """Auto-detect the best available backend.
+    """Auto-detect the installed production backend.
 
-    Three-tier preference order: Rust (``common-expression-language``) →
-    C++ (``cel-expr-python``) → ``cel-python``. Returns the
-    highest-preference installed backend, else ``CelpyAdapter`` (the
-    always-available bundled backend).
+    Preference order: Rust (``common-expression-language``), then bundled
+    celpy. The C++ binding stays out of this order (ADR 0066). Pass
+    ``CelExprAdapter()`` to use that reference backend.
     """
 
     if importlib.util.find_spec("cel") is not None:
         return CelRustAdapter()
-    if importlib.util.find_spec("cel_expr_python") is not None:
-        return CelExprAdapter()
     return CelpyAdapter()
 
 

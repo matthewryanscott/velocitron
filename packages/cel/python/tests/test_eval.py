@@ -122,13 +122,11 @@ def test_matches_runs_on_the_bundled_backend() -> None:
     assert matched is True
 
 
-def test_get_default_adapter_is_celpy_without_optional_backends() -> None:
-    # given: a process where the optional backends are not installed
-    if (
-        importlib.util.find_spec("cel") is not None
-        or importlib.util.find_spec("cel_expr_python") is not None
-    ):
-        pytest.skip("an optional CEL backend is installed")
+def test_get_default_adapter_is_celpy_when_rust_is_absent() -> None:
+    # given: a process where the Rust backend is not installed. The C++
+    # binding may be installed; auto-detection does not select it (ADR 0066).
+    if importlib.util.find_spec("cel") is not None:
+        pytest.skip("common-expression-language is installed")
     # when: the default adapter is selected
     adapter = get_default_adapter()
     # then: it is the bundled celpy adapter and not an engine helper

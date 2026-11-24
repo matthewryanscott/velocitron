@@ -102,3 +102,13 @@ up. The note suggests the Rust backend only before `play` and `equiv`.
 Before `prove` the note says only that `matches()` follows Python's regex
 rules, when the stand-in of ADR 0054 is in use.
 
+## Amendment — the C++ binding is not a selected backend (ADR 0066)
+
+Auto-detection no longer picks the C++ binding, so an installed
+`cel-expr-python` is not a reason the note stays quiet. The note is shown
+when celpy is in use. Installing `cel-cpp` leaves the default on celpy and
+the note visible. Decision 2's line that the C++ backend is close to Rust
+in speed described the old auto-detection order, in which having the C++
+extra meant the library was running it. ADR 0066 is the current order:
+Rust, then celpy, with the C++ binding as a conformance reference.
+

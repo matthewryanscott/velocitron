@@ -1,9 +1,10 @@
 """Nox sessions for testing CEL backend configurations.
 
 Each session syncs the integration-test project with a specific set of
-optional CEL backends, then runs the full test suite. This exercises the
-adapter-preference chain (Rust -> C++ -> cel-python) and the
-environment-dependent skips in ``test_cel_adapter.py``.
+optional CEL backends. ``test_celpy``, ``test_cel_rust``, and ``test_all``
+run the full suite. Auto-detection is Rust, then celpy (ADR 0066).
+``test_cel_expr`` installs the C++ reference extra and runs the adapter
+cases plus the numeric conformance table.
 """
 
 from __future__ import annotations
@@ -37,9 +38,17 @@ def test_celpy(session: nox.Session) -> None:
 
 @nox.session(venv_backend="uv", tags=["cel"])
 def test_cel_expr(session: nox.Session) -> None:
-    """Test with cel-expr-python (C++ binding) installed."""
+    """Check the C++ reference backend: adapter cases and the numeric table.
+
+    ``cel-expr-python`` stays installable. Auto-detection does not select it
+    (ADR 0066). Pass pytest paths after ``--`` to run something else.
+    """
     _sync(session, "--extra", "cel-cpp")
-    session.run("pytest", *session.posargs)
+    args = session.posargs or [
+        "tests/test_cel_adapter.py",
+        "tests/test_cel_numeric.py::test_every_backend_agrees_on_cross_type_numeric_equality",
+    ]
+    session.run("pytest", *args)
 
 
 @nox.session(venv_backend="uv", tags=["cel"])

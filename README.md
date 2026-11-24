@@ -178,7 +178,10 @@ uv run velocitron validate ../../examples/capability-ladder/01-coin-deposit/coin
 
 Install the CLI on its own with `uv tool install packages/cli/python` from a
 clone, or the optional CEL extras `velocitron-cli[cel-rust]` and
-`velocitron-cel[cel-rust]`.
+`velocitron-cel[cel-rust]`. Auto-detection uses that Rust extra when it is
+installed, and otherwise bundled celpy. `velocitron-cel[cel-cpp]` stays
+installable as a conformance reference and is selected by constructing
+`CelExprAdapter` (ADR 0066).
 
 The `velocitron` CLI provides:
 

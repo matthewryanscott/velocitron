@@ -20,7 +20,9 @@ workloads.
    error is raised by the backend.
 2. `eval` returns a Python value. An evaluation error raises `CelEvalError`.
 3. `get_default_adapter` selects the installed backend in this order: Rust
-   (`common-expression-language`), C++ (`cel-expr-python`), then bundled celpy.
+   (`common-expression-language`), then bundled celpy. The C++ binding
+   (`cel-expr-python`) stays an optional extra and is a compatibility and
+   conformance reference (ADR 0066). Construct `CelExprAdapter` to use it.
 
 `CelpyAdapter` is always available. Its code is the bundled celpy 0.5.0 tree.
 `matches()` uses `google-re2` where that package has a wheel, and otherwise
