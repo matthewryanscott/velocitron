@@ -1,11 +1,12 @@
 import {execFileSync} from "node:child_process";
-import {mkdtempSync, readdirSync, writeFileSync} from "node:fs";
+import {cpSync, existsSync, mkdirSync, mkdtempSync, readdirSync, symlinkSync, writeFileSync} from "node:fs";
 import {tmpdir} from "node:os";
-import {dirname, join, resolve} from "node:path";
+import {dirname, join, relative, resolve, sep} from "node:path";
 import test from "node:test";
 import {fileURLToPath} from "node:url";
 
 const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+const repoRoot = resolve(packageRoot, "../../..");
 const repoPackages = resolve(packageRoot, "../..");
 
 const siblings = [
@@ -43,10 +44,39 @@ if (!renderWalkthrough(report.traces[0]).includes("accept")) throw new Error("wa
 console.log("ok");
 `;
 
+function typescriptCompiler(directory) {
+  const candidates = [
+    join(directory, "node_modules", ".bin", "tsc"),
+    join(repoRoot, "node_modules", ".bin", "tsc"),
+  ];
+  const found = candidates.find((candidate) => existsSync(candidate));
+  if (found === undefined) throw new Error("tsc is not installed");
+  return found;
+}
+
 function pack(directory, destination) {
+  // Compile a private copy. npm pack's prepare script is tsc, and another
+  // package's test is compiling this same dist at the same time.
+  const stageRoot = mkdtempSync(join(tmpdir(), "velocitron-stage-"));
+  const stage = join(stageRoot, relative(repoRoot, directory));
+  mkdirSync(dirname(stage), {recursive: true});
+  cpSync(directory, stage, {
+    recursive: true,
+    filter(source) {
+      const parts = relative(directory, source).split(sep);
+      return !parts.includes("node_modules") && !parts.includes("dist");
+    },
+  });
+  cpSync(join(repoRoot, "tsconfig.base.json"), join(stageRoot, "tsconfig.base.json"));
+  const modules = join(directory, "node_modules");
+  if (existsSync(modules)) symlinkSync(modules, join(stage, "node_modules"));
+  execFileSync(typescriptCompiler(directory), ["-p", "tsconfig.build.json"], {
+    cwd: stage,
+    stdio: "pipe",
+  });
   const before = new Set(readdirSync(destination));
-  execFileSync("npm", ["pack", "--pack-destination", destination], {
-    cwd: directory,
+  execFileSync("npm", ["pack", "--ignore-scripts", "--pack-destination", destination], {
+    cwd: stage,
     stdio: "pipe",
   });
   const tarball = readdirSync(destination).find(
