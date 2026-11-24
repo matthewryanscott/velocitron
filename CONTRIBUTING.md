@@ -17,6 +17,18 @@ provide support, or maintain compatibility. Any response is best-effort.
 For potential vulnerabilities, follow [SECURITY.md](SECURITY.md) rather than
 publishing exploit details.
 
+## Mentions on issues and pull requests
+
+`.github/workflows/issue-bot.yml` runs when a comment is created on an issue
+or pull request. It forwards the comment only when the repository owner
+writes it and the body contains `@velocitron`. A comment from anyone else
+does not run the forward. A reply, when one is sent, comes from a GitHub
+App.
+
+The workflow reads two repository secrets, `GROK_BOT_WEBHOOK_URL` and
+`GROK_BOT_WEBHOOK_SECRET`. When either one is unset, it records a notice
+and skips the forward.
+
 ## Regenerating the parsers
 
 `tools/antlr.py` regenerates the committed ANTLR parsers from
