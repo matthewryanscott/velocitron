@@ -1,7 +1,7 @@
 {
   "author": "Matthew R. Scott",
   "bugs": {
-    "url": "https://github.com/circuitmeridian/velocitron/issues"
+    "url": "https://github.com/matthewryanscott/velocitron/issues"
   },
   "description": "Renders an already-built Velocitron net as Graphviz DOT. Does not parse documents, compile CEL, or install a console script.",
   "devDependencies": {
@@ -22,14 +22,14 @@
     "LICENSE",
     "README.md"
   ],
-  "homepage": "https://github.com/circuitmeridian/velocitron",
+  "homepage": "https://github.com/matthewryanscott/velocitron",
   "license": "MIT",
   "name": "@velocitron/viz",
   "private": true,
   "repository": {
     "directory": "packages/viz/typescript",
     "type": "git",
-    "url": "git+https://github.com/circuitmeridian/velocitron.git"
+    "url": "git+https://github.com/matthewryanscott/velocitron.git"
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",

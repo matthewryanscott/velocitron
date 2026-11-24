@@ -19,7 +19,7 @@ The inline `!`…`` block above is a Claude Code dynamic-context feature that ru
 
 If the output shows `velocitron CLI NOT INSTALLED` (or `velocitron-viz CLI NOT INSTALLED`), the CLIs are not on PATH. Offer the user these two install options and wait for their choice — do not pick one yourself:
 
-1. Install from GitHub: `uv tool install "git+https://github.com/circuitmeridian/velocitron#subdirectory=packages/cli/python"`
+1. Install from GitHub: `uv tool install "git+https://github.com/matthewryanscott/velocitron#subdirectory=packages/cli/python"`
 2. Install from a local clone the user names: `uv tool install <path-to-clone>/packages/cli/python` (add `--editable` to track edits).
 
 ## Authoring workflow

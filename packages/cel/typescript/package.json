@@ -1,7 +1,7 @@
 {
   "author": "Matthew R. Scott",
   "bugs": {
-    "url": "https://github.com/circuitmeridian/velocitron/issues"
+    "url": "https://github.com/matthewryanscott/velocitron/issues"
   },
   "dependencies": {
     "@marcbachmann/cel-js": "8.0.0"
@@ -25,14 +25,14 @@
     "LICENSE",
     "README.md"
   ],
-  "homepage": "https://github.com/circuitmeridian/velocitron",
+  "homepage": "https://github.com/matthewryanscott/velocitron",
   "license": "MIT",
   "name": "@velocitron/cel",
   "private": true,
   "repository": {
     "directory": "packages/cel/typescript",
     "type": "git",
-    "url": "git+https://github.com/circuitmeridian/velocitron.git"
+    "url": "git+https://github.com/matthewryanscott/velocitron.git"
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",

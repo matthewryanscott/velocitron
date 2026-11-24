@@ -3,9 +3,9 @@
 Parser for Velocitron `.play` documents. The import name is
 `velocitron_play`. The TypeScript package is `@velocitron/play`.
 
-This package is part of the [velocitron](https://github.com/circuitmeridian/velocitron)
+This package is part of the [velocitron](https://github.com/matthewryanscott/velocitron)
 monorepo. It is not published to PyPI. Downstream projects depend on a git
-revision of `circuitmeridian/velocitron` and the
+revision of `matthewryanscott/velocitron` and the
 `packages/play/python` subdirectory.
 
 Version 0.1.0 is alpha software. The grammar may change without notice.
@@ -57,7 +57,7 @@ published. They point at this repository.
 ```toml
 [project]
 dependencies = [
-  "velocitron-play @ git+https://github.com/circuitmeridian/velocitron.git@<ref>#subdirectory=packages/play/python",
+  "velocitron-play @ git+https://github.com/matthewryanscott/velocitron.git@<ref>#subdirectory=packages/play/python",
 ]
 ```
 
@@ -65,7 +65,7 @@ With a uv source table:
 
 ```toml
 [tool.uv.sources]
-velocitron-play = { git = "https://github.com/circuitmeridian/velocitron.git", rev = "<ref>", subdirectory = "packages/play/python" }
+velocitron-play = { git = "https://github.com/matthewryanscott/velocitron.git", rev = "<ref>", subdirectory = "packages/play/python" }
 ```
 
 ```python

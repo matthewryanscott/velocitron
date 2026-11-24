@@ -13,7 +13,7 @@ The TypeScript package raises `ExplainUnavailableError` from `explainNet`.
 It does not render prose.
 
 Nothing here is published to npm or PyPI. Consumers install a git
-subdirectory of `circuitmeridian/velocitron`. Each language
+subdirectory of `matthewryanscott/velocitron`. Each language
 README has the install snippet.
 
 `velocitron.explain` re-exports `explain_net`. The umbrella console entry

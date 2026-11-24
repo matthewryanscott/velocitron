@@ -13,7 +13,7 @@ gate. The TypeScript package re-exports `SYNTH_HANDLER` and raises
 a net.
 
 Nothing here is published to npm or PyPI. Consumers install a git
-subdirectory of `circuitmeridian/velocitron`. Each language
+subdirectory of `matthewryanscott/velocitron`. Each language
 README has the install snippet.
 
 `net_document`, `canonical_net_json`, `net_sha256`, and `SYNTH_HANDLER`

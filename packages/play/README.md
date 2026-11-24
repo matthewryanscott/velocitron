@@ -19,7 +19,7 @@ reports `SC1xx`. `project_source` / `projectPlay` is the shared projection the
 two parsers agree on.
 
 Nothing here is published to npm or PyPI. Consumers install a git
-subdirectory of `circuitmeridian/velocitron`. Each language
+subdirectory of `matthewryanscott/velocitron`. Each language
 README has the install snippet.
 
 Checking a play against a net, the walkthrough, and the sequence diagram

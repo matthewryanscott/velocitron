@@ -3,9 +3,9 @@
 Resolves the bundled Velocitron authoring skill. The import name is
 `velocitron_skill`.
 
-This package is part of the [velocitron](https://github.com/circuitmeridian/velocitron)
+This package is part of the [velocitron](https://github.com/matthewryanscott/velocitron)
 monorepo. It is not published to PyPI. Downstream projects depend on a git
-revision of `circuitmeridian/velocitron` and the
+revision of `matthewryanscott/velocitron` and the
 `packages/skill/python` subdirectory.
 
 Version 0.1.0 is alpha software. The resolver may change without notice.
@@ -45,7 +45,7 @@ published. They point at this repository.
 ```toml
 [project]
 dependencies = [
-  "velocitron-skill @ git+https://github.com/circuitmeridian/velocitron.git@<ref>#subdirectory=packages/skill/python",
+  "velocitron-skill @ git+https://github.com/matthewryanscott/velocitron.git@<ref>#subdirectory=packages/skill/python",
 ]
 ```
 
@@ -53,7 +53,7 @@ With a uv source table:
 
 ```toml
 [tool.uv.sources]
-velocitron-skill = { git = "https://github.com/circuitmeridian/velocitron.git", rev = "<ref>", subdirectory = "packages/skill/python" }
+velocitron-skill = { git = "https://github.com/matthewryanscott/velocitron.git", rev = "<ref>", subdirectory = "packages/skill/python" }
 ```
 
 ## License

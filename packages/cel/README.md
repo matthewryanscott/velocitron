@@ -13,7 +13,7 @@ evaluation failure. The TypeScript adapter throws `CelCompileError` or
 `CelEvaluationError`.
 
 Nothing here is published to npm or PyPI. Consumers install a git
-subdirectory of `circuitmeridian/velocitron`. Each language
+subdirectory of `matthewryanscott/velocitron`. Each language
 README has the install snippet.
 
 `CachingCelAdapter` and `slow_backend_hint` live in `velocitron_cel`.

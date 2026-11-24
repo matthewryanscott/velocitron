@@ -17,7 +17,7 @@ load the checker needs (`packages/petrinet`), or own the CLI. `records_to_play`
 writes a `.play` from journal records and lives in this package.
 
 Nothing here is published to npm or PyPI. Consumers install a git
-subdirectory of `circuitmeridian/velocitron`. Each language
+subdirectory of `matthewryanscott/velocitron`. Each language
 README has the install snippet.
 
 Python is the reference for paired Graphviz graphs and PlantUML. TypeScript

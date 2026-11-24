@@ -3,9 +3,9 @@
 Console commands for Velocitron nets. The import name is `velocitron_cli`.
 The TypeScript package is `@velocitron/cli`.
 
-This package is part of the [velocitron](https://github.com/circuitmeridian/velocitron)
+This package is part of the [velocitron](https://github.com/matthewryanscott/velocitron)
 monorepo. It is not published to PyPI. Downstream projects depend on a git
-revision of `circuitmeridian/velocitron` and the
+revision of `matthewryanscott/velocitron` and the
 `packages/cli/python` subdirectory.
 
 Version 0.1.0 is alpha software. The dispatcher may change without notice.
@@ -59,7 +59,7 @@ installed the same way from their `packages/*/python` directories.
 ```toml
 [project]
 dependencies = [
-  "velocitron-cli @ git+https://github.com/circuitmeridian/velocitron.git@<ref>#subdirectory=packages/cli/python",
+  "velocitron-cli @ git+https://github.com/matthewryanscott/velocitron.git@<ref>#subdirectory=packages/cli/python",
 ]
 ```
 
@@ -67,7 +67,7 @@ With a uv source table:
 
 ```toml
 [tool.uv.sources]
-velocitron-cli = { git = "https://github.com/circuitmeridian/velocitron.git", rev = "<ref>", subdirectory = "packages/cli/python" }
+velocitron-cli = { git = "https://github.com/matthewryanscott/velocitron.git", rev = "<ref>", subdirectory = "packages/cli/python" }
 ```
 
 ```python

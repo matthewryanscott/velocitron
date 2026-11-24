@@ -23,7 +23,8 @@ import zipfile
 _SCHEMA_VERSION = 1
 _HEX_40 = re.compile(r"[0-9a-f]{40}")
 _VERSION = re.compile(r"[0-9]+\.[0-9]+\.[0-9]+")
-_EXPECTED_REPOSITORY = "circuitmeridian/velocitron"
+_EXPECTED_REPOSITORY = "matthewryanscott/velocitron"
+_EXPECTED_OWNER = _EXPECTED_REPOSITORY.split("/", 1)[0]
 _CORE_REPOSITORY_IDENTITY = re.compile(
     rb"(?i)(?:(?:git\+https|https)://github\.com/"
     rb"|ssh://git@github\.com/"
@@ -433,7 +434,7 @@ def _wrong_repository_identities(content: bytes) -> list[str]:
         {
             match.group(0).decode("ascii")
             for match in _CORE_REPOSITORY_IDENTITY.finditer(content)
-            if match.group("owner").decode("ascii").lower() != "circuitmeridian"
+            if match.group("owner").decode("ascii").lower() != _EXPECTED_OWNER
         }
     )
 

@@ -19,9 +19,9 @@ classifiers = [
 dependencies = []
 
 [project.urls]
-Homepage = "https://github.com/circuitmeridian/velocitron"
-Repository = "https://github.com/circuitmeridian/velocitron"
-Issues = "https://github.com/circuitmeridian/velocitron/issues"
+Homepage = "https://github.com/matthewryanscott/velocitron"
+Repository = "https://github.com/matthewryanscott/velocitron"
+Issues = "https://github.com/matthewryanscott/velocitron/issues"
 
 [build-system]
 requires = ["maturin>=1.16,<2"]

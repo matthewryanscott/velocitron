@@ -3,11 +3,11 @@
 Syntax parser for Velocitron `.petrinet` documents. The Python distribution
 name is `velocitron-grammar` (import `velocitron_grammar`).
 
-This package is part of the [velocitron](https://github.com/circuitmeridian/velocitron)
+This package is part of the [velocitron](https://github.com/matthewryanscott/velocitron)
 monorepo. It is not published to npm. The package is marked `"private": true`
 so a workspace publish does not send it to the registry. Git subdirectory
 installs still resolve it. Downstream projects depend on a git revision of
-`circuitmeridian/velocitron` and the `packages/grammar/typescript`
+`matthewryanscott/velocitron` and the `packages/grammar/typescript`
 subdirectory.
 
 Version 0.1.0 is alpha software. The grammar may change without notice.
@@ -65,7 +65,7 @@ pnpm:
 ```json
 {
   "dependencies": {
-    "@velocitron/grammar": "git+https://github.com/circuitmeridian/velocitron.git#<ref>&path:/packages/grammar/typescript"
+    "@velocitron/grammar": "git+https://github.com/matthewryanscott/velocitron.git#<ref>&path:/packages/grammar/typescript"
   }
 }
 ```
@@ -75,7 +75,7 @@ npm accepts the same git URL, and also:
 ```json
 {
   "dependencies": {
-    "@velocitron/grammar": "github:circuitmeridian/velocitron#<ref>&path:packages/grammar/typescript"
+    "@velocitron/grammar": "github:matthewryanscott/velocitron#<ref>&path:packages/grammar/typescript"
   }
 }
 ```

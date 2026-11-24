@@ -3,11 +3,11 @@
 Name the structural-equivalence seam. The Python distribution name is
 `velocitron-equiv` (import `velocitron_equiv`).
 
-This package is part of the [velocitron](https://github.com/circuitmeridian/velocitron)
+This package is part of the [velocitron](https://github.com/matthewryanscott/velocitron)
 monorepo. It is not published to npm. The package is marked `"private": true`
 so a workspace publish does not send it to the registry. Git subdirectory
 installs still resolve it. Downstream projects depend on a git revision of
-`circuitmeridian/velocitron` and the
+`matthewryanscott/velocitron` and the
 `packages/equiv/typescript` subdirectory.
 
 Version 0.1.0 is alpha software. The marker may change without notice.
@@ -48,7 +48,7 @@ pnpm:
 ```json
 {
   "dependencies": {
-    "@velocitron/equiv": "git+https://github.com/circuitmeridian/velocitron.git#<ref>&path:/packages/equiv/typescript"
+    "@velocitron/equiv": "git+https://github.com/matthewryanscott/velocitron.git#<ref>&path:/packages/equiv/typescript"
   }
 }
 ```
@@ -58,7 +58,7 @@ npm accepts the same git URL, and also:
 ```json
 {
   "dependencies": {
-    "@velocitron/equiv": "github:circuitmeridian/velocitron#<ref>&path:packages/equiv/typescript"
+    "@velocitron/equiv": "github:matthewryanscott/velocitron#<ref>&path:packages/equiv/typescript"
   }
 }
 ```

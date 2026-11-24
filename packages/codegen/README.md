@@ -12,7 +12,7 @@ shares the synthesized-handler prefix and the `RefinedAway` name. It does not
 emit Python.
 
 Nothing here is published to npm or PyPI. Consumers install a git
-subdirectory of `circuitmeridian/velocitron`. Each language
+subdirectory of `matthewryanscott/velocitron`. Each language
 README has the install snippet.
 
 Callers import `velocitron_codegen`. `velocitron_netbase` re-exports the

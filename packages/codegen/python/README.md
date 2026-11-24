@@ -4,9 +4,9 @@ Generate one Python base class per Velocitron net, and the sha256 that
 class registers with. The import name is `velocitron_codegen`. The
 TypeScript package is `@velocitron/codegen`.
 
-This package is part of the [velocitron](https://github.com/circuitmeridian/velocitron)
+This package is part of the [velocitron](https://github.com/matthewryanscott/velocitron)
 monorepo. It is not published to PyPI. Downstream projects depend on a git
-revision of `circuitmeridian/velocitron` and the
+revision of `matthewryanscott/velocitron` and the
 `packages/codegen/python` subdirectory.
 
 Version 0.1.0 is alpha software. The generator may change without notice.
@@ -71,7 +71,7 @@ the same way from their `packages/*/python` directories.
 ```toml
 [project]
 dependencies = [
-  "velocitron-codegen @ git+https://github.com/circuitmeridian/velocitron.git@<ref>#subdirectory=packages/codegen/python",
+  "velocitron-codegen @ git+https://github.com/matthewryanscott/velocitron.git@<ref>#subdirectory=packages/codegen/python",
 ]
 ```
 
@@ -79,7 +79,7 @@ With a uv source table:
 
 ```toml
 [tool.uv.sources]
-velocitron-codegen = { git = "https://github.com/circuitmeridian/velocitron.git", rev = "<ref>", subdirectory = "packages/codegen/python" }
+velocitron-codegen = { git = "https://github.com/matthewryanscott/velocitron.git", rev = "<ref>", subdirectory = "packages/codegen/python" }
 ```
 
 ```python

@@ -12,7 +12,7 @@ connected transition. Two neighbor transitions of one choice can share a
 copy when the place is `beside` and names no side.
 
 Nothing here is published to npm or PyPI. Consumers install a git
-subdirectory of `circuitmeridian/velocitron`. Each language
+subdirectory of `matthewryanscott/velocitron`. Each language
 README has the install snippet.
 
 Callers import `velocitron_viz` or `@velocitron/viz`. The `velocitron-viz`

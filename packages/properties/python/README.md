@@ -4,9 +4,9 @@ Checks declarative properties against a produced marking or a journal
 replay. The import name is `velocitron_properties`. The TypeScript package
 is `@velocitron/properties`.
 
-This package is part of the [velocitron](https://github.com/circuitmeridian/velocitron)
+This package is part of the [velocitron](https://github.com/matthewryanscott/velocitron)
 monorepo. It is not published to PyPI. Downstream projects depend on a git
-revision of `circuitmeridian/velocitron` and the
+revision of `matthewryanscott/velocitron` and the
 `packages/properties/python` subdirectory.
 
 Version 0.1.0 is alpha software. The property pass may change without
@@ -51,7 +51,7 @@ published. They point at this repository. `velocitron-cel`, `velocitron-engine`,
 ```toml
 [project]
 dependencies = [
-  "velocitron-properties @ git+https://github.com/circuitmeridian/velocitron.git@<ref>#subdirectory=packages/properties/python",
+  "velocitron-properties @ git+https://github.com/matthewryanscott/velocitron.git@<ref>#subdirectory=packages/properties/python",
 ]
 ```
 
@@ -59,7 +59,7 @@ With a uv source table:
 
 ```toml
 [tool.uv.sources]
-velocitron-properties = { git = "https://github.com/circuitmeridian/velocitron.git", rev = "<ref>", subdirectory = "packages/properties/python" }
+velocitron-properties = { git = "https://github.com/matthewryanscott/velocitron.git", rev = "<ref>", subdirectory = "packages/properties/python" }
 ```
 
 ```python

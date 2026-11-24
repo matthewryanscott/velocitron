@@ -3,9 +3,9 @@
 Syntax parser for Velocitron `.petrinet` documents. The import name is
 `velocitron_grammar`. The TypeScript package is `@velocitron/grammar`.
 
-This package is part of the [velocitron](https://github.com/circuitmeridian/velocitron)
+This package is part of the [velocitron](https://github.com/matthewryanscott/velocitron)
 monorepo. It is not published to PyPI. Downstream projects depend on a git
-revision of `circuitmeridian/velocitron` and the
+revision of `matthewryanscott/velocitron` and the
 `packages/grammar/python` subdirectory.
 
 Version 0.1.0 is alpha software. The grammar may change without notice.
@@ -58,7 +58,7 @@ published. They point at this repository.
 ```toml
 [project]
 dependencies = [
-  "velocitron-grammar @ git+https://github.com/circuitmeridian/velocitron.git@<ref>#subdirectory=packages/grammar/python",
+  "velocitron-grammar @ git+https://github.com/matthewryanscott/velocitron.git@<ref>#subdirectory=packages/grammar/python",
 ]
 ```
 
@@ -66,7 +66,7 @@ With a uv source table:
 
 ```toml
 [tool.uv.sources]
-velocitron-grammar = { git = "https://github.com/circuitmeridian/velocitron.git", rev = "<ref>", subdirectory = "packages/grammar/python" }
+velocitron-grammar = { git = "https://github.com/matthewryanscott/velocitron.git", rev = "<ref>", subdirectory = "packages/grammar/python" }
 ```
 
 ```python

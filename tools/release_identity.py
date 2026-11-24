@@ -12,7 +12,7 @@ from typing import Any, cast
 
 _HEX_40 = re.compile(r"[0-9a-f]{40}")
 _WORKFLOW_PATH = ".github/workflows/release-candidate.yml"
-_EXPECTED_REPOSITORY = "circuitmeridian/velocitron"
+_EXPECTED_REPOSITORY = "matthewryanscott/velocitron"
 
 
 class IdentityError(ValueError):

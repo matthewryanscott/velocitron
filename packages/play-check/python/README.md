@@ -4,9 +4,9 @@ Check a `.play` document against a net and step a walkthrough. The import
 name is `velocitron_play_check`. The TypeScript package is
 `@velocitron/play-check`.
 
-This package is part of the [velocitron](https://github.com/circuitmeridian/velocitron)
+This package is part of the [velocitron](https://github.com/matthewryanscott/velocitron)
 monorepo. It is not published to PyPI. Downstream projects depend on a git
-revision of `circuitmeridian/velocitron` and the
+revision of `matthewryanscott/velocitron` and the
 `packages/play-check/python` subdirectory.
 
 Version 0.1.0 is alpha software. The checker may change without notice.
@@ -51,7 +51,7 @@ and `velocitron-viz` the same way, from their own subdirectories.
 ```toml
 [project]
 dependencies = [
-  "velocitron-play-check @ git+https://github.com/circuitmeridian/velocitron.git@<ref>#subdirectory=packages/play-check/python",
+  "velocitron-play-check @ git+https://github.com/matthewryanscott/velocitron.git@<ref>#subdirectory=packages/play-check/python",
 ]
 ```
 
@@ -59,7 +59,7 @@ With a uv source table:
 
 ```toml
 [tool.uv.sources]
-velocitron-play-check = { git = "https://github.com/circuitmeridian/velocitron.git", rev = "<ref>", subdirectory = "packages/play-check/python" }
+velocitron-play-check = { git = "https://github.com/matthewryanscott/velocitron.git", rev = "<ref>", subdirectory = "packages/play-check/python" }
 ```
 
 ```python

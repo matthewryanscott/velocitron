@@ -3,9 +3,9 @@
 `ReplayCursor`, `ReplayBase`, and `replay_run`. The import name is
 `velocitron_replay`. The TypeScript package is `@velocitron/replay`.
 
-This package is part of the [velocitron](https://github.com/circuitmeridian/velocitron)
+This package is part of the [velocitron](https://github.com/matthewryanscott/velocitron)
 monorepo. It is not published to PyPI. Downstream projects depend on a git
-revision of `circuitmeridian/velocitron` and the
+revision of `matthewryanscott/velocitron` and the
 `packages/replay/python` subdirectory.
 
 Version 0.1.0 is alpha software. The replay contract may change without
@@ -76,7 +76,7 @@ installed the same way from their `packages/*/python` directories.
 ```toml
 [project]
 dependencies = [
-  "velocitron-replay @ git+https://github.com/circuitmeridian/velocitron.git@<ref>#subdirectory=packages/replay/python",
+  "velocitron-replay @ git+https://github.com/matthewryanscott/velocitron.git@<ref>#subdirectory=packages/replay/python",
 ]
 ```
 
@@ -84,7 +84,7 @@ With a uv source table:
 
 ```toml
 [tool.uv.sources]
-velocitron-replay = { git = "https://github.com/circuitmeridian/velocitron.git", rev = "<ref>", subdirectory = "packages/replay/python" }
+velocitron-replay = { git = "https://github.com/matthewryanscott/velocitron.git", rev = "<ref>", subdirectory = "packages/replay/python" }
 ```
 
 ```python

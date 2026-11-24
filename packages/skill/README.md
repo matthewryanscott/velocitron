@@ -11,7 +11,7 @@ markdown and examples. [`skills/README.md`](../../skills/README.md) maps how
 an agent uses the packages together.
 
 Nothing here is published to npm or PyPI. Consumers install a git
-subdirectory of `circuitmeridian/velocitron`. The language
+subdirectory of `matthewryanscott/velocitron`. The language
 README has the install snippet.
 
 `velocitron skill` copies the directory `skill_root()` returns. The CLI

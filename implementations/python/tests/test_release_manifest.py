@@ -50,7 +50,7 @@ class _ReleaseManifestTool(Protocol):
 
 _TOOL = cast(_ReleaseManifestTool, cast(object, _RELEASE_MANIFEST_MODULE))
 
-_REPOSITORY = "circuitmeridian/velocitron"
+_REPOSITORY = "matthewryanscott/velocitron"
 _VERSION = "0.1.0"
 _TAG = f"v{_VERSION}"
 _TAG_REF = "a" * 40

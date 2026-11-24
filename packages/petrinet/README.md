@@ -17,7 +17,7 @@ ships in `velocitron_dsl`. `merge_nets` and `merge_composition` call
 `velocitron_merge` and then `validate_net`.
 
 Nothing here is published to npm or PyPI. Consumers install a git
-subdirectory of `circuitmeridian/velocitron`. Each language
+subdirectory of `matthewryanscott/velocitron`. Each language
 README has the install snippet.
 
 Callers import this package's public API. There is no `velocitron` or

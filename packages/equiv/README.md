@@ -14,7 +14,7 @@ The TypeScript package raises `EquivUnavailableError` from `compare` and
 `Equivalence`. It does not compare nets.
 
 Nothing here is published to npm or PyPI. Consumers install a git
-subdirectory of `circuitmeridian/velocitron`. Each language
+subdirectory of `matthewryanscott/velocitron`. Each language
 README has the install snippet.
 
 `velocitron.equiv` re-exports this public seam. The umbrella console entry

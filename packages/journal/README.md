@@ -10,7 +10,7 @@ them to a marking without calling handlers. Store them in memory, in a
 JSONL file, or in sqlite.
 
 Nothing here is published to npm or PyPI. Consumers install a git
-subdirectory of `circuitmeridian/velocitron`. Each language
+subdirectory of `matthewryanscott/velocitron`. Each language
 README has the install snippet.
 
 Callers import `velocitron_journal` or `@velocitron/journal`. The sqlite

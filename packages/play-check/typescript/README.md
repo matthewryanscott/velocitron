@@ -3,9 +3,9 @@
 Check a `.play` document against a net and step a walkthrough. The Python
 package is `velocitron-play-check`.
 
-This package is part of the [velocitron](https://github.com/circuitmeridian/velocitron)
+This package is part of the [velocitron](https://github.com/matthewryanscott/velocitron)
 monorepo. It is not published to npm (`"private": true`). Downstream
-projects depend on a git revision of `circuitmeridian/velocitron`
+projects depend on a git revision of `matthewryanscott/velocitron`
 and the `packages/play-check/typescript` subdirectory.
 
 Version 0.1.0 is alpha software. The checker may change without notice.
@@ -49,7 +49,7 @@ published. They point at this repository. Install `@velocitron/play`,
 ```json
 {
   "dependencies": {
-    "@velocitron/play-check": "github:circuitmeridian/velocitron#<ref>&path:packages/play-check/typescript"
+    "@velocitron/play-check": "github:matthewryanscott/velocitron#<ref>&path:packages/play-check/typescript"
   }
 }
 ```

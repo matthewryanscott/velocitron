@@ -4,7 +4,7 @@ Portable Velocitron contracts: the JSON Schemas, the normative prose, and
 the conformance corpus. The Python distribution name is `velocitron-spec`.
 The TypeScript package name is `@velocitron/spec`.
 
-This package is part of the [velocitron](https://github.com/circuitmeridian/velocitron)
+This package is part of the [velocitron](https://github.com/matthewryanscott/velocitron)
 monorepo. It is not published to npm or PyPI. Downstream projects depend on
 a git revision and the `packages/spec` subdirectory.
 
@@ -65,7 +65,7 @@ published.
 ```toml
 [project]
 dependencies = [
-  "velocitron-spec @ git+https://github.com/circuitmeridian/velocitron.git@<ref>#subdirectory=packages/spec",
+  "velocitron-spec @ git+https://github.com/matthewryanscott/velocitron.git@<ref>#subdirectory=packages/spec",
 ]
 ```
 
@@ -73,7 +73,7 @@ With a uv source table:
 
 ```toml
 [tool.uv.sources]
-velocitron-spec = { git = "https://github.com/circuitmeridian/velocitron.git", rev = "<ref>", subdirectory = "packages/spec" }
+velocitron-spec = { git = "https://github.com/matthewryanscott/velocitron.git", rev = "<ref>", subdirectory = "packages/spec" }
 ```
 
 ```python
@@ -97,7 +97,7 @@ pnpm:
 ```json
 {
   "dependencies": {
-    "@velocitron/spec": "git+https://github.com/circuitmeridian/velocitron.git#<ref>&path:/packages/spec"
+    "@velocitron/spec": "git+https://github.com/matthewryanscott/velocitron.git#<ref>&path:/packages/spec"
   }
 }
 ```
@@ -107,7 +107,7 @@ npm accepts the same git URL, and also:
 ```json
 {
   "dependencies": {
-    "@velocitron/spec": "github:circuitmeridian/velocitron#<ref>&path:packages/spec"
+    "@velocitron/spec": "github:matthewryanscott/velocitron#<ref>&path:packages/spec"
   }
 }
 ```

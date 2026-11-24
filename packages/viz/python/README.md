@@ -3,9 +3,9 @@
 Render an already-built Velocitron net as Graphviz DOT. The import name is
 `velocitron_viz`. The TypeScript package is `@velocitron/viz`.
 
-This package is part of the [velocitron](https://github.com/circuitmeridian/velocitron)
+This package is part of the [velocitron](https://github.com/matthewryanscott/velocitron)
 monorepo. It is not published to PyPI. Downstream projects depend on a git
-revision of `circuitmeridian/velocitron` and the
+revision of `matthewryanscott/velocitron` and the
 `packages/viz/python` subdirectory.
 
 Version 0.1.0 is alpha software. The renderer may change without notice.
@@ -52,7 +52,7 @@ published. They point at this repository.
 ```toml
 [project]
 dependencies = [
-  "velocitron-viz @ git+https://github.com/circuitmeridian/velocitron.git@<ref>#subdirectory=packages/viz/python",
+  "velocitron-viz @ git+https://github.com/matthewryanscott/velocitron.git@<ref>#subdirectory=packages/viz/python",
 ]
 ```
 
@@ -60,7 +60,7 @@ With a uv source table:
 
 ```toml
 [tool.uv.sources]
-velocitron-viz = { git = "https://github.com/circuitmeridian/velocitron.git", rev = "<ref>", subdirectory = "packages/viz/python" }
+velocitron-viz = { git = "https://github.com/matthewryanscott/velocitron.git", rev = "<ref>", subdirectory = "packages/viz/python" }
 ```
 
 ```python
