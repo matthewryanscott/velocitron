@@ -221,9 +221,10 @@ class CelRustAdapter(CelAdapter):
     Python primitives needing no unwrapping (unlike
     ``CelpyAdapter._celpy_to_native`` and ``CelExprAdapter``'s ``.value()``).
 
-    ``==``, ``!=``, ``in``, and indexing are rewritten so ``int``, ``uint``,
-    and ``double`` share one number line, including as list elements and map
-    keys (``_rust_equality``). The crate's own ``==`` does not.
+    ``==``, ``!=``, ``in``, and indexing are rewritten (``_rust_equality``).
+    0.10.0 already compares scalars, list elements, and map values on one
+    number line. Map keys do not: a double is not a key, and ``int`` and
+    ``uint`` keys stay distinct in the crate.
     """
 
     def compile(self, expr: str) -> Any:
