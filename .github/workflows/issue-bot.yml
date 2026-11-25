@@ -93,6 +93,7 @@ jobs:
             --silent --show-error \
             --request POST \
             --header "Content-Type: application/json" \
+            --header "Authorization: Bearer ${GROK_BOT_WEBHOOK_SECRET}" \
             --header "X-Hub-Signature-256: sha256=${signature}" \
             --data-binary @"${payload}" \
             "$GROK_BOT_WEBHOOK_URL"
