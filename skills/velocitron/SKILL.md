@@ -66,8 +66,10 @@ If the output shows `velocitron CLI NOT INSTALLED` (or `velocitron-viz CLI NOT I
    when a copy lands far away and its read arc crosses the net; a copy the
    transition writes keeps its side too. With no
    side, two transitions that are neighbors in a choice (same one input
-   place, next to each other in arc order) and both use `p` share one copy,
-   drawn between them; order the choice's arcs to pick the pairs. The sides
+   place, next to each other in the drawing's structural order) and both use
+   `p` share one copy, drawn between them. That order is the distance from
+   the initial marking, then the name, so rearranging the source does not
+   pick different pairs. The sides
    are for `tb`/`bt`; `lr`/`rl` put left below. A view with positions
    ignores it.
    The render-inspect loop for authoring: render the DOT to an image, LOOK at

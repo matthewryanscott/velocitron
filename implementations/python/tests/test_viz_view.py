@@ -748,30 +748,38 @@ def test_beside_keeps_copies_on_their_transitions_rank_in_side_order(
     decorations = "decorate (switch) beside left\ndecorate (budget) beside right\n"
     # when: rendered
     dot = _beside_dot(decorations, tmp_path=tmp_path, capsys=capsys)
-    # then: each transition and its beside copies share one ranked cluster
+    # then: each transition and its beside copies share one ranked cluster.
+    # finish and start are the same distance from a source, so finish's row
+    # is first by name.
     assert "    newrank=true;" in dot.splitlines()
     assert _line_with(dot, 'subgraph "cluster_beside_0"') == (
         '    subgraph "cluster_beside_0" { label=""; peripheries=0; margin=0; '
+        '{ rank=same; "switch@finish"; "finish"; } }'
+    )
+    assert _line_with(dot, 'subgraph "cluster_beside_1"') == (
+        '    subgraph "cluster_beside_1" { label=""; peripheries=0; margin=0; '
         '{ rank=same; "switch@start"; "start"; "budget@start"; } }'
     )
     # and: an invisible chain fixes the order; a copy without beside stays out
     assert '    "switch@start" -> "start" -> "budget@start" [style=invis];' in dot
     assert '    "switch@finish" -> "finish" [style=invis];' in dot
-    assert "owner@start" not in _line_with(dot, 'subgraph "cluster_beside_0"')
+    assert "owner@start" not in _line_with(dot, 'subgraph "cluster_beside_1"')
 
 
 def test_beside_without_a_side_balances_copies_starting_left(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    # given: three copies at start with no side, in arc order switch, budget, owner
+    # given: three copies at start with no side. Structural order is
+    # budget, owner, switch, so budget is the nearest left copy.
     decorations = (
         "decorate (switch) beside\ndecorate (budget) beside\ndecorate (owner) beside\n"
     )
     # when: rendered
     dot = _beside_dot(decorations, tmp_path=tmp_path, capsys=capsys)
-    # then: switch goes left, budget right, owner left again and farther out
+    # then: budget is nearest on the left, owner is on the right, and
+    # switch is farther out on the left
     assert (
-        '    "owner@start" -> "switch@start" -> "start" -> "budget@start" '
+        '    "switch@start" -> "budget@start" -> "start" -> "owner@start" '
         "[style=invis];"
     ) in dot
 

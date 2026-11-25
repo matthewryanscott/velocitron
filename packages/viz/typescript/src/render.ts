@@ -143,33 +143,151 @@ export function netRenderModel(net: Net, options: NetRenderOptions = {}): Render
   };
 }
 
+type FlowKey = readonly ["place" | "transition", string];
+
+/** Distance from the initial marking. Same rule as Python `_flow_ranks` (ADR 0067). */
+function flowRanks(net: Net): Map<string, number> {
+  const places = net.places.map((place) => place.name);
+  const transitions = net.transitions.map((transition) => transition.name);
+  const placeSet = new Set(places);
+  const transitionSet = new Set(transitions);
+  const placeOut = new Map<string, Set<string>>(places.map((name) => [name, new Set()]));
+  const transitionOut = new Map<string, Set<string>>(transitions.map((name) => [name, new Set()]));
+  const placeIn = new Map<string, number>(places.map((name) => [name, 0]));
+  const transitionIn = new Map<string, number>(transitions.map((name) => [name, 0]));
+  for (const arc of net.arcs) {
+    if (isConsume(arc) && placeSet.has(arc.from.place) && transitionSet.has(arc.to.transition)) {
+      placeOut.get(arc.from.place)!.add(arc.to.transition);
+      transitionIn.set(arc.to.transition, (transitionIn.get(arc.to.transition) ?? 0) + 1);
+    } else if (isProduce(arc) && transitionSet.has(arc.from.transition) && placeSet.has(arc.to.place)) {
+      transitionOut.get(arc.from.transition)!.add(arc.to.place);
+      placeIn.set(arc.to.place, (placeIn.get(arc.to.place) ?? 0) + 1);
+    }
+  }
+  const ranks = new Map<string, number>();
+  const queue: FlowKey[] = [];
+  const keyOf = (kind: FlowKey[0], name: string): string => `${kind}\0${name}`;
+  const seed = (kind: FlowKey[0], name: string, rank: number): void => {
+    const key = keyOf(kind, name);
+    if (ranks.has(key)) return;
+    ranks.set(key, rank);
+    queue.push([kind, name]);
+  };
+  const expand = (): void => {
+    while (queue.length > 0) {
+      const [kind, name] = queue.shift()!;
+      const rank = ranks.get(keyOf(kind, name))!;
+      const nextKind: FlowKey[0] = kind === "place" ? "transition" : "place";
+      const nexts = [...(kind === "place" ? placeOut.get(name)! : transitionOut.get(name)!)].sort();
+      for (const next of nexts) {
+        const key = keyOf(nextKind, next);
+        if (!ranks.has(key)) {
+          ranks.set(key, rank + 1);
+          queue.push([nextKind, next]);
+        }
+      }
+    }
+  };
+  const marked = new Set<string>();
+  for (const [name, tokens] of Object.entries(net.initialMarking ?? {})) {
+    if (tokens.length > 0 && placeSet.has(name)) marked.add(name);
+  }
+  const sources = places.filter((name) => placeIn.get(name) === 0);
+  for (const name of [...new Set([...marked, ...sources])].sort()) seed("place", name, 0);
+  for (const name of transitions.filter((name) => transitionIn.get(name) === 0).sort()) {
+    seed("transition", name, 0);
+  }
+  expand();
+  while (true) {
+    const missing: FlowKey[] = [
+      ...places.filter((name) => !ranks.has(keyOf("place", name))).map((name) => ["place", name] as const),
+      ...transitions
+        .filter((name) => !ranks.has(keyOf("transition", name)))
+        .map((name) => ["transition", name] as const),
+    ];
+    if (missing.length === 0) return ranks;
+    missing.sort((left, right) => (left[1] < right[1] ? -1 : left[1] > right[1] ? 1 : left[0] < right[0] ? -1 : 1));
+    const [kind, name] = missing[0]!;
+    const base = ranks.size === 0 ? 0 : Math.max(...ranks.values()) + 1;
+    seed(kind, name, base);
+    expand();
+  }
+}
+
+function nodeOrder(kind: FlowKey[0], name: string, ranks: ReadonlyMap<string, number>): readonly [number, string] {
+  return [ranks.get(`${kind}\0${name}`) ?? 1_000_000_000, name];
+}
+
+function compareOrder(left: readonly (string | number | boolean)[], right: readonly (string | number | boolean)[]): number {
+  const count = Math.min(left.length, right.length);
+  for (let index = 0; index < count; index += 1) {
+    if (left[index]! < right[index]!) return -1;
+    if (left[index]! > right[index]!) return 1;
+  }
+  return left.length - right.length;
+}
+
+function decorationOrderKey(decoration: Decoration): readonly (string | boolean)[] {
+  return [
+    decoration.faded === true,
+    decoration.failure === true,
+    decoration.highlight === true,
+    decoration.highlightLabel ?? "",
+    decoration.note ?? "",
+    decoration.summary ?? "",
+  ];
+}
+
+function arcOrderKey(arc: Arc, ranks: ReadonlyMap<string, number>, decoration: Decoration): readonly (string | number | boolean)[] {
+  const endpoint = (kind: FlowKey[0], name: string): readonly [number, string] => nodeOrder(kind, name, ranks);
+  if (isConsume(arc)) {
+    const [sourceRank, sourceName] = endpoint("place", arc.from.place);
+    const [targetRank, targetName] = endpoint("transition", arc.to.transition);
+    return [
+      sourceRank, sourceName, targetRank, targetName,
+      "consume", arc.consume.mode, arc.consume.type, arc.consume.weight,
+      arc.consume.predicate?.cel ?? "", arc.consume.predicate?.handler ?? "",
+      arc.consume.correlate?.cel ?? "", "", "",
+      arc.description ?? "",
+      ...decorationOrderKey(decoration),
+    ];
+  }
+  const [sourceRank, sourceName] = endpoint("transition", arc.from.transition);
+  const [targetRank, targetName] = endpoint("place", arc.to.place);
+  const data = arc.produce.data === undefined ? "" : pythonJson(arc.produce.data);
+  return [
+    sourceRank, sourceName, targetRank, targetName,
+    "produce", "produce", arc.produce.type, 0,
+    "", "", "", data, arc.produce.cel ?? "",
+    arc.description ?? "",
+    ...decorationOrderKey(decoration),
+  ];
+}
+
 export function siblingGroups(net: Net, fusion: ReadonlySet<string>): string[][] {
+  const ranks = flowRanks(net);
   const inputs = new Map<string, Set<string>>();
-  const firstArcs: Array<readonly [string, string]> = [];
   for (const arc of net.arcs) {
     if (!isConsume(arc) || fusion.has(arc.from.place)) continue;
     const transition = arc.to.transition;
     const place = arc.from.place;
-    let places = inputs.get(transition);
-    if (places === undefined) {
-      places = new Set();
-      inputs.set(transition, places);
-    }
-    if (!places.has(place)) {
-      places.add(place);
-      firstArcs.push([place, transition]);
-    }
-  }
-  const groups = new Map<string, string[]>();
-  for (const [place, transition] of firstArcs) {
     const places = inputs.get(transition);
-    if (places?.size === 1 && places.has(place)) {
-      const group = groups.get(place);
-      if (group === undefined) groups.set(place, [transition]);
-      else group.push(transition);
-    }
+    if (places === undefined) inputs.set(transition, new Set([place]));
+    else places.add(place);
   }
-  return [...groups.values()].filter((group) => group.length > 1);
+  const groups: Array<readonly [string, string[]]> = [];
+  for (const [transition, places] of inputs) {
+    if (places.size !== 1) continue;
+    const place = [...places][0]!;
+    const found = groups.find((group) => group[0] === place);
+    if (found === undefined) groups.push([place, [transition]]);
+    else found[1].push(transition);
+  }
+  for (const [, names] of groups) {
+    names.sort((left, right) => compareOrder([...nodeOrder("transition", left, ranks)], [...nodeOrder("transition", right, ranks)]));
+  }
+  groups.sort((left, right) => compareOrder([...nodeOrder("place", left[0], ranks)], [...nodeOrder("place", right[0], ranks)]));
+  return groups.filter((group) => group[1].length > 1).map((group) => group[1]);
 }
 
 export function fusionLayout(
@@ -177,7 +295,8 @@ export function fusionLayout(
   fusion: ReadonlySet<string>,
   decorations: Decorations = EMPTY_DECORATIONS,
 ): FusionLayout {
-  const instances = fusionInstances(net, fusion);
+  const ranks = flowRanks(net);
+  const instances = fusionInstances(net, fusion, ranks);
   const besideOf = (place: string): Decoration | undefined => {
     const decoration = decorations.nodes[`place:${place}`];
     return decoration?.beside === true ? decoration : undefined;
@@ -195,8 +314,10 @@ export function fusionLayout(
   const segments: string[][] = [];
   for (const group of siblingGroups(net, fusion)) {
     const linked = Array.from({length: Math.max(group.length - 1, 0)}, () => false);
-    const places = group.flatMap((transition) => besidePlaces.get(transition) ?? []);
-    for (const place of unique(places)) {
+    const places = unique(group.flatMap((transition) => besidePlaces.get(transition) ?? [])).sort((left, right) =>
+      compareOrder([...nodeOrder("place", left, ranks)], [...nodeOrder("place", right, ranks)]),
+    );
+    for (const place of places) {
       const decoration = besideOf(place);
       if (decoration === undefined || decoration.besideSide != null) continue;
       let start = 0;
@@ -264,6 +385,9 @@ export function fusionLayout(
     }
     return order;
   };
+  for (const places of besidePlaces.values()) {
+    places.sort((left, right) => compareOrder([...nodeOrder("place", left, ranks)], [...nodeOrder("place", right, ranks)]));
+  }
   const rows: string[][] = [];
   const seenRows = new Set<string>();
   for (const transition of besidePlaces.keys()) {
@@ -273,6 +397,12 @@ export function fusionLayout(
     seenRows.add(key);
     rows.push(row(segment === undefined ? [transition] : segments[segment]!));
   }
+  const transitionNames = new Set(net.transitions.map((transition) => transition.name));
+  rows.sort((left, right) => {
+    const leftName = left.find((node) => transitionNames.has(node)) ?? "";
+    const rightName = right.find((node) => transitionNames.has(node)) ?? "";
+    return compareOrder([...nodeOrder("transition", leftName, ranks)], [...nodeOrder("transition", rightName, ranks)]);
+  });
   const copies = new Map<string, string>();
   for (const [place, transition] of instances) {
     copies.set(
@@ -357,8 +487,9 @@ class RenderIndex {
     else found.push(this.offset + position);
   }
 
-  recordArc(position: number): void {
-    this.arcLines.push(this.offset + position);
+  recordArc(index: number, position: number): void {
+    // Declaration index, not emission order: a view routes net.arcs[index].
+    this.arcLines[index] = this.offset + position;
   }
 
   recordBeside(position: number): void {
@@ -390,7 +521,11 @@ function netBody(
   const tokensOf = (place: Place): readonly Token[] => selected?.[place.name] ?? [];
   const nodeDecoration = (key: string): Decoration => args.decorations.nodes[key] ?? NO_DECORATION;
   const lines: string[] = [];
-  for (const place of net.places) {
+  const ranks = flowRanks(net);
+  const placesInOrder = [...net.places].sort((left, right) =>
+    compareOrder([...nodeOrder("place", left.name, ranks)], [...nodeOrder("place", right.name, ranks)]),
+  );
+  for (const place of placesInOrder) {
     if (fusion.has(place.name)) continue;
     args.recorder?.recordNode(`place:${place.name}`, lines.length);
     const attrs = placeAttrs(place, tokensOf(place), {
@@ -401,7 +536,10 @@ function netBody(
     lines.push(`${indent}${quote(`${prefix}${place.name}`)} [${attrs}];`);
   }
   lines.push("");
-  for (const transition of net.transitions) {
+  const transitionsInOrder = [...net.transitions].sort((left, right) =>
+    compareOrder([...nodeOrder("transition", left.name, ranks)], [...nodeOrder("transition", right.name, ranks)]),
+  );
+  for (const transition of transitionsInOrder) {
     args.recorder?.recordNode(`transition:${transition.name}`, lines.length);
     const attrs = transitionAttrs(transition, args.style, nodeDecoration(`transition:${transition.name}`));
     lines.push(`${indent}${quote(`${prefix}${transition.name}`)} [${attrs}];`);
@@ -412,7 +550,15 @@ function netBody(
     const places = new Map(net.places.map((place) => [place.name, place]));
     const transitions = new Map(net.transitions.map((transition) => [transition.name, transition]));
     const drawn = new Set<string>();
-    for (const [key, copy] of layout.copies) {
+    const copies = [...layout.copies].sort((left, right) => {
+      const [leftPlace, leftTransition] = left[0].split("\0");
+      const [rightPlace, rightTransition] = right[0].split("\0");
+      return compareOrder(
+        [...nodeOrder("place", leftPlace!, ranks), ...nodeOrder("transition", leftTransition!, ranks)],
+        [...nodeOrder("place", rightPlace!, ranks), ...nodeOrder("transition", rightTransition!, ranks)],
+      );
+    });
+    for (const [key, copy] of copies) {
       if (drawn.has(copy)) continue;
       drawn.add(copy);
       const [placeName, transitionName] = key.split("\0");
@@ -434,12 +580,19 @@ function netBody(
   for (const row of layout.rows) {
     for (const node of row) if (!transitionNames.has(node)) besideCopies.add(node);
   }
-  net.arcs.forEach((arc, index) => {
+  const arcOrder = net.arcs.map((arc, index) => index).sort((left, right) =>
+    compareOrder(
+      [...arcOrderKey(net.arcs[left]!, ranks, args.decorations.arcs[left] ?? NO_DECORATION)],
+      [...arcOrderKey(net.arcs[right]!, ranks, args.decorations.arcs[right] ?? NO_DECORATION)],
+    ),
+  );
+  for (const index of arcOrder) {
+    const arc = net.arcs[index]!;
     lines.push(
       arcEdge(arc, indent, prefix, args.style, layout.copies, besideCopies, args.decorations.arcs[index] ?? NO_DECORATION),
     );
-    args.recorder?.recordArc(lines.length - 1);
-  });
+    args.recorder?.recordArc(index, lines.length - 1);
+  }
   for (const statement of besideStatements(layout, indent, prefix)) {
     args.recorder?.recordBeside(lines.length);
     lines.push(statement);
@@ -700,7 +853,11 @@ function besideStatements(layout: FusionLayout, indent: string, prefix: string):
   return statements;
 }
 
-function fusionInstances(net: Net, fusion: ReadonlySet<string>): Array<readonly [string, string]> {
+function fusionInstances(
+  net: Net,
+  fusion: ReadonlySet<string>,
+  ranks: ReadonlyMap<string, number>,
+): Array<readonly [string, string]> {
   const pairs: Array<readonly [string, string]> = [];
   const seen = new Set<string>();
   for (const arc of net.arcs) {
@@ -713,6 +870,12 @@ function fusionInstances(net: Net, fusion: ReadonlySet<string>): Array<readonly 
     seen.add(pairKey(pair[0], pair[1]));
     pairs.push(pair);
   }
+  pairs.sort((left, right) =>
+    compareOrder(
+      [...nodeOrder("place", left[0], ranks), ...nodeOrder("transition", left[1], ranks)],
+      [...nodeOrder("place", right[0], ranks), ...nodeOrder("transition", right[1], ranks)],
+    ),
+  );
   return pairs;
 }
 

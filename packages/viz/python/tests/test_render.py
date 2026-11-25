@@ -222,14 +222,74 @@ def test_neighbor_siblings_share_one_fusion_copy() -> None:
     three = fusion_layout(trio, {"switch"}, decorations)
     groups = sibling_groups(trio, {"switch"})
     # then: two neighbors share the copy between them, and a run of three
-    # pairs from the left
-    assert groups == [("hold", "skip", "send")]
+    # pairs from the left of the structural order (rank, then name)
+    assert groups == [("hold", "send", "skip")]
     assert dict(paired.copies) == {
         ("switch", "hold"): "switch@hold+skip",
         ("switch", "skip"): "switch@hold+skip",
     }
     assert paired.rows == (("hold", "switch@hold+skip", "skip"),)
-    assert three.rows == (("hold", "switch@hold+skip", "skip", "send", "switch@send"),)
+    assert three.rows == (("hold", "switch@hold+send", "send", "skip", "switch@skip"),)
+
+
+def test_reordering_declarations_does_not_change_the_drawing() -> None:
+    # given: a net, the same net with every declaration reversed, and a choice
+    # whose arcs are reversed
+    net = _feature_net()
+    reversed_net = Net(
+        name=net.name,
+        places=list(reversed(net.places)),
+        transitions=list(reversed(net.transitions)),
+        arcs=list(reversed(net.arcs)),
+        initial_marking=net.initial_marking,
+        description=net.description,
+        annotations=net.annotations,
+    )
+    switch = Place("switch", ["job"], annotations={"fusion": True})
+    read = _read_switch
+    forward = _choice(
+        [read("hold"), read("skip"), read("send")],
+        [switch],
+        ["hold", "skip", "send"],
+    )
+    backward = Net(
+        name=forward.name,
+        places=list(reversed(forward.places)),
+        transitions=list(reversed(forward.transitions)),
+        arcs=list(reversed(forward.arcs)),
+    )
+    decorations = Decorations(nodes={"place:switch": Decoration(beside=True)})
+    # when: each pair is drawn
+    drawn = net_to_dot(net)
+    drawn_reversed = net_to_dot(reversed_net)
+    choice = net_to_dot(forward, decorations=decorations)
+    choice_reversed = net_to_dot(backward, decorations=decorations)
+    # then: the bytes match, and the initially marked place is not waiting
+    # on where it was declared
+    assert drawn == drawn_reversed
+    assert choice == choice_reversed
+    assert sibling_groups(forward, {"switch"}) == sibling_groups(backward, {"switch"})
+    place_names = [
+        line.split('"')[1]
+        for line in drawn.splitlines()
+        if line.startswith('    "')
+        and "->" not in line
+        and line.rstrip().endswith("];")
+    ]
+    assert place_names.index("buffer") < place_names.index("in_port")
+    assert place_names.index("buffer") < place_names.index("out_port")
+    # and: a view still finds each arc by its declaration index
+    model = net_render_model(reversed_net)
+    text = model.dot.splitlines()
+    for index, arc in enumerate(reversed_net.arcs):
+        endpoints = [
+            arc.from_place,
+            arc.to_place,
+            arc.from_transition,
+            arc.to_transition,
+        ]
+        line = text[model.arc_lines[index]]
+        assert all(name is None or f'"{name}"' in line for name in endpoints)
 
 
 def test_a_view_pins_positions_without_parsing_dot_text() -> None:
