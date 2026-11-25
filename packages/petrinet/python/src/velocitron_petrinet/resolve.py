@@ -175,10 +175,16 @@ def _rendered_position_target(kind: str, name: str, copy_transition: str) -> str
     return f"[{name}]"
 
 
+def _endpoint(value: object) -> Mapping[str, Any] | None:
+    if not isinstance(value, Mapping):
+        return None
+    return cast(Mapping[str, Any], value)
+
+
 def _arc_place_transition(arc: Mapping[str, Any]) -> tuple[str, str] | None:
     """The ``(place, transition)`` pair an arc joins, in either direction."""
-    source, destination = arc.get("from"), arc.get("to")
-    if not isinstance(source, Mapping) or not isinstance(destination, Mapping):
+    source, destination = _endpoint(arc.get("from")), _endpoint(arc.get("to"))
+    if source is None or destination is None:
         return None
     if "place" in source and "transition" in destination:
         place, transition = source["place"], destination["transition"]
@@ -203,8 +209,8 @@ def _sibling_groups(
     inputs: dict[str, set[str]] = {}
     first_arcs: list[tuple[str, str]] = []
     for arc in arcs:
-        source, destination = arc.get("from"), arc.get("to")
-        if not isinstance(source, Mapping) or not isinstance(destination, Mapping):
+        source, destination = _endpoint(arc.get("from")), _endpoint(arc.get("to"))
+        if source is None or destination is None:
             continue
         place, transition = source.get("place"), destination.get("transition")
         if (
