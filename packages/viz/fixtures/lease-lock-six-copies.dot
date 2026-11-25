@@ -1,0 +1,53 @@
+digraph net {
+    rankdir=TB;
+    label=<<b>lease_lock</b>>; labelloc=t;
+    node [fontname="Helvetica"];
+    edge [fontname="Helvetica", fontsize=10];
+    layout=neato;
+    inputscale=72;
+    overlap=scale;
+    splines=ortho;
+
+    "ready_a" [shape=ellipse, label=<<b>ready_a</b><br/><font point-size="9" color="#666666">&#10216;job&#10217;</font>>, pos="-220,840!"];
+    "held_a" [shape=ellipse, label=<<b>held_a</b><br/><font point-size="9" color="#666666">&#10216;job&#10217;</font>>, pos="0,280!"];
+    "done_a" [shape=ellipse, label=<<b>done_a</b><br/><font point-size="9" color="#666666">&#10216;job&#10217;</font>>, pos="0,-280!"];
+    "ready_b" [shape=ellipse, label=<<b>ready_b</b><br/><font point-size="9" color="#666666">&#10216;job&#10217;</font>>, pos="640,840!"];
+    "held_b" [shape=ellipse, label=<<b>held_b</b><br/><font point-size="9" color="#666666">&#10216;job&#10217;</font>>, pos="640,280!"];
+    "done_b" [shape=ellipse, label=<<b>done_b</b><br/><font point-size="9" color="#666666">&#10216;job&#10217;</font>>, pos="640,-280!"];
+    "ready_c" [shape=ellipse, label=<<b>ready_c</b><br/><font point-size="9" color="#666666">&#10216;job&#10217;</font>>, pos="1280,840!"];
+    "held_c" [shape=ellipse, label=<<b>held_c</b><br/><font point-size="9" color="#666666">&#10216;job&#10217;</font>>, pos="1280,280!"];
+    "done_c" [shape=ellipse, label=<<b>done_c</b><br/><font point-size="9" color="#666666">&#10216;job&#10217;</font>>, pos="1280,-280!"];
+
+    "acquire_a" [shape=box, style=filled, fillcolor=lightyellow, label=<<b>acquire_a</b>>, pos="0,560!"];
+    "release_a" [shape=box, style=filled, fillcolor=lightyellow, label=<<b>release_a</b>>, pos="0,0!"];
+    "acquire_b" [shape=box, style=filled, fillcolor=lightyellow, label=<<b>acquire_b</b>>, pos="640,560!"];
+    "release_b" [shape=box, style=filled, fillcolor=lightyellow, label=<<b>release_b</b>>, pos="640,0!"];
+    "acquire_c" [shape=box, style=filled, fillcolor=lightyellow, label=<<b>acquire_c</b>>, pos="1280,560!"];
+    "release_c" [shape=box, style=filled, fillcolor=lightyellow, label=<<b>release_c</b>>, pos="1280,0!"];
+
+    "lock@acquire_a" [shape=ellipse, label=<<b>lock</b><br/><font point-size="9" color="#666666">&#10216;permit&#10217;</font>>, class="fusion", style=dashed, color="gray40", fontcolor="gray30", pos="-220,560!"];
+    "lock@release_a" [shape=ellipse, label=<<b>lock</b><br/><font point-size="9" color="#666666">&#10216;permit&#10217;</font>>, class="fusion", style=dashed, color="gray40", fontcolor="gray30", pos="-220,0!"];
+    "lock@acquire_b" [shape=ellipse, label=<<b>lock</b><br/><font point-size="9" color="#666666">&#10216;permit&#10217;</font>>, class="fusion", style=dashed, color="gray40", fontcolor="gray30", pos="420,560!"];
+    "lock@release_b" [shape=ellipse, label=<<b>lock</b><br/><font point-size="9" color="#666666">&#10216;permit&#10217;</font>>, class="fusion", style=dashed, color="gray40", fontcolor="gray30", pos="420,0!"];
+    "lock@acquire_c" [shape=ellipse, label=<<b>lock</b><br/><font point-size="9" color="#666666">&#10216;permit&#10217;</font>>, class="fusion", style=dashed, color="gray40", fontcolor="gray30", pos="1060,560!"];
+    "lock@release_c" [shape=ellipse, label=<<b>lock</b><br/><font point-size="9" color="#666666">&#10216;permit&#10217;</font>>, class="fusion", style=dashed, color="gray40", fontcolor="gray30", pos="1060,0!"];
+
+    "ready_a" -> "acquire_a" [label=<<font point-size="10">job</font>>];
+    "lock@acquire_a" -> "acquire_a" [label=<<font point-size="10">permit</font>>, constraint=false];
+    "acquire_a" -> "held_a" [label=<<font point-size="10">job</font>>];
+    "held_a" -> "release_a" [label=<<font point-size="10">job</font>>];
+    "release_a" -> "done_a" [label=<<font point-size="10">job</font>>];
+    "release_a" -> "lock@release_a" [label=<<font point-size="10">permit</font>>, constraint=false];
+    "ready_b" -> "acquire_b" [label=<<font point-size="10">job</font>>];
+    "lock@acquire_b" -> "acquire_b" [label=<<font point-size="10">permit</font>>, constraint=false];
+    "acquire_b" -> "held_b" [label=<<font point-size="10">job</font>>];
+    "held_b" -> "release_b" [label=<<font point-size="10">job</font>>];
+    "release_b" -> "done_b" [label=<<font point-size="10">job</font>>];
+    "release_b" -> "lock@release_b" [label=<<font point-size="10">permit</font>>, constraint=false];
+    "ready_c" -> "acquire_c" [label=<<font point-size="10">job</font>>];
+    "lock@acquire_c" -> "acquire_c" [label=<<font point-size="10">permit</font>>, constraint=false];
+    "acquire_c" -> "held_c" [label=<<font point-size="10">job</font>>];
+    "held_c" -> "release_c" [label=<<font point-size="10">job</font>>];
+    "release_c" -> "done_c" [label=<<font point-size="10">job</font>>];
+    "release_c" -> "lock@release_c" [label=<<font point-size="10">permit</font>>, constraint=false];
+}
