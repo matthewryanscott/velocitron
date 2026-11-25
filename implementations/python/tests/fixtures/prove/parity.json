@@ -225,6 +225,19 @@
     "report": "577549b414ccb13ce875a6ddd57b8a1cb9c0b8b3ae46034841bc84c99781e576",
     "states": 302
   },
+  "examples/contrived/beside-pinned.petrinet": {
+    "edges": 8,
+    "facts": {
+      "invariant: place invariant 1": "proved",
+      "invariant: place invariant 2": "proved",
+      "invariant: place invariant 3": "proved",
+      "soundness: no dead transitions": "proved",
+      "soundness: option to complete": "proved",
+      "soundness: proper completion": "proved"
+    },
+    "report": "7346634a6007c0894035895cd645ea2d8a183fdd7ca2e28a075b743d60a2e95d",
+    "states": 9
+  },
   "implementations/python/tests/fixtures/codegen/library_holds/branch-policy-as-is.petrinet": {
     "edges": 1315,
     "facts": {
