@@ -1,6 +1,6 @@
 # `beside` keeps fusion copies next to their transitions
 
-**Status:** Accepted.
+**Status:** Accepted. Amended 2026-11-25 (Decision 4, by ADR 0067).
 
 A fusion place renders as one local copy per transition that uses it
 (CONTEXT.md "Fusion place"). With the default `dot` layout, crossing
@@ -83,6 +83,9 @@ invisible ordering edges would stay, as extra springs. The render model
 records the beside statements, and applying such a view removes them. Views
 with style facts only stay on `dot` and keep `beside`. The author of a
 positioned view sets the geometry by hand.
+
+*Amended by ADR 0067. A view that positions nodes places each unpositioned
+`beside` copy relative to its transition.*
 
 ## Consequences
 

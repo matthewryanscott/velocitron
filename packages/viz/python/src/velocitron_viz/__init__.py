@@ -17,6 +17,7 @@ from __future__ import annotations
 from .canonical import render_canonical_json
 from .render import (
     DETAIL_LEVELS,
+    BesidePlacement,
     Detail,
     FusionLayout,
     MarkingRow,
@@ -57,21 +58,33 @@ from .schema import (
     Wire,
 )
 from .view import (
+    BESIDE_MARGIN,
     DEFAULT_VIEW,
+    NAME_POINT,
+    NODE_PAD,
+    SMALL_POINT,
     Decoration,
     Decorations,
     ViewApplicationError,
     apply_view,
+    beside_gap,
     has_view,
+    node_width,
+    text_width,
     read_decorations,
     resolve_positions,
     view_setting,
 )
 
 __all__ = [
+    "BESIDE_MARGIN",
     "DEFAULT_VIEW",
     "DETAIL_LEVELS",
+    "NAME_POINT",
+    "NODE_PAD",
+    "SMALL_POINT",
     "Arc",
+    "BesidePlacement",
     "Composition",
     "ConsumePattern",
     "Decoration",
@@ -100,6 +113,7 @@ __all__ = [
     "ViewApplicationError",
     "Wire",
     "apply_view",
+    "beside_gap",
     "composition_overview_dot",
     "composition_ports_dot",
     "composition_to_dot",
@@ -111,9 +125,11 @@ __all__ = [
     "net_render_model",
     "net_to_dot",
     "net_twin_dots",
+    "node_width",
     "read_decorations",
     "render_canonical_json",
     "resolve_positions",
     "sibling_groups",
+    "text_width",
     "view_setting",
 ]

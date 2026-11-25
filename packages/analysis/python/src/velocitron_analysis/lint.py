@@ -29,6 +29,7 @@ from typing import Any, Literal, cast
 
 from velocitron_cel import load_celpy
 from velocitron_engine import Net, Transition
+from velocitron_viz import ViewApplicationError, fusion_layout, read_decorations
 
 # Stable rule id: a transition with >=1 consume-mode arc and zero produce
 # arcs. Read- and inhibit-mode arcs are not outputs and do not exempt a
@@ -58,6 +59,17 @@ RULE_CORRELATE_FREE_NAME = "correlate-free-name"
 # declared idiom, out of this rule's scope.
 RULE_READ_ONLY_PRODUCER = "read-only-producer"
 
+# Stable rule id: a whole-place ``position`` on a fusion place that the
+# renderer draws as more than one copy. Every copy is pinned to that one
+# point, so ``overlap=scale`` collapses the drawing and Graphviz can fail
+# (ADR 0067).
+RULE_FUSION_PLACE_POSITION = "fusion-place-position"
+
+# Stable rule id: a whole-place ``position`` on a fusion place that has
+# ``beside``. The copies are placed beside their transitions, so the
+# position does not land on them. It still anchors ``relative (P)``.
+RULE_BESIDE_POSITION_SHADOWED = "beside-position-shadowed"
+
 # CEL macros whose first argument binds a loop variable, not a free name.
 _BINDING_MACROS = frozenset({"all", "exists", "exists_one", "map", "filter"})
 
@@ -67,16 +79,23 @@ _CEL_TYPE_NAMES = frozenset(
     | {"string", "type", "uint"}
 )
 
+
 @dataclass(frozen=True)
 class LintFinding:
     """A single advisory lint finding: a stable rule id, the flagged
-    transition's name, and a human-readable message."""
+    transition's name, and a human-readable message.
+
+    A place rule leaves ``transition`` empty and sets ``place`` and
+    ``view`` instead.
+    """
 
     rule: str
     transition: str
     message: str
     arc: int | None = None  # index in net.arcs of the flagged arc, if any
     inscription: Literal["predicate", "correlate"] | None = None  # flagged CEL
+    place: str | None = None  # fusion place a view positions as one point
+    view: str | None = None  # the view that carries that position
 
 
 def suppressed_rules(annotations: Mapping[str, Any] | None) -> list[str]:
@@ -338,13 +357,104 @@ def _read_only_producer_finding(net: Net, transition: str) -> LintFinding | None
     )
 
 
+def _is_fusion_place(annotations: Mapping[str, Any] | None) -> bool:
+    return bool(annotations and annotations.get("fusion"))
+
+
+def _fusion_position_findings(net: Net) -> list[LintFinding]:
+    """Whole-place positions that pin every copy of a fusion place at once."""
+    annotations = net.annotations or {}
+    payload_raw = annotations.get("petrinet.dsl/v1")
+    if not isinstance(payload_raw, Mapping):
+        return []
+    payload = cast("Mapping[str, Any]", payload_raw)
+    views_raw = payload.get("views")
+    if not isinstance(views_raw, Mapping):
+        return []
+    views = cast("Mapping[str, Any]", views_raw)
+    fusion = {
+        place.name: place for place in net.places if _is_fusion_place(place.annotations)
+    }
+    if not fusion:
+        return []
+    candidates: list[tuple[str, str]] = []
+    for view_name, view_raw in views.items():
+        if not isinstance(view_raw, Mapping):
+            continue
+        view = cast("Mapping[str, Any]", view_raw)
+        positions_raw = view.get("positions")
+        if not isinstance(positions_raw, Mapping):
+            continue
+        positions = cast("Mapping[str, Any]", positions_raw)
+        for subject in positions:
+            if not subject.startswith("place:"):
+                continue
+            name = subject.removeprefix("place:")
+            if name in fusion:
+                candidates.append((view_name, name))
+    if not candidates:
+        return []
+    try:
+        decorations = read_decorations({"annotations": annotations})
+    except ViewApplicationError:
+        return []
+    layout = fusion_layout(net, set(fusion), decorations)
+    drawn: dict[str, set[str]] = {}
+    for (name, _transition), copy in layout.copies.items():
+        drawn.setdefault(name, set()).add(copy)
+    findings: list[LintFinding] = []
+    reported: set[tuple[str, str]] = set()
+    for view_name, name in candidates:
+        if (view_name, name) in reported:
+            continue
+        reported.add((view_name, name))
+        decoration = decorations.nodes.get(f"place:{name}")
+        has_beside = decoration is not None and decoration.beside
+        count = len(drawn.get(name, ()))
+        suppressed = suppressed_rules(fusion[name].annotations)
+        if has_beside and count >= 1:
+            if RULE_BESIDE_POSITION_SHADOWED in suppressed:
+                continue
+            noun = "copy" if count == 1 else "copies"
+            findings.append(
+                LintFinding(
+                    rule=RULE_BESIDE_POSITION_SHADOWED,
+                    transition="",
+                    place=name,
+                    view=view_name,
+                    message=(
+                        f"view {view_name!r} positions fusion place {name!r}; "
+                        f"beside shadows that position for the {count} drawn "
+                        f"{noun}, and the position still anchors relative ({name})"
+                    ),
+                )
+            )
+            continue
+        if count <= 1 or RULE_FUSION_PLACE_POSITION in suppressed:
+            continue
+        findings.append(
+            LintFinding(
+                rule=RULE_FUSION_PLACE_POSITION,
+                transition="",
+                place=name,
+                view=view_name,
+                message=(
+                    f"view {view_name!r} positions fusion place {name!r}, which "
+                    f"draws {count} copies; a whole-place position stacks every "
+                    "copy on one point"
+                ),
+            )
+        )
+    return findings
+
+
 def lint_net(net: Net) -> list[LintFinding]:
     """Run all lint rules over a parsed net; return advisory findings.
 
     Findings follow transition declaration order; within a transition the
     transition-level rules come first, then arc findings in arc declaration
-    order. An empty list means the net is clean under every (non-suppressed)
-    rule.
+    order. Place findings follow, in view order and then position order.
+    An empty list means the net is clean under every (non-suppressed) rule.
     """
     consuming_transitions: set[str] = set()
     producing_transitions: set[str] = set()
@@ -397,12 +507,15 @@ def lint_net(net: Net) -> list[LintFinding]:
                 findings.extend(
                     _correlate_findings(net, transition.name, arc_index, keys)
                 )
+    findings.extend(_fusion_position_findings(net))
     return findings
 
 
 __all__ = [
+    "RULE_BESIDE_POSITION_SHADOWED",
     "RULE_CONSUME_WITHOUT_PRODUCE",
     "RULE_CORRELATE_FREE_NAME",
+    "RULE_FUSION_PLACE_POSITION",
     "RULE_PREDICATE_NAMES_COLOR_OR_PLACE",
     "RULE_READ_ONLY_PRODUCER",
     "LintFinding",

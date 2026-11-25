@@ -1,0 +1,48 @@
+// Two workers share one lock. (lock) is a fusion place, so each transition
+// that uses it gets its own copy, and beside keeps each copy next to it.
+// lanes pins the two lanes and leaves (lock) to beside. lanes_lock also
+// positions (lock): that point anchors relative (lock), and beside still
+// places the copies.
+net beside_pinned "Two workers share one lock"
+
+(ready_a) -job-> [take_a]
+(lock) -permit-> [take_a]
+[take_a] -job-> (busy_a)
+(busy_a) -job-> [give_a]
+[give_a] -job-> (done_a)
+[give_a] -permit-> (lock)
+
+(ready_b) -job-> [take_b]
+(lock) -permit-> [take_b]
+[take_b] -job-> (busy_b)
+(busy_b) -job-> [give_b]
+[give_b] -job-> (done_b)
+[give_b] -permit-> (lock)
+
+(lock) annotation fusion true
+decorate (lock) beside left
+
+view lanes position (ready_a) at {"x": 0, "y": 400}
+view lanes position [take_a] at {"x": 0, "y": 300}
+view lanes position (busy_a) at {"x": 0, "y": 200}
+view lanes position [give_a] at {"x": 0, "y": 100}
+view lanes position (done_a) at {"x": 0, "y": 0}
+view lanes position (ready_b) relative (ready_a) + {"x": 300, "y": 0}
+view lanes position [take_b] relative [take_a] + {"x": 300, "y": 0}
+view lanes position (busy_b) relative (busy_a) + {"x": 300, "y": 0}
+view lanes position [give_b] relative [give_a] + {"x": 300, "y": 0}
+view lanes position (done_b) relative (done_a) + {"x": 300, "y": 0}
+
+view lanes_lock position (ready_a) at {"x": 0, "y": 400}
+view lanes_lock position [take_a] at {"x": 0, "y": 300}
+view lanes_lock position (busy_a) at {"x": 0, "y": 200}
+view lanes_lock position [give_a] at {"x": 0, "y": 100}
+view lanes_lock position (done_a) at {"x": 0, "y": 0}
+view lanes_lock position (ready_b) relative (ready_a) + {"x": 300, "y": 0}
+view lanes_lock position [take_b] relative [take_a] + {"x": 300, "y": 0}
+view lanes_lock position (busy_b) relative (busy_a) + {"x": 300, "y": 0}
+view lanes_lock position [give_b] relative [give_a] + {"x": 300, "y": 0}
+view lanes_lock position (done_b) relative (done_a) + {"x": 300, "y": 0}
+view lanes_lock position (lock) at {"x": 150, "y": 200}
+view lanes_lock position (marker) relative (lock) + {"x": 0, "y": -40}
+(marker)

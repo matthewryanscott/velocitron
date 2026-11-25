@@ -584,7 +584,12 @@ while lowering. `beside` applies to a fusion place, one annotated
 `fusion true`, which a renderer draws as one local copy per transition that
 uses it: it asks the renderer to draw each copy on the same rank as its
 transition, next to it. `left` and `right` pick the side; without a side the
-renderer picks one. A transition or a handle has no copies, so `beside` on
+renderer picks one. When a view positions nodes, each copy is placed beside
+its transition, at a horizontal offset on the side `beside` chooses, when
+that transition is positioned (ADR 0067). The offset is computed from the
+label widths. A whole-place position does not move those copies; it still
+anchors a relative position. A transition or a
+handle has no copies, so `beside` on
 one is rejected while lowering, and `beside` on a place that is not annotated
 `fusion true` is rejected. `decorate color Color quiet` asks a renderer to hide the type
 label on consume and produce arcs of that color, as it always does for the

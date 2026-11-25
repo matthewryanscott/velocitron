@@ -44,10 +44,11 @@ depends on imports `journal`. `runtime` may import `cel`, `engine`, and
 through the engine. A journal is injected. Record shapes live on the
 engine, so the package does not import `journal` today. Nothing `runtime`
 depends on imports `runtime`. `analysis` may import `cel`, `engine`,
-`kernel`, `petrinet`, `merge`, and `runtime`: prove explores through the
+`kernel`, `petrinet`, `merge`, `runtime`, and `viz`: prove explores through the
 engine, compiles CEL, loads a `.petrinet` document, merges a composition,
 reads intended waits, and on the fast path hands the tables it fills to the
-kernel. Nothing `analysis` depends on imports `analysis`. The TypeScript package reads a proof
+kernel. The fusion-place position lint asks `viz` how many copies a place
+draws. Nothing `analysis` depends on imports `analysis`. The TypeScript package reads a proof
 report and does not explore a net. `kernel` imports no other Velocitron
 layer: it is a compiled module that explores a net from the tables
 `analysis` passes it, and knows nothing of nets, CEL or handlers. There is

@@ -769,6 +769,7 @@ dependencies = [
     { name = "velocitron-merge" },
     { name = "velocitron-petrinet" },
     { name = "velocitron-runtime" },
+    { name = "velocitron-viz" },
 ]
 
 [package.metadata]
@@ -780,6 +781,7 @@ requires-dist = [
     { name = "velocitron-merge", directory = "../../packages/merge/python" },
     { name = "velocitron-petrinet", directory = "../../packages/petrinet/python" },
     { name = "velocitron-runtime", directory = "../../packages/runtime/python" },
+    { name = "velocitron-viz", directory = "../../packages/viz/python" },
 ]
 provides-extras = ["fast"]
 
