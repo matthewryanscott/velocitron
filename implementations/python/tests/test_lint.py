@@ -20,6 +20,7 @@ from velocitron_analysis import (
     RULE_CONSUME_WITHOUT_PRODUCE,
     RULE_CORRELATE_FREE_NAME,
     RULE_BESIDE_POSITION_SHADOWED,
+    RULE_BESIDE_UNSHARED_REDUNDANT,
     RULE_FUSION_PLACE_POSITION,
     RULE_PREDICATE_NAMES_COLOR_OR_PLACE,
     RULE_READ_ONLY_PRODUCER,
@@ -869,3 +870,34 @@ def test_validate_warns_when_beside_shadows_a_place_position(
     assert f"warning[{RULE_BESIDE_POSITION_SHADOWED}]:" in captured.err
     assert "shadows" in captured.err
     assert f"warning[{RULE_FUSION_PLACE_POSITION}]" not in captured.err
+
+
+def test_validate_warns_when_beside_unshared_names_a_side(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    # given: a fixed side, which already never shares, plus unshared
+    source = tmp_path / "clock.petrinet"
+    source.write_text(
+        "net clock\n"
+        "\n"
+        "(idle) -job-> [commit] -job-> (done)\n"
+        "(idle) -job-> [expire] -job-> (done)\n"
+        "(clock) -now->? [commit]\n"
+        "(clock) -now->? [expire]\n"
+        "(clock) annotation fusion true\n"
+        "decorate (clock) beside left unshared\n",
+        encoding="utf-8",
+    )
+
+    # when: validating
+    result = main(["validate", str(source)])
+    captured = capsys.readouterr()
+
+    # then: the net is valid, and the warning points at the decorate fact
+    assert result == 0
+    assert captured.out == "net\n"
+    assert captured.err == (
+        f"{source}:8:1: warning[{RULE_BESIDE_UNSHARED_REDUNDANT}]: "
+        "beside left unshared on (clock) is redundant; "
+        "a fixed side never shares a copy\n"
+    )

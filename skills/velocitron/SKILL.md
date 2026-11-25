@@ -60,14 +60,17 @@ If the output shows `velocitron CLI NOT INSTALLED` (or `velocitron-viz CLI NOT I
    consume and produce arcs, and `decorate color C show "f" "g.h"` shows
    only those fields (dotted paths reach into nested objects) in `C`'s
    marking rows. An arc decoration needs a handle that covers
-   exactly one arc. `decorate (p) beside [left|right]` draws each local copy
+   exactly one arc.    `decorate (p) beside [left|right] [unshared]` draws each local copy
    of a fusion place (`(p) annotation fusion true`) on its transition's rank,
    next to it; with no side the copies are balanced, first one left. Use it
    when a copy lands far away and its read arc crosses the net; a copy the
    transition writes keeps its side too. With no
    side, two transitions that are neighbors in a choice (same one input
    place, next to each other in arc order) and both use `p` share one copy,
-   drawn between them; order the choice's arcs to pick the pairs. The sides
+   drawn between them; order the choice's arcs to pick the pairs. `unshared`
+   keeps one copy per transition instead, and pushes those copies outside
+   the choice's row (`P A B P`). `beside left unshared` parses and warns:
+   a fixed side already never shares. The sides
    are for `tb`/`bt`; `lr`/`rl` put left below. A view that pins a
    transition places each copy beside that transition. A position on the
    place itself does not move those copies; it still anchors `relative`.

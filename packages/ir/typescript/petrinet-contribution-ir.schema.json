@@ -971,6 +971,9 @@
         "value": {
           "additionalProperties": false,
           "properties": {
+            "share": {
+              "const": false
+            },
             "side": {
               "enum": [
                 "left",

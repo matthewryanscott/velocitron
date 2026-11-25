@@ -1130,7 +1130,7 @@ def _fusion_copy_ids(
 
     Shared ids match ``fusion_layout`` (ADR 0035): two neighbor transitions
     that share one non-fusion input and a ``beside`` place with no side draw
-    one copy.
+    one copy. ``share: false`` keeps one id per transition (ADR 0070).
     """
     nodes: dict[str, Decoration] = {}
     for subject, facts in decorations.items():
@@ -1143,8 +1143,15 @@ def _fusion_copy_ids(
             if isinstance(raw_beside, Mapping)
             else None
         )
+        share = (
+            cast(Mapping[str, Any], raw_beside).get("share")
+            if isinstance(raw_beside, Mapping)
+            else None
+        )
         nodes[subject] = Decoration(
-            beside=True, beside_side=side_value if isinstance(side_value, str) else None
+            beside=True,
+            beside_side=side_value if isinstance(side_value, str) else None,
+            beside_share=share is not False,
         )
     places: list[Place] = []
     fusion: set[str] = set()
@@ -2449,7 +2456,11 @@ def resolve_contribution_ir(
                 decoration_value: Any = dict(value)
             elif member == "beside":
                 side = value.get("side", "left")
-                valid_value = set(value) <= {"side"} and side in ("left", "right")
+                valid_value = (
+                    set(value) <= {"side", "share"}
+                    and side in ("left", "right")
+                    and ("share" not in value or value.get("share") is False)
+                )
                 decoration_value = dict(value)
             elif member == "quiet":
                 valid_value = not value

@@ -621,7 +621,11 @@ A view is flagged when it sets a whole-place `position` on a fusion place that h
 
 A view is flagged when it sets a whole-place `position` on a fusion place and every drawn copy of that place has its own `(P)@[T]` position. The place entry does not land on a copy. It still anchors `relative (P)`. The finding honors `annotations.lint.suppress` on the place.
 
-`velocitron validate` runs every lint rule on a net, or on each net a composition uses (as written, not merged, since each net's CEL keeps its own place names; ADR 0032), and prints each finding to stderr as `PATH:LINE:COL: warning[RULE]: MESSAGE`; the exit code stays 0. For a `.petrinet` file, `LINE:COL` is where the source writes what the finding flags: a transition's name where it first appears, an arc's `predicate` or `correlate` fact when the rule is about that expression, else the arc itself, or the view's `position` fact for `fusion-place-position`, `beside-position-shadowed`, and `place-position-overridden`. A composition's findings point into the file of the net they come from, and a net used twice reports each finding once. A JSON net has no source positions, so its findings report `1:1`.
+### Rule `beside-unshared-redundant`
+
+A place is flagged when its `beside` decoration names a side and also sets `share` to false (`beside left unshared` or `beside right unshared`). A fixed side already draws one copy per transition and never shares one, so `unshared` changes nothing (ADR 0068). The net stays valid. `beside unshared` with no side is not flagged. The finding names the place and the side. It honors `annotations.lint.suppress` on the place.
+
+`velocitron validate` runs every lint rule on a net, or on each net a composition uses (as written, not merged, since each net's CEL keeps its own place names; ADR 0032), and prints each finding to stderr as `PATH:LINE:COL: warning[RULE]: MESSAGE`; the exit code stays 0. For a `.petrinet` file, `LINE:COL` is where the source writes what the finding flags: a transition's name where it first appears, an arc's `predicate` or `correlate` fact when the rule is about that expression, else the arc itself, the view's `position` fact for `fusion-place-position`, `beside-position-shadowed`, and `place-position-overridden`, or the `decorate … beside` fact for `beside-unshared-redundant`. A composition's findings point into the file of the net they come from, and a net used twice reports each finding once. A JSON net has no source positions, so its findings report `1:1`.
 
 ### Suppressing an intentional sink (ADR 0016)
 
@@ -637,7 +641,7 @@ An intentional sink is acknowledged per-transition through the documentation-fie
 
 Suppression is **rule-specific** (the list names exactly the rule ids being acknowledged) and **fails open**: anything other than the documented shape — a `lint` object carrying a `suppress` array of rule-id strings — suppresses nothing, so a malformed acknowledgement surfaces as the finding still firing rather than silently silencing a rule. The engine continues to ignore `annotations` entirely; only the opt-in lint surface reads the `lint` key. See `docs/adr/0016-lint-surface-annotations-suppression.md`.
 
-`fusion-place-position` and `beside-position-shadowed` are acknowledged on the place, with the same `lint.suppress` list (`(lock) annotation lint {"suppress": ["fusion-place-position"]}`). A transition's list does not silence them.
+`fusion-place-position`, `beside-position-shadowed`, and `beside-unshared-redundant` are acknowledged on the place, with the same `lint.suppress` list (`(lock) annotation lint {"suppress": ["fusion-place-position"]}`). A transition's list does not silence them.
 
 A shorter form says why the sink is there: mark the transition as an **intended end** with the annotation `"end": true` (in `.petrinet`, `[clear_flag] annotation end true`). It silences `consume-without-produce` for that transition and no other rule. Only the JSON boolean `true` marks an end; any other value (`"true"`, `1`) fails open like a malformed suppression. The `consume-without-produce` message names this form.
 

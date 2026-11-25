@@ -214,6 +214,8 @@ export function fusionLayout(
   const shared = new Map<string, string>();
   const gaps = new Map<string, string[]>();
   const outerRight = new Set<string>();
+  const outwardLeft = new Set<string>();
+  const outwardRight = new Set<string>();
   const segments: string[][] = [];
   for (const group of siblingGroups(net, fusion)) {
     const linked = Array.from({length: Math.max(group.length - 1, 0)}, () => false);
@@ -226,17 +228,25 @@ export function fusionLayout(
         let end = start;
         while (end < group.length && (besidePlaces.get(group[end]!) ?? []).includes(place)) end += 1;
         const run = group.slice(start, end);
-        for (let index = 0; index < run.length - 1; index += 2) {
-          const left = run[index]!;
-          const right = run[index + 1]!;
-          const copy = copyId(place, [left, right]);
-          shared.set(pairKey(place, left), copy);
-          shared.set(pairKey(place, right), copy);
-          pushMap(gaps, edgeKey(left, right), place);
-        }
-        if (run.length > 1) {
+        // Unshared (ADR 0068): one row, copies outside it. A missing
+        // besideShare still shares, which is the ADR 0035 default.
+        if (run.length > 1 && decoration.besideShare === false) {
           for (let index = start; index < end - 1; index += 1) linked[index] = true;
-          if (run.length % 2 === 1) outerRight.add(pairKey(place, run[run.length - 1]!));
+          outwardLeft.add(pairKey(place, run[0]!));
+          outwardRight.add(pairKey(place, run[run.length - 1]!));
+        } else {
+          for (let index = 0; index < run.length - 1; index += 2) {
+            const left = run[index]!;
+            const right = run[index + 1]!;
+            const copy = copyId(place, [left, right]);
+            shared.set(pairKey(place, left), copy);
+            shared.set(pairKey(place, right), copy);
+            pushMap(gaps, edgeKey(left, right), place);
+          }
+          if (run.length > 1) {
+            for (let index = start; index < end - 1; index += 1) linked[index] = true;
+            if (run.length % 2 === 1) outerRight.add(pairKey(place, run[run.length - 1]!));
+          }
         }
         start = end === start ? end + 1 : end;
       }
@@ -267,14 +277,17 @@ export function fusionLayout(
         if (shared.has(pairKey(place, transition))) continue;
         const decoration = besideOf(place);
         if (decoration === undefined) continue;
+        const key = pairKey(place, transition);
         const side =
           decoration.besideSide != null
             ? decoration.besideSide
-            : outerRight.has(pairKey(place, transition))
-              ? "right"
-              : left.length + sharedLeft <= right.length + sharedRight
-                ? "left"
-                : "right";
+            : outwardLeft.has(key)
+              ? "left"
+              : outwardRight.has(key) || outerRight.has(key)
+                ? "right"
+                : left.length + sharedLeft <= right.length + sharedRight
+                  ? "left"
+                  : "right";
         (side === "left" ? left : right).push(copyId(place, [transition]));
       }
       order.push(...left.reverse(), transition, ...right);

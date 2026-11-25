@@ -279,7 +279,7 @@ decoration
     : DECORATE decorationTarget HIGHLIGHT STRING?
     | DECORATE decorationTarget NOTE STRING
     | DECORATE decorationTarget SUMMARY STRING
-    | DECORATE decorationTarget BESIDE (LEFT | RIGHT)?
+    | DECORATE decorationTarget BESIDE (LEFT | RIGHT)? UNSHARED?
     | DECORATE COLOR_KEYWORD color QUIET
     | DECORATE COLOR_KEYWORD color SHOW STRING+
     ;
@@ -431,6 +431,7 @@ keyword
     | BESIDE
     | LEFT
     | RIGHT
+    | UNSHARED
     | SHOW
     | DOMAIN
     | FINAL
@@ -664,6 +665,10 @@ LEFT
 
 RIGHT
     : 'right'
+    ;
+
+UNSHARED
+    : 'unshared'
     ;
 
 SHOW

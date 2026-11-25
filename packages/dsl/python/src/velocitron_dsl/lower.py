@@ -1289,10 +1289,12 @@ class _LoweringVisitor(VelocitronPetriNetVisitor):
                     if ctx.RIGHT() is not None
                     else None
                 )
-                kind, value = (
-                    "decoration.beside",
-                    {} if side is None else {"side": side},
-                )
+                beside_value: dict[str, Any] = {}
+                if side is not None:
+                    beside_value["side"] = side
+                if ctx.UNSHARED() is not None:
+                    beside_value["share"] = False
+                kind, value = "decoration.beside", beside_value
             else:
                 if target["type"] == "place":
                     self._semantic_error(

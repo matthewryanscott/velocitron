@@ -46,6 +46,8 @@ export interface Decoration {
   readonly summary?: string | null;
   readonly beside?: boolean;
   readonly besideSide?: string | null;
+  /** False is `beside unshared`: one copy per transition (ADR 0068). */
+  readonly besideShare?: boolean;
   readonly failure?: boolean;
   readonly faded?: boolean;
 }
@@ -107,6 +109,7 @@ export function readDecorations(raw: unknown): Decorations {
       summary: optionalText(rawEntry.summary),
       beside: isRecord(beside),
       besideSide: isRecord(beside) ? optionalText(beside.side) : null,
+      besideShare: isRecord(beside) ? beside.share !== false : true,
     };
     if (kind === "place" || kind === "transition") nodes[subject] = decoration;
     else if (kind === "arc") {

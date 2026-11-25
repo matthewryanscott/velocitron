@@ -47,7 +47,8 @@ every net-schema feature (`spec/net-schema.md`, `spec/composition.md`):
   quiet color loses its arc type labels, and ``beside`` keeps each fusion
   copy of a place next to its transition (ADR 0029). A view that pins the
   transition places an unpositioned copy there too (ADR 0067). With no side,
-  two neighbor transitions of one choice share one copy between them (ADR 0035).
+  two neighbor transitions of one choice share one copy between them (ADR 0035),
+  unless the place is ``beside unshared`` (ADR 0068).
 
 Output is markdown-embeddable on request: :class:`RenderStyle` (CLI
 ``--plain-labels`` / ``--no-tooltips``, or the ``--doc`` preset) swaps the
@@ -1096,11 +1097,19 @@ def fusion_layout(
 
     Two transitions that are neighbors in a sibling group (see
     :func:`sibling_groups`) and both have a copy of the same ``beside``
-    place with no side share one copy, drawn between them (ADR 0035). A run
+    place with no side share one copy, drawn between them (ADR 0035), unless
+    that place is ``unshared`` (``beside_share`` is false, ADR 0068). A run
     of more such neighbors pairs from the left; when the run is odd, the
     last one keeps its own copy, on its right. The transitions a run links
     share one row, in group order, so the shared copy is always between
     its two transitions.
+
+    An unshared place does not share. A run that would have shared stays one
+    row, and each copy is pushed outward: the first sibling's copy on the
+    left, the last sibling's on the right, and a middle sibling on the side
+    with fewer of its own copies so far, left on a tie (ADR 0029 Decision 3).
+    A run of two is the copy, the first transition, the second, the copy.
+    A transition outside such a run is placed as it is today.
     """
     instances = _fusion_instances(net, set(fusion))
 
@@ -1116,6 +1125,8 @@ def fusion_layout(
     shared: dict[tuple[str, str], str] = {}
     gaps: dict[tuple[str, str], list[str]] = {}
     outer_right: set[tuple[str, str]] = set()
+    outward_left: set[tuple[str, str]] = set()
+    outward_right: set[tuple[str, str]] = set()
     segments: list[tuple[str, ...]] = []
     for group in sibling_groups(net, fusion):
         linked = [False] * (len(group) - 1)
@@ -1132,15 +1143,21 @@ def fusion_layout(
                 while end < len(group) and place in beside_places.get(group[end], ()):
                     end += 1
                 run = group[start:end]
-                for i in range(0, len(run) - 1, 2):
-                    pair = run[i], run[i + 1]
-                    copy = _copy_id(place, pair)
-                    shared[(place, pair[0])] = shared[(place, pair[1])] = copy
-                    gaps.setdefault(pair, []).append(place)
-                if len(run) > 1:
+                if len(run) > 1 and not decoration.beside_share:
+                    # One row, copies outside it: first left, last right.
                     linked[start : end - 1] = [True] * (len(run) - 1)
-                    if len(run) % 2:
-                        outer_right.add((place, run[-1]))
+                    outward_left.add((place, run[0]))
+                    outward_right.add((place, run[-1]))
+                else:
+                    for i in range(0, len(run) - 1, 2):
+                        pair = run[i], run[i + 1]
+                        copy = _copy_id(place, pair)
+                        shared[(place, pair[0])] = shared[(place, pair[1])] = copy
+                        gaps.setdefault(pair, []).append(place)
+                    if len(run) > 1:
+                        linked[start : end - 1] = [True] * (len(run) - 1)
+                        if len(run) % 2:
+                            outer_right.add((place, run[-1]))
                 start = end + 1 if end == start else end
         first = 0
         for i in range(len(group)):
@@ -1166,13 +1183,19 @@ def fusion_layout(
                     continue
                 decoration = beside(place)
                 assert decoration is not None
-                side = decoration.beside_side or (
-                    "right"
-                    if (place, transition) in outer_right
-                    else "left"
-                    if len(left) + shared_left <= len(right) + shared_right
-                    else "right"
-                )
+                if decoration.beside_side is not None:
+                    side = decoration.beside_side
+                elif (place, transition) in outward_left:
+                    side = "left"
+                elif (place, transition) in outward_right or (
+                    place,
+                    transition,
+                ) in outer_right:
+                    side = "right"
+                elif len(left) + shared_left <= len(right) + shared_right:
+                    side = "left"
+                else:
+                    side = "right"
                 (left if side == "left" else right).append(
                     _copy_id(place, [transition])
                 )

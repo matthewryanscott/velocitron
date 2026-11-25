@@ -87,6 +87,12 @@ function choice(names, reads) {
 }
 
 const beside = {nodes: {"place:switch": {beside: true}}, arcs: {}, quietColors: [], shownFields: {}};
+const unshared = {
+  nodes: {"place:switch": {beside: true, besideShare: false}},
+  arcs: {},
+  quietColors: [],
+  shownFields: {},
+};
 
 describe("net rendering", () => {
   it("draws ports, marks, guards, and arc modes", () => {
@@ -175,6 +181,92 @@ describe("net rendering", () => {
     assert.deepEqual(three.rows, [["hold", "switch@hold+skip", "skip", "send", "switch@send"]]);
     const dot = netToDot(pair, {decorations: beside});
     assert.ok(dot.includes('    "hold" -> "switch@hold+skip" -> "skip" [style=invis];'));
+  });
+
+  it("pushes unshared copies outside the choice row", () => {
+    // given: the same choice, opted out of sharing
+    const pair = choice(["hold", "skip"], ["hold", "skip"]);
+    const trio = choice(["hold", "skip", "send"], ["hold", "skip", "send"]);
+    const fusion = new Set(["switch"]);
+    // when: the layout places the copies
+    const paired = fusionLayout(pair, fusion, unshared);
+    const three = fusionLayout(trio, fusion, unshared);
+    const dot = netToDot(pair, {decorations: unshared});
+    // then: a run of two is copy, siblings, copy, and the middle of three goes left
+    assert.equal(fusionCopy(paired, "switch", "hold"), "switch@hold");
+    assert.equal(fusionCopy(paired, "switch", "skip"), "switch@skip");
+    assert.deepEqual(paired.rows, [["switch@hold", "hold", "skip", "switch@skip"]]);
+    assert.deepEqual(three.rows, [["switch@hold", "hold", "switch@skip", "skip", "send", "switch@send"]]);
+    assert.equal(dot.includes("switch@hold+skip"), false);
+    assert.ok(dot.includes('    "switch@hold" -> "hold" -> "skip" -> "switch@skip" [style=invis];'));
+  });
+
+  function leaseChoice() {
+    const consume = (place, transition, type) => ({
+      from: {place},
+      to: {transition},
+      consume: {type, mode: "consume", weight: 1},
+    });
+    const produce = (transition, place, type) => ({
+      from: {transition},
+      to: {place},
+      produce: {type, destination: place},
+    });
+    const read = (transition) => ({
+      from: {place: "clock"},
+      to: {transition},
+      consume: {type: "now", mode: "read", weight: 1},
+    });
+    return {
+      name: "lease_choice",
+      places: [
+        {name: "idle", accepts: ["job"]},
+        {name: "lease", accepts: ["permit"]},
+        {name: "working", accepts: ["job"]},
+        {name: "done", accepts: ["job"]},
+        {name: "clock", accepts: ["now"], annotations: {fusion: true}},
+      ],
+      transitions: [{name: "acquire"}, {name: "commit"}, {name: "expire"}],
+      arcs: [
+        consume("idle", "acquire", "job"),
+        consume("lease", "acquire", "permit"),
+        produce("acquire", "working", "job"),
+        consume("working", "commit", "job"),
+        produce("commit", "done", "job"),
+        produce("commit", "lease", "permit"),
+        consume("working", "expire", "job"),
+        produce("expire", "idle", "job"),
+        produce("expire", "lease", "permit"),
+        read("acquire"),
+        read("commit"),
+        read("expire"),
+      ],
+    };
+  }
+
+  it("draws lease_choice as two clock copies outside commit and expire", () => {
+    // given: commit and expire are one choice; the clock is beside unshared
+    const net = leaseChoice();
+    const decorations = {
+      nodes: {"place:clock": {beside: true, besideShare: false}},
+      arcs: {},
+      quietColors: [],
+      shownFields: {},
+    };
+    // when: the layout and the drawing place the copies
+    const layout = fusionLayout(net, new Set(["clock"]), decorations);
+    const dot = netToDot(net, {decorations});
+    // then: no shared clock node, and the row is copy, commit, expire, copy
+    assert.deepEqual(layout.rows, [
+      ["clock@acquire", "acquire"],
+      ["clock@commit", "commit", "expire", "clock@expire"],
+    ]);
+    assert.equal(dot.includes("clock@commit+expire"), false);
+    assert.equal(dot.split('"clock@commit" [shape=ellipse').length - 1, 1);
+    assert.equal(dot.split('"clock@expire" [shape=ellipse').length - 1, 1);
+    assert.ok(
+      dot.includes('    "clock@commit" -> "commit" -> "expire" -> "clock@expire" [style=invis];'),
+    );
   });
 
   it("pins a view through the structural index", () => {
