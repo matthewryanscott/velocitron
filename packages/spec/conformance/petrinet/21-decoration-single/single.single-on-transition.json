@@ -1,0 +1,26 @@
+{
+  "diagnostic": {
+    "code": "PN202",
+    "column": 1,
+    "file": "single.single-on-transition.petrinet",
+    "line": 7,
+    "message": "single decorations apply to fusion places; [start] has no fused drawing to collapse",
+    "span": {
+      "end": {
+        "byteOffset": 135,
+        "column": 24,
+        "line": 7
+      },
+      "source": "single.single-on-transition.petrinet",
+      "start": {
+        "byteOffset": 112,
+        "column": 1,
+        "line": 7
+      }
+    }
+  },
+  "source": {
+    "sourceId": "single.single-on-transition.petrinet",
+    "text": "net single\n\n(queued) -job-> [start] -job-> (running)\n(switch) -flag->? [start]\n(switch) annotation fusion true\n\ndecorate [start] single\n"
+  }
+}

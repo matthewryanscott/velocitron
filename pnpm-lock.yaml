@@ -203,6 +203,9 @@ importers:
       '@velocitron/merge':
         specifier: workspace:*
         version: link:../../merge/typescript
+      '@velocitron/viz':
+        specifier: workspace:*
+        version: link:../../viz/typescript
     devDependencies:
       typescript:
         specifier: 7.0.2

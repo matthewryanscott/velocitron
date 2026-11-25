@@ -344,7 +344,9 @@ that stay usable as names; `=` is a token only here.
 
 Actor facts say who does each step of the net, in business words
 ([ADR 0038](https://github.com/matthewryanscott/velocitron/blob/main/docs/adr/0038-sequence-diagrams-project-scenarios-onto-actors.md)).
-A play's sequence diagram draws one lifeline per actor.
+A play's sequence diagram draws one lifeline per actor, and a queue for
+each place a token crosses between actors
+([ADR 0073](https://github.com/matthewryanscott/velocitron/blob/main/docs/adr/0073-hand-off-places-are-sequence-lifelines.md)).
 
 ```text
 person Name
@@ -543,28 +545,46 @@ view Name position ViewTarget relative ViewTarget + {"x": Number, "y": Number}
 view Name route @Handle orthogonal [ {"x": Number, "y": Number}, ... ]
 view Name splines ( ortho | spline | curved | polyline | line )
 view Name detail ( full | summary | structure )
+view Name fusion (Place) ( single | copies )
 decorate DecorationTarget highlight [ JsonString ]
 decorate DecorationTarget note JsonString
 decorate ( [Transition] | @Handle ) summary JsonString
-decorate (Place) beside [ left | right ]
+decorate (Place) beside [ left | right ] [ unshared ]
+decorate (Place) single
 decorate color Color quiet
 decorate color Color show JsonString ...
 ```
 
 `MetadataTarget` is `net`, `(Place)`, `[Transition]`, or `@Handle`.
-`ViewTarget` is only `(Place)` or `[Transition]`; views cannot position the
-document or an arc. A `relative` position names two targets: the subject it
-positions and the base it offsets from; the delta is added to the base's
-rendered position. The base may be any positionable target of either kind.
-Relative entries never resolve into the stored payload: they lower verbatim
-(positions stay `{"from", "delta"}` facts), and the resolver only checks shape
-and that the base names a declared place or transition. Applying a view
-resolves relative entries at render time against the other positions in the
-same view — chains resolve in dependency order, a base that carries no
-position in that view is rejected, and a relative chain that never becomes
-grounded is rejected. Relative entries are inert at compile time.
+`ViewTarget` is `(Place)`, `(Place)@[Transition]`, or `[Transition]`; views
+cannot position the document or an arc. `(Place)@[Transition]` names one
+drawn copy of a fusion place at that transition (ADR 0068). The place must be annotated
+`fusion true`, and the transition must use it. Two targets that draw the same
+shared copy (ADR 0035: neighbor transitions, `beside` with no side) must carry
+the same position; equal positions are idempotent and different ones conflict.
+The stored key is `place:<place>@transition:<transition>`. The entry is
+stored on the view. A renderer places that copy at the entry's resolved
+point (ADR 0072). An ADR 0035 shared copy is one node, so the one agreed
+entry places it.
+A `relative`
+position names two targets: the subject it positions and the base it offsets
+from; the delta is added to the base's rendered position. The base may be any
+positionable target. Relative entries never resolve into the stored payload:
+they lower verbatim (positions stay `{"from", "delta"}` facts). The resolver
+checks shape and that each target names a declared place or transition. A bare
+`(Place)` base is that place entry's point, so the view must position the
+place. A `(Place)@[Transition]` base must itself be positioned in the view,
+and applying the view adds the delta to the point where that copy is drawn. A
+transition base is only checked as declared; applying the view rejects one
+that carries no position. Applying a view resolves relative entries at render
+time against the other positions in the same view — chains resolve in
+dependency order, a base that carries no position in that view is rejected,
+and a relative chain that never becomes grounded is rejected.
 `splines` picks the Graphviz edge style a renderer uses when it applies the
-view; without it the style is `ortho`. `detail` picks how much behavior the
+view; without it the style is `ortho`. `fusion` chooses, for one fusion
+place in that view, `single` (one dashed node) or `copies` (one local copy
+per transition). It wins over a `single` decoration and loses to
+`velocitron-viz --no-fusion`. `detail` picks how much behavior the
 labels show when the view applies: `full` shows every expression whole,
 `summary` shortens expressions, and `structure` drops handler refs, guards,
 timers, priorities, predicates, correlations and data templates. A caller's
@@ -584,9 +604,38 @@ while lowering. `beside` applies to a fusion place, one annotated
 `fusion true`, which a renderer draws as one local copy per transition that
 uses it: it asks the renderer to draw each copy on the same rank as its
 transition, next to it. `left` and `right` pick the side; without a side the
-renderer picks one. A transition or a handle has no copies, so `beside` on
+renderer picks one. `unshared` keeps one copy per transition and never shares
+a copy between neighbors. The side is still chosen as above. A choice whose
+transitions would have shared that copy stays in one row, and the copies are
+pushed outward: the first sibling's copy on the left, the last sibling's on
+the right, and a middle sibling on the side with fewer of its own copies so
+far, left on a tie. A run of two is the copy, the first transition, the
+second transition, the copy. That row is the `beside` side a view uses.
+`beside left unshared` and `beside right
+unshared` parse. A fixed side already never shares, so `velocitron validate`
+warns `beside-unshared-redundant` and the copies stay on that side. When a
+view positions nodes, a copy is placed by the
+first of these that applies (ADR 0072). A `(P)@[T]` entry places that copy.
+A whole-place `(P)` entry places every copy of `P` that has no copy entry.
+`beside` places a copy only when neither entry does, at a horizontal offset
+from its transition on the side `beside` chooses, when that transition is
+positioned (ADR 0067). The offset is computed from the label widths. A
+whole-place entry still anchors `relative (P)`. A transition or a
+handle has no copies, so `beside` on
 one is rejected while lowering, and `beside` on a place that is not annotated
-`fusion true` is rejected. `decorate color Color quiet` asks a renderer to hide the type
+`fusion true` is rejected. `decorate (Place) single` asks every render to draw
+that fusion place as one node, still in the dashed gray fusion style, with
+its arcs taking part in ranking. It is rejected on a transition or a handle,
+and on a place that is not annotated `fusion true`, for the same reason as
+`beside`: a silent no-op would hide a typo. `single` and `beside` on the same
+place conflict, because a single node has no copies to place. A view that
+resolves the place to `single` drops that place's `beside` rows. A
+`(Place)@[Transition]` position does not apply to a place drawn as one node;
+`velocitron validate` warns (`single-copy-position`). The drawing
+choice, highest first, is `velocitron-viz --no-fusion` (deprecated; it still
+draws every fusion place as one ordinary node), then the view's `fusion`
+fact, then `decorate (Place) single`, then per-transition copies.
+`decorate color Color quiet` asks a renderer to hide the type
 label on consume and produce arcs of that color, as it always does for the
 Generic `token` color; read and inhibit arcs keep their labels.
 `decorate color Color show "id" "owner.name"` names the token fields a
@@ -622,19 +671,24 @@ views:      { Name: { positions: { Target: Point }
                                           points: [Point, ...] } },
                       splines?: "ortho" | "spline" | "curved"
                                 | "polyline" | "line",
-                      detail?: "full" | "summary" | "structure" } }
+                      detail?: "full" | "summary" | "structure",
+                      fusion?: { "place:" Place: "single" | "copies" } } }
 extensions: JsonObject
 decorations?: { Subject: { highlight?: { label?: String },
                            note?: String,
                            summary?: String,
-                           beside?: { side?: "left" | "right" } }
+                           beside?: { side?: "left" | "right",
+                                      share?: false },
+                           single?: true }
               | { "color:" Color: { quiet?: true,
                                     show?: [FieldPath, ...] } } }
 ```
 
-A decoration `Subject` is `place:<name>`, `transition:<name>`, or
+A position `Target` is `place:<name>`, `transition:<name>`, or
+`place:<name>@transition:<name>` for one drawn copy. A decoration `Subject` is `place:<name>`, `transition:<name>`, or
 `arc:<handle>`; a place subject carries no `summary`, and only a place subject
-carries `beside`. A color subject carries at least one of `quiet` and `show`;
+carries `beside` or `single`, and not both. `share: false` is `unshared`. When `share` is absent, the
+copies may be shared. A color subject carries at least one of `quiet` and `show`;
 `show` keeps the source order of its field paths. The `decorations` member
 is present only when the source has at least one decoration.
 

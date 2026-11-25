@@ -508,6 +508,7 @@ dependencies = [
     { name = "velocitron-ir" },
     { name = "velocitron-merge" },
     { name = "velocitron-spec" },
+    { name = "velocitron-viz" },
 ]
 
 [package.dev-dependencies]
@@ -524,6 +525,7 @@ requires-dist = [
     { name = "velocitron-ir", directory = "../../ir/python" },
     { name = "velocitron-merge", directory = "../../merge/python" },
     { name = "velocitron-spec", directory = "../../spec" },
+    { name = "velocitron-viz", directory = "../../viz/python" },
 ]
 
 [package.metadata.requires-dev]

@@ -30,6 +30,7 @@ document
       | viewRoute
       | viewSplines
       | viewDetail
+      | viewFusion
       | decoration
       | extensions
       | domainDeclaration
@@ -270,8 +271,12 @@ viewDetail
     : VIEW name DETAIL name
     ;
 
+viewFusion
+    : VIEW name FUSION place (SINGLE | COPIES)
+    ;
+
 viewTarget
-    : place
+    : place (AT transition)?
     | transition
     ;
 
@@ -279,7 +284,8 @@ decoration
     : DECORATE decorationTarget HIGHLIGHT STRING?
     | DECORATE decorationTarget NOTE STRING
     | DECORATE decorationTarget SUMMARY STRING
-    | DECORATE decorationTarget BESIDE (LEFT | RIGHT)?
+    | DECORATE decorationTarget BESIDE (LEFT | RIGHT)? UNSHARED?
+    | DECORATE decorationTarget SINGLE
     | DECORATE COLOR_KEYWORD color QUIET
     | DECORATE COLOR_KEYWORD color SHOW STRING+
     ;
@@ -429,8 +435,12 @@ keyword
     | QUIET
     | COLOR_KEYWORD
     | BESIDE
+    | FUSION
+    | SINGLE
+    | COPIES
     | LEFT
     | RIGHT
+    | UNSHARED
     | SHOW
     | DOMAIN
     | FINAL
@@ -658,12 +668,28 @@ BESIDE
     : 'beside'
     ;
 
+FUSION
+    : 'fusion'
+    ;
+
+SINGLE
+    : 'single'
+    ;
+
+COPIES
+    : 'copies'
+    ;
+
 LEFT
     : 'left'
     ;
 
 RIGHT
     : 'right'
+    ;
+
+UNSHARED
+    : 'unshared'
     ;
 
 SHOW

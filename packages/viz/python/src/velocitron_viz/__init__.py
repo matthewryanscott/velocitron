@@ -3,6 +3,8 @@
 ``net_to_dot`` draws one net. ``apply_view`` pins authored positions and
 routes onto that drawing. ``fusion_layout`` is the fusion-copy placement,
 including a shared copy between two neighbor transitions of one choice.
+``beside unshared`` keeps one copy per transition and pushes those copies
+outside the choice's row.
 Pass a net the caller already built. This package does not parse documents,
 compile CEL, merge compositions, or install a console script, and it does
 not import ``velocitron``.
@@ -17,6 +19,7 @@ from __future__ import annotations
 from .canonical import render_canonical_json
 from .render import (
     DETAIL_LEVELS,
+    BesidePlacement,
     Detail,
     FusionLayout,
     MarkingRow,
@@ -57,21 +60,36 @@ from .schema import (
     Wire,
 )
 from .view import (
+    BESIDE_MARGIN,
     DEFAULT_VIEW,
+    NAME_POINT,
+    NODE_PAD,
+    SMALL_POINT,
     Decoration,
     Decorations,
     ViewApplicationError,
     apply_view,
+    beside_gap,
+    fusion_modes_of,
     has_view,
+    node_width,
+    text_width,
     read_decorations,
+    read_fusion_modes,
+    resolve_fusion_mode,
     resolve_positions,
     view_setting,
 )
 
 __all__ = [
+    "BESIDE_MARGIN",
     "DEFAULT_VIEW",
     "DETAIL_LEVELS",
+    "NAME_POINT",
+    "NODE_PAD",
+    "SMALL_POINT",
     "Arc",
+    "BesidePlacement",
     "Composition",
     "ConsumePattern",
     "Decoration",
@@ -100,10 +118,12 @@ __all__ = [
     "ViewApplicationError",
     "Wire",
     "apply_view",
+    "beside_gap",
     "composition_overview_dot",
     "composition_ports_dot",
     "composition_to_dot",
     "fusion_layout",
+    "fusion_modes_of",
     "has_view",
     "legend_dot",
     "marking_rows",
@@ -111,9 +131,13 @@ __all__ = [
     "net_render_model",
     "net_to_dot",
     "net_twin_dots",
+    "node_width",
     "read_decorations",
+    "read_fusion_modes",
     "render_canonical_json",
+    "resolve_fusion_mode",
     "resolve_positions",
     "sibling_groups",
+    "text_width",
     "view_setting",
 ]

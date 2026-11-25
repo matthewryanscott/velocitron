@@ -252,3 +252,78 @@ def test_twin_graphs_with_a_shared_copy_get_one_layout(tmp_path: Path) -> None:
         assert before == after
         x = {name: float(pos.split(",")[0]) for name, (pos, _, _) in before.items()}
         assert x["hold"] < x["switch@hold+send"] < x["send"]
+
+
+def test_an_unshared_run_pushes_copies_outside_the_row() -> None:
+    # given: hold and send read one beside place that never shares. In
+    # structural order they are neighbors; skip sits after them.
+    net, decorations = _compile(
+        "(switch) -switch->? [hold]\n(switch) -switch->? [send]\n",
+        "decorate (switch) beside unshared\n",
+    )
+    # when
+    layout = fusion_layout(net, _fusion(net), decorations)
+    # then: one copy each, outside the siblings
+    assert layout.rows == (("switch@hold", "hold", "send", "switch@send"),)
+    assert "hold+send" not in "".join(layout.copies.values())
+
+
+def test_an_unshared_run_of_three_balances_the_middle_to_the_left() -> None:
+    # given: hold, skip and send all read the unshared place
+    net, decorations = _compile(
+        "(switch) -switch->? [hold]\n(switch) -switch->? [skip]\n"
+        "(switch) -switch->? [send]\n",
+        "decorate (switch) beside unshared\n",
+    )
+    # when
+    layout = fusion_layout(net, _fusion(net), decorations)
+    # then: the ends go outward and the middle copy, a tie, goes left
+    assert layout.rows == (
+        ("switch@hold", "hold", "switch@send", "send", "skip", "switch@skip"),
+    )
+
+
+_LEASE_CHOICE = """\
+// A holder either commits its work or loses the lease; both read the clock.
+// (clock) is supplied from outside (fusion), so it's drawn as copies.
+net lease_choice "One holder: commit or expire"
+
+(idle) -job-> [acquire]
+(lease) -permit-> [acquire]
+[acquire] -job-> (working)
+(working) -job-> [commit]
+[commit] -job-> (done)
+[commit] -permit-> (lease)
+(working) -job-> [expire]
+[expire] -job-> (idle)
+[expire] -permit-> (lease)
+
+(clock) -now->? [acquire]
+(clock) -now->? [commit]
+(clock) -now->? [expire]
+
+(clock) annotation fusion true
+decorate (clock) beside unshared
+"""
+
+
+def test_lease_choice_unshared_draws_two_clock_copies_outside_the_row() -> None:
+    # given: commit and expire are a choice, and the clock is beside unshared
+    document = compile_petrinet_text(_LEASE_CHOICE, "lease_choice.petrinet")
+    net = parse_net(document)
+    decorations = read_decorations(document)
+    # when: the layout and the drawing place the copies
+    layout = fusion_layout(net, _fusion(net), decorations)
+    dot = net_to_dot(net, decorations=decorations)
+    # then: no shared clock node, and the choice row is copy, commit, expire, copy
+    assert layout.rows == (
+        ("clock@acquire", "acquire"),
+        ("clock@commit", "commit", "expire", "clock@expire"),
+    )
+    assert "clock@commit+expire" not in dot
+    assert dot.count('"clock@commit" [shape=ellipse') == 1
+    assert dot.count('"clock@expire" [shape=ellipse') == 1
+    assert (
+        '    "clock@commit" -> "commit" -> "expire" -> "clock@expire" [style=invis];'
+        in dot
+    )

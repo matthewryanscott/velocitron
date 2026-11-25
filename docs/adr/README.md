@@ -65,6 +65,12 @@ current normative contracts live in `packages/spec/`.
 - [0064 — A failed output keeps its exception in-process](0064-a-failed-output-keeps-its-exception-in-process.md)
 - [0065 — A copy into a side output does not keep environment tokens apart](0065-a-copy-into-a-side-output-does-not-keep-environment-tokens-apart.md)
 - [0066 — The C++ CEL backend is a compatibility and conformance reference](0066-the-cpp-cel-backend-is-a-compatibility-and-conformance-reference.md)
+- [0067 — A pinned view places `beside` copies next to their transitions](0067-a-pinned-view-places-beside-copies-next-to-their-transitions.md)
+- [0068 — A view can position one fusion copy](0068-a-view-can-position-one-fusion-copy.md)
 - [0069 — A layout fact has to be one a renderer can ignore, and DOT order follows the net](0069-a-layout-fact-has-to-be-one-a-renderer-can-ignore.md)
+- [0070 — `beside unshared` keeps one fusion copy per transition](0070-beside-unshared-keeps-one-fusion-copy-per-transition.md)
+- [0071 — A fusion place can be drawn as one node](0071-a-fusion-place-can-be-drawn-as-one-node.md)
+- [0072 — A renderer places each fusion copy from its own position](0072-a-renderer-places-each-fusion-copy-from-its-own-position.md)
+- [0073 — Hand-off places are sequence lifelines](0073-hand-off-places-are-sequence-lifelines.md)
 
 Historical numbering gaps are retained rather than filled by reconstructed records. Titles are likewise historical: an Accepted record's title keeps the words it was written with (ADR 0038's `scenarios`, now `play`); later-accepted renames do not rewrite them — the body and the index track the current word, the title stays as accepted.

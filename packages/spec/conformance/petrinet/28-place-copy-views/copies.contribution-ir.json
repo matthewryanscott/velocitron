@@ -1,0 +1,1528 @@
+{
+  "format": "velocitron.petrinet/contribution-ir",
+  "version": 1,
+  "documentKind": "net",
+  "document": {
+    "id": "copies.petrinet"
+  },
+  "contributions": [
+    {
+      "id": {
+        "source": "copies.petrinet",
+        "statement": 0,
+        "part": 0
+      },
+      "kind": "document.net-header",
+      "ordinal": 0,
+      "span": {
+        "source": "copies.petrinet",
+        "start": {
+          "byteOffset": 0,
+          "line": 1,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 16,
+          "line": 1,
+          "column": 17
+        }
+      },
+      "target": {
+        "type": "document"
+      },
+      "value": {
+        "name": "place_copies"
+      }
+    },
+    {
+      "id": {
+        "source": "copies.petrinet",
+        "statement": 1,
+        "part": 0
+      },
+      "kind": "arc.declare",
+      "ordinal": 1,
+      "span": {
+        "source": "copies.petrinet",
+        "start": {
+          "byteOffset": 18,
+          "line": 3,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 40,
+          "line": 3,
+          "column": 23
+        }
+      },
+      "target": {
+        "type": "arc",
+        "id": {
+          "document": "copies.petrinet",
+          "statement": 1,
+          "part": 0
+        }
+      },
+      "value": {
+        "from": {
+          "type": "place",
+          "name": "seed"
+        },
+        "to": {
+          "type": "transition",
+          "name": "lend"
+        },
+        "color": {
+          "kind": "explicit",
+          "value": "pulse"
+        },
+        "mode": "consume",
+        "transitionNameSpan": {
+          "source": "copies.petrinet",
+          "start": {
+            "byteOffset": 35,
+            "line": 3,
+            "column": 18
+          },
+          "end": {
+            "byteOffset": 39,
+            "line": 3,
+            "column": 22
+          }
+        }
+      }
+    },
+    {
+      "id": {
+        "source": "copies.petrinet",
+        "statement": 2,
+        "part": 0
+      },
+      "kind": "arc.declare",
+      "ordinal": 2,
+      "span": {
+        "source": "copies.petrinet",
+        "start": {
+          "byteOffset": 41,
+          "line": 4,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 65,
+          "line": 4,
+          "column": 25
+        }
+      },
+      "target": {
+        "type": "arc",
+        "id": {
+          "document": "copies.petrinet",
+          "statement": 2,
+          "part": 0
+        }
+      },
+      "value": {
+        "from": {
+          "type": "place",
+          "name": "seed"
+        },
+        "to": {
+          "type": "transition",
+          "name": "recall"
+        },
+        "color": {
+          "kind": "explicit",
+          "value": "pulse"
+        },
+        "mode": "consume",
+        "transitionNameSpan": {
+          "source": "copies.petrinet",
+          "start": {
+            "byteOffset": 58,
+            "line": 4,
+            "column": 18
+          },
+          "end": {
+            "byteOffset": 64,
+            "line": 4,
+            "column": 24
+          }
+        }
+      }
+    },
+    {
+      "id": {
+        "source": "copies.petrinet",
+        "statement": 3,
+        "part": 0
+      },
+      "kind": "arc.declare",
+      "ordinal": 3,
+      "span": {
+        "source": "copies.petrinet",
+        "start": {
+          "byteOffset": 66,
+          "line": 5,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 88,
+          "line": 5,
+          "column": 23
+        }
+      },
+      "target": {
+        "type": "arc",
+        "id": {
+          "document": "copies.petrinet",
+          "statement": 3,
+          "part": 0
+        }
+      },
+      "value": {
+        "from": {
+          "type": "place",
+          "name": "seed"
+        },
+        "to": {
+          "type": "transition",
+          "name": "keep"
+        },
+        "color": {
+          "kind": "explicit",
+          "value": "pulse"
+        },
+        "mode": "consume",
+        "transitionNameSpan": {
+          "source": "copies.petrinet",
+          "start": {
+            "byteOffset": 83,
+            "line": 5,
+            "column": 18
+          },
+          "end": {
+            "byteOffset": 87,
+            "line": 5,
+            "column": 22
+          }
+        }
+      }
+    },
+    {
+      "id": {
+        "source": "copies.petrinet",
+        "statement": 4,
+        "part": 0
+      },
+      "kind": "arc.declare",
+      "ordinal": 4,
+      "span": {
+        "source": "copies.petrinet",
+        "start": {
+          "byteOffset": 89,
+          "line": 6,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 114,
+          "line": 6,
+          "column": 26
+        }
+      },
+      "target": {
+        "type": "arc",
+        "id": {
+          "document": "copies.petrinet",
+          "statement": 4,
+          "part": 0
+        }
+      },
+      "value": {
+        "from": {
+          "type": "place",
+          "name": "lock"
+        },
+        "to": {
+          "type": "transition",
+          "name": "acquire"
+        },
+        "color": {
+          "kind": "explicit",
+          "value": "pulse"
+        },
+        "mode": "consume",
+        "transitionNameSpan": {
+          "source": "copies.petrinet",
+          "start": {
+            "byteOffset": 106,
+            "line": 6,
+            "column": 18
+          },
+          "end": {
+            "byteOffset": 113,
+            "line": 6,
+            "column": 25
+          }
+        }
+      }
+    },
+    {
+      "id": {
+        "source": "copies.petrinet",
+        "statement": 5,
+        "part": 0
+      },
+      "kind": "arc.declare",
+      "ordinal": 5,
+      "span": {
+        "source": "copies.petrinet",
+        "start": {
+          "byteOffset": 115,
+          "line": 7,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 140,
+          "line": 7,
+          "column": 26
+        }
+      },
+      "target": {
+        "type": "arc",
+        "id": {
+          "document": "copies.petrinet",
+          "statement": 5,
+          "part": 0
+        }
+      },
+      "value": {
+        "from": {
+          "type": "place",
+          "name": "lock"
+        },
+        "to": {
+          "type": "transition",
+          "name": "release"
+        },
+        "color": {
+          "kind": "explicit",
+          "value": "pulse"
+        },
+        "mode": "consume",
+        "transitionNameSpan": {
+          "source": "copies.petrinet",
+          "start": {
+            "byteOffset": 132,
+            "line": 7,
+            "column": 18
+          },
+          "end": {
+            "byteOffset": 139,
+            "line": 7,
+            "column": 25
+          }
+        }
+      }
+    },
+    {
+      "id": {
+        "source": "copies.petrinet",
+        "statement": 6,
+        "part": 0
+      },
+      "kind": "arc.declare",
+      "ordinal": 6,
+      "span": {
+        "source": "copies.petrinet",
+        "start": {
+          "byteOffset": 141,
+          "line": 8,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 164,
+          "line": 8,
+          "column": 24
+        }
+      },
+      "target": {
+        "type": "arc",
+        "id": {
+          "document": "copies.petrinet",
+          "statement": 6,
+          "part": 0
+        }
+      },
+      "value": {
+        "from": {
+          "type": "place",
+          "name": "badge"
+        },
+        "to": {
+          "type": "transition",
+          "name": "lend"
+        },
+        "color": {
+          "kind": "explicit",
+          "value": "pulse"
+        },
+        "mode": "consume",
+        "transitionNameSpan": {
+          "source": "copies.petrinet",
+          "start": {
+            "byteOffset": 159,
+            "line": 8,
+            "column": 19
+          },
+          "end": {
+            "byteOffset": 163,
+            "line": 8,
+            "column": 23
+          }
+        }
+      }
+    },
+    {
+      "id": {
+        "source": "copies.petrinet",
+        "statement": 7,
+        "part": 0
+      },
+      "kind": "arc.declare",
+      "ordinal": 7,
+      "span": {
+        "source": "copies.petrinet",
+        "start": {
+          "byteOffset": 165,
+          "line": 9,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 190,
+          "line": 9,
+          "column": 26
+        }
+      },
+      "target": {
+        "type": "arc",
+        "id": {
+          "document": "copies.petrinet",
+          "statement": 7,
+          "part": 0
+        }
+      },
+      "value": {
+        "from": {
+          "type": "place",
+          "name": "badge"
+        },
+        "to": {
+          "type": "transition",
+          "name": "recall"
+        },
+        "color": {
+          "kind": "explicit",
+          "value": "pulse"
+        },
+        "mode": "consume",
+        "transitionNameSpan": {
+          "source": "copies.petrinet",
+          "start": {
+            "byteOffset": 183,
+            "line": 9,
+            "column": 19
+          },
+          "end": {
+            "byteOffset": 189,
+            "line": 9,
+            "column": 25
+          }
+        }
+      }
+    },
+    {
+      "id": {
+        "source": "copies.petrinet",
+        "statement": 8,
+        "part": 0
+      },
+      "kind": "arc.declare",
+      "ordinal": 8,
+      "span": {
+        "source": "copies.petrinet",
+        "start": {
+          "byteOffset": 191,
+          "line": 10,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 214,
+          "line": 10,
+          "column": 24
+        }
+      },
+      "target": {
+        "type": "arc",
+        "id": {
+          "document": "copies.petrinet",
+          "statement": 8,
+          "part": 0
+        }
+      },
+      "value": {
+        "from": {
+          "type": "place",
+          "name": "badge"
+        },
+        "to": {
+          "type": "transition",
+          "name": "keep"
+        },
+        "color": {
+          "kind": "explicit",
+          "value": "pulse"
+        },
+        "mode": "consume",
+        "transitionNameSpan": {
+          "source": "copies.petrinet",
+          "start": {
+            "byteOffset": 209,
+            "line": 10,
+            "column": 19
+          },
+          "end": {
+            "byteOffset": 213,
+            "line": 10,
+            "column": 23
+          }
+        }
+      }
+    },
+    {
+      "id": {
+        "source": "copies.petrinet",
+        "statement": 9,
+        "part": 0
+      },
+      "kind": "arc.declare",
+      "ordinal": 9,
+      "span": {
+        "source": "copies.petrinet",
+        "start": {
+          "byteOffset": 215,
+          "line": 11,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 240,
+          "line": 11,
+          "column": 26
+        }
+      },
+      "target": {
+        "type": "arc",
+        "id": {
+          "document": "copies.petrinet",
+          "statement": 9,
+          "part": 0
+        }
+      },
+      "value": {
+        "from": {
+          "type": "transition",
+          "name": "acquire"
+        },
+        "to": {
+          "type": "place",
+          "name": "done"
+        },
+        "color": {
+          "kind": "explicit",
+          "value": "pulse"
+        },
+        "mode": "produce"
+      }
+    },
+    {
+      "id": {
+        "source": "copies.petrinet",
+        "statement": 10,
+        "part": 0
+      },
+      "kind": "arc.declare",
+      "ordinal": 10,
+      "span": {
+        "source": "copies.petrinet",
+        "start": {
+          "byteOffset": 241,
+          "line": 12,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 265,
+          "line": 12,
+          "column": 25
+        }
+      },
+      "target": {
+        "type": "arc",
+        "id": {
+          "document": "copies.petrinet",
+          "statement": 10,
+          "part": 0
+        }
+      },
+      "value": {
+        "from": {
+          "type": "transition",
+          "name": "release"
+        },
+        "to": {
+          "type": "place",
+          "name": "out"
+        },
+        "color": {
+          "kind": "explicit",
+          "value": "pulse"
+        },
+        "mode": "produce"
+      }
+    },
+    {
+      "id": {
+        "source": "copies.petrinet",
+        "statement": 11,
+        "part": 0
+      },
+      "kind": "arc.declare",
+      "ordinal": 11,
+      "span": {
+        "source": "copies.petrinet",
+        "start": {
+          "byteOffset": 266,
+          "line": 13,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 288,
+          "line": 13,
+          "column": 23
+        }
+      },
+      "target": {
+        "type": "arc",
+        "id": {
+          "document": "copies.petrinet",
+          "statement": 11,
+          "part": 0
+        }
+      },
+      "value": {
+        "from": {
+          "type": "transition",
+          "name": "lend"
+        },
+        "to": {
+          "type": "place",
+          "name": "done"
+        },
+        "color": {
+          "kind": "explicit",
+          "value": "pulse"
+        },
+        "mode": "produce"
+      }
+    },
+    {
+      "id": {
+        "source": "copies.petrinet",
+        "statement": 12,
+        "part": 0
+      },
+      "kind": "arc.declare",
+      "ordinal": 12,
+      "span": {
+        "source": "copies.petrinet",
+        "start": {
+          "byteOffset": 289,
+          "line": 14,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 313,
+          "line": 14,
+          "column": 25
+        }
+      },
+      "target": {
+        "type": "arc",
+        "id": {
+          "document": "copies.petrinet",
+          "statement": 12,
+          "part": 0
+        }
+      },
+      "value": {
+        "from": {
+          "type": "transition",
+          "name": "recall"
+        },
+        "to": {
+          "type": "place",
+          "name": "done"
+        },
+        "color": {
+          "kind": "explicit",
+          "value": "pulse"
+        },
+        "mode": "produce"
+      }
+    },
+    {
+      "id": {
+        "source": "copies.petrinet",
+        "statement": 13,
+        "part": 0
+      },
+      "kind": "arc.declare",
+      "ordinal": 13,
+      "span": {
+        "source": "copies.petrinet",
+        "start": {
+          "byteOffset": 314,
+          "line": 15,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 336,
+          "line": 15,
+          "column": 23
+        }
+      },
+      "target": {
+        "type": "arc",
+        "id": {
+          "document": "copies.petrinet",
+          "statement": 13,
+          "part": 0
+        }
+      },
+      "value": {
+        "from": {
+          "type": "transition",
+          "name": "keep"
+        },
+        "to": {
+          "type": "place",
+          "name": "done"
+        },
+        "color": {
+          "kind": "explicit",
+          "value": "pulse"
+        },
+        "mode": "produce"
+      }
+    },
+    {
+      "id": {
+        "source": "copies.petrinet",
+        "statement": 14,
+        "part": 0
+      },
+      "kind": "documentation.annotation",
+      "ordinal": 14,
+      "span": {
+        "source": "copies.petrinet",
+        "start": {
+          "byteOffset": 338,
+          "line": 17,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 367,
+          "line": 17,
+          "column": 30
+        }
+      },
+      "target": {
+        "type": "place",
+        "name": "lock"
+      },
+      "value": {
+        "key": "fusion",
+        "value": {
+          "type": "boolean",
+          "value": true
+        }
+      }
+    },
+    {
+      "id": {
+        "source": "copies.petrinet",
+        "statement": 15,
+        "part": 0
+      },
+      "kind": "documentation.annotation",
+      "ordinal": 15,
+      "span": {
+        "source": "copies.petrinet",
+        "start": {
+          "byteOffset": 368,
+          "line": 18,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 398,
+          "line": 18,
+          "column": 31
+        }
+      },
+      "target": {
+        "type": "place",
+        "name": "badge"
+      },
+      "value": {
+        "key": "fusion",
+        "value": {
+          "type": "boolean",
+          "value": true
+        }
+      }
+    },
+    {
+      "id": {
+        "source": "copies.petrinet",
+        "statement": 16,
+        "part": 0
+      },
+      "kind": "decoration.beside",
+      "ordinal": 16,
+      "span": {
+        "source": "copies.petrinet",
+        "start": {
+          "byteOffset": 399,
+          "line": 19,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 426,
+          "line": 19,
+          "column": 28
+        }
+      },
+      "target": {
+        "type": "place",
+        "name": "lock"
+      },
+      "value": {
+        "side": "left"
+      }
+    },
+    {
+      "id": {
+        "source": "copies.petrinet",
+        "statement": 17,
+        "part": 0
+      },
+      "kind": "decoration.beside",
+      "ordinal": 17,
+      "span": {
+        "source": "copies.petrinet",
+        "start": {
+          "byteOffset": 427,
+          "line": 20,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 450,
+          "line": 20,
+          "column": 24
+        }
+      },
+      "target": {
+        "type": "place",
+        "name": "badge"
+      },
+      "value": {}
+    },
+    {
+      "id": {
+        "source": "copies.petrinet",
+        "statement": 18,
+        "part": 0
+      },
+      "kind": "transition.handler",
+      "ordinal": 18,
+      "span": {
+        "source": "copies.petrinet",
+        "start": {
+          "byteOffset": 452,
+          "line": 22,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 492,
+          "line": 22,
+          "column": 41
+        }
+      },
+      "target": {
+        "type": "transition",
+        "name": "acquire"
+      },
+      "value": {
+        "handler": "acquire@place_copies"
+      }
+    },
+    {
+      "id": {
+        "source": "copies.petrinet",
+        "statement": 19,
+        "part": 0
+      },
+      "kind": "transition.handler",
+      "ordinal": 19,
+      "span": {
+        "source": "copies.petrinet",
+        "start": {
+          "byteOffset": 493,
+          "line": 23,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 533,
+          "line": 23,
+          "column": 41
+        }
+      },
+      "target": {
+        "type": "transition",
+        "name": "release"
+      },
+      "value": {
+        "handler": "release@place_copies"
+      }
+    },
+    {
+      "id": {
+        "source": "copies.petrinet",
+        "statement": 20,
+        "part": 0
+      },
+      "kind": "transition.handler",
+      "ordinal": 20,
+      "span": {
+        "source": "copies.petrinet",
+        "start": {
+          "byteOffset": 534,
+          "line": 24,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 568,
+          "line": 24,
+          "column": 35
+        }
+      },
+      "target": {
+        "type": "transition",
+        "name": "lend"
+      },
+      "value": {
+        "handler": "lend@place_copies"
+      }
+    },
+    {
+      "id": {
+        "source": "copies.petrinet",
+        "statement": 21,
+        "part": 0
+      },
+      "kind": "transition.handler",
+      "ordinal": 21,
+      "span": {
+        "source": "copies.petrinet",
+        "start": {
+          "byteOffset": 569,
+          "line": 25,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 607,
+          "line": 25,
+          "column": 39
+        }
+      },
+      "target": {
+        "type": "transition",
+        "name": "recall"
+      },
+      "value": {
+        "handler": "recall@place_copies"
+      }
+    },
+    {
+      "id": {
+        "source": "copies.petrinet",
+        "statement": 22,
+        "part": 0
+      },
+      "kind": "transition.handler",
+      "ordinal": 22,
+      "span": {
+        "source": "copies.petrinet",
+        "start": {
+          "byteOffset": 608,
+          "line": 26,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 642,
+          "line": 26,
+          "column": 35
+        }
+      },
+      "target": {
+        "type": "transition",
+        "name": "keep"
+      },
+      "value": {
+        "handler": "keep@place_copies"
+      }
+    },
+    {
+      "id": {
+        "source": "copies.petrinet",
+        "statement": 23,
+        "part": 0
+      },
+      "kind": "view.position",
+      "ordinal": 23,
+      "span": {
+        "source": "copies.petrinet",
+        "start": {
+          "byteOffset": 644,
+          "line": 28,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 693,
+          "line": 28,
+          "column": 50
+        }
+      },
+      "target": {
+        "type": "view",
+        "name": "lanes"
+      },
+      "value": {
+        "subject": {
+          "type": "transition",
+          "name": "acquire"
+        },
+        "position": {
+          "type": "object",
+          "entries": [
+            {
+              "key": "x",
+              "value": {
+                "type": "number",
+                "lexeme": "0"
+              }
+            },
+            {
+              "key": "y",
+              "value": {
+                "type": "number",
+                "lexeme": "0"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": {
+        "source": "copies.petrinet",
+        "statement": 24,
+        "part": 0
+      },
+      "kind": "view.position",
+      "ordinal": 24,
+      "span": {
+        "source": "copies.petrinet",
+        "start": {
+          "byteOffset": 694,
+          "line": 29,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 745,
+          "line": 29,
+          "column": 52
+        }
+      },
+      "target": {
+        "type": "view",
+        "name": "lanes"
+      },
+      "value": {
+        "subject": {
+          "type": "transition",
+          "name": "release"
+        },
+        "position": {
+          "type": "object",
+          "entries": [
+            {
+              "key": "x",
+              "value": {
+                "type": "number",
+                "lexeme": "300"
+              }
+            },
+            {
+              "key": "y",
+              "value": {
+                "type": "number",
+                "lexeme": "0"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": {
+        "source": "copies.petrinet",
+        "statement": 25,
+        "part": 0
+      },
+      "kind": "view.position",
+      "ordinal": 25,
+      "span": {
+        "source": "copies.petrinet",
+        "start": {
+          "byteOffset": 746,
+          "line": 30,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 795,
+          "line": 30,
+          "column": 50
+        }
+      },
+      "target": {
+        "type": "view",
+        "name": "lanes"
+      },
+      "value": {
+        "subject": {
+          "type": "place",
+          "name": "lock"
+        },
+        "position": {
+          "type": "object",
+          "entries": [
+            {
+              "key": "x",
+              "value": {
+                "type": "number",
+                "lexeme": "150"
+              }
+            },
+            {
+              "key": "y",
+              "value": {
+                "type": "number",
+                "lexeme": "80"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": {
+        "source": "copies.petrinet",
+        "statement": 26,
+        "part": 0
+      },
+      "kind": "view.position",
+      "ordinal": 26,
+      "span": {
+        "source": "copies.petrinet",
+        "start": {
+          "byteOffset": 796,
+          "line": 31,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 872,
+          "line": 31,
+          "column": 77
+        }
+      },
+      "target": {
+        "type": "view",
+        "name": "lanes"
+      },
+      "value": {
+        "subject": {
+          "type": "placeCopy",
+          "place": "lock",
+          "transition": "acquire"
+        },
+        "position": {
+          "from": {
+            "type": "transition",
+            "name": "acquire"
+          },
+          "delta": {
+            "type": "object",
+            "entries": [
+              {
+                "key": "x",
+                "value": {
+                  "type": "number",
+                  "lexeme": "-70"
+                }
+              },
+              {
+                "key": "y",
+                "value": {
+                  "type": "number",
+                  "lexeme": "0"
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": {
+        "source": "copies.petrinet",
+        "statement": 27,
+        "part": 0
+      },
+      "kind": "view.position",
+      "ordinal": 27,
+      "span": {
+        "source": "copies.petrinet",
+        "start": {
+          "byteOffset": 873,
+          "line": 32,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 931,
+          "line": 32,
+          "column": 59
+        }
+      },
+      "target": {
+        "type": "view",
+        "name": "lanes"
+      },
+      "value": {
+        "subject": {
+          "type": "placeCopy",
+          "place": "lock",
+          "transition": "release"
+        },
+        "position": {
+          "type": "object",
+          "entries": [
+            {
+              "key": "x",
+              "value": {
+                "type": "number",
+                "lexeme": "370"
+              }
+            },
+            {
+              "key": "y",
+              "value": {
+                "type": "number",
+                "lexeme": "0"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": {
+        "source": "copies.petrinet",
+        "statement": 28,
+        "part": 0
+      },
+      "kind": "view.position",
+      "ordinal": 28,
+      "span": {
+        "source": "copies.petrinet",
+        "start": {
+          "byteOffset": 932,
+          "line": 33,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 995,
+          "line": 33,
+          "column": 64
+        }
+      },
+      "target": {
+        "type": "view",
+        "name": "lanes"
+      },
+      "value": {
+        "subject": {
+          "type": "place",
+          "name": "done"
+        },
+        "position": {
+          "from": {
+            "type": "place",
+            "name": "lock"
+          },
+          "delta": {
+            "type": "object",
+            "entries": [
+              {
+                "key": "x",
+                "value": {
+                  "type": "number",
+                  "lexeme": "0"
+                }
+              },
+              {
+                "key": "y",
+                "value": {
+                  "type": "number",
+                  "lexeme": "-40"
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": {
+        "source": "copies.petrinet",
+        "statement": 29,
+        "part": 0
+      },
+      "kind": "view.position",
+      "ordinal": 29,
+      "span": {
+        "source": "copies.petrinet",
+        "start": {
+          "byteOffset": 996,
+          "line": 34,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 1052,
+          "line": 34,
+          "column": 57
+        }
+      },
+      "target": {
+        "type": "view",
+        "name": "lanes"
+      },
+      "value": {
+        "subject": {
+          "type": "placeCopy",
+          "place": "badge",
+          "transition": "lend"
+        },
+        "position": {
+          "type": "object",
+          "entries": [
+            {
+              "key": "x",
+              "value": {
+                "type": "number",
+                "lexeme": "40"
+              }
+            },
+            {
+              "key": "y",
+              "value": {
+                "type": "number",
+                "lexeme": "20"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": {
+        "source": "copies.petrinet",
+        "statement": 30,
+        "part": 0
+      },
+      "kind": "view.position",
+      "ordinal": 30,
+      "span": {
+        "source": "copies.petrinet",
+        "start": {
+          "byteOffset": 1053,
+          "line": 35,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 1111,
+          "line": 35,
+          "column": 59
+        }
+      },
+      "target": {
+        "type": "view",
+        "name": "lanes"
+      },
+      "value": {
+        "subject": {
+          "type": "placeCopy",
+          "place": "badge",
+          "transition": "recall"
+        },
+        "position": {
+          "type": "object",
+          "entries": [
+            {
+              "key": "x",
+              "value": {
+                "type": "number",
+                "lexeme": "80"
+              }
+            },
+            {
+              "key": "y",
+              "value": {
+                "type": "number",
+                "lexeme": "20"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": {
+        "source": "copies.petrinet",
+        "statement": 31,
+        "part": 0
+      },
+      "kind": "view.position",
+      "ordinal": 31,
+      "span": {
+        "source": "copies.petrinet",
+        "start": {
+          "byteOffset": 1112,
+          "line": 36,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 1168,
+          "line": 36,
+          "column": 57
+        }
+      },
+      "target": {
+        "type": "view",
+        "name": "lanes"
+      },
+      "value": {
+        "subject": {
+          "type": "placeCopy",
+          "place": "badge",
+          "transition": "keep"
+        },
+        "position": {
+          "type": "object",
+          "entries": [
+            {
+              "key": "x",
+              "value": {
+                "type": "number",
+                "lexeme": "40"
+              }
+            },
+            {
+              "key": "y",
+              "value": {
+                "type": "number",
+                "lexeme": "20"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": {
+        "source": "copies.petrinet",
+        "statement": 32,
+        "part": 0
+      },
+      "kind": "view.position",
+      "ordinal": 32,
+      "span": {
+        "source": "copies.petrinet",
+        "start": {
+          "byteOffset": 1169,
+          "line": 37,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 1240,
+          "line": 37,
+          "column": 72
+        }
+      },
+      "target": {
+        "type": "view",
+        "name": "lanes"
+      },
+      "value": {
+        "subject": {
+          "type": "place",
+          "name": "out"
+        },
+        "position": {
+          "from": {
+            "type": "placeCopy",
+            "place": "lock",
+            "transition": "release"
+          },
+          "delta": {
+            "type": "object",
+            "entries": [
+              {
+                "key": "x",
+                "value": {
+                  "type": "number",
+                  "lexeme": "10"
+                }
+              },
+              {
+                "key": "y",
+                "value": {
+                  "type": "number",
+                  "lexeme": "0"
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+{
+  "sourceId": "single.petrinet",
+  "text": "net single\n\n(queued) -job-> [start] -job-> (running)\n(running) -job-> [finish] -job-> (done)\n(switch) -flag->? [start]\n(switch) -flag->? [finish]\n(budget) -credit->? [start]\n(switch) annotation fusion true\n(budget) annotation fusion true\n\ndecorate (switch) single\ndecorate (budget) beside\n\nview detail fusion (switch) copies\nview overview fusion (budget) single\n"
+}

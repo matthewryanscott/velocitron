@@ -25,7 +25,15 @@ import type {
   Token,
   Transition,
 } from "./schema/types.js";
-import type {Decoration, Decorations} from "./view.js";
+import {
+  NAME_POINT,
+  SMALL_POINT,
+  besideGap,
+  nodeWidth,
+  resolveFusionMode,
+  type Decoration,
+  type Decorations,
+} from "./view.js";
 
 const INPUT_PORT_FILL = "#e7f1fb";
 const INPUT_PORT_BORDER = "#1f6feb";
@@ -76,6 +84,21 @@ export interface NetRenderOptions {
   readonly style?: RenderStyle;
   readonly renderFusion?: boolean;
   readonly decorations?: Decorations;
+  /** Place name to `"single"` or `"copies"`. A view's choice; it wins over `decorate single`. */
+  readonly fusionModes?: Readonly<Record<string, string>>;
+}
+
+export interface BesidePlacement {
+  readonly line: number;
+  readonly place: string;
+  readonly anchor: string;
+  readonly slots: number;
+  readonly gap: number;
+  readonly also?: string;
+  readonly alsoSlots?: number;
+  readonly alsoGap?: number;
+  readonly betweenIndex: number;
+  readonly betweenCount: number;
 }
 
 export interface RenderModel {
@@ -84,6 +107,13 @@ export interface RenderModel {
   readonly arcLines: readonly number[];
   readonly graphAttrLine: number;
   readonly besideLines: readonly number[];
+  readonly besidePlacements: readonly BesidePlacement[];
+  /** Drawn fusion copy `(place, transition)` → node line. A shared copy is one line under both transitions. */
+  readonly copyLines: ReadonlyMap<string, number>;
+}
+
+export function copyKey(place: string, transition: string): string {
+  return `${place}\0${transition}`;
 }
 
 export interface FusionLayout {
@@ -129,6 +159,7 @@ export function netRenderModel(net: Net, options: NetRenderOptions = {}): Render
     style,
     renderFusion: options.renderFusion !== false,
     decorations: options.decorations ?? EMPTY_DECORATIONS,
+    fusionModes: options.fusionModes ?? {},
     recorder,
   });
   const dot = `${[...header, "", ...body, "}"].join("\n")}\n`;
@@ -140,6 +171,8 @@ export function netRenderModel(net: Net, options: NetRenderOptions = {}): Render
     arcLines: recorder.arcLines,
     graphAttrLine: header.length,
     besideLines: recorder.besideLines,
+    besidePlacements: recorder.besidePlacements,
+    copyLines: recorder.copyLines,
   };
 }
 
@@ -311,6 +344,8 @@ export function fusionLayout(
   const shared = new Map<string, string>();
   const gaps = new Map<string, string[]>();
   const outerRight = new Set<string>();
+  const outwardLeft = new Set<string>();
+  const outwardRight = new Set<string>();
   const segments: string[][] = [];
   for (const group of siblingGroups(net, fusion)) {
     const linked = Array.from({length: Math.max(group.length - 1, 0)}, () => false);
@@ -325,17 +360,25 @@ export function fusionLayout(
         let end = start;
         while (end < group.length && (besidePlaces.get(group[end]!) ?? []).includes(place)) end += 1;
         const run = group.slice(start, end);
-        for (let index = 0; index < run.length - 1; index += 2) {
-          const left = run[index]!;
-          const right = run[index + 1]!;
-          const copy = copyId(place, [left, right]);
-          shared.set(pairKey(place, left), copy);
-          shared.set(pairKey(place, right), copy);
-          pushMap(gaps, edgeKey(left, right), place);
-        }
-        if (run.length > 1) {
+        // Unshared (ADR 0070): one row, copies outside it. A missing
+        // besideShare still shares, which is the ADR 0035 default.
+        if (run.length > 1 && decoration.besideShare === false) {
           for (let index = start; index < end - 1; index += 1) linked[index] = true;
-          if (run.length % 2 === 1) outerRight.add(pairKey(place, run[run.length - 1]!));
+          outwardLeft.add(pairKey(place, run[0]!));
+          outwardRight.add(pairKey(place, run[run.length - 1]!));
+        } else {
+          for (let index = 0; index < run.length - 1; index += 2) {
+            const left = run[index]!;
+            const right = run[index + 1]!;
+            const copy = copyId(place, [left, right]);
+            shared.set(pairKey(place, left), copy);
+            shared.set(pairKey(place, right), copy);
+            pushMap(gaps, edgeKey(left, right), place);
+          }
+          if (run.length > 1) {
+            for (let index = start; index < end - 1; index += 1) linked[index] = true;
+            if (run.length % 2 === 1) outerRight.add(pairKey(place, run[run.length - 1]!));
+          }
         }
         start = end === start ? end + 1 : end;
       }
@@ -366,14 +409,17 @@ export function fusionLayout(
         if (shared.has(pairKey(place, transition))) continue;
         const decoration = besideOf(place);
         if (decoration === undefined) continue;
+        const key = pairKey(place, transition);
         const side =
           decoration.besideSide != null
             ? decoration.besideSide
-            : outerRight.has(pairKey(place, transition))
-              ? "right"
-              : left.length + sharedLeft <= right.length + sharedRight
-                ? "left"
-                : "right";
+            : outwardLeft.has(key)
+              ? "left"
+              : outwardRight.has(key) || outerRight.has(key)
+                ? "right"
+                : left.length + sharedLeft <= right.length + sharedRight
+                  ? "left"
+                  : "right";
         (side === "left" ? left : right).push(copyId(place, [transition]));
       }
       order.push(...left.reverse(), transition, ...right);
@@ -386,7 +432,15 @@ export function fusionLayout(
     return order;
   };
   for (const places of besidePlaces.values()) {
-    places.sort((left, right) => compareOrder([...nodeOrder("place", left, ranks)], [...nodeOrder("place", right, ranks)]));
+    // An authored side is placed before an unsided copy, so a later name
+    // cannot take the side the author already chose. Within each group the
+    // structural order still decides which copy sits nearest.
+    places.sort((left, right) => {
+      const leftAuthored = besideOf(left)?.besideSide != null ? 0 : 1;
+      const rightAuthored = besideOf(right)?.besideSide != null ? 0 : 1;
+      if (leftAuthored !== rightAuthored) return leftAuthored - rightAuthored;
+      return compareOrder([...nodeOrder("place", left, ranks)], [...nodeOrder("place", right, ranks)]);
+    });
   }
   const rows: string[][] = [];
   const seenRows = new Set<string>();
@@ -411,6 +465,95 @@ export function fusionLayout(
     );
   }
   return {copies, rows};
+}
+
+export function besidePlacements(
+  layout: FusionLayout,
+  drawn: ReadonlyMap<string, {line: number; place: string}>,
+  widths: ReadonlyMap<string, number>,
+): BesidePlacement[] {
+  // Keep this in step with `_beside_placements` in the Python renderer.
+  const users = new Map<string, Set<string>>();
+  const sideGap = (anchor: string, nodes: readonly string[]): number => {
+    const widest = nodes.reduce((width, node) => Math.max(width, widths.get(node) ?? 0), 0);
+    return besideGap(widths.get(anchor) ?? 0, widest);
+  };
+  for (const [key, copy] of layout.copies) {
+    const transition = key.split("\0")[1];
+    if (transition === undefined) continue;
+    const found = users.get(copy);
+    if (found === undefined) users.set(copy, new Set([transition]));
+    else found.add(transition);
+  }
+  const placements: BesidePlacement[] = [];
+  const own = (node: string, anchor: string, slots: number, gap: number): void => {
+    const copy = drawn.get(node);
+    if (copy === undefined) return;
+    placements.push({
+      line: copy.line,
+      place: `place:${copy.place}`,
+      anchor: `transition:${anchor}`,
+      slots,
+      gap,
+      betweenIndex: 0,
+      betweenCount: 1,
+    });
+  };
+  for (const row of layout.rows) {
+    const transAt = row.flatMap((node, index) => (drawn.has(node) ? [] : [index]));
+    const first = transAt[0];
+    const last = transAt[transAt.length - 1];
+    if (first === undefined || last === undefined) continue;
+    const leftNodes = row.slice(0, first).reverse();
+    if (leftNodes.length > 0) {
+      const gap = sideGap(row[first]!, leftNodes);
+      leftNodes.forEach((node, index) => own(node, row[first]!, -(index + 1), gap));
+    }
+    const rightNodes = row.slice(last + 1);
+    if (rightNodes.length > 0) {
+      const gap = sideGap(row[last]!, rightNodes);
+      rightNodes.forEach((node, index) => own(node, row[last]!, index + 1, gap));
+    }
+    for (let pair = 0; pair < transAt.length - 1; pair += 1) {
+      const leftIndex = transAt[pair]!;
+      const rightIndex = transAt[pair + 1]!;
+      const leftName = row[leftIndex]!;
+      const rightName = row[rightIndex]!;
+      const ownRight: string[] = [];
+      const ownLeft: string[] = [];
+      const shared: string[] = [];
+      for (const node of row.slice(leftIndex + 1, rightIndex)) {
+        const used = users.get(node) ?? new Set<string>();
+        if (used.has(leftName) && used.has(rightName)) shared.push(node);
+        else if (used.has(rightName) && !used.has(leftName)) ownLeft.push(node);
+        else ownRight.push(node);
+      }
+      const gapRight = ownRight.length + shared.length > 0 ? sideGap(leftName, [...ownRight, ...shared]) : 0;
+      const gapLeft = ownLeft.length + shared.length > 0 ? sideGap(rightName, [...ownLeft, ...shared]) : 0;
+      ownRight.forEach((node, index) => own(node, leftName, index + 1, gapRight));
+      ownLeft
+        .slice()
+        .reverse()
+        .forEach((node, index) => own(node, rightName, -(index + 1), gapLeft));
+      shared.forEach((node, index) => {
+        const copy = drawn.get(node);
+        if (copy === undefined) return;
+        placements.push({
+          line: copy.line,
+          place: `place:${copy.place}`,
+          anchor: `transition:${leftName}`,
+          slots: ownRight.length + index + 1,
+          gap: gapRight,
+          also: `transition:${rightName}`,
+          alsoSlots: -(ownLeft.length + (shared.length - index)),
+          alsoGap: gapLeft,
+          betweenIndex: index,
+          betweenCount: shared.length,
+        });
+      });
+    }
+  }
+  return placements;
 }
 
 export function fusionCopy(
@@ -478,6 +621,8 @@ class RenderIndex {
   readonly nodeLines = new Map<string, number[]>();
   readonly arcLines: number[] = [];
   readonly besideLines: number[] = [];
+  readonly besidePlacements: BesidePlacement[] = [];
+  readonly copyLines = new Map<string, number>();
 
   constructor(private readonly offset: number) {}
 
@@ -487,6 +632,10 @@ class RenderIndex {
     else found.push(this.offset + position);
   }
 
+  recordCopy(place: string, transition: string, position: number): void {
+    this.copyLines.set(copyKey(place, transition), this.offset + position);
+  }
+
   recordArc(index: number, position: number): void {
     // Declaration index, not emission order: a view routes net.arcs[index].
     this.arcLines[index] = this.offset + position;
@@ -494,6 +643,10 @@ class RenderIndex {
 
   recordBeside(position: number): void {
     this.besideLines.push(this.offset + position);
+  }
+
+  recordBesidePlacement(placement: BesidePlacement): void {
+    this.besidePlacements.push({...placement, line: this.offset + placement.line});
   }
 }
 
@@ -505,6 +658,7 @@ function netBody(
     style: Style;
     renderFusion: boolean;
     decorations: Decorations;
+    fusionModes: Readonly<Record<string, string>>;
     recorder: RenderIndex | undefined;
     indent?: string;
     prefix?: string;
@@ -515,13 +669,24 @@ function netBody(
   const selected = !args.includeMarking
     ? undefined
     : (args.marking ?? net.initialMarking);
-  const fusion = args.renderFusion
-    ? new Set(net.places.filter(isFusionPlace).map((place) => place.name))
-    : new Set<string>();
+  const copyPlaces = new Set<string>();
+  const singlePlaces = new Set<string>();
+  if (args.renderFusion) {
+    for (const place of net.places) {
+      if (!isFusionPlace(place)) continue;
+      if (resolveFusionMode(place.name, args.decorations, args.fusionModes) === "single") {
+        singlePlaces.add(place.name);
+      } else {
+        copyPlaces.add(place.name);
+      }
+    }
+  }
+  const fusion = copyPlaces;
   const tokensOf = (place: Place): readonly Token[] => selected?.[place.name] ?? [];
   const nodeDecoration = (key: string): Decoration => args.decorations.nodes[key] ?? NO_DECORATION;
   const lines: string[] = [];
   const ranks = flowRanks(net);
+  const widths = new Map<string, number>();
   const placesInOrder = [...net.places].sort((left, right) =>
     compareOrder([...nodeOrder("place", left.name, ranks)], [...nodeOrder("place", right.name, ranks)]),
   );
@@ -531,6 +696,7 @@ function netBody(
     const attrs = placeAttrs(place, tokensOf(place), {
       label: memberLabel(place.name),
       style: args.style,
+      fusion: singlePlaces.has(place.name),
       decoration: nodeDecoration(`place:${place.name}`),
     });
     lines.push(`${indent}${quote(`${prefix}${place.name}`)} [${attrs}];`);
@@ -541,15 +707,17 @@ function netBody(
   );
   for (const transition of transitionsInOrder) {
     args.recorder?.recordNode(`transition:${transition.name}`, lines.length);
-    const attrs = transitionAttrs(transition, args.style, nodeDecoration(`transition:${transition.name}`));
+    const transitionDecoration = nodeDecoration(`transition:${transition.name}`);
+    widths.set(transition.name, nodeWidth(measureTransition(transition, args.style, transitionDecoration)));
+    const attrs = transitionAttrs(transition, args.style, transitionDecoration);
     lines.push(`${indent}${quote(`${prefix}${transition.name}`)} [${attrs}];`);
   }
   lines.push("");
   const layout = fusionLayout(net, fusion, args.decorations);
+  const drawn = new Map<string, {line: number; place: string}>();
   if (fusion.size > 0) {
     const places = new Map(net.places.map((place) => [place.name, place]));
     const transitions = new Map(net.transitions.map((transition) => [transition.name, transition]));
-    const drawn = new Set<string>();
     const copies = [...layout.copies].sort((left, right) => {
       const [leftPlace, leftTransition] = left[0].split("\0");
       const [rightPlace, rightTransition] = right[0].split("\0");
@@ -559,14 +727,23 @@ function netBody(
       );
     });
     for (const [key, copy] of copies) {
-      if (drawn.has(copy)) continue;
-      drawn.add(copy);
       const [placeName, transitionName] = key.split("\0");
-      const place = places.get(placeName!);
-      if (place === undefined || placeName === undefined || transitionName === undefined) continue;
-      args.recorder?.recordNode(`place:${placeName}`, lines.length);
+      if (placeName === undefined || transitionName === undefined) continue;
+      const already = drawn.get(copy);
+      if (already !== undefined) {
+        args.recorder?.recordCopy(placeName, transitionName, already.line);
+        continue;
+      }
+      const place = places.get(placeName);
+      if (place === undefined) continue;
+      const bodyLine = lines.length;
+      args.recorder?.recordNode(`place:${placeName}`, bodyLine);
+      args.recorder?.recordCopy(placeName, transitionName, bodyLine);
+      drawn.set(copy, {line: bodyLine, place: placeName});
+      const label = memberLabel(placeName, transitions.get(transitionName));
+      widths.set(copy, nodeWidth(measurePlace(label, place, nodeDecoration(`place:${placeName}`))));
       const attrs = placeAttrs(place, tokensOf(place), {
-        label: memberLabel(placeName, transitions.get(transitionName)),
+        label,
         style: args.style,
         fusion: true,
         decoration: nodeDecoration(`place:${placeName}`),
@@ -574,6 +751,11 @@ function netBody(
       lines.push(`${indent}${quote(`${prefix}${copy}`)} [${attrs}];`);
     }
     lines.push("");
+  }
+  if (args.recorder !== undefined) {
+    for (const placement of besidePlacements(layout, drawn, widths)) {
+      args.recorder.recordBesidePlacement(placement);
+    }
   }
   const transitionNames = new Set(net.transitions.map((transition) => transition.name));
   const besideCopies = new Set<string>();
@@ -597,6 +779,43 @@ function netBody(
     args.recorder?.recordBeside(lines.length);
     lines.push(statement);
   }
+  return lines;
+}
+
+function measurePlace(
+  name: string,
+  place: Place,
+  decoration: Decoration,
+): Array<readonly [string, number]> {
+  const lines: Array<readonly [string, number]> = [[name, NAME_POINT]];
+  const colors = place.accepts.filter((type) => type !== GENERIC);
+  if (colors.length > 0) lines.push([`⟨${colors.join(", ")}⟩`, SMALL_POINT]);
+  if (typeof decoration.highlightLabel === "string") lines.push([decoration.highlightLabel, SMALL_POINT]);
+  if (typeof decoration.note === "string") lines.push([decoration.note, SMALL_POINT]);
+  return lines;
+}
+
+function measureTransition(
+  transition: Transition,
+  style: Style,
+  decoration: Decoration,
+): Array<readonly [string, number]> {
+  const lines: Array<readonly [string, number]> = [[transition.name, NAME_POINT]];
+  if (decoration.faded === true) return lines;
+  const summary = style.detail === "summary" && typeof decoration.summary === "string"
+    ? decoration.summary
+    : undefined;
+  if (style.detail !== "structure") {
+    if (transition.handler !== undefined) lines.push([`${transition.handler}()`, SMALL_POINT]);
+    if (summary !== undefined) lines.push([summary, SMALL_POINT]);
+    else if (transition.guard !== undefined) lines.push([`guard: ${transition.guard}?`, SMALL_POINT]);
+    if (summary === undefined) {
+      if (transition.timer !== undefined) lines.push([`timer: ${transition.timer.cel}`, SMALL_POINT]);
+      if (transition.priority !== undefined) lines.push([`priority ${transition.priority}`, SMALL_POINT]);
+    }
+  }
+  if (typeof decoration.highlightLabel === "string") lines.push([decoration.highlightLabel, SMALL_POINT]);
+  if (typeof decoration.note === "string") lines.push([decoration.note, SMALL_POINT]);
   return lines;
 }
 
@@ -913,7 +1132,7 @@ function copyId(place: string, transitions: readonly string[]): string {
 }
 
 function pairKey(place: string, transition: string): string {
-  return `${place}\0${transition}`;
+  return copyKey(place, transition);
 }
 
 function edgeKey(left: string, right: string): string {

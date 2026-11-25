@@ -47,7 +47,7 @@ layers:
   analysis:
     python: velocitron_analysis
     typescript: "@velocitron/analysis"
-    allow: [cel, engine, kernel, petrinet, merge, runtime]
+    allow: [cel, engine, kernel, petrinet, merge, runtime, viz]
   properties:
     python: velocitron_properties
     typescript: "@velocitron/properties"
@@ -79,7 +79,7 @@ layers:
   petrinet:
     python: velocitron_petrinet
     typescript: "@velocitron/petrinet"
-    allow: [spec, ir, grammar, cel, dsl, engine, merge]
+    allow: [spec, ir, grammar, cel, dsl, engine, merge, viz]
   viz:
     python: velocitron_viz
     typescript: "@velocitron/viz"

@@ -10,6 +10,10 @@ from velocitron_petrinet import compile_petrinet_text
 from velocitron_petrinet import parse_net
 from velocitron_cli import viz_main as main
 from velocitron_viz import (
+    NAME_POINT,
+    SMALL_POINT,
+    beside_gap,
+    node_width,
     RenderModel,
     net_render_model,
     net_to_dot,
@@ -799,7 +803,7 @@ def test_beside_leaves_the_order_of_a_written_copy_to_its_row(
     assert "constraint=false" not in _line_with(dot, '"owner@start" -> "start"')
 
 
-def test_beside_is_dropped_by_a_positioned_view_and_by_no_fusion(
+def test_a_positioned_view_places_a_beside_copy_and_drops_rank_clusters(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
     # given: a beside copy and a view that pins start
@@ -812,12 +816,75 @@ def test_beside_is_dropped_by_a_positioned_view_and_by_no_fusion(
         decorations, "--view", "pinned", tmp_path=tmp_path, capsys=capsys
     )
     unfused = _beside_dot(decorations, "--no-fusion", tmp_path=tmp_path, capsys=capsys)
-    # then: neato gets no beside statements, and without copies there are none
+    # then: neato gets no rank clusters, and the pinned transition's copy
+    # sits one gap to its left
     assert "layout=neato;" in pinned
     for dot in (pinned, unfused):
         assert "newrank" not in dot
         assert "cluster_beside" not in dot
         assert "style=invis" not in dot
+    gap = beside_gap(
+        node_width([("start", NAME_POINT)]),
+        node_width([("switch", NAME_POINT), ("⟨flag⟩", SMALL_POINT)]),
+    )
+    number = float(gap)
+    rendered = str(int(number)) if number.is_integer() else str(number)
+    assert f'pos="-{rendered},0!"' in _line_with(pinned, '"switch@start" [')
+    assert "pos=" not in _line_with(pinned, '"switch@finish" [')
+
+
+_LEASE_LOCK = """
+net lease_lock
+
+(ready_a) -job-> [acquire_a]
+(lock) -permit-> [acquire_a]
+[acquire_a] -job-> (held_a)
+(held_a) -job-> [release_a]
+[release_a] -job-> (done_a)
+[release_a] -permit-> (lock)
+
+(ready_b) -job-> [acquire_b]
+(lock) -permit-> [acquire_b]
+[acquire_b] -job-> (held_b)
+(held_b) -job-> [release_b]
+[release_b] -job-> (done_b)
+[release_b] -permit-> (lock)
+
+(lock) annotation fusion true
+decorate (lock) beside left
+
+view lanes position [acquire_a] at {"x": 0, "y": 300}
+view lanes position [release_a] at {"x": 0, "y": 100}
+view lanes position [acquire_b] relative [acquire_a] + {"x": 300, "y": 0}
+view lanes position [release_b] relative [release_a] + {"x": 300, "y": 0}
+"""
+
+
+def test_a_lease_lock_view_places_each_fused_copy_beside_its_transition(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    # given: one fusion lock used by four transitions, and a view that pins them
+    source = tmp_path / "lease_lock.petrinet"
+    source.write_text(_LEASE_LOCK, encoding="utf-8")
+    # when: the lanes view is rendered
+    assert main([str(source), "--view", "lanes", "--plain-labels"]) == 0
+    dot = capsys.readouterr().out
+    # then: each copy sits one gap to the left of its transition, not on one point
+    gap = beside_gap(
+        node_width([("acquire_a", NAME_POINT)]),
+        node_width([("lock", NAME_POINT), ("⟨permit⟩", SMALL_POINT)]),
+    )
+
+    def coord(value: float) -> str:
+        number = float(value)
+        return str(int(number)) if number.is_integer() else str(number)
+
+    assert f'pos="-{coord(gap)},300!"' in _line_with(dot, '"lock@acquire_a" [')
+    assert f'pos="-{coord(gap)},100!"' in _line_with(dot, '"lock@release_a" [')
+    assert f'pos="{coord(300 - gap)},300!"' in _line_with(dot, '"lock@acquire_b" [')
+    assert f'pos="{coord(300 - gap)},100!"' in _line_with(dot, '"lock@release_b" [')
+    assert "layout=neato;" in dot
+    assert "cluster_beside" not in dot
 
 
 def test_decorate_color_show_picks_the_fields_a_render_shows(

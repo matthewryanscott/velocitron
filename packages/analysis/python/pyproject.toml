@@ -22,6 +22,7 @@ dependencies = [
     "velocitron-merge",
     "velocitron-petrinet",
     "velocitron-runtime",
+    "velocitron-viz",
 ]
 
 [project.optional-dependencies]
@@ -35,6 +36,7 @@ velocitron-engine = { path = "../../engine/python", editable = false }
 velocitron-merge = { path = "../../merge/python", editable = false }
 velocitron-petrinet = { path = "../../petrinet/python", editable = false }
 velocitron-runtime = { path = "../../runtime/python", editable = false }
+velocitron-viz = { path = "../../viz/python", editable = false }
 velocitron-kernel = { path = "../../kernel/python", editable = false }
 
 [project.urls]

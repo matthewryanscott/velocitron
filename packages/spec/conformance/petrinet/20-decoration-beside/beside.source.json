@@ -1,4 +1,4 @@
 {
   "sourceId": "beside.petrinet",
-  "text": "net beside\n\n(queued) -job-> [start] -job-> (running)\n(running) -job-> [finish] -job-> (done)\n(switch) -flag->? [start]\n(switch) -flag->? [finish]\n(budget) -credit->? [start]\n(switch) annotation fusion true\n(budget) annotation fusion true\n\ndecorate (switch) beside left\ndecorate (budget) beside\n"
+  "text": "net beside\n\n(queued) -job-> [start] -job-> (running)\n(running) -job-> [finish] -job-> (done)\n(switch) -flag->? [start]\n(switch) -flag->? [finish]\n(budget) -credit->? [start]\n(switch) annotation fusion true\n(budget) annotation fusion true\n\ndecorate (switch) beside left\ndecorate (budget) beside\nview lanes position [start] at {\"x\": 0, \"y\": 200}\nview lanes position [finish] relative [start] + {\"x\": 0, \"y\": -200}\n\nview lanes_lock position [start] at {\"x\": 0, \"y\": 200}\nview lanes_lock position [finish] relative [start] + {\"x\": 0, \"y\": -200}\nview lanes_lock position (switch) at {\"x\": 40, \"y\": 0}\nview lanes_lock position (done) relative (switch) + {\"x\": 80, \"y\": 0}\n"
 }

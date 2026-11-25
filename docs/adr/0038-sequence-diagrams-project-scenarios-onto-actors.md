@@ -3,7 +3,10 @@
 **Status:** Accepted. Amended 2026-10-17 (Decision 2: only consumed tokens
 trigger). Refined by [ADR 0039](0039-sequence-diagrams-draw-lived-places-as-columns.md)
 (2026-10-17): lived places are columns, own steps are notes, and the
-activation folding and self-arrows below are replaced. (The title keeps the
+activation folding and self-arrows below are replaced. Refined again by
+[ADR 0073](0073-hand-off-places-are-sequence-lifelines.md) (2026-11-25): a
+hand-off place is a queue lifeline, and each arrow is drawn in the step
+that moves the token. (The title keeps the
 word `scenarios` this record was written with, 2026-10-17; the object it
 names is the play of ADR 0059, renamed 2026-10-22 — the body's wording
 tracks the rename, the title stays historical.)

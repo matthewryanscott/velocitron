@@ -1,24 +1,30 @@
 {
+  "format": "velocitron.petrinet/contribution-ir",
+  "version": 1,
+  "documentKind": "net",
+  "document": {
+    "id": "beside.petrinet"
+  },
   "contributions": [
     {
       "id": {
-        "part": 0,
         "source": "beside.petrinet",
-        "statement": 0
+        "statement": 0,
+        "part": 0
       },
       "kind": "document.net-header",
       "ordinal": 0,
       "span": {
-        "end": {
-          "byteOffset": 10,
-          "column": 11,
-          "line": 1
-        },
         "source": "beside.petrinet",
         "start": {
           "byteOffset": 0,
-          "column": 1,
-          "line": 1
+          "line": 1,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 10,
+          "line": 1,
+          "column": 11
         }
       },
       "target": {
@@ -30,369 +36,369 @@
     },
     {
       "id": {
-        "part": 0,
         "source": "beside.petrinet",
-        "statement": 1
+        "statement": 1,
+        "part": 0
       },
       "kind": "arc.declare",
       "ordinal": 1,
       "span": {
-        "end": {
-          "byteOffset": 35,
-          "column": 24,
-          "line": 3
-        },
         "source": "beside.petrinet",
         "start": {
           "byteOffset": 12,
-          "column": 1,
-          "line": 3
+          "line": 3,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 35,
+          "line": 3,
+          "column": 24
         }
       },
       "target": {
+        "type": "arc",
         "id": {
           "document": "beside.petrinet",
-          "part": 0,
-          "statement": 1
-        },
-        "type": "arc"
+          "statement": 1,
+          "part": 0
+        }
       },
       "value": {
+        "from": {
+          "type": "place",
+          "name": "queued"
+        },
+        "to": {
+          "type": "transition",
+          "name": "start"
+        },
         "color": {
           "kind": "explicit",
           "value": "job"
         },
-        "from": {
-          "name": "queued",
-          "type": "place"
-        },
         "mode": "consume",
-        "to": {
-          "name": "start",
-          "type": "transition"
-        },
         "transitionNameSpan": {
-          "end": {
-            "byteOffset": 34,
-            "column": 23,
-            "line": 3
-          },
           "source": "beside.petrinet",
           "start": {
             "byteOffset": 29,
-            "column": 18,
-            "line": 3
+            "line": 3,
+            "column": 18
+          },
+          "end": {
+            "byteOffset": 34,
+            "line": 3,
+            "column": 23
           }
         }
       }
     },
     {
       "id": {
-        "part": 1,
         "source": "beside.petrinet",
-        "statement": 1
+        "statement": 1,
+        "part": 1
       },
       "kind": "arc.declare",
       "ordinal": 2,
       "span": {
-        "end": {
-          "byteOffset": 52,
-          "column": 41,
-          "line": 3
-        },
         "source": "beside.petrinet",
         "start": {
           "byteOffset": 28,
-          "column": 17,
-          "line": 3
+          "line": 3,
+          "column": 17
+        },
+        "end": {
+          "byteOffset": 52,
+          "line": 3,
+          "column": 41
         }
       },
       "target": {
+        "type": "arc",
         "id": {
           "document": "beside.petrinet",
-          "part": 1,
-          "statement": 1
-        },
-        "type": "arc"
+          "statement": 1,
+          "part": 1
+        }
       },
       "value": {
+        "from": {
+          "type": "transition",
+          "name": "start"
+        },
+        "to": {
+          "type": "place",
+          "name": "running"
+        },
         "color": {
           "kind": "explicit",
           "value": "job"
         },
-        "from": {
-          "name": "start",
-          "type": "transition"
-        },
-        "mode": "produce",
-        "to": {
-          "name": "running",
-          "type": "place"
-        }
+        "mode": "produce"
       }
     },
     {
       "id": {
-        "part": 0,
         "source": "beside.petrinet",
-        "statement": 2
+        "statement": 2,
+        "part": 0
       },
       "kind": "arc.declare",
       "ordinal": 3,
       "span": {
-        "end": {
-          "byteOffset": 78,
-          "column": 26,
-          "line": 4
-        },
         "source": "beside.petrinet",
         "start": {
           "byteOffset": 53,
-          "column": 1,
-          "line": 4
+          "line": 4,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 78,
+          "line": 4,
+          "column": 26
         }
       },
       "target": {
+        "type": "arc",
         "id": {
           "document": "beside.petrinet",
-          "part": 0,
-          "statement": 2
-        },
-        "type": "arc"
+          "statement": 2,
+          "part": 0
+        }
       },
       "value": {
+        "from": {
+          "type": "place",
+          "name": "running"
+        },
+        "to": {
+          "type": "transition",
+          "name": "finish"
+        },
         "color": {
           "kind": "explicit",
           "value": "job"
         },
-        "from": {
-          "name": "running",
-          "type": "place"
-        },
         "mode": "consume",
-        "to": {
-          "name": "finish",
-          "type": "transition"
-        },
         "transitionNameSpan": {
-          "end": {
-            "byteOffset": 77,
-            "column": 25,
-            "line": 4
-          },
           "source": "beside.petrinet",
           "start": {
             "byteOffset": 71,
-            "column": 19,
-            "line": 4
+            "line": 4,
+            "column": 19
+          },
+          "end": {
+            "byteOffset": 77,
+            "line": 4,
+            "column": 25
           }
         }
       }
     },
     {
       "id": {
-        "part": 1,
         "source": "beside.petrinet",
-        "statement": 2
+        "statement": 2,
+        "part": 1
       },
       "kind": "arc.declare",
       "ordinal": 4,
       "span": {
-        "end": {
-          "byteOffset": 92,
-          "column": 40,
-          "line": 4
-        },
         "source": "beside.petrinet",
         "start": {
           "byteOffset": 70,
-          "column": 18,
-          "line": 4
+          "line": 4,
+          "column": 18
+        },
+        "end": {
+          "byteOffset": 92,
+          "line": 4,
+          "column": 40
         }
       },
       "target": {
+        "type": "arc",
         "id": {
           "document": "beside.petrinet",
-          "part": 1,
-          "statement": 2
-        },
-        "type": "arc"
+          "statement": 2,
+          "part": 1
+        }
       },
       "value": {
+        "from": {
+          "type": "transition",
+          "name": "finish"
+        },
+        "to": {
+          "type": "place",
+          "name": "done"
+        },
         "color": {
           "kind": "explicit",
           "value": "job"
         },
-        "from": {
-          "name": "finish",
-          "type": "transition"
-        },
-        "mode": "produce",
-        "to": {
-          "name": "done",
-          "type": "place"
-        }
+        "mode": "produce"
       }
     },
     {
       "id": {
-        "part": 0,
         "source": "beside.petrinet",
-        "statement": 3
+        "statement": 3,
+        "part": 0
       },
       "kind": "arc.declare",
       "ordinal": 5,
       "span": {
-        "end": {
-          "byteOffset": 118,
-          "column": 26,
-          "line": 5
-        },
         "source": "beside.petrinet",
         "start": {
           "byteOffset": 93,
-          "column": 1,
-          "line": 5
+          "line": 5,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 118,
+          "line": 5,
+          "column": 26
         }
       },
       "target": {
+        "type": "arc",
         "id": {
           "document": "beside.petrinet",
-          "part": 0,
-          "statement": 3
-        },
-        "type": "arc"
+          "statement": 3,
+          "part": 0
+        }
       },
       "value": {
+        "from": {
+          "type": "place",
+          "name": "switch"
+        },
+        "to": {
+          "type": "transition",
+          "name": "start"
+        },
         "color": {
           "kind": "explicit",
           "value": "flag"
         },
-        "from": {
-          "name": "switch",
-          "type": "place"
-        },
-        "mode": "read",
-        "to": {
-          "name": "start",
-          "type": "transition"
-        }
+        "mode": "read"
       }
     },
     {
       "id": {
-        "part": 0,
         "source": "beside.petrinet",
-        "statement": 4
+        "statement": 4,
+        "part": 0
       },
       "kind": "arc.declare",
       "ordinal": 6,
       "span": {
-        "end": {
-          "byteOffset": 145,
-          "column": 27,
-          "line": 6
-        },
         "source": "beside.petrinet",
         "start": {
           "byteOffset": 119,
-          "column": 1,
-          "line": 6
+          "line": 6,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 145,
+          "line": 6,
+          "column": 27
         }
       },
       "target": {
+        "type": "arc",
         "id": {
           "document": "beside.petrinet",
-          "part": 0,
-          "statement": 4
-        },
-        "type": "arc"
+          "statement": 4,
+          "part": 0
+        }
       },
       "value": {
+        "from": {
+          "type": "place",
+          "name": "switch"
+        },
+        "to": {
+          "type": "transition",
+          "name": "finish"
+        },
         "color": {
           "kind": "explicit",
           "value": "flag"
         },
-        "from": {
-          "name": "switch",
-          "type": "place"
-        },
-        "mode": "read",
-        "to": {
-          "name": "finish",
-          "type": "transition"
-        }
+        "mode": "read"
       }
     },
     {
       "id": {
-        "part": 0,
         "source": "beside.petrinet",
-        "statement": 5
+        "statement": 5,
+        "part": 0
       },
       "kind": "arc.declare",
       "ordinal": 7,
       "span": {
-        "end": {
-          "byteOffset": 173,
-          "column": 28,
-          "line": 7
-        },
         "source": "beside.petrinet",
         "start": {
           "byteOffset": 146,
-          "column": 1,
-          "line": 7
+          "line": 7,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 173,
+          "line": 7,
+          "column": 28
         }
       },
       "target": {
+        "type": "arc",
         "id": {
           "document": "beside.petrinet",
-          "part": 0,
-          "statement": 5
-        },
-        "type": "arc"
+          "statement": 5,
+          "part": 0
+        }
       },
       "value": {
+        "from": {
+          "type": "place",
+          "name": "budget"
+        },
+        "to": {
+          "type": "transition",
+          "name": "start"
+        },
         "color": {
           "kind": "explicit",
           "value": "credit"
         },
-        "from": {
-          "name": "budget",
-          "type": "place"
-        },
-        "mode": "read",
-        "to": {
-          "name": "start",
-          "type": "transition"
-        }
+        "mode": "read"
       }
     },
     {
       "id": {
-        "part": 0,
         "source": "beside.petrinet",
-        "statement": 6
+        "statement": 6,
+        "part": 0
       },
       "kind": "documentation.annotation",
       "ordinal": 8,
       "span": {
-        "end": {
-          "byteOffset": 205,
-          "column": 32,
-          "line": 8
-        },
         "source": "beside.petrinet",
         "start": {
           "byteOffset": 174,
-          "column": 1,
-          "line": 8
+          "line": 8,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 205,
+          "line": 8,
+          "column": 32
         }
       },
       "target": {
-        "name": "switch",
-        "type": "place"
+        "type": "place",
+        "name": "switch"
       },
       "value": {
         "key": "fusion",
@@ -404,28 +410,28 @@
     },
     {
       "id": {
-        "part": 0,
         "source": "beside.petrinet",
-        "statement": 7
+        "statement": 7,
+        "part": 0
       },
       "kind": "documentation.annotation",
       "ordinal": 9,
       "span": {
-        "end": {
-          "byteOffset": 237,
-          "column": 32,
-          "line": 9
-        },
         "source": "beside.petrinet",
         "start": {
           "byteOffset": 206,
-          "column": 1,
-          "line": 9
+          "line": 9,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 237,
+          "line": 9,
+          "column": 32
         }
       },
       "target": {
-        "name": "budget",
-        "type": "place"
+        "type": "place",
+        "name": "budget"
       },
       "value": {
         "key": "fusion",
@@ -437,28 +443,28 @@
     },
     {
       "id": {
-        "part": 0,
         "source": "beside.petrinet",
-        "statement": 8
+        "statement": 8,
+        "part": 0
       },
       "kind": "decoration.beside",
       "ordinal": 10,
       "span": {
-        "end": {
-          "byteOffset": 268,
-          "column": 30,
-          "line": 11
-        },
         "source": "beside.petrinet",
         "start": {
           "byteOffset": 239,
-          "column": 1,
-          "line": 11
+          "line": 11,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 268,
+          "line": 11,
+          "column": 30
         }
       },
       "target": {
-        "name": "switch",
-        "type": "place"
+        "type": "place",
+        "name": "switch"
       },
       "value": {
         "side": "left"
@@ -466,36 +472,354 @@
     },
     {
       "id": {
-        "part": 0,
         "source": "beside.petrinet",
-        "statement": 9
+        "statement": 9,
+        "part": 0
       },
       "kind": "decoration.beside",
       "ordinal": 11,
       "span": {
-        "end": {
-          "byteOffset": 293,
-          "column": 25,
-          "line": 12
-        },
         "source": "beside.petrinet",
         "start": {
           "byteOffset": 269,
-          "column": 1,
-          "line": 12
+          "line": 12,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 293,
+          "line": 12,
+          "column": 25
         }
       },
       "target": {
-        "name": "budget",
-        "type": "place"
+        "type": "place",
+        "name": "budget"
       },
       "value": {}
+    },
+    {
+      "id": {
+        "source": "beside.petrinet",
+        "statement": 10,
+        "part": 0
+      },
+      "kind": "view.position",
+      "ordinal": 12,
+      "span": {
+        "source": "beside.petrinet",
+        "start": {
+          "byteOffset": 294,
+          "line": 13,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 343,
+          "line": 13,
+          "column": 50
+        }
+      },
+      "target": {
+        "type": "view",
+        "name": "lanes"
+      },
+      "value": {
+        "subject": {
+          "type": "transition",
+          "name": "start"
+        },
+        "position": {
+          "type": "object",
+          "entries": [
+            {
+              "key": "x",
+              "value": {
+                "type": "number",
+                "lexeme": "0"
+              }
+            },
+            {
+              "key": "y",
+              "value": {
+                "type": "number",
+                "lexeme": "200"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": {
+        "source": "beside.petrinet",
+        "statement": 11,
+        "part": 0
+      },
+      "kind": "view.position",
+      "ordinal": 13,
+      "span": {
+        "source": "beside.petrinet",
+        "start": {
+          "byteOffset": 344,
+          "line": 14,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 411,
+          "line": 14,
+          "column": 68
+        }
+      },
+      "target": {
+        "type": "view",
+        "name": "lanes"
+      },
+      "value": {
+        "subject": {
+          "type": "transition",
+          "name": "finish"
+        },
+        "position": {
+          "from": {
+            "type": "transition",
+            "name": "start"
+          },
+          "delta": {
+            "type": "object",
+            "entries": [
+              {
+                "key": "x",
+                "value": {
+                  "type": "number",
+                  "lexeme": "0"
+                }
+              },
+              {
+                "key": "y",
+                "value": {
+                  "type": "number",
+                  "lexeme": "-200"
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": {
+        "source": "beside.petrinet",
+        "statement": 12,
+        "part": 0
+      },
+      "kind": "view.position",
+      "ordinal": 14,
+      "span": {
+        "source": "beside.petrinet",
+        "start": {
+          "byteOffset": 413,
+          "line": 16,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 467,
+          "line": 16,
+          "column": 55
+        }
+      },
+      "target": {
+        "type": "view",
+        "name": "lanes_lock"
+      },
+      "value": {
+        "subject": {
+          "type": "transition",
+          "name": "start"
+        },
+        "position": {
+          "type": "object",
+          "entries": [
+            {
+              "key": "x",
+              "value": {
+                "type": "number",
+                "lexeme": "0"
+              }
+            },
+            {
+              "key": "y",
+              "value": {
+                "type": "number",
+                "lexeme": "200"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": {
+        "source": "beside.petrinet",
+        "statement": 13,
+        "part": 0
+      },
+      "kind": "view.position",
+      "ordinal": 15,
+      "span": {
+        "source": "beside.petrinet",
+        "start": {
+          "byteOffset": 468,
+          "line": 17,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 540,
+          "line": 17,
+          "column": 73
+        }
+      },
+      "target": {
+        "type": "view",
+        "name": "lanes_lock"
+      },
+      "value": {
+        "subject": {
+          "type": "transition",
+          "name": "finish"
+        },
+        "position": {
+          "from": {
+            "type": "transition",
+            "name": "start"
+          },
+          "delta": {
+            "type": "object",
+            "entries": [
+              {
+                "key": "x",
+                "value": {
+                  "type": "number",
+                  "lexeme": "0"
+                }
+              },
+              {
+                "key": "y",
+                "value": {
+                  "type": "number",
+                  "lexeme": "-200"
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": {
+        "source": "beside.petrinet",
+        "statement": 14,
+        "part": 0
+      },
+      "kind": "view.position",
+      "ordinal": 16,
+      "span": {
+        "source": "beside.petrinet",
+        "start": {
+          "byteOffset": 541,
+          "line": 18,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 595,
+          "line": 18,
+          "column": 55
+        }
+      },
+      "target": {
+        "type": "view",
+        "name": "lanes_lock"
+      },
+      "value": {
+        "subject": {
+          "type": "place",
+          "name": "switch"
+        },
+        "position": {
+          "type": "object",
+          "entries": [
+            {
+              "key": "x",
+              "value": {
+                "type": "number",
+                "lexeme": "40"
+              }
+            },
+            {
+              "key": "y",
+              "value": {
+                "type": "number",
+                "lexeme": "0"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": {
+        "source": "beside.petrinet",
+        "statement": 15,
+        "part": 0
+      },
+      "kind": "view.position",
+      "ordinal": 17,
+      "span": {
+        "source": "beside.petrinet",
+        "start": {
+          "byteOffset": 596,
+          "line": 19,
+          "column": 1
+        },
+        "end": {
+          "byteOffset": 665,
+          "line": 19,
+          "column": 70
+        }
+      },
+      "target": {
+        "type": "view",
+        "name": "lanes_lock"
+      },
+      "value": {
+        "subject": {
+          "type": "place",
+          "name": "done"
+        },
+        "position": {
+          "from": {
+            "type": "place",
+            "name": "switch"
+          },
+          "delta": {
+            "type": "object",
+            "entries": [
+              {
+                "key": "x",
+                "value": {
+                  "type": "number",
+                  "lexeme": "80"
+                }
+              },
+              {
+                "key": "y",
+                "value": {
+                  "type": "number",
+                  "lexeme": "0"
+                }
+              }
+            ]
+          }
+        }
+      }
     }
-  ],
-  "document": {
-    "id": "beside.petrinet"
-  },
-  "documentKind": "net",
-  "format": "velocitron.petrinet/contribution-ir",
-  "version": 1
+  ]
 }
