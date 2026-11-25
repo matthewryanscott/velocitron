@@ -344,7 +344,9 @@ that stay usable as names; `=` is a token only here.
 
 Actor facts say who does each step of the net, in business words
 ([ADR 0038](https://github.com/matthewryanscott/velocitron/blob/main/docs/adr/0038-sequence-diagrams-project-scenarios-onto-actors.md)).
-A play's sequence diagram draws one lifeline per actor.
+A play's sequence diagram draws one lifeline per actor, and a queue for
+each place a token crosses between actors
+([ADR 0073](https://github.com/matthewryanscott/velocitron/blob/main/docs/adr/0073-hand-off-places-are-sequence-lifelines.md)).
 
 ```text
 person Name

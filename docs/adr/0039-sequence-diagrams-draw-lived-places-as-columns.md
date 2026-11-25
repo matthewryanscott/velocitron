@@ -2,7 +2,10 @@
 
 **Status:** Accepted (2026-10-17). Refines ADR 0038: replaces its activation
 folding, self-arrows and place-named context arrows. Amended 2026-10-17
-(Decision 1: an unlabeled write-back draws the read).
+(Decision 1: an unlabeled write-back draws the read). Refined by
+[ADR 0073](0073-hand-off-places-are-sequence-lifelines.md) (2026-11-25): a
+place a token crosses actors through is a queue, drawn at the step that
+moves the token, and back-to-back moves of one clock show the total time.
 
 ADR 0038 projects a checked play path onto its actors. On the first real
 evening shift the result was correct but hard to read. Each actor's own
