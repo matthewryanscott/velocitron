@@ -1,0 +1,27 @@
+{
+  "diagnostic": {
+    "code": "PN202",
+    "column": 1,
+    "file": "single.single-on-plain-place.petrinet",
+    "help": "annotate it with `(switch) annotation fusion true`, or remove the single decoration",
+    "line": 6,
+    "message": "single decoration needs a fusion place; (switch) is drawn once, so there is no fused drawing to collapse",
+    "span": {
+      "end": {
+        "byteOffset": 104,
+        "column": 25,
+        "line": 6
+      },
+      "source": "single.single-on-plain-place.petrinet",
+      "start": {
+        "byteOffset": 80,
+        "column": 1,
+        "line": 6
+      }
+    }
+  },
+  "source": {
+    "sourceId": "single.single-on-plain-place.petrinet",
+    "text": "net single\n\n(queued) -job-> [start] -job-> (running)\n(switch) -flag->? [start]\n\ndecorate (switch) single\n"
+  }
+}

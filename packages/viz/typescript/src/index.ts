@@ -60,8 +60,11 @@ export {
   besideGap,
   nodeWidth,
   textWidth,
+  fusionModesOf,
   hasView,
   readDecorations,
+  readFusionModes,
+  resolveFusionMode,
   resolvePositions,
   viewSetting,
 } from "./view.js";

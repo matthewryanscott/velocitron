@@ -76,6 +76,13 @@ If the output shows `velocitron CLI NOT INSTALLED` (or `velocitron-viz CLI NOT I
    beside a pinned transition, on the side that row chose. A whole-place
    position still anchors `relative (P)`.
    `relative (P)@[T]` uses the point where that copy is drawn.
+   `decorate (p) single` draws that fusion place as one dashed node in every
+   render, including `--no-view` and a Markdown fence; its arcs take part in
+   ranking. `view V fusion (p) single` or `copies` overrides that choice for
+   one view. A view that resolves a place to `single` drops that place's
+   `beside` rows. A `(P)@[T]` position does not apply to a place drawn as
+   one node. `--no-fusion` is deprecated: it still forces every fusion
+   place to one ordinary node, and it still wins over both facts.
    The render-inspect loop for authoring: render the DOT to an image, LOOK at
    it, then re-edit the source. Any DOT renderer composes —
    `velocitron-viz net.petrinet --view wired | dot -Tpng -o /tmp/net.png` with a

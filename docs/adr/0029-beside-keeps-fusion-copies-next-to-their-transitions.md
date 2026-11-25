@@ -96,4 +96,6 @@ that copy nor its place.*
   Decision 5.
 - `beside` is inert like every decoration: no engine, property, or
   composition code reads it. `--no-fusion` and composition renders draw no
-  copies, so they draw nothing for it.
+  copies, so they draw nothing for it. `--no-fusion` is deprecated (ADR 0071):
+  it still wins over a `single` decoration and a view `fusion` fact, and it
+  still draws every fusion place as one ordinary node.

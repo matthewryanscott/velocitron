@@ -57,6 +57,7 @@ import { ViewPositionContext } from "./VelocitronPetriNetParser.js";
 import { ViewRouteContext } from "./VelocitronPetriNetParser.js";
 import { ViewSplinesContext } from "./VelocitronPetriNetParser.js";
 import { ViewDetailContext } from "./VelocitronPetriNetParser.js";
+import { ViewFusionContext } from "./VelocitronPetriNetParser.js";
 import { ViewTargetContext } from "./VelocitronPetriNetParser.js";
 import { DecorationContext } from "./VelocitronPetriNetParser.js";
 import { DecorationTargetContext } from "./VelocitronPetriNetParser.js";
@@ -418,6 +419,12 @@ export default class VelocitronPetriNetVisitor<Result> extends ParseTreeVisitor<
 	 * @return the visitor result
 	 */
 	visitViewDetail?: (ctx: ViewDetailContext) => Result;
+	/**
+	 * Visit a parse tree produced by `VelocitronPetriNetParser.viewFusion`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitViewFusion?: (ctx: ViewFusionContext) => Result;
 	/**
 	 * Visit a parse tree produced by `VelocitronPetriNetParser.viewTarget`.
 	 * @param ctx the parse tree

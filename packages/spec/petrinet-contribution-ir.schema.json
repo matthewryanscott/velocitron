@@ -790,6 +790,9 @@
           "$ref": "#/$defs/viewDetailContribution"
         },
         {
+          "$ref": "#/$defs/viewFusionContribution"
+        },
+        {
           "$ref": "#/$defs/decorationHighlightContribution"
         },
         {
@@ -803,6 +806,9 @@
         },
         {
           "$ref": "#/$defs/decorationBesideContribution"
+        },
+        {
+          "$ref": "#/$defs/decorationSingleContribution"
         },
         {
           "$ref": "#/$defs/decorationShowContribution"
@@ -1094,6 +1100,28 @@
           "required": [
             "fields"
           ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "kind",
+        "target",
+        "value"
+      ],
+      "type": "object"
+    },
+    "decorationSingleContribution": {
+      "$comment": "Resolver accepts this kind only for net documents, where it lowers below annotations['petrinet.dsl/v1'].decorations. Only a place annotated fusion true is drawn as local copies, so only that place has a fused drawing to collapse to one node.",
+      "properties": {
+        "kind": {
+          "const": "decoration.single"
+        },
+        "target": {
+          "$ref": "#/$defs/placeTarget"
+        },
+        "value": {
+          "additionalProperties": false,
+          "properties": {},
           "type": "object"
         }
       },
@@ -2352,6 +2380,42 @@
           },
           "required": [
             "detail"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "kind",
+        "target",
+        "value"
+      ],
+      "type": "object"
+    },
+    "viewFusionContribution": {
+      "$comment": "Resolver accepts this kind only for net documents, where it lowers below annotations['petrinet.dsl/v1'].views. It chooses whether that view draws one fusion place as a single node or as per-transition copies.",
+      "properties": {
+        "kind": {
+          "const": "view.fusion"
+        },
+        "target": {
+          "$ref": "#/$defs/viewTarget"
+        },
+        "value": {
+          "additionalProperties": false,
+          "properties": {
+            "mode": {
+              "enum": [
+                "single",
+                "copies"
+              ]
+            },
+            "place": {
+              "$ref": "#/$defs/name"
+            }
+          },
+          "required": [
+            "place",
+            "mode"
           ],
           "type": "object"
         }

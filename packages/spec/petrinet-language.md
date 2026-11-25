@@ -545,10 +545,12 @@ view Name position ViewTarget relative ViewTarget + {"x": Number, "y": Number}
 view Name route @Handle orthogonal [ {"x": Number, "y": Number}, ... ]
 view Name splines ( ortho | spline | curved | polyline | line )
 view Name detail ( full | summary | structure )
+view Name fusion (Place) ( single | copies )
 decorate DecorationTarget highlight [ JsonString ]
 decorate DecorationTarget note JsonString
 decorate ( [Transition] | @Handle ) summary JsonString
 decorate (Place) beside [ left | right ] [ unshared ]
+decorate (Place) single
 decorate color Color quiet
 decorate color Color show JsonString ...
 ```
@@ -579,7 +581,10 @@ time against the other positions in the same view — chains resolve in
 dependency order, a base that carries no position in that view is rejected,
 and a relative chain that never becomes grounded is rejected.
 `splines` picks the Graphviz edge style a renderer uses when it applies the
-view; without it the style is `ortho`. `detail` picks how much behavior the
+view; without it the style is `ortho`. `fusion` chooses, for one fusion
+place in that view, `single` (one dashed node) or `copies` (one local copy
+per transition). It wins over a `single` decoration and loses to
+`velocitron-viz --no-fusion`. `detail` picks how much behavior the
 labels show when the view applies: `full` shows every expression whole,
 `summary` shortens expressions, and `structure` drops handler refs, guards,
 timers, priorities, predicates, correlations and data templates. A caller's
@@ -618,7 +623,19 @@ positioned (ADR 0067). The offset is computed from the label widths. A
 whole-place entry still anchors `relative (P)`. A transition or a
 handle has no copies, so `beside` on
 one is rejected while lowering, and `beside` on a place that is not annotated
-`fusion true` is rejected. `decorate color Color quiet` asks a renderer to hide the type
+`fusion true` is rejected. `decorate (Place) single` asks every render to draw
+that fusion place as one node, still in the dashed gray fusion style, with
+its arcs taking part in ranking. It is rejected on a transition or a handle,
+and on a place that is not annotated `fusion true`, for the same reason as
+`beside`: a silent no-op would hide a typo. `single` and `beside` on the same
+place conflict, because a single node has no copies to place. A view that
+resolves the place to `single` drops that place's `beside` rows. A
+`(Place)@[Transition]` position does not apply to a place drawn as one node;
+`velocitron validate` warns (`single-copy-position`). The drawing
+choice, highest first, is `velocitron-viz --no-fusion` (deprecated; it still
+draws every fusion place as one ordinary node), then the view's `fusion`
+fact, then `decorate (Place) single`, then per-transition copies.
+`decorate color Color quiet` asks a renderer to hide the type
 label on consume and produce arcs of that color, as it always does for the
 Generic `token` color; read and inhibit arcs keep their labels.
 `decorate color Color show "id" "owner.name"` names the token fields a
@@ -654,13 +671,15 @@ views:      { Name: { positions: { Target: Point }
                                           points: [Point, ...] } },
                       splines?: "ortho" | "spline" | "curved"
                                 | "polyline" | "line",
-                      detail?: "full" | "summary" | "structure" } }
+                      detail?: "full" | "summary" | "structure",
+                      fusion?: { "place:" Place: "single" | "copies" } } }
 extensions: JsonObject
 decorations?: { Subject: { highlight?: { label?: String },
                            note?: String,
                            summary?: String,
                            beside?: { side?: "left" | "right",
-                                      share?: false } }
+                                      share?: false },
+                           single?: true }
               | { "color:" Color: { quiet?: true,
                                     show?: [FieldPath, ...] } } }
 ```
@@ -668,7 +687,7 @@ decorations?: { Subject: { highlight?: { label?: String },
 A position `Target` is `place:<name>`, `transition:<name>`, or
 `place:<name>@transition:<name>` for one drawn copy. A decoration `Subject` is `place:<name>`, `transition:<name>`, or
 `arc:<handle>`; a place subject carries no `summary`, and only a place subject
-carries `beside`. `share: false` is `unshared`. When `share` is absent, the
+carries `beside` or `single`, and not both. `share: false` is `unshared`. When `share` is absent, the
 copies may be shared. A color subject carries at least one of `quiet` and `show`;
 `show` keeps the source order of its field paths. The `decorations` member
 is present only when the source has at least one decoration.

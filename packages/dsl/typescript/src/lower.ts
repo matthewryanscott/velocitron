@@ -89,6 +89,7 @@ import type {
   ViewRouteContext,
   ViewSplinesContext,
   ViewDetailContext,
+  ViewFusionContext,
   ViewTargetContext,
   DecorationContext,
   DomainDeclarationContext,
@@ -636,6 +637,7 @@ function statementRule(ruleIndex: number): boolean {
     case VelocitronPetriNetParser.RULE_viewRoute:
     case VelocitronPetriNetParser.RULE_viewSplines:
     case VelocitronPetriNetParser.RULE_viewDetail:
+    case VelocitronPetriNetParser.RULE_viewFusion:
     case VelocitronPetriNetParser.RULE_decoration:
     case VelocitronPetriNetParser.RULE_extensions:
     case VelocitronPetriNetParser.RULE_domainDeclaration:
@@ -730,6 +732,7 @@ class LoweringVisitor {
       this.#viewStyle(context, "splines", VIEW_SPLINES);
     this.visitor.visitViewDetail = (context) =>
       this.#viewStyle(context, "detail", VIEW_DETAILS);
+    this.visitor.visitViewFusion = (context) => this.visitViewFusion(context);
     this.visitor.visitDecoration = (context) => this.visitDecoration(context);
     this.visitor.visitExtensions = (context) => this.visitExtensions(context);
     this.visitor.visitDomainDeclaration = (context) =>
@@ -1712,6 +1715,19 @@ class LoweringVisitor {
     });
   }
 
+  visitViewFusion(context: ViewFusionContext): void {
+    // Kept apart from view position and style so a later per-copy target
+    // can land in those rules without touching this one.
+    const mode = (context.SINGLE() as TerminalNode | undefined) ? "single" : "copies";
+    this.#contribution({
+      kind: "view.fusion",
+      target: { type: "view", name: decodeName(context.name().getText()) },
+      value: { place: decodeName(context.place().name().getText()), mode },
+      start: this.#contextStart(context),
+      end: this.#contextEnd(context),
+    });
+  }
+
   visitDecoration(context: DecorationContext): void {
     let kind: string;
     let target: ReadonlyJsonObject;
@@ -1779,6 +1795,15 @@ class LoweringVisitor {
         if (context.UNSHARED() as TerminalNode | undefined) besideValue.share = false;
         kind = "decoration.beside";
         value = besideValue;
+      } else if (context.SINGLE() as TerminalNode | undefined) {
+        if (!place) {
+          this.#semanticError(
+            `single decorations apply to fusion places; ${targetContext.getText()} has no fused drawing to collapse`,
+            context,
+          );
+        }
+        kind = "decoration.single";
+        value = {};
       } else {
         if (place) {
           this.#semanticError(

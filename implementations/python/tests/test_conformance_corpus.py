@@ -109,8 +109,8 @@ def test_manifest_pins_format_version_and_case_counts() -> None:
     # when/then: identity and case counts match the conformance contract
     assert _MANIFEST["format"] == "velocitron.petrinet/conformance-corpus"
     assert _MANIFEST["version"] == 1
-    assert len(_VALID_CASES) == 41
-    assert len(_INVALID_CASES) == 116
+    assert len(_VALID_CASES) == 42
+    assert len(_INVALID_CASES) == 119
 
 
 @pytest.mark.parametrize(("case_id", "valid"), _VALID_CASES)

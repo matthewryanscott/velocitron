@@ -277,6 +277,10 @@ class VelocitronPetriNetVisitor(ParseTreeVisitor):
     def visitViewDetail(self, ctx: VelocitronPetriNetParser.ViewDetailContext):
         return self.visitChildren(ctx)
 
+    # Visit a parse tree produced by VelocitronPetriNetParser#viewFusion.
+    def visitViewFusion(self, ctx: VelocitronPetriNetParser.ViewFusionContext):
+        return self.visitChildren(ctx)
+
     # Visit a parse tree produced by VelocitronPetriNetParser#viewTarget.
     def visitViewTarget(self, ctx: VelocitronPetriNetParser.ViewTargetContext):
         return self.visitChildren(ctx)

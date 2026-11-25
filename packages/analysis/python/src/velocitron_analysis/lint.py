@@ -28,8 +28,15 @@ from dataclasses import dataclass
 from typing import Any, Literal, cast
 
 from velocitron_cel import load_celpy
-from velocitron_engine import Net, Transition
-from velocitron_viz import ViewApplicationError, fusion_layout, read_decorations
+from velocitron_engine import Net, Place, Transition
+from velocitron_viz import (
+    Decorations,
+    ViewApplicationError,
+    fusion_layout,
+    fusion_modes_of,
+    read_decorations,
+    resolve_fusion_mode,
+)
 
 # Stable rule id: a transition with >=1 consume-mode arc and zero produce
 # arcs. Read- and inhibit-mode arcs are not outputs and do not exempt a
@@ -64,6 +71,10 @@ RULE_READ_ONLY_PRODUCER = "read-only-producer"
 # the drawing and Graphviz can fail (ADR 0067, ADR 0072). A copy entry
 # keeps that copy off the point. ``beside`` does not.
 RULE_FUSION_PLACE_POSITION = "fusion-place-position"
+
+# A `(P)@[T]` position on a fusion place drawn as one node. The place has
+# one position, so the copy fact does not apply (ADR 0071, ADR 0072).
+RULE_SINGLE_COPY_POSITION = "single-copy-position"
 
 # Stable rule id: a whole-place position that every drawn copy of the place
 # overrides with its own `(P)@[T]` position. The place entry no longer lands
@@ -376,6 +387,54 @@ def _copy_target(subject: str) -> tuple[str, str] | None:
     return place, transition
 
 
+def _single_copy_position_findings(
+    views: Mapping[str, Any],
+    fusion: Mapping[str, Place],
+    decorations: Decorations,
+) -> list[LintFinding]:
+    """Copy positions on a fusion place that this view draws as one node.
+
+    The place has one position, so ``(P)@[T]`` does not apply (ADR 0071,
+    ADR 0072). One finding per view and place.
+    """
+    findings: list[LintFinding] = []
+    for view_name, view_raw in views.items():
+        if not isinstance(view_raw, Mapping):
+            continue
+        view = cast("Mapping[str, Any]", view_raw)
+        modes = fusion_modes_of(view)
+        positions_raw = view.get("positions")
+        if not isinstance(positions_raw, Mapping):
+            continue
+        positions = cast("Mapping[str, Any]", positions_raw)
+        warned: set[str] = set()
+        for subject in positions:
+            parsed = _copy_target(subject)
+            if parsed is None or parsed[0] not in fusion or parsed[0] in warned:
+                continue
+            if resolve_fusion_mode(parsed[0], decorations, modes) != "single":
+                continue
+            warned.add(parsed[0])
+            if RULE_SINGLE_COPY_POSITION in suppressed_rules(
+                fusion[parsed[0]].annotations
+            ):
+                continue
+            findings.append(
+                LintFinding(
+                    rule=RULE_SINGLE_COPY_POSITION,
+                    transition="",
+                    place=parsed[0],
+                    view=view_name,
+                    message=(
+                        f"view {view_name!r} positions a copy of fusion place "
+                        f"{parsed[0]!r}, which is drawn as one node; the copy "
+                        "position does not apply"
+                    ),
+                )
+            )
+    return findings
+
+
 def _fusion_position_findings(net: Net) -> list[LintFinding]:
     """Whole-place positions that pin every copy of a fusion place at once."""
     annotations = net.annotations or {}
@@ -391,6 +450,14 @@ def _fusion_position_findings(net: Net) -> list[LintFinding]:
         place.name: place for place in net.places if _is_fusion_place(place.annotations)
     }
     if not fusion:
+        return []
+    try:
+        decorations = read_decorations({"annotations": annotations})
+    except ViewApplicationError:
+        return []
+    try:
+        findings = _single_copy_position_findings(views, fusion, decorations)
+    except ViewApplicationError:
         return []
     candidates: list[tuple[str, str]] = []
     for view_name, view_raw in views.items():
@@ -408,23 +475,35 @@ def _fusion_position_findings(net: Net) -> list[LintFinding]:
             if name in fusion:
                 candidates.append((view_name, name))
     if not candidates:
-        return []
-    try:
-        decorations = read_decorations({"annotations": annotations})
-    except ViewApplicationError:
-        return []
-    layout = fusion_layout(net, set(fusion), decorations)
-    drawn: dict[str, set[str]] = {}
-    for (name, _transition), copy in layout.copies.items():
-        drawn.setdefault(name, set()).add(copy)
-    findings: list[LintFinding] = []
+        return findings
     reported: set[tuple[str, str]] = set()
+    drawn_by_view: dict[str, dict[str, set[str]]] = {}
+    layouts: dict[str, Any] = {}
     for view_name, name in candidates:
+        if view_name not in drawn_by_view:
+            view = cast("Mapping[str, Any]", views[view_name])
+            try:
+                modes = fusion_modes_of(view)
+            except ViewApplicationError:
+                return []
+            copy_places = {
+                place_name
+                for place_name in fusion
+                if resolve_fusion_mode(place_name, decorations, modes) == "copies"
+            }
+            layout = fusion_layout(net, copy_places, decorations)
+            drawn: dict[str, set[str]] = {}
+            for (place_name, _transition), copy in layout.copies.items():
+                drawn.setdefault(place_name, set()).add(copy)
+            drawn_by_view[view_name] = drawn
+            layouts[view_name] = layout
         if (view_name, name) in reported:
             continue
         reported.add((view_name, name))
         view = cast("Mapping[str, Any]", views[view_name])
         view_positions = cast("Mapping[str, Any]", view.get("positions", {}))
+        layout = layouts[view_name]
+        drawn = drawn_by_view[view_name]
         positioned_copies: set[str] = set()
         for subject in view_positions:
             parsed = _copy_target(str(subject))
@@ -574,6 +653,7 @@ __all__ = [
     "RULE_CORRELATE_FREE_NAME",
     "RULE_FUSION_PLACE_POSITION",
     "RULE_PLACE_POSITION_OVERRIDDEN",
+    "RULE_SINGLE_COPY_POSITION",
     "RULE_PREDICATE_NAMES_COLOR_OR_PLACE",
     "RULE_READ_ONLY_PRODUCER",
     "LintFinding",

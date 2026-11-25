@@ -128,6 +128,7 @@ class Decoration:
     # False is ``beside unshared``: one copy per transition (ADR 0070).
     # Absent ``share`` stays True, so a place with no side still shares.
     beside_share: bool = True
+    single: bool = False
     failure: bool = False
     faded: bool = False
 
@@ -202,6 +203,7 @@ def read_decorations(raw: Mapping[str, Any]) -> Decorations:
                 if isinstance(beside, Mapping)
                 else True
             ),
+            single=entry.get("single") is True,
         )
         if kind in ("place", "transition"):
             nodes[subject] = decoration
@@ -357,6 +359,60 @@ def _validate_routes(
     return route_by_arc
 
 
+def fusion_modes_of(view: Mapping[str, Any]) -> dict[str, str]:
+    """``place name → "single" | "copies"`` from one view's ``fusion`` map."""
+    raw = view.get("fusion", {})
+    if raw in ({}, None):
+        return {}
+    if not isinstance(raw, Mapping):
+        raise ViewApplicationError("invalid view fusion")
+    modes: dict[str, str] = {}
+    for subject, mode in cast(Mapping[str, Any], raw).items():
+        place = subject.removeprefix("place:")
+        if (
+            not subject.startswith("place:")
+            or not place
+            or not isinstance(mode, str)
+            or mode not in ("single", "copies")
+        ):
+            raise ViewApplicationError(f"invalid view fusion {subject!r}")
+        modes[place] = mode
+    return modes
+
+
+def read_fusion_modes(raw: Mapping[str, Any], view_name: str) -> dict[str, str]:
+    """The named view's fusion choices, or none when that view is absent."""
+    try:
+        annotations = cast(Mapping[str, Any], raw["annotations"])
+        payload = cast(Mapping[str, Any], annotations["petrinet.dsl/v1"])
+        views = cast(Mapping[str, Any], payload["views"])
+        view = views[view_name]
+    except (KeyError, TypeError):
+        return {}
+    if not isinstance(view, Mapping):
+        raise ViewApplicationError("invalid view fusion")
+    return fusion_modes_of(cast(Mapping[str, Any], view))
+
+
+def resolve_fusion_mode(
+    place: str,
+    decorations: Decorations,
+    fusion_modes: Mapping[str, str],
+) -> str:
+    """How one fusion place is drawn: view, then decoration, then copies.
+
+    ``--no-fusion`` is decided by the caller, before this. A view value of
+    ``single`` or ``copies`` wins over ``decorate (place) single``.
+    """
+    mode = fusion_modes.get(place)
+    if mode in ("single", "copies"):
+        return cast(str, mode)
+    decoration = decorations.nodes.get(f"place:{place}")
+    if decoration is not None and decoration.single:
+        return "single"
+    return "copies"
+
+
 def text_width(text: str, point_size: int) -> float:
     """Width of ``text`` at ``point_size``, in points.
 
@@ -441,6 +497,13 @@ def _pos_statement_line(line: str, rendered: str) -> str:
     )
 
 
+def _drawn_once(model: "RenderModel", place: str) -> bool:
+    """Whether ``place`` is one node, not a set of fusion copies."""
+    if any(drawn == place for drawn, _transition in model.copy_lines):
+        return False
+    return bool(model.node_lines.get(f"place:{place}"))
+
+
 def apply_view(
     model: "RenderModel",
     raw: Mapping[str, Any],
@@ -483,6 +546,10 @@ def apply_view(
             continue
         line_index = model.copy_lines.get(parsed)
         if line_index is None:
+            # A place drawn as one node has no copies. The copy fact does
+            # not apply; lint reports it (ADR 0071, ADR 0072).
+            if _drawn_once(model, parsed[0]):
+                continue
             raise ViewApplicationError(
                 f"view {view_name!r} positions unknown subject {subject!r}"
             )

@@ -897,11 +897,13 @@ class TestCli:
         # when: the CLI renders it with --no-fusion
         exit_code = main([str(path), "--no-fusion"])
 
-        # then: the place renders as a single hub node
+        # then: the place renders as a single hub node, and the flag warns
         assert exit_code == 0
-        out = capsys.readouterr().out
-        assert '"window" [' in out
-        assert "window@" not in out
+        captured = capsys.readouterr()
+        assert '"window" [' in captured.out
+        assert "window@" not in captured.out
+        assert "decorate (P) single" in captured.err
+        assert "view V fusion (P) single" in captured.err
 
     def test_merged_composition_keeps_fusion_rendering(
         self, tmp_path: Path, capsys: pytest.CaptureFixture[str]

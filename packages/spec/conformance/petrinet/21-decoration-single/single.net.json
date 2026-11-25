@@ -1,0 +1,164 @@
+{
+  "annotations": {
+    "petrinet.dsl/v1": {
+      "arcHandles": {},
+      "decorations": {
+        "place:budget": {
+          "beside": {}
+        },
+        "place:switch": {
+          "single": true
+        }
+      },
+      "extensions": {},
+      "markings": {},
+      "views": {
+        "detail": {
+          "fusion": {
+            "place:switch": "copies"
+          },
+          "positions": {},
+          "routes": {}
+        },
+        "overview": {
+          "fusion": {
+            "place:budget": "single"
+          },
+          "positions": {},
+          "routes": {}
+        }
+      }
+    }
+  },
+  "arcs": [
+    {
+      "consume": {
+        "type": "job"
+      },
+      "from": {
+        "place": "queued"
+      },
+      "to": {
+        "transition": "start"
+      }
+    },
+    {
+      "from": {
+        "transition": "start"
+      },
+      "produce": {
+        "destination": "running",
+        "type": "job"
+      },
+      "to": {
+        "place": "running"
+      }
+    },
+    {
+      "consume": {
+        "type": "job"
+      },
+      "from": {
+        "place": "running"
+      },
+      "to": {
+        "transition": "finish"
+      }
+    },
+    {
+      "from": {
+        "transition": "finish"
+      },
+      "produce": {
+        "destination": "done",
+        "type": "job"
+      },
+      "to": {
+        "place": "done"
+      }
+    },
+    {
+      "consume": {
+        "mode": "read",
+        "type": "flag"
+      },
+      "from": {
+        "place": "switch"
+      },
+      "to": {
+        "transition": "start"
+      }
+    },
+    {
+      "consume": {
+        "mode": "read",
+        "type": "flag"
+      },
+      "from": {
+        "place": "switch"
+      },
+      "to": {
+        "transition": "finish"
+      }
+    },
+    {
+      "consume": {
+        "mode": "read",
+        "type": "credit"
+      },
+      "from": {
+        "place": "budget"
+      },
+      "to": {
+        "transition": "start"
+      }
+    }
+  ],
+  "name": "single",
+  "places": [
+    {
+      "accepts": [
+        "job"
+      ],
+      "name": "queued"
+    },
+    {
+      "accepts": [
+        "job"
+      ],
+      "name": "running"
+    },
+    {
+      "accepts": [
+        "job"
+      ],
+      "name": "done"
+    },
+    {
+      "accepts": [
+        "flag"
+      ],
+      "annotations": {
+        "fusion": true
+      },
+      "name": "switch"
+    },
+    {
+      "accepts": [
+        "credit"
+      ],
+      "annotations": {
+        "fusion": true
+      },
+      "name": "budget"
+    }
+  ],
+  "transitions": [
+    {
+      "name": "start"
+    },
+    {
+      "name": "finish"
+    }
+  ]
+}

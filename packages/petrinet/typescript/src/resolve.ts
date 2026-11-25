@@ -512,11 +512,13 @@ function invalidContributionMessage(contribution: AnyObject): string {
     case "view.route": return "invalid view route contribution";
     case "view.splines": return "invalid view splines contribution";
     case "view.detail": return "invalid view detail contribution";
+    case "view.fusion": return "invalid view fusion contribution";
     case "decoration.highlight": return "invalid highlight decoration contribution";
     case "decoration.note": return "invalid note decoration contribution";
     case "decoration.summary": return "invalid summary decoration contribution";
     case "decoration.quiet": return "invalid quiet decoration contribution";
     case "decoration.beside": return "invalid beside decoration contribution";
+    case "decoration.single": return "invalid single decoration contribution";
     case "decoration.show": return "invalid show decoration contribution";
     case "document.extensions": return "invalid document extensions contribution";
     case "domain.values": return "invalid domain contribution";
@@ -1305,6 +1307,7 @@ export function resolveContributionIr(
   const relativeBases: {viewName: string; baseType: string; baseName: string; span: IrSpan}[] = [];
   const routes = new Map<string, Fact<AnyObject[]>>();
   const viewStyles = new Map<string, Fact<string>>();
+  const viewFusions = new Map<string, Fact<string>>();
   const decorations = new Map<string, Map<string, Fact<JsonValue>>>();
   let extensions: Fact<ReadonlyJsonObject> | undefined;
   const domains = new Map<string, Fact<JsonValue[]>>();
@@ -2448,12 +2451,44 @@ export function resolveContributionIr(
       continue;
     }
 
+    if (kind === "view.fusion") {
+      const viewName = target.name;
+      const place = value.place;
+      const mode = value.mode;
+      if (
+        !keysEqual(target, ["type", "name"]) ||
+        target.type !== "view" ||
+        typeof viewName !== "string" ||
+        viewName.length === 0 ||
+        !keysEqual(value, ["mode", "place"]) ||
+        typeof place !== "string" ||
+        place.length === 0 ||
+        (mode !== "single" && mode !== "copies")
+      ) {
+        throw resolutionError("PN200", "invalid view fusion contribution", span);
+      }
+      const key = JSON.stringify([viewName, place]);
+      const existing = viewFusions.get(key);
+      if (existing !== undefined && existing.value !== mode) {
+        throw resolutionError(
+          "PN202",
+          `conflicting fusion facts for place (${place}) in view ${pythonRepr(viewName)}`,
+          span,
+          "remove one declaration or make both values identical",
+          [["first fusion value was declared here", existing.span]],
+        );
+      }
+      if (existing === undefined) viewFusions.set(key, {value: mode, span});
+      continue;
+    }
+
     if (
       kind === "decoration.highlight" ||
       kind === "decoration.note" ||
       kind === "decoration.summary" ||
       kind === "decoration.quiet" ||
       kind === "decoration.beside" ||
+      kind === "decoration.single" ||
       kind === "decoration.show"
     ) {
       const member = kind.slice("decoration.".length);
@@ -2461,7 +2496,7 @@ export function resolveContributionIr(
       const targetName = target.name;
       const allowedTypes = member === "quiet" || member === "show"
         ? ["color"]
-        : member === "beside"
+        : member === "beside" || member === "single"
           ? ["place"]
           : member === "summary"
             ? ["transition", "arcHandle"]
@@ -2484,6 +2519,9 @@ export function resolveContributionIr(
         if (typeof side === "string") besideValue.side = side;
         if (share === false) besideValue.share = false;
         decorationValue = besideValue;
+      } else if (member === "single") {
+        validValue = Object.keys(value).length === 0;
+        decorationValue = true;
       } else if (member === "quiet") {
         validValue = Object.keys(value).length === 0;
         decorationValue = true;
@@ -3230,14 +3268,68 @@ export function resolveContributionIr(
         `declare the ${noun} before decorating it`,
       );
     }
-    const besideFact = facts.get("beside");
     const fusion = annotations.get(metadataKey("place", subjectName))?.get("fusion");
-    if (besideFact !== undefined && fusion?.value !== true) {
+    const fusionTrue = fusion?.value === true;
+    const missingFusion = (["beside", "single"] as const).filter(
+      (member) => facts.get(member) !== undefined && !fusionTrue,
+    );
+    if (missingFusion.length > 0) {
+      const member = missingFusion.reduce((earliest, candidate) => {
+        const earliestFact = facts.get(earliest) as Fact<JsonValue>;
+        const candidateFact = facts.get(candidate) as Fact<JsonValue>;
+        return candidateFact.span.start.byteOffset < earliestFact.span.start.byteOffset
+          ? candidate
+          : earliest;
+      });
+      const fact = facts.get(member) as Fact<JsonValue>;
+      if (member === "beside") {
+        throw resolutionError(
+          "PN202",
+          `beside decoration needs a fusion place; (${subjectName}) is drawn once, so it has no local copies to place`,
+          fact.span,
+          `annotate it with \`(${subjectName}) annotation fusion true\`, or remove the beside decoration`,
+        );
+      }
       throw resolutionError(
         "PN202",
-        `beside decoration needs a fusion place; (${subjectName}) is drawn once, so it has no local copies to place`,
-        besideFact.span,
-        `annotate it with \`(${subjectName}) annotation fusion true\`, or remove the beside decoration`,
+        `single decoration needs a fusion place; (${subjectName}) is drawn once, so there is no fused drawing to collapse`,
+        fact.span,
+        `annotate it with \`(${subjectName}) annotation fusion true\`, or remove the single decoration`,
+      );
+    }
+    const singleFact = facts.get("single");
+    const besideFact = facts.get("beside");
+    if (singleFact !== undefined && besideFact !== undefined) {
+      const singleFirst = singleFact.span.start.byteOffset <= besideFact.span.start.byteOffset;
+      const earlier = singleFirst ? "single" : "beside";
+      const earlierSpan = singleFirst ? singleFact.span : besideFact.span;
+      const laterSpan = singleFirst ? besideFact.span : singleFact.span;
+      throw resolutionError(
+        "PN202",
+        `conflicting single and beside decorations for (${subjectName})`,
+        laterSpan,
+        "a single node has no copies to place; remove one declaration",
+        [[`first ${earlier} decoration was declared here`, earlierSpan]],
+      );
+    }
+  }
+  for (const [key, fact] of viewFusions) {
+    const [viewName, place] = JSON.parse(key) as [string, string];
+    if (!accepts.has(place)) {
+      throw resolutionError(
+        "PN202",
+        `view ${pythonRepr(viewName)} fusion fact references unknown place ${pythonRepr(place)}; presentation facts cannot declare semantic objects`,
+        fact.span,
+        "declare the place in topology before choosing how to draw it",
+      );
+    }
+    const fusion = annotations.get(metadataKey("place", place))?.get("fusion");
+    if (fusion?.value !== true) {
+      throw resolutionError(
+        "PN202",
+        `view ${pythonRepr(viewName)} fusion fact needs a fusion place; (${place}) is not annotated fusion true`,
+        fact.span,
+        `annotate it with \`(${place}) annotation fusion true\`, or remove the fusion fact`,
       );
     }
   }
@@ -3462,7 +3554,7 @@ export function resolveContributionIr(
   };
   if (
     markings.length > 0 ||
-    (namedMarkings.size === 0 && positions.size === 0 && routes.size === 0 && viewStyles.size === 0 && decorations.size === 0 && extensions === undefined)
+    (namedMarkings.size === 0 && positions.size === 0 && routes.size === 0 && viewStyles.size === 0 && viewFusions.size === 0 && decorations.size === 0 && extensions === undefined)
   ) {
     result.initialMarking = initialMarking;
   }
@@ -3562,6 +3654,20 @@ export function resolveContributionIr(
       setOwn(views, viewName, view);
     }
     setOwn(view, member, fact.value);
+  }
+  for (const [key, fact] of viewFusions) {
+    const [viewName, place] = JSON.parse(key) as [string, string];
+    let view = Object.hasOwn(views, viewName) ? views[viewName] as AnyObject : undefined;
+    if (view === undefined) {
+      view = {positions: {}, routes: {}};
+      setOwn(views, viewName, view);
+    }
+    let fusion = view.fusion as AnyObject | undefined;
+    if (fusion === undefined) {
+      fusion = {};
+      setOwn(view, "fusion", fusion);
+    }
+    setOwn(fusion, `place:${place}`, fact.value);
   }
 
   if (

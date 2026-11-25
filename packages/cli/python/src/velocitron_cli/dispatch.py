@@ -613,6 +613,9 @@ def _net_source_map(text: str, source_name: str, net: Net) -> _NetSourceMap:
                 place_name = subject.get("name")
                 if subject.get("type") == "place" and isinstance(place_name, str):
                     positions.setdefault((view_name, place_name), _position(span))
+                copy_place = subject.get("place")
+                if subject.get("type") == "placeCopy" and isinstance(copy_place, str):
+                    positions.setdefault((view_name, copy_place), _position(span))
         elif kind == "decoration.beside":
             place_name = target.get("name")
             if target.get("type") == "place" and isinstance(place_name, str):

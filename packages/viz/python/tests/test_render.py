@@ -206,6 +206,153 @@ def test_a_fusion_place_is_one_local_copy_per_transition() -> None:
     assert "window@" not in flat
 
 
+def test_single_draws_one_dashed_fusion_node_and_a_view_can_override_it() -> None:
+    """decorate single keeps the fusion style; a view wins; --no-fusion wins."""
+    # given: switch asks to be one node, and budget stays a beside copy
+    net = Net(
+        name="single",
+        places=[
+            Place("queued", ["job"]),
+            Place("running", ["job"]),
+            Place("switch", ["flag"], annotations={"fusion": True}),
+            Place("budget", ["credit"], annotations={"fusion": True}),
+        ],
+        transitions=[Transition("start"), Transition("finish")],
+        arcs=[
+            Arc(
+                from_place="queued",
+                to_transition="start",
+                consume=ConsumePattern("job", None, "consume"),
+            ),
+            Arc(
+                from_transition="start",
+                to_place="running",
+                produce=ProduceTemplate("job", "running"),
+            ),
+            Arc(
+                from_place="switch",
+                to_transition="start",
+                consume=ConsumePattern("flag", None, "read"),
+            ),
+            Arc(
+                from_place="switch",
+                to_transition="finish",
+                consume=ConsumePattern("flag", None, "read"),
+            ),
+            Arc(
+                from_place="budget",
+                to_transition="start",
+                consume=ConsumePattern("credit", None, "read"),
+            ),
+        ],
+    )
+    decorations = Decorations(
+        nodes={
+            "place:switch": Decoration(single=True),
+            "place:budget": Decoration(beside=True),
+        }
+    )
+    plain = RenderStyle(html_labels=False, tooltips=False)
+
+    def edge(dot: str, source: str, target: str) -> str:
+        return next(
+            line for line in dot.splitlines() if f'"{source}" -> "{target}"' in line
+        )
+
+    # when: rendered from the decoration, from each view override, and with the flag
+    dot = net_to_dot(net, decorations=decorations, style=plain)
+    copies = net_to_dot(
+        net, decorations=decorations, fusion_modes={"switch": "copies"}, style=plain
+    )
+    collapsed = net_to_dot(
+        net, decorations=decorations, fusion_modes={"budget": "single"}, style=plain
+    )
+    flat = net_to_dot(net, decorations=decorations, render_fusion=False, style=plain)
+
+    # then: switch is one dashed node whose arcs take part in ranking
+    assert '"switch@' not in dot
+    assert 'class="fusion", style=dashed, color="gray40"' in dot
+    assert "constraint=false" not in edge(dot, "switch", "start")
+    assert "constraint=false" not in edge(dot, "switch", "finish")
+    # and: budget stays a beside copy, so its arc does not rank
+    assert '"budget@start"' in dot
+    assert "constraint=false" in edge(dot, "budget@start", "start")
+    assert "cluster_beside_0" in dot
+    # and: the view can put switch back to copies
+    assert '"switch@start"' in copies and '"switch@finish"' in copies
+    # and: the view can collapse budget, dropping its beside row
+    assert '"budget" [' in collapsed
+    assert '"budget@' not in collapsed
+    assert "cluster_beside" not in collapsed
+    assert 'class="fusion"' in collapsed
+    # and: --no-fusion still draws ordinary nodes and wins over the decoration
+    assert '"switch" [' in flat and '"budget" [' in flat
+    assert "switch@" not in flat and "budget@" not in flat
+    assert 'class="fusion"' not in flat
+
+
+def test_a_copy_position_does_not_apply_to_a_single_fusion_node() -> None:
+    """A place drawn once takes its place position; a copy fact is not an error."""
+    # given: switch is one node, and the view also positions one of its copies
+    net = Net(
+        name="single",
+        places=[
+            Place("queued", ["job"]),
+            Place("switch", ["flag"], annotations={"fusion": True}),
+        ],
+        transitions=[Transition("start"), Transition("finish")],
+        arcs=[
+            Arc(
+                from_place="queued",
+                to_transition="start",
+                consume=ConsumePattern("job", None, "consume"),
+            ),
+            Arc(
+                from_place="switch",
+                to_transition="start",
+                consume=ConsumePattern("flag", None, "read"),
+            ),
+            Arc(
+                from_place="switch",
+                to_transition="finish",
+                consume=ConsumePattern("flag", None, "read"),
+            ),
+        ],
+    )
+    decorations = Decorations(nodes={"place:switch": Decoration(single=True)})
+    model = net_render_model(
+        net,
+        decorations=decorations,
+        style=RenderStyle(html_labels=False, tooltips=False),
+    )
+    raw = {
+        "annotations": {
+            "petrinet.dsl/v1": {
+                "arcHandles": {},
+                "views": {
+                    "lanes": {
+                        "positions": {
+                            "place:switch": {"x": 4, "y": 8},
+                            "place:switch@transition:start": {"x": 40, "y": 80},
+                            "transition:start": {"x": 1, "y": 2},
+                        },
+                        "routes": {},
+                    }
+                },
+            }
+        }
+    }
+
+    # when: the view is applied
+    dot = apply_view(model, raw, "lanes")
+
+    # then: the one node takes the place point, and the copy point is unused
+    assert '"switch@' not in dot
+    switch = next(line for line in dot.splitlines() if '"switch" [' in line)
+    assert 'pos="4,8!"' in switch
+    assert "40,80" not in dot
+
+
 def _read_switch(name: str) -> Arc:
     return Arc(
         from_place="switch",

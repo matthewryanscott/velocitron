@@ -169,6 +169,107 @@ describe("net rendering", () => {
     assert.equal(flat.includes("window@"), false);
   });
 
+  it("draws a single fusion place as one dashed node and lets a view override it", () => {
+    // given: switch asks to be one node, and budget stays a beside copy
+    const net = {
+      name: "single",
+      places: [
+        {name: "queued", accepts: ["job"]},
+        {name: "running", accepts: ["job"]},
+        {name: "switch", accepts: ["flag"], annotations: {fusion: true}},
+        {name: "budget", accepts: ["credit"], annotations: {fusion: true}},
+      ],
+      transitions: [{name: "start"}, {name: "finish"}],
+      arcs: [
+        {from: {place: "queued"}, to: {transition: "start"}, consume: {type: "job", mode: "consume", weight: 1}},
+        {from: {transition: "start"}, to: {place: "running"}, produce: {type: "job", destination: "running"}},
+        {from: {place: "switch"}, to: {transition: "start"}, consume: {type: "flag", mode: "read", weight: 1}},
+        {from: {place: "switch"}, to: {transition: "finish"}, consume: {type: "flag", mode: "read", weight: 1}},
+        {from: {place: "budget"}, to: {transition: "start"}, consume: {type: "credit", mode: "read", weight: 1}},
+      ],
+    };
+    const decorations = {
+      nodes: {
+        "place:switch": {single: true},
+        "place:budget": {beside: true},
+      },
+      arcs: {},
+      quietColors: [],
+      shownFields: {},
+    };
+    const plain = {htmlLabels: false, tooltips: false};
+    const edge = (dot, source, target) => dot.split("\n").find((line) => line.includes(`"${source}" -> "${target}"`));
+    // when: rendered from the decoration, from each view override, and without fusion copies
+    const dot = netToDot(net, {decorations, style: plain});
+    const copies = netToDot(net, {decorations, fusionModes: {switch: "copies"}, style: plain});
+    const collapsed = netToDot(net, {decorations, fusionModes: {budget: "single"}, style: plain});
+    const flat = netToDot(net, {decorations, renderFusion: false, style: plain});
+    // then: switch is one dashed node whose arcs take part in ranking
+    assert.equal(dot.includes('"switch@'), false);
+    assert.ok(dot.includes('class="fusion", style=dashed, color="gray40"'));
+    assert.equal(edge(dot, "switch", "start").includes("constraint=false"), false);
+    assert.equal(edge(dot, "switch", "finish").includes("constraint=false"), false);
+    assert.ok(dot.includes('"budget@start"'));
+    assert.ok(edge(dot, "budget@start", "start").includes("constraint=false"));
+    assert.ok(copies.includes('"switch@start"'));
+    assert.ok(copies.includes('"switch@finish"'));
+    assert.ok(collapsed.includes('"budget" ['));
+    assert.equal(collapsed.includes('"budget@'), false);
+    assert.equal(collapsed.includes("cluster_beside"), false);
+    assert.ok(flat.includes('"switch" ['));
+    assert.equal(flat.includes("class=\"fusion\""), false);
+  });
+
+  it("does not apply a copy position to a fusion place drawn as one node", () => {
+    // given: switch is one node, and the view also positions one of its copies
+    const net = {
+      name: "single",
+      places: [
+        {name: "queued", accepts: ["job"]},
+        {name: "switch", accepts: ["flag"], annotations: {fusion: true}},
+      ],
+      transitions: [{name: "start"}, {name: "finish"}],
+      arcs: [
+        {from: {place: "queued"}, to: {transition: "start"}, consume: {type: "job", mode: "consume", weight: 1}},
+        {from: {place: "switch"}, to: {transition: "start"}, consume: {type: "flag", mode: "read", weight: 1}},
+        {from: {place: "switch"}, to: {transition: "finish"}, consume: {type: "flag", mode: "read", weight: 1}},
+      ],
+    };
+    const decorations = {
+      nodes: {"place:switch": {single: true}},
+      arcs: {},
+      quietColors: [],
+      shownFields: {},
+    };
+    const raw = {
+      annotations: {
+        "petrinet.dsl/v1": {
+          arcHandles: {},
+          views: {
+            lanes: {
+              positions: {
+                "place:switch": {x: 4, y: 8},
+                "place:switch@transition:start": {x: 40, y: 80},
+                "transition:start": {x: 1, y: 2},
+              },
+              routes: {},
+            },
+          },
+        },
+      },
+    };
+    // when: the view is applied
+    const dot = applyView(
+      netRenderModel(net, {decorations, style: {htmlLabels: false, tooltips: false}}),
+      raw,
+      "lanes",
+    );
+    // then: the one node takes the place point, and the copy point is unused
+    assert.equal(dot.includes('"switch@'), false);
+    assert.ok(dot.split("\n").find((line) => line.includes('"switch" [')).includes('pos="4,8!"'));
+    assert.equal(dot.includes("40,80"), false);
+  });
+
   it("shares one fusion copy between neighbor siblings", () => {
     // given: a choice whose transitions also read one beside fusion place
     const pair = choice(["hold", "skip"], ["hold", "skip"]);

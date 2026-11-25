@@ -420,6 +420,12 @@ def _reserved_payload(
     transition_names = {
         item.get("name") for item in transitions if isinstance(item.get("name"), str)
     }
+    fusion_place_names = {
+        item.get("name")
+        for item in places
+        if isinstance(item.get("annotations"), Mapping)
+        and cast(Mapping[str, Any], item["annotations"]).get("fusion") is True
+    }
     for marking_name, raw_marking in cast(
         Mapping[Any, Any], payload["markings"]
     ).items():
@@ -449,13 +455,35 @@ def _reserved_payload(
             raise ValueError(f"{view_path} must be an object")
         view_value = cast(Mapping[str, Any], raw_view)
         _unsupported_fields(
-            view_value, {"positions", "routes", "splines", "detail"}, view_path
+            view_value,
+            {"positions", "routes", "splines", "detail", "fusion"},
+            view_path,
         )
         if not {"positions", "routes"} <= set(view_value):
             raise ValueError(f"{view_path} must contain positions and routes")
         for member, allowed in (("splines", VIEW_SPLINES), ("detail", VIEW_DETAILS)):
             if member in view_value and view_value[member] not in allowed:
                 raise ValueError(f"{view_path}.{member} is invalid")
+        raw_fusion = view_value.get("fusion", {})
+        if not isinstance(raw_fusion, Mapping):
+            raise ValueError(f"{view_path}.fusion must be an object")
+        for subject, mode in cast(Mapping[Any, Any], raw_fusion).items():
+            fusion_path = f"{view_path}.fusion.{subject}"
+            subject_parts = str(subject).split(":", 1)
+            if (
+                len(subject_parts) != 2
+                or subject_parts[0] != "place"
+                or not subject_parts[1]
+            ):
+                raise ValueError(f"{fusion_path} must target place:<name>")
+            if subject_parts[1] not in place_names:
+                raise ValueError(
+                    f"{fusion_path} references unknown place {subject_parts[1]!r}"
+                )
+            if mode not in ("single", "copies"):
+                raise ValueError(f"{fusion_path} must be single or copies")
+            if subject_parts[1] not in fusion_place_names:
+                raise ValueError(f"{fusion_path} needs a place annotated fusion true")
         positions, view_routes = view_value["positions"], view_value["routes"]
         if not isinstance(positions, Mapping) or not isinstance(view_routes, Mapping):
             raise ValueError(f"{view_path} positions and routes must be objects")
@@ -581,12 +609,6 @@ def _reserved_payload(
         if isinstance(item.get("accepts"), list)
         for color in cast(list[Any], item["accepts"])
     }
-    fusion_place_names = {
-        item.get("name")
-        for item in places
-        if isinstance(item.get("annotations"), Mapping)
-        and cast(Mapping[str, Any], item["annotations"]).get("fusion") is True
-    }
     for subject, raw_decoration in cast(
         Mapping[Any, Any], payload.get("decorations", {})
     ).items():
@@ -629,7 +651,7 @@ def _reserved_payload(
                     )
             continue
         allowed = (
-            {"highlight", "note", "beside"}
+            {"highlight", "note", "beside", "single"}
             if subject_kind == "place"
             else {"highlight", "note", "summary"}
         )
@@ -658,6 +680,15 @@ def _reserved_payload(
                 raise ValueError(
                     f"{decoration_path}.beside needs a place annotated fusion true"
                 )
+        if "single" in decoration:
+            if decoration["single"] is not True:
+                raise ValueError(f"{decoration_path}.single must be true")
+            if subject_name not in fusion_place_names:
+                raise ValueError(
+                    f"{decoration_path}.single needs a place annotated fusion true"
+                )
+        if "single" in decoration and "beside" in decoration:
+            raise ValueError(f"{decoration_path} cannot carry both single and beside")
         for member in ("note", "summary"):
             if member in decoration and not isinstance(decoration[member], str):
                 raise ValueError(f"{decoration_path}.{member} must be a string")
@@ -1403,6 +1434,12 @@ def emit_petrinet(document: Mapping[str, Any], compact: bool = False) -> str:
                     view_facts.append(
                         f"view {_name(cast(str, view_name))} {member} {view[member]}"
                     )
+            for subject, mode in sorted(view.get("fusion", {}).items()):
+                _, place_name = cast(str, subject).split(":", 1)
+                view_facts.append(
+                    f"view {_name(cast(str, view_name))} fusion "
+                    f"({_name(place_name)}) {mode}"
+                )
             ordered_relative: list[tuple[str, str, Mapping[str, Any]]] = []
             for subject, position in view["positions"].items():
                 if "from" in position:
@@ -1476,6 +1513,8 @@ def emit_petrinet(document: Mapping[str, Any], compact: bool = False) -> str:
                     + ("" if side is None else f" {side}")
                     + (" unshared" if beside.get("share") is False else "")
                 )
+            if decoration.get("single") is True:
+                view_facts.append(f"decorate {rendered_subject} single")
         view_facts.append(f"extensions {_json(metadata['extensions'])}")
 
     proof_facts = _proof_facts(document)

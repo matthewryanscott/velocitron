@@ -33,8 +33,11 @@ every net-schema feature (`spec/net-schema.md`, `spec/composition.md`):
   box named by its description, with the places between the nets.
 - **Fusion places** (``annotations: {"fusion": true}`` — CONTEXT.md "Fusion
   place") render as a local dashed gray instance at each connected transition
-  instead of one hub node with arcs radiating everywhere; ``render_fusion=
-  False`` (CLI ``--no-fusion``) restores the single-node view.
+  instead of one hub node with arcs radiating everywhere. ``decorate (P)
+  single`` draws that place as one dashed node whose arcs take part in
+  ranking, and a view's ``fusion`` fact can choose ``single`` or ``copies``
+  for one render. ``render_fusion=False`` (CLI ``--no-fusion``, deprecated)
+  still draws every fusion place as one ordinary node and wins over both.
 - ``description`` fields become SVG tooltips on nodes and edges.
 - **Views** (``--view <name>``, payload ``views[<name>]``: authored positions
   and handled-arc routes) are applied over a :class:`RenderModel`
@@ -44,10 +47,12 @@ every net-schema feature (`spec/net-schema.md`, `spec/composition.md`):
 - **Decorations** (payload ``decorations``, ADR 0028) apply with or without a
   view: a highlight fills a node or thickens an arc in amber, a note adds an
   italic line, a summary replaces expressions at ``summary`` detail, a
-  quiet color loses its arc type labels, and ``beside`` keeps each fusion
-  copy of a place next to its transition (ADR 0029). A view places a copy
+  quiet color loses its arc type labels, ``beside`` keeps each fusion
+  copy of a place next to its transition (ADR 0029), and ``single`` draws
+  that fusion place as one dashed node (ADR 0071). A view places a copy
   from its ``place:<P>@transition:<T>`` entry, else from the whole-place
-  entry, else beside its pinned transition (ADR 0072, ADR 0067). With no side,
+  entry, else beside its pinned transition (ADR 0072, ADR 0067). A place
+  drawn as one node has that one position. With no side,
   two neighbor transitions of one choice share one copy between them (ADR 0035),
   unless the place is ``beside unshared`` (ADR 0070).
 
@@ -93,6 +98,7 @@ from .view import (
     Decorations,
     beside_gap,
     node_width,
+    resolve_fusion_mode,
 )
 
 
@@ -1377,6 +1383,7 @@ def _net_body(
     token_changes: TokenChanges | None = None,
     marking_rows: Mapping[str, Sequence[tuple[MarkingRow, bool]]] | None = None,
     twin_labels: Mapping[str, str | None] | None = None,
+    fusion_modes: Mapping[str, str] = {},
 ) -> list[str]:
     """Node and edge statements for one net, optionally name-prefixed.
 
@@ -1412,9 +1419,19 @@ def _net_body(
         if include_marking
         else None
     )
-    fusion: set[str] = (
-        {p.name for p in net.places if _is_fusion(p)} if render_fusion else set()
-    )
+    # --no-fusion draws every fusion place as an ordinary node. Otherwise a
+    # view mode wins over decorate single, which wins over per-transition copies.
+    copy_places: set[str] = set()
+    single_places: set[str] = set()
+    if render_fusion:
+        for place in net.places:
+            if not _is_fusion(place):
+                continue
+            if resolve_fusion_mode(place.name, decorations, fusion_modes) == "single":
+                single_places.add(place.name)
+            else:
+                copy_places.add(place.name)
+    fusion = copy_places
 
     def _tokens(place: Place) -> Sequence[Token]:
         if selected_marking is not None and place.name in selected_marking:
@@ -1434,6 +1451,7 @@ def _net_body(
             _tokens(place),
             label=member_label(place.name),
             style=style,
+            fusion=place.name in single_places,
             decoration=_node_decoration(f"place:{place.name}"),
             marks=_marks(place),
             changes=_changes(place),
@@ -1534,6 +1552,7 @@ def net_render_model(
     decorations: Decorations = Decorations(),
     token_marks: TokenMarks | None = None,
     token_changes: TokenChanges | None = None,
+    fusion_modes: Mapping[str, str] | None = None,
 ) -> RenderModel:
     """Render a standalone net and return it with its structural index (ADR 0024).
 
@@ -1577,6 +1596,7 @@ def net_render_model(
                     decorations=decorations,
                     token_marks=token_marks,
                     token_changes=token_changes,
+                    fusion_modes=fusion_modes or {},
                 ),
                 "}",
             ]
@@ -1607,6 +1627,7 @@ def net_to_dot(
     decorations: Decorations = Decorations(),
     token_marks: TokenMarks | None = None,
     token_changes: TokenChanges | None = None,
+    fusion_modes: Mapping[str, str] | None = None,
 ) -> str:
     """Render a standalone net, optionally replacing its default marking."""
     return net_render_model(
@@ -1619,6 +1640,7 @@ def net_to_dot(
         decorations=decorations,
         token_marks=token_marks,
         token_changes=token_changes,
+        fusion_modes=fusion_modes,
     ).dot
 
 
@@ -1678,6 +1700,7 @@ def net_twin_dots(
     style: RenderStyle = _DEFAULT_STYLE,
     render_fusion: bool = True,
     splines: str | None = None,
+    fusion_modes: Mapping[str, str] | None = None,
 ) -> tuple[str, str]:
     """Draw ``net`` twice, as two graphs that get one layout.
 
@@ -1735,6 +1758,7 @@ def net_twin_dots(
                 token_changes=side.token_changes,
                 marking_rows=rows,
                 twin_labels={key: label_of(twin, key) for key in keys},
+                fusion_modes=fusion_modes or {},
             )
         )
         lines.append("}")

@@ -5,6 +5,7 @@ from __future__ import annotations
 from velocitron_analysis import (
     RULE_FUSION_PLACE_POSITION,
     RULE_PLACE_POSITION_OVERRIDDEN,
+    RULE_SINGLE_COPY_POSITION,
     LintFinding,
     lint_net,
 )
@@ -267,6 +268,38 @@ def test_every_copy_position_overrides_the_place_entry() -> None:
     assert [finding.rule for finding in findings] == [RULE_PLACE_POSITION_OVERRIDDEN]
     assert findings[0].place == "lock"
     assert "overrides" in findings[0].message
+
+
+def test_a_copy_position_on_a_place_drawn_once_is_warned() -> None:
+    # given: the view draws the lock as one node and also positions a copy
+    net = _with_view(
+        _lock(),
+        {
+            "place:lock": {"x": 0, "y": 0},
+            "place:lock@transition:acquire": {"x": 10, "y": 0},
+        },
+    )
+    assert net.annotations is not None
+    payload = net.annotations["petrinet.dsl/v1"]
+    assert isinstance(payload, dict)
+    payload["decorations"] = {"place:lock": {"single": True}}
+
+    # when: linting
+    findings = lint_net(net)
+
+    # then: the copy fact does not apply, and the place is not a stack
+    assert findings == [
+        LintFinding(
+            rule=RULE_SINGLE_COPY_POSITION,
+            transition="",
+            place="lock",
+            view="lanes",
+            message=(
+                "view 'lanes' positions a copy of fusion place 'lock', which "
+                "is drawn as one node; the copy position does not apply"
+            ),
+        )
+    ]
 
 
 def test_invalid_decorations_do_not_raise() -> None:

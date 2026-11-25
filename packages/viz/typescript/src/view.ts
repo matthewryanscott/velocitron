@@ -48,6 +48,7 @@ export interface Decoration {
   readonly besideSide?: string | null;
   /** False is `beside unshared`: one copy per transition (ADR 0070). */
   readonly besideShare?: boolean;
+  readonly single?: boolean;
   readonly failure?: boolean;
   readonly faded?: boolean;
 }
@@ -110,6 +111,7 @@ export function readDecorations(raw: unknown): Decorations {
       beside: isRecord(beside),
       besideSide: isRecord(beside) ? optionalText(beside.side) : null,
       besideShare: isRecord(beside) ? beside.share !== false : true,
+      single: rawEntry.single === true,
     };
     if (kind === "place" || kind === "transition") nodes[subject] = decoration;
     else if (kind === "arc") {
@@ -131,6 +133,36 @@ export function readDecorations(raw: unknown): Decorations {
     }
   }
   return {nodes, arcs, quietColors, shownFields};
+}
+
+export function fusionModesOf(view: Readonly<Record<string, unknown>>): Record<string, string> {
+  const raw = view.fusion ?? {};
+  if (raw === null || (isRecord(raw) && Object.keys(raw).length === 0)) return {};
+  if (!isRecord(raw)) throw new ViewApplicationError("invalid view fusion");
+  const modes: Record<string, string> = {};
+  for (const [subject, mode] of Object.entries(raw)) {
+    const place = subject.startsWith("place:") ? subject.slice("place:".length) : "";
+    if (place.length === 0 || (mode !== "single" && mode !== "copies")) {
+      throw new ViewApplicationError(`invalid view fusion ${pyStr(subject)}`);
+    }
+    modes[place] = mode;
+  }
+  return modes;
+}
+
+export function readFusionModes(raw: unknown, viewName: string): Record<string, string> {
+  const view = viewOf(raw, viewName);
+  return view === undefined ? {} : fusionModesOf(view);
+}
+
+export function resolveFusionMode(
+  place: string,
+  decorations: Decorations,
+  fusionModes: Readonly<Record<string, string>>,
+): "single" | "copies" {
+  const mode = fusionModes[place];
+  if (mode === "single" || mode === "copies") return mode;
+  return decorations.nodes[`place:${place}`]?.single === true ? "single" : "copies";
 }
 
 export function resolvePositions(
@@ -182,6 +214,14 @@ export function resolvePositions(
   return resolved;
 }
 
+function drawnOnce(model: RenderModel, place: string): boolean {
+  for (const key of model.copyLines.keys()) {
+    if (key.startsWith(`${place}\0`)) return false;
+  }
+  const lines = model.nodeLines[`place:${place}`];
+  return lines !== undefined && lines.length > 0;
+}
+
 export function applyView(model: RenderModel, raw: unknown, viewName: string): string {
   const facts = viewFacts(raw, viewName);
   const resolved = resolvePositions(viewName, facts.positions);
@@ -201,6 +241,9 @@ export function applyView(model: RenderModel, raw: unknown, viewName: string): s
     if (parsed === undefined) continue;
     const lineIndex = model.copyLines.get(copyLineKey(parsed[0], parsed[1]));
     if (lineIndex === undefined) {
+      // A place drawn as one node has no copies. The copy fact does not
+      // apply; lint reports it (ADR 0071, ADR 0072).
+      if (drawnOnce(model, parsed[0])) continue;
       throw new ViewApplicationError(
         `view ${pyStr(viewName)} positions unknown subject ${pyStr(subject)}`,
       );

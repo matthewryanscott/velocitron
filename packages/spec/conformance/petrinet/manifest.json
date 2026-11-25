@@ -1469,6 +1469,39 @@
       }
     },
     {
+      "id": "21-decoration-single",
+      "invalid": [
+        {
+          "expectation": "21-decoration-single/single.single-on-transition.json",
+          "id": "single-on-transition",
+          "phase": "parse",
+          "structureParses": false
+        },
+        {
+          "expectation": "21-decoration-single/single.single-on-plain-place.json",
+          "id": "single-on-plain-place",
+          "phase": "resolution",
+          "structureParses": true
+        },
+        {
+          "expectation": "21-decoration-single/single.single-beside-conflict.json",
+          "id": "single-beside-conflict",
+          "phase": "resolution",
+          "structureParses": true
+        }
+      ],
+      "valid": {
+        "canonicalNet": "21-decoration-single/single.net.json",
+        "canonicalSource": "21-decoration-single/single.canonical.source.json",
+        "contributionIr": "21-decoration-single/single.contribution-ir.json",
+        "expect": {
+          "canonicalSourceFixedPoint": true,
+          "contributionIrVersion": 1,
+          "source": "21-decoration-single/single.source.json"
+        }
+      }
+    },
+    {
       "id": "21-correlated-join",
       "invalid": [
         {

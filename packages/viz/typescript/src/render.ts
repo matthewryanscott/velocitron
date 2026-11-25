@@ -30,6 +30,7 @@ import {
   SMALL_POINT,
   besideGap,
   nodeWidth,
+  resolveFusionMode,
   type Decoration,
   type Decorations,
 } from "./view.js";
@@ -83,6 +84,8 @@ export interface NetRenderOptions {
   readonly style?: RenderStyle;
   readonly renderFusion?: boolean;
   readonly decorations?: Decorations;
+  /** Place name to `"single"` or `"copies"`. A view's choice; it wins over `decorate single`. */
+  readonly fusionModes?: Readonly<Record<string, string>>;
 }
 
 export interface BesidePlacement {
@@ -156,6 +159,7 @@ export function netRenderModel(net: Net, options: NetRenderOptions = {}): Render
     style,
     renderFusion: options.renderFusion !== false,
     decorations: options.decorations ?? EMPTY_DECORATIONS,
+    fusionModes: options.fusionModes ?? {},
     recorder,
   });
   const dot = `${[...header, "", ...body, "}"].join("\n")}\n`;
@@ -515,6 +519,7 @@ function netBody(
     style: Style;
     renderFusion: boolean;
     decorations: Decorations;
+    fusionModes: Readonly<Record<string, string>>;
     recorder: RenderIndex | undefined;
     indent?: string;
     prefix?: string;
@@ -525,9 +530,19 @@ function netBody(
   const selected = !args.includeMarking
     ? undefined
     : (args.marking ?? net.initialMarking);
-  const fusion = args.renderFusion
-    ? new Set(net.places.filter(isFusionPlace).map((place) => place.name))
-    : new Set<string>();
+  const copyPlaces = new Set<string>();
+  const singlePlaces = new Set<string>();
+  if (args.renderFusion) {
+    for (const place of net.places) {
+      if (!isFusionPlace(place)) continue;
+      if (resolveFusionMode(place.name, args.decorations, args.fusionModes) === "single") {
+        singlePlaces.add(place.name);
+      } else {
+        copyPlaces.add(place.name);
+      }
+    }
+  }
+  const fusion = copyPlaces;
   const tokensOf = (place: Place): readonly Token[] => selected?.[place.name] ?? [];
   const nodeDecoration = (key: string): Decoration => args.decorations.nodes[key] ?? NO_DECORATION;
   const lines: string[] = [];
@@ -538,6 +553,7 @@ function netBody(
     const attrs = placeAttrs(place, tokensOf(place), {
       label: memberLabel(place.name),
       style: args.style,
+      fusion: singlePlaces.has(place.name),
       decoration: nodeDecoration(`place:${place.name}`),
     });
     lines.push(`${indent}${quote(`${prefix}${place.name}`)} [${attrs}];`);

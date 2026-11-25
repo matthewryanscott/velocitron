@@ -2,8 +2,8 @@
 // @ts-nocheck -- Ajv emits standalone JavaScript.
 "use strict";
 const validateContributionIrWire = validate20;
-const schema31 = {"$comment":"This schema validates the v1 wire shape only. Consumers MUST reject an unsupported format or version before resolution. Semantic resolution additionally enforces that contribution IDs are source-derived and unique and that ordinal values are contiguous zero-based integers in source order; JSON Schema cannot express either cross-item invariant.","$defs":{"actorDeclareContribution":{"$comment":"Resolver accepts this kind only for net documents, where it lowers to the net annotation actors: one {name, kind} entry per actor, in source order.","properties":{"kind":{"const":"actor.declare"},"target":{"$ref":"#/$defs/netDocumentTarget"},"value":{"additionalProperties":false,"properties":{"kind":{"enum":["person","system","record"]},"name":{"minLength":1,"type":"string"}},"required":["name","kind"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"annotationContribution":{"properties":{"kind":{"const":"documentation.annotation"},"target":{"$ref":"#/$defs/elementTarget"},"value":{"additionalProperties":false,"properties":{"key":{"$ref":"#/$defs/name"},"value":{"$ref":"#/$defs/taggedJsonValue"}},"required":["key","value"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"arcColor":{"$comment":"Both explicit-color syntax and bare -> lower to an explicitly chosen core color. Bare -> uses the generic core color token.","additionalProperties":false,"properties":{"kind":{"const":"explicit"},"value":{"$ref":"#/$defs/name"}},"required":["kind","value"],"type":"object"},"arcCorrelateContribution":{"properties":{"kind":{"const":"arc.correlate"},"target":{"$ref":"#/$defs/arcHandleTarget"},"value":{"additionalProperties":false,"properties":{"cel":{"$ref":"#/$defs/name"}},"required":["cel"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"arcDeclareContribution":{"properties":{"kind":{"const":"arc.declare"},"target":{"$ref":"#/$defs/arcTarget"},"value":{"additionalProperties":false,"allOf":[{"else":{"not":{"required":["transitionNameSpan"]}},"if":{"properties":{"from":{"$ref":"#/$defs/placeTarget"},"mode":{"const":"consume"},"to":{"$ref":"#/$defs/transitionTarget"}},"required":["from","to","mode"]},"then":{"required":["transitionNameSpan"]}}],"properties":{"color":{"$ref":"#/$defs/arcColor"},"from":{"$ref":"#/$defs/endpoint"},"mode":{"$ref":"#/$defs/arcMode"},"to":{"$ref":"#/$defs/endpoint"},"transitionNameSpan":{"$comment":"Required only for a consumed place-to-transition declaration; identifies the exact lexical transition-name token.","$ref":"#/$defs/span"}},"required":["from","to","color","mode"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"arcHandleContribution":{"properties":{"kind":{"const":"arc.handle"},"target":{"$ref":"#/$defs/arcHandleTarget"},"value":{"additionalProperties":false,"properties":{"arcIds":{"$comment":"Ordered source ArcIds in the handle's consecutive expansion run.","items":{"$ref":"#/$defs/arcId"},"minItems":1,"type":"array"}},"required":["arcIds"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"arcHandleTarget":{"$comment":"A typed local source @handle reference. It may precede its topology declaration; the resolver later resolves its ordered ArcId mapping and requires exactly one compatible concrete arc when an elaboration needs one.","additionalProperties":false,"properties":{"name":{"$ref":"#/$defs/name"},"type":{"const":"arcHandle"}},"required":["type","name"],"type":"object"},"arcId":{"$comment":"The deterministic source-derived identity of an arc.declare contribution. It is never a canonical JSON arc index.","additionalProperties":false,"properties":{"document":{"$ref":"#/$defs/relativeSourceId"},"part":{"minimum":0,"type":"integer"},"statement":{"minimum":0,"type":"integer"}},"required":["document","statement","part"],"type":"object"},"arcMode":{"enum":["consume","read","inhibit","produce"]},"arcPredicateContribution":{"properties":{"kind":{"const":"arc.predicate"},"target":{"$ref":"#/$defs/arcHandleTarget"},"value":{"$ref":"#/$defs/predicateValue"}},"required":["kind","target","value"],"type":"object"},"arcProduceCelContribution":{"properties":{"kind":{"const":"arc.produce-cel"},"target":{"$ref":"#/$defs/arcHandleTarget"},"value":{"additionalProperties":false,"properties":{"cel":{"$ref":"#/$defs/name"}},"required":["cel"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"arcProduceDataContribution":{"properties":{"kind":{"const":"arc.produce-data"},"target":{"$ref":"#/$defs/arcHandleTarget"},"value":{"additionalProperties":false,"properties":{"data":{"$ref":"#/$defs/taggedJsonValue"}},"required":["data"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"arcRunOrderContribution":{"properties":{"kind":{"const":"order.arc-run"},"target":{"$ref":"#/$defs/arcHandleTarget"},"value":{"additionalProperties":false,"properties":{"rank":{"minimum":1,"type":"integer"}},"required":["rank"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"arcTarget":{"additionalProperties":false,"properties":{"id":{"$ref":"#/$defs/arcId"},"type":{"const":"arc"}},"required":["type","id"],"type":"object"},"arcWeightContribution":{"properties":{"kind":{"const":"arc.weight"},"target":{"$ref":"#/$defs/arcHandleTarget"},"value":{"additionalProperties":false,"properties":{"weight":{"minimum":1,"type":"integer"}},"required":["weight"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"capacityKey":{"oneOf":[{"$ref":"#/$defs/name"},{"items":{"$ref":"#/$defs/name"},"minItems":1,"type":"array"}]},"colorTarget":{"$comment":"A token color named by a decoration. The resolver requires some place to accept it.","additionalProperties":false,"properties":{"name":{"$ref":"#/$defs/name"},"type":{"const":"color"}},"required":["type","name"],"type":"object"},"compositionFinalContribution":{"$comment":"Resolver accepts this kind only for composition documents, where it lowers to the composition's final markings; every alias must be declared by a use fact. One contribution per final fact; each marking lists places that must all hold a token.","properties":{"kind":{"const":"composition.final"},"target":{"$ref":"#/$defs/documentTarget"},"value":{"additionalProperties":false,"properties":{"markings":{"items":{"items":{"$ref":"#/$defs/wireEndpoint"},"minItems":1,"type":"array"},"minItems":1,"type":"array"}},"required":["markings"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"compositionHeaderContribution":{"properties":{"kind":{"const":"document.composition-header"},"target":{"$ref":"#/$defs/documentTarget"},"value":{"$comment":"The namespace is DSL-local source identity only. It MUST NOT lower to a core composition name, description, annotations, or other composition metadata.","additionalProperties":false,"properties":{"namespace":{"$ref":"#/$defs/name"}},"required":["namespace"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"compositionRefineContribution":{"$comment":"Resolver accepts this kind only for composition documents; both aliases must be declared by use facts and differ.","properties":{"kind":{"const":"composition.refine"},"target":{"$ref":"#/$defs/documentTarget"},"value":{"additionalProperties":false,"properties":{"by":{"additionalProperties":false,"properties":{"alias":{"$ref":"#/$defs/name"},"span":{"$comment":"The exact half-open span of the authored refining alias.","$ref":"#/$defs/span"}},"required":["alias","span"],"type":"object"},"transition":{"additionalProperties":false,"properties":{"alias":{"$ref":"#/$defs/name"},"name":{"$ref":"#/$defs/name"},"span":{"$comment":"The exact half-open span of the authored alias-dot-transition endpoint.","$ref":"#/$defs/span"}},"required":["alias","name","span"],"type":"object"}},"required":["transition","by"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"compositionShareContribution":{"$comment":"Resolver accepts this kind only for composition documents; every alias must be declared by a use fact. A share has no direction: its places need not be ports.","properties":{"kind":{"const":"composition.share"},"target":{"$ref":"#/$defs/documentTarget"},"value":{"additionalProperties":false,"properties":{"places":{"items":{"$ref":"#/$defs/wireEndpoint"},"minItems":2,"type":"array"}},"required":["places"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"compositionUseContribution":{"$comment":"Resolver accepts this kind only for composition documents and resolves ref relative to the containing source.","properties":{"kind":{"const":"composition.use"},"target":{"$ref":"#/$defs/documentTarget"},"value":{"additionalProperties":false,"properties":{"alias":{"$ref":"#/$defs/name"},"ref":{"minLength":1,"type":"string"}},"required":["ref","alias"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"compositionWireContribution":{"$comment":"Resolver accepts this kind only for composition documents and validates output-to-input direction and equal port colors.","properties":{"kind":{"const":"composition.wire"},"target":{"$ref":"#/$defs/documentTarget"},"value":{"additionalProperties":false,"properties":{"from":{"$ref":"#/$defs/wireEndpoint"},"to":{"$ref":"#/$defs/wireEndpoint"}},"required":["from","to"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"contribution":{"$comment":"The oneOf is deliberately closed: every kind has an exact typed target and exact value structure. No generic target or arbitrary host-language value is permitted.","additionalProperties":false,"oneOf":[{"$ref":"#/$defs/netHeaderContribution"},{"$ref":"#/$defs/compositionHeaderContribution"},{"$ref":"#/$defs/arcDeclareContribution"},{"$ref":"#/$defs/placeDeclareContribution"},{"$ref":"#/$defs/transitionDeclareContribution"},{"$ref":"#/$defs/arcHandleContribution"},{"$ref":"#/$defs/transitionHandlerContribution"},{"$ref":"#/$defs/transitionGuardContribution"},{"$ref":"#/$defs/transitionPriorityContribution"},{"$ref":"#/$defs/transitionTimerContribution"},{"$ref":"#/$defs/transitionTimerBindContribution"},{"$ref":"#/$defs/transitionTimerMaturityContribution"},{"$ref":"#/$defs/transitionBindingNameContribution"},{"$ref":"#/$defs/transitionOrderContribution"},{"$ref":"#/$defs/arcRunOrderContribution"},{"$ref":"#/$defs/arcPredicateContribution"},{"$ref":"#/$defs/arcWeightContribution"},{"$ref":"#/$defs/arcCorrelateContribution"},{"$ref":"#/$defs/arcProduceCelContribution"},{"$ref":"#/$defs/arcProduceDataContribution"},{"$ref":"#/$defs/placeAcceptsContribution"},{"$ref":"#/$defs/placePortContribution"},{"$ref":"#/$defs/placeCapacityContribution"},{"$ref":"#/$defs/templateDefineContribution"},{"$ref":"#/$defs/markingAppendContribution"},{"$ref":"#/$defs/descriptionContribution"},{"$ref":"#/$defs/annotationContribution"},{"$ref":"#/$defs/extensionsContribution"},{"$ref":"#/$defs/namedMarkingContribution"},{"$ref":"#/$defs/viewPositionContribution"},{"$ref":"#/$defs/viewRouteContribution"},{"$ref":"#/$defs/viewSplinesContribution"},{"$ref":"#/$defs/viewDetailContribution"},{"$ref":"#/$defs/decorationHighlightContribution"},{"$ref":"#/$defs/decorationNoteContribution"},{"$ref":"#/$defs/decorationSummaryContribution"},{"$ref":"#/$defs/decorationQuietContribution"},{"$ref":"#/$defs/decorationBesideContribution"},{"$ref":"#/$defs/decorationShowContribution"},{"$ref":"#/$defs/domainValuesContribution"},{"$ref":"#/$defs/proofFinalContribution"},{"$ref":"#/$defs/proofInvariantContribution"},{"$ref":"#/$defs/actorDeclareContribution"},{"$ref":"#/$defs/compositionUseContribution"},{"$ref":"#/$defs/compositionWireContribution"},{"$ref":"#/$defs/compositionFinalContribution"},{"$ref":"#/$defs/compositionShareContribution"},{"$ref":"#/$defs/compositionRefineContribution"}],"properties":{"id":{"$ref":"#/$defs/contributionIdentity"},"kind":{"type":"string"},"ordinal":{"minimum":0,"type":"integer"},"span":{"$ref":"#/$defs/span"},"target":{"$ref":"#/$defs/typedReference"},"value":{}},"required":["id","ordinal","span","kind","target","value"],"type":"object"},"contributionIdentity":{"$comment":"Deterministically derived from the source document, source statement, and expanded statement part. It is not a runtime-generated UUID.","additionalProperties":false,"properties":{"part":{"minimum":0,"type":"integer"},"source":{"$ref":"#/$defs/relativeSourceId"},"statement":{"minimum":0,"type":"integer"}},"required":["source","statement","part"],"type":"object"},"coordinatePoint":{"allOf":[{"$ref":"#/$defs/taggedObject"},{"properties":{"entries":{"allOf":[{"contains":{"$ref":"#/$defs/coordinateXEntry"}},{"contains":{"$ref":"#/$defs/coordinateYEntry"}}],"items":{"oneOf":[{"$ref":"#/$defs/coordinateXEntry"},{"$ref":"#/$defs/coordinateYEntry"}]},"maxItems":2,"minItems":2,"type":"array"}}}]},"coordinateXEntry":{"allOf":[{"$ref":"#/$defs/taggedObjectEntry"},{"properties":{"key":{"const":"x"},"value":{"$ref":"#/$defs/taggedNumber"}}}]},"coordinateYEntry":{"allOf":[{"$ref":"#/$defs/taggedObjectEntry"},{"properties":{"key":{"const":"y"},"value":{"$ref":"#/$defs/taggedNumber"}}}]},"decorationBesideContribution":{"$comment":"Resolver accepts this kind only for net documents, where it lowers below annotations['petrinet.dsl/v1'].decorations. Only a place annotated fusion true has local copies to place.","properties":{"kind":{"const":"decoration.beside"},"target":{"$ref":"#/$defs/placeTarget"},"value":{"additionalProperties":false,"properties":{"share":{"const":false},"side":{"enum":["left","right"]}},"type":"object"}},"required":["kind","target","value"],"type":"object"},"decorationHighlightContribution":{"$comment":"Resolver accepts this kind only for net documents, where it lowers below annotations['petrinet.dsl/v1'].decorations. Presentation only.","properties":{"kind":{"const":"decoration.highlight"},"target":{"$ref":"#/$defs/decorationTarget"},"value":{"additionalProperties":false,"properties":{"label":{"type":"string"}},"type":"object"}},"required":["kind","target","value"],"type":"object"},"decorationNoteContribution":{"$comment":"Resolver accepts this kind only for net documents, where it lowers below annotations['petrinet.dsl/v1'].decorations. Presentation only.","properties":{"kind":{"const":"decoration.note"},"target":{"$ref":"#/$defs/decorationTarget"},"value":{"additionalProperties":false,"properties":{"text":{"type":"string"}},"required":["text"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"decorationQuietContribution":{"$comment":"Resolver accepts this kind only for net documents, where it lowers below annotations['petrinet.dsl/v1'].decorations. Presentation only.","properties":{"kind":{"const":"decoration.quiet"},"target":{"$ref":"#/$defs/colorTarget"},"value":{"additionalProperties":false,"properties":{},"type":"object"}},"required":["kind","target","value"],"type":"object"},"decorationShowContribution":{"$comment":"Resolver accepts this kind only for net documents, where it lowers below annotations['petrinet.dsl/v1'].decorations. Names the token fields a renderer shows for a color, in source order.","properties":{"kind":{"const":"decoration.show"},"target":{"$ref":"#/$defs/colorTarget"},"value":{"additionalProperties":false,"properties":{"fields":{"items":{"$comment":"A token field path: non-empty keys joined by dots. A dotted path reaches into a nested object.","pattern":"^[^.]+(\\.[^.]+)*$","type":"string"},"minItems":1,"type":"array","uniqueItems":true}},"required":["fields"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"decorationSummaryContribution":{"$comment":"Resolver accepts this kind only for net documents, where it lowers below annotations['petrinet.dsl/v1'].decorations. Only transitions and arcs carry expressions to summarize.","properties":{"kind":{"const":"decoration.summary"},"target":{"oneOf":[{"$ref":"#/$defs/transitionTarget"},{"$ref":"#/$defs/arcHandleTarget"}]},"value":{"additionalProperties":false,"properties":{"text":{"type":"string"}},"required":["text"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"decorationTarget":{"oneOf":[{"$ref":"#/$defs/placeTarget"},{"$ref":"#/$defs/transitionTarget"},{"$ref":"#/$defs/arcHandleTarget"}]},"descriptionContribution":{"properties":{"kind":{"const":"documentation.description"},"target":{"$ref":"#/$defs/elementTarget"},"value":{"additionalProperties":false,"properties":{"text":{"type":"string"}},"required":["text"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"documentIdentity":{"additionalProperties":false,"properties":{"id":{"$ref":"#/$defs/relativeSourceId"}},"required":["id"],"type":"object"},"documentTarget":{"additionalProperties":false,"properties":{"type":{"const":"document"}},"required":["type"],"type":"object"},"domainValuesContribution":{"$comment":"Resolver accepts this kind only for net documents, where it lowers to the net's domains member under the key color.path. The engine enforces it (ADR 0037).","properties":{"kind":{"const":"domain.values"},"target":{"$ref":"#/$defs/colorTarget"},"value":{"additionalProperties":false,"properties":{"path":{"$comment":"A token field path: non-empty keys joined by dots.","pattern":"^[^.]+(\\.[^.]+)*$","type":"string"},"values":{"items":{"oneOf":[{"$ref":"#/$defs/taggedBoolean"},{"$ref":"#/$defs/taggedNumber"},{"$ref":"#/$defs/taggedString"}]},"minItems":1,"type":"array"}},"required":["path","values"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"elementTarget":{"oneOf":[{"$ref":"#/$defs/netDocumentTarget"},{"$ref":"#/$defs/placeTarget"},{"$ref":"#/$defs/transitionTarget"},{"$ref":"#/$defs/arcHandleTarget"}]},"endpoint":{"oneOf":[{"$ref":"#/$defs/placeTarget"},{"$ref":"#/$defs/transitionTarget"}]},"extensionsContribution":{"$comment":"Resolver accepts this kind only for net documents, where it lowers below annotations['petrinet.dsl/v1'].extensions.","properties":{"kind":{"const":"document.extensions"},"target":{"$ref":"#/$defs/documentTarget"},"value":{"additionalProperties":false,"properties":{"extensions":{"$ref":"#/$defs/taggedObject"}},"required":["extensions"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"markingAppendContribution":{"properties":{"kind":{"const":"marking.append"},"target":{"$ref":"#/$defs/placeTarget"},"value":{"additionalProperties":false,"properties":{"count":{"minimum":1,"type":"integer"},"token":{"$ref":"#/$defs/markingToken"}},"required":["token","count"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"markingToken":{"oneOf":[{"$ref":"#/$defs/tokenLiteral"},{"additionalProperties":false,"properties":{"template":{"$ref":"#/$defs/templateTarget"}},"required":["template"],"type":"object"}]},"name":{"minLength":1,"type":"string"},"namedMarkingContribution":{"$comment":"Resolver accepts this kind only for net documents, where it lowers below annotations['petrinet.dsl/v1'].markings.","properties":{"kind":{"const":"metadata.named-marking"},"target":{"$ref":"#/$defs/documentTarget"},"value":{"additionalProperties":false,"properties":{"entries":{"items":{"additionalProperties":false,"properties":{"count":{"minimum":1,"type":"integer"},"place":{"$ref":"#/$defs/placeTarget"},"token":{"$ref":"#/$defs/markingToken"}},"required":["place","token","count"],"type":"object"},"type":"array"},"name":{"$ref":"#/$defs/name"}},"required":["name","entries"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"netDocumentTarget":{"$comment":"The typed top-level net target for ordinary net description and annotation facts. Composition has no corresponding ordinary core metadata target.","additionalProperties":false,"properties":{"kind":{"const":"net"},"type":{"const":"document"}},"required":["type","kind"],"type":"object"},"netHeaderContribution":{"properties":{"kind":{"const":"document.net-header"},"target":{"$ref":"#/$defs/documentTarget"},"value":{"additionalProperties":false,"properties":{"description":{"type":"string"},"name":{"$ref":"#/$defs/name"}},"required":["name"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"placeAcceptsContribution":{"properties":{"kind":{"const":"place.accepts"},"target":{"$ref":"#/$defs/placeTarget"},"value":{"additionalProperties":false,"properties":{"colors":{"items":{"$ref":"#/$defs/name"},"minItems":1,"type":"array"}},"required":["colors"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"placeCapacityContribution":{"properties":{"kind":{"const":"place.capacity-per-color-key"},"target":{"$ref":"#/$defs/placeTarget"},"value":{"additionalProperties":false,"properties":{"key":{"$ref":"#/$defs/capacityKey"},"max":{"minimum":1,"type":"integer"}},"required":["key","max"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"placeDeclareContribution":{"properties":{"kind":{"const":"place.declare"},"target":{"$ref":"#/$defs/placeTarget"},"value":{"additionalProperties":false,"type":"object"}},"required":["kind","target","value"],"type":"object"},"placeCopyTarget":{"additionalProperties":false,"properties":{"place":{"$ref":"#/$defs/name"},"transition":{"$ref":"#/$defs/name"},"type":{"const":"placeCopy"}},"required":["type","place","transition"],"type":"object"},"placePortContribution":{"properties":{"kind":{"const":"place.port"},"target":{"$ref":"#/$defs/placeTarget"},"value":{"additionalProperties":false,"properties":{"color":{"$ref":"#/$defs/name"},"direction":{"enum":["input","output"]}},"required":["direction","color"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"placeTarget":{"additionalProperties":false,"properties":{"name":{"$ref":"#/$defs/name"},"type":{"const":"place"}},"required":["type","name"],"type":"object"},"position":{"additionalProperties":false,"properties":{"byteOffset":{"description":"Zero-based UTF-8 byte offset.","minimum":0,"type":"integer"},"column":{"description":"One-based Unicode-scalar column number.","minimum":1,"type":"integer"},"line":{"description":"One-based Unicode-scalar line number.","minimum":1,"type":"integer"}},"required":["byteOffset","line","column"],"type":"object"},"predicateValue":{"oneOf":[{"additionalProperties":false,"properties":{"cel":{"$ref":"#/$defs/name"},"kind":{"const":"cel"}},"required":["kind","cel"],"type":"object"},{"additionalProperties":false,"properties":{"handler":{"$ref":"#/$defs/name"},"kind":{"const":"handler"}},"required":["kind","handler"],"type":"object"}]},"proofFinalContribution":{"$comment":"Resolver accepts this kind only for net documents, where it lowers to proofs.final. One contribution per final marking: the target is its first place, and `with` lists the other places that must also hold a token.","properties":{"kind":{"const":"proof.final"},"target":{"$ref":"#/$defs/placeTarget"},"value":{"additionalProperties":false,"properties":{"with":{"items":{"$ref":"#/$defs/name"},"minItems":1,"type":"array"}},"type":"object"}},"required":["kind","target","value"],"type":"object"},"proofInvariantContribution":{"$comment":"Resolver accepts this kind only for net documents, where it lowers to proofs.invariants.","properties":{"kind":{"const":"proof.invariant"},"target":{"$ref":"#/$defs/netDocumentTarget"},"value":{"additionalProperties":false,"properties":{"constant":{"minimum":0,"type":"integer"},"name":{"minLength":1,"type":"string"},"terms":{"items":{"additionalProperties":false,"properties":{"place":{"$ref":"#/$defs/name"},"weight":{"minimum":1,"type":"integer"}},"required":["place","weight"],"type":"object"},"minItems":1,"type":"array"}},"required":["terms"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"relativePosition":{"$comment":"Authored relative view position: the rendered subject is offset from 'from' by 'delta'. The resolver checks shape and target references here, requires a place position for a bare place base and a copy position for a place-copy base, and resolves the chain at render time (ADR 0024).","additionalProperties":false,"properties":{"delta":{"$ref":"#/$defs/coordinatePoint"},"from":{"oneOf":[{"$ref":"#/$defs/placeTarget"},{"$ref":"#/$defs/placeCopyTarget"},{"$ref":"#/$defs/transitionTarget"}]}},"required":["from","delta"],"type":"object"},"relativeSourceId":{"$comment":"A logical source-relative identifier. The resolver, not this schema, verifies that it is relative to the loading root and identifies an available source.","minLength":1,"pattern":"^(?!/)(?![A-Za-z]:[\\\\/])(?![A-Za-z][A-Za-z0-9+.-]*:).+$","type":"string"},"span":{"$comment":"A half-open source span. start and end refer to the same UTF-8 source; end MUST NOT precede start. Equality with the containing contribution id.source is enforced by the resolver.","additionalProperties":false,"properties":{"end":{"$ref":"#/$defs/position"},"source":{"$ref":"#/$defs/relativeSourceId"},"start":{"$ref":"#/$defs/position"}},"required":["source","start","end"],"type":"object"},"taggedArray":{"additionalProperties":false,"properties":{"items":{"items":{"$ref":"#/$defs/taggedJsonValue"},"type":"array"},"type":{"const":"array"}},"required":["type","items"],"type":"object"},"taggedBoolean":{"additionalProperties":false,"properties":{"type":{"const":"boolean"},"value":{"type":"boolean"}},"required":["type","value"],"type":"object"},"taggedJsonValue":{"description":"A closed lossless representation of an RFC 8259 JSON value. Objects use ordered entries so object-entry order and number lexemes survive target-neutral reconstruction.","oneOf":[{"$ref":"#/$defs/taggedNull"},{"$ref":"#/$defs/taggedBoolean"},{"$ref":"#/$defs/taggedNumber"},{"$ref":"#/$defs/taggedString"},{"$ref":"#/$defs/taggedArray"},{"$ref":"#/$defs/taggedObject"}]},"taggedNull":{"additionalProperties":false,"properties":{"type":{"const":"null"}},"required":["type"],"type":"object"},"taggedNumber":{"$comment":"The resolver MUST parse lexeme as a finite IEEE-754 binary64 value. Integer lexemes MUST be in [-9007199254740991, 9007199254740991]. These numeric-profile checks cannot be expressed portably in JSON Schema.","additionalProperties":false,"properties":{"lexeme":{"description":"Original RFC 8259 number lexeme.","pattern":"^-?(?:0|[1-9][0-9]*)(?:\\.[0-9]+)?(?:[eE][+-]?[0-9]+)?$","type":"string"},"type":{"const":"number"}},"required":["type","lexeme"],"type":"object"},"taggedObject":{"additionalProperties":false,"properties":{"entries":{"$comment":"Entries are retained in source order. The resolver rejects duplicate keys.","items":{"$ref":"#/$defs/taggedObjectEntry"},"type":"array"},"type":{"const":"object"}},"required":["type","entries"],"type":"object"},"taggedObjectEntry":{"additionalProperties":false,"properties":{"key":{"type":"string"},"value":{"$ref":"#/$defs/taggedJsonValue"}},"required":["key","value"],"type":"object"},"taggedString":{"additionalProperties":false,"properties":{"type":{"const":"string"},"value":{"type":"string"}},"required":["type","value"],"type":"object"},"templateDefineContribution":{"properties":{"kind":{"const":"template.define"},"target":{"$ref":"#/$defs/templateTarget"},"value":{"additionalProperties":false,"properties":{"value":{"$ref":"#/$defs/taggedJsonValue"}},"required":["value"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"templateTarget":{"additionalProperties":false,"properties":{"name":{"$ref":"#/$defs/name"},"type":{"const":"template"}},"required":["type","name"],"type":"object"},"tokenLiteral":{"additionalProperties":false,"properties":{"color":{"$ref":"#/$defs/name"},"data":{"$ref":"#/$defs/taggedJsonValue"}},"required":["color","data"],"type":"object"},"transitionBindingNameContribution":{"properties":{"kind":{"const":"transition.binding-name"},"target":{"$ref":"#/$defs/transitionTarget"},"value":{"additionalProperties":false,"properties":{"name":{"$ref":"#/$defs/name"},"place":{"$ref":"#/$defs/placeTarget"}},"required":["name","place"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"transitionDeclareContribution":{"properties":{"kind":{"const":"transition.declare"},"target":{"$ref":"#/$defs/transitionTarget"},"value":{"additionalProperties":false,"type":"object"}},"required":["kind","target","value"],"type":"object"},"transitionGuardContribution":{"properties":{"kind":{"const":"transition.guard"},"target":{"$ref":"#/$defs/transitionTarget"},"value":{"additionalProperties":false,"properties":{"guard":{"$ref":"#/$defs/name"}},"required":["guard"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"transitionHandlerContribution":{"properties":{"kind":{"const":"transition.handler"},"target":{"$ref":"#/$defs/transitionTarget"},"value":{"additionalProperties":false,"properties":{"handler":{"$ref":"#/$defs/name"}},"required":["handler"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"transitionOrderContribution":{"properties":{"kind":{"const":"order.transition"},"target":{"$ref":"#/$defs/transitionTarget"},"value":{"additionalProperties":false,"properties":{"rank":{"minimum":1,"type":"integer"}},"required":["rank"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"transitionPriorityContribution":{"properties":{"kind":{"const":"transition.priority"},"target":{"$ref":"#/$defs/transitionTarget"},"value":{"additionalProperties":false,"properties":{"priority":{"minimum":0,"type":"integer"}},"required":["priority"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"transitionTarget":{"additionalProperties":false,"properties":{"name":{"$ref":"#/$defs/name"},"type":{"const":"transition"}},"required":["type","name"],"type":"object"},"transitionTimerBindContribution":{"properties":{"kind":{"const":"transition.timer-bind"},"target":{"$ref":"#/$defs/transitionTarget"},"value":{"additionalProperties":false,"properties":{"name":{"$ref":"#/$defs/name"},"place":{"$ref":"#/$defs/placeTarget"}},"required":["name","place"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"transitionTimerContribution":{"properties":{"kind":{"const":"transition.timer"},"target":{"$ref":"#/$defs/transitionTarget"},"value":{"additionalProperties":false,"properties":{"cel":{"$ref":"#/$defs/name"},"clock":{"$ref":"#/$defs/placeTarget"}},"required":["clock","cel"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"transitionTimerMaturityContribution":{"properties":{"kind":{"const":"transition.timer-maturity"},"target":{"$ref":"#/$defs/transitionTarget"},"value":{"additionalProperties":false,"properties":{"maturity":{"$ref":"#/$defs/name"}},"required":["maturity"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"typedReference":{"oneOf":[{"$ref":"#/$defs/documentTarget"},{"$ref":"#/$defs/netDocumentTarget"},{"$ref":"#/$defs/placeTarget"},{"$ref":"#/$defs/transitionTarget"},{"$ref":"#/$defs/arcHandleTarget"},{"$ref":"#/$defs/arcTarget"},{"$ref":"#/$defs/templateTarget"},{"$ref":"#/$defs/viewTarget"},{"$ref":"#/$defs/colorTarget"}]},"viewDetailContribution":{"$comment":"Resolver accepts this kind only for net documents. It sets the label detail level a renderer uses when it applies the view.","properties":{"kind":{"const":"view.detail"},"target":{"$ref":"#/$defs/viewTarget"},"value":{"additionalProperties":false,"properties":{"detail":{"enum":["full","summary","structure"]}},"required":["detail"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"viewPositionContribution":{"$comment":"Resolver accepts this kind only for net documents and validates position as the v1 {x:number,y:number} value or the v1 additive relative {from,delta} shape.","properties":{"kind":{"const":"view.position"},"target":{"$ref":"#/$defs/viewTarget"},"value":{"additionalProperties":false,"properties":{"position":{"oneOf":[{"$ref":"#/$defs/coordinatePoint"},{"$ref":"#/$defs/relativePosition"}]},"subject":{"$ref":"#/$defs/viewPositionSubjectTarget"}},"required":["subject","position"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"viewPositionSubjectTarget":{"oneOf":[{"$ref":"#/$defs/placeTarget"},{"$ref":"#/$defs/placeCopyTarget"},{"$ref":"#/$defs/transitionTarget"}]},"viewRouteContribution":{"$comment":"Resolver accepts this kind only for net documents and validates each point as the v1 {x:number,y:number} value.","properties":{"kind":{"const":"view.route"},"target":{"$ref":"#/$defs/arcHandleTarget"},"value":{"additionalProperties":false,"properties":{"points":{"items":{"$ref":"#/$defs/coordinatePoint"},"minItems":1,"type":"array"},"view":{"$ref":"#/$defs/viewTarget"}},"required":["view","points"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"viewSplinesContribution":{"$comment":"Resolver accepts this kind only for net documents. It sets the Graphviz edge style a renderer uses when it applies the view.","properties":{"kind":{"const":"view.splines"},"target":{"$ref":"#/$defs/viewTarget"},"value":{"additionalProperties":false,"properties":{"splines":{"enum":["ortho","spline","curved","polyline","line"]}},"required":["splines"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"viewTarget":{"additionalProperties":false,"properties":{"name":{"$ref":"#/$defs/name"},"type":{"const":"view"}},"required":["type","name"],"type":"object"},"wireEndpoint":{"additionalProperties":false,"properties":{"alias":{"$ref":"#/$defs/name"},"place":{"$ref":"#/$defs/name"},"span":{"$comment":"The exact half-open span of the authored alias-dot-place endpoint.","$ref":"#/$defs/span"}},"required":["alias","place","span"],"type":"object"}},"$id":"https://velocitron.dev/spec/petrinet-contribution-ir.schema.json","$schema":"https://json-schema.org/draft/2020-12/schema","additionalProperties":false,"description":"A portable, progressive, target-neutral intermediate representation for .petrinet source documents.","properties":{"contributions":{"$comment":"Items MUST have unique source-derived id values and ordinal values 0..length-1 without gaps, ordered by ordinal.","items":{"$ref":"#/$defs/contribution"},"type":"array"},"document":{"$ref":"#/$defs/documentIdentity"},"documentKind":{"description":"The source document's explicit kind.","enum":["net","composition"]},"format":{"const":"velocitron.petrinet/contribution-ir","description":"The only supported IR format identifier."},"version":{"const":1,"description":"The only supported IR format version."}},"required":["format","version","documentKind","document","contributions"],"title":"Velocitron Petri Net Contribution IR v1","type":"object"};
-const schema32 = {"$comment":"The oneOf is deliberately closed: every kind has an exact typed target and exact value structure. No generic target or arbitrary host-language value is permitted.","additionalProperties":false,"oneOf":[{"$ref":"#/$defs/netHeaderContribution"},{"$ref":"#/$defs/compositionHeaderContribution"},{"$ref":"#/$defs/arcDeclareContribution"},{"$ref":"#/$defs/placeDeclareContribution"},{"$ref":"#/$defs/transitionDeclareContribution"},{"$ref":"#/$defs/arcHandleContribution"},{"$ref":"#/$defs/transitionHandlerContribution"},{"$ref":"#/$defs/transitionGuardContribution"},{"$ref":"#/$defs/transitionPriorityContribution"},{"$ref":"#/$defs/transitionTimerContribution"},{"$ref":"#/$defs/transitionTimerBindContribution"},{"$ref":"#/$defs/transitionTimerMaturityContribution"},{"$ref":"#/$defs/transitionBindingNameContribution"},{"$ref":"#/$defs/transitionOrderContribution"},{"$ref":"#/$defs/arcRunOrderContribution"},{"$ref":"#/$defs/arcPredicateContribution"},{"$ref":"#/$defs/arcWeightContribution"},{"$ref":"#/$defs/arcCorrelateContribution"},{"$ref":"#/$defs/arcProduceCelContribution"},{"$ref":"#/$defs/arcProduceDataContribution"},{"$ref":"#/$defs/placeAcceptsContribution"},{"$ref":"#/$defs/placePortContribution"},{"$ref":"#/$defs/placeCapacityContribution"},{"$ref":"#/$defs/templateDefineContribution"},{"$ref":"#/$defs/markingAppendContribution"},{"$ref":"#/$defs/descriptionContribution"},{"$ref":"#/$defs/annotationContribution"},{"$ref":"#/$defs/extensionsContribution"},{"$ref":"#/$defs/namedMarkingContribution"},{"$ref":"#/$defs/viewPositionContribution"},{"$ref":"#/$defs/viewRouteContribution"},{"$ref":"#/$defs/viewSplinesContribution"},{"$ref":"#/$defs/viewDetailContribution"},{"$ref":"#/$defs/decorationHighlightContribution"},{"$ref":"#/$defs/decorationNoteContribution"},{"$ref":"#/$defs/decorationSummaryContribution"},{"$ref":"#/$defs/decorationQuietContribution"},{"$ref":"#/$defs/decorationBesideContribution"},{"$ref":"#/$defs/decorationShowContribution"},{"$ref":"#/$defs/domainValuesContribution"},{"$ref":"#/$defs/proofFinalContribution"},{"$ref":"#/$defs/proofInvariantContribution"},{"$ref":"#/$defs/actorDeclareContribution"},{"$ref":"#/$defs/compositionUseContribution"},{"$ref":"#/$defs/compositionWireContribution"},{"$ref":"#/$defs/compositionFinalContribution"},{"$ref":"#/$defs/compositionShareContribution"},{"$ref":"#/$defs/compositionRefineContribution"}],"properties":{"id":{"$ref":"#/$defs/contributionIdentity"},"kind":{"type":"string"},"ordinal":{"minimum":0,"type":"integer"},"span":{"$ref":"#/$defs/span"},"target":{"$ref":"#/$defs/typedReference"},"value":{}},"required":["id","ordinal","span","kind","target","value"],"type":"object"};
+const schema31 = {"$comment":"This schema validates the v1 wire shape only. Consumers MUST reject an unsupported format or version before resolution. Semantic resolution additionally enforces that contribution IDs are source-derived and unique and that ordinal values are contiguous zero-based integers in source order; JSON Schema cannot express either cross-item invariant.","$defs":{"actorDeclareContribution":{"$comment":"Resolver accepts this kind only for net documents, where it lowers to the net annotation actors: one {name, kind} entry per actor, in source order.","properties":{"kind":{"const":"actor.declare"},"target":{"$ref":"#/$defs/netDocumentTarget"},"value":{"additionalProperties":false,"properties":{"kind":{"enum":["person","system","record"]},"name":{"minLength":1,"type":"string"}},"required":["name","kind"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"annotationContribution":{"properties":{"kind":{"const":"documentation.annotation"},"target":{"$ref":"#/$defs/elementTarget"},"value":{"additionalProperties":false,"properties":{"key":{"$ref":"#/$defs/name"},"value":{"$ref":"#/$defs/taggedJsonValue"}},"required":["key","value"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"arcColor":{"$comment":"Both explicit-color syntax and bare -> lower to an explicitly chosen core color. Bare -> uses the generic core color token.","additionalProperties":false,"properties":{"kind":{"const":"explicit"},"value":{"$ref":"#/$defs/name"}},"required":["kind","value"],"type":"object"},"arcCorrelateContribution":{"properties":{"kind":{"const":"arc.correlate"},"target":{"$ref":"#/$defs/arcHandleTarget"},"value":{"additionalProperties":false,"properties":{"cel":{"$ref":"#/$defs/name"}},"required":["cel"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"arcDeclareContribution":{"properties":{"kind":{"const":"arc.declare"},"target":{"$ref":"#/$defs/arcTarget"},"value":{"additionalProperties":false,"allOf":[{"else":{"not":{"required":["transitionNameSpan"]}},"if":{"properties":{"from":{"$ref":"#/$defs/placeTarget"},"mode":{"const":"consume"},"to":{"$ref":"#/$defs/transitionTarget"}},"required":["from","to","mode"]},"then":{"required":["transitionNameSpan"]}}],"properties":{"color":{"$ref":"#/$defs/arcColor"},"from":{"$ref":"#/$defs/endpoint"},"mode":{"$ref":"#/$defs/arcMode"},"to":{"$ref":"#/$defs/endpoint"},"transitionNameSpan":{"$comment":"Required only for a consumed place-to-transition declaration; identifies the exact lexical transition-name token.","$ref":"#/$defs/span"}},"required":["from","to","color","mode"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"arcHandleContribution":{"properties":{"kind":{"const":"arc.handle"},"target":{"$ref":"#/$defs/arcHandleTarget"},"value":{"additionalProperties":false,"properties":{"arcIds":{"$comment":"Ordered source ArcIds in the handle's consecutive expansion run.","items":{"$ref":"#/$defs/arcId"},"minItems":1,"type":"array"}},"required":["arcIds"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"arcHandleTarget":{"$comment":"A typed local source @handle reference. It may precede its topology declaration; the resolver later resolves its ordered ArcId mapping and requires exactly one compatible concrete arc when an elaboration needs one.","additionalProperties":false,"properties":{"name":{"$ref":"#/$defs/name"},"type":{"const":"arcHandle"}},"required":["type","name"],"type":"object"},"arcId":{"$comment":"The deterministic source-derived identity of an arc.declare contribution. It is never a canonical JSON arc index.","additionalProperties":false,"properties":{"document":{"$ref":"#/$defs/relativeSourceId"},"part":{"minimum":0,"type":"integer"},"statement":{"minimum":0,"type":"integer"}},"required":["document","statement","part"],"type":"object"},"arcMode":{"enum":["consume","read","inhibit","produce"]},"arcPredicateContribution":{"properties":{"kind":{"const":"arc.predicate"},"target":{"$ref":"#/$defs/arcHandleTarget"},"value":{"$ref":"#/$defs/predicateValue"}},"required":["kind","target","value"],"type":"object"},"arcProduceCelContribution":{"properties":{"kind":{"const":"arc.produce-cel"},"target":{"$ref":"#/$defs/arcHandleTarget"},"value":{"additionalProperties":false,"properties":{"cel":{"$ref":"#/$defs/name"}},"required":["cel"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"arcProduceDataContribution":{"properties":{"kind":{"const":"arc.produce-data"},"target":{"$ref":"#/$defs/arcHandleTarget"},"value":{"additionalProperties":false,"properties":{"data":{"$ref":"#/$defs/taggedJsonValue"}},"required":["data"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"arcRunOrderContribution":{"properties":{"kind":{"const":"order.arc-run"},"target":{"$ref":"#/$defs/arcHandleTarget"},"value":{"additionalProperties":false,"properties":{"rank":{"minimum":1,"type":"integer"}},"required":["rank"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"arcTarget":{"additionalProperties":false,"properties":{"id":{"$ref":"#/$defs/arcId"},"type":{"const":"arc"}},"required":["type","id"],"type":"object"},"arcWeightContribution":{"properties":{"kind":{"const":"arc.weight"},"target":{"$ref":"#/$defs/arcHandleTarget"},"value":{"additionalProperties":false,"properties":{"weight":{"minimum":1,"type":"integer"}},"required":["weight"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"capacityKey":{"oneOf":[{"$ref":"#/$defs/name"},{"items":{"$ref":"#/$defs/name"},"minItems":1,"type":"array"}]},"colorTarget":{"$comment":"A token color named by a decoration. The resolver requires some place to accept it.","additionalProperties":false,"properties":{"name":{"$ref":"#/$defs/name"},"type":{"const":"color"}},"required":["type","name"],"type":"object"},"compositionFinalContribution":{"$comment":"Resolver accepts this kind only for composition documents, where it lowers to the composition's final markings; every alias must be declared by a use fact. One contribution per final fact; each marking lists places that must all hold a token.","properties":{"kind":{"const":"composition.final"},"target":{"$ref":"#/$defs/documentTarget"},"value":{"additionalProperties":false,"properties":{"markings":{"items":{"items":{"$ref":"#/$defs/wireEndpoint"},"minItems":1,"type":"array"},"minItems":1,"type":"array"}},"required":["markings"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"compositionHeaderContribution":{"properties":{"kind":{"const":"document.composition-header"},"target":{"$ref":"#/$defs/documentTarget"},"value":{"$comment":"The namespace is DSL-local source identity only. It MUST NOT lower to a core composition name, description, annotations, or other composition metadata.","additionalProperties":false,"properties":{"namespace":{"$ref":"#/$defs/name"}},"required":["namespace"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"compositionRefineContribution":{"$comment":"Resolver accepts this kind only for composition documents; both aliases must be declared by use facts and differ.","properties":{"kind":{"const":"composition.refine"},"target":{"$ref":"#/$defs/documentTarget"},"value":{"additionalProperties":false,"properties":{"by":{"additionalProperties":false,"properties":{"alias":{"$ref":"#/$defs/name"},"span":{"$comment":"The exact half-open span of the authored refining alias.","$ref":"#/$defs/span"}},"required":["alias","span"],"type":"object"},"transition":{"additionalProperties":false,"properties":{"alias":{"$ref":"#/$defs/name"},"name":{"$ref":"#/$defs/name"},"span":{"$comment":"The exact half-open span of the authored alias-dot-transition endpoint.","$ref":"#/$defs/span"}},"required":["alias","name","span"],"type":"object"}},"required":["transition","by"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"compositionShareContribution":{"$comment":"Resolver accepts this kind only for composition documents; every alias must be declared by a use fact. A share has no direction: its places need not be ports.","properties":{"kind":{"const":"composition.share"},"target":{"$ref":"#/$defs/documentTarget"},"value":{"additionalProperties":false,"properties":{"places":{"items":{"$ref":"#/$defs/wireEndpoint"},"minItems":2,"type":"array"}},"required":["places"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"compositionUseContribution":{"$comment":"Resolver accepts this kind only for composition documents and resolves ref relative to the containing source.","properties":{"kind":{"const":"composition.use"},"target":{"$ref":"#/$defs/documentTarget"},"value":{"additionalProperties":false,"properties":{"alias":{"$ref":"#/$defs/name"},"ref":{"minLength":1,"type":"string"}},"required":["ref","alias"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"compositionWireContribution":{"$comment":"Resolver accepts this kind only for composition documents and validates output-to-input direction and equal port colors.","properties":{"kind":{"const":"composition.wire"},"target":{"$ref":"#/$defs/documentTarget"},"value":{"additionalProperties":false,"properties":{"from":{"$ref":"#/$defs/wireEndpoint"},"to":{"$ref":"#/$defs/wireEndpoint"}},"required":["from","to"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"contribution":{"$comment":"The oneOf is deliberately closed: every kind has an exact typed target and exact value structure. No generic target or arbitrary host-language value is permitted.","additionalProperties":false,"oneOf":[{"$ref":"#/$defs/netHeaderContribution"},{"$ref":"#/$defs/compositionHeaderContribution"},{"$ref":"#/$defs/arcDeclareContribution"},{"$ref":"#/$defs/placeDeclareContribution"},{"$ref":"#/$defs/transitionDeclareContribution"},{"$ref":"#/$defs/arcHandleContribution"},{"$ref":"#/$defs/transitionHandlerContribution"},{"$ref":"#/$defs/transitionGuardContribution"},{"$ref":"#/$defs/transitionPriorityContribution"},{"$ref":"#/$defs/transitionTimerContribution"},{"$ref":"#/$defs/transitionTimerBindContribution"},{"$ref":"#/$defs/transitionTimerMaturityContribution"},{"$ref":"#/$defs/transitionBindingNameContribution"},{"$ref":"#/$defs/transitionOrderContribution"},{"$ref":"#/$defs/arcRunOrderContribution"},{"$ref":"#/$defs/arcPredicateContribution"},{"$ref":"#/$defs/arcWeightContribution"},{"$ref":"#/$defs/arcCorrelateContribution"},{"$ref":"#/$defs/arcProduceCelContribution"},{"$ref":"#/$defs/arcProduceDataContribution"},{"$ref":"#/$defs/placeAcceptsContribution"},{"$ref":"#/$defs/placePortContribution"},{"$ref":"#/$defs/placeCapacityContribution"},{"$ref":"#/$defs/templateDefineContribution"},{"$ref":"#/$defs/markingAppendContribution"},{"$ref":"#/$defs/descriptionContribution"},{"$ref":"#/$defs/annotationContribution"},{"$ref":"#/$defs/extensionsContribution"},{"$ref":"#/$defs/namedMarkingContribution"},{"$ref":"#/$defs/viewPositionContribution"},{"$ref":"#/$defs/viewRouteContribution"},{"$ref":"#/$defs/viewSplinesContribution"},{"$ref":"#/$defs/viewDetailContribution"},{"$ref":"#/$defs/viewFusionContribution"},{"$ref":"#/$defs/decorationHighlightContribution"},{"$ref":"#/$defs/decorationNoteContribution"},{"$ref":"#/$defs/decorationSummaryContribution"},{"$ref":"#/$defs/decorationQuietContribution"},{"$ref":"#/$defs/decorationBesideContribution"},{"$ref":"#/$defs/decorationSingleContribution"},{"$ref":"#/$defs/decorationShowContribution"},{"$ref":"#/$defs/domainValuesContribution"},{"$ref":"#/$defs/proofFinalContribution"},{"$ref":"#/$defs/proofInvariantContribution"},{"$ref":"#/$defs/actorDeclareContribution"},{"$ref":"#/$defs/compositionUseContribution"},{"$ref":"#/$defs/compositionWireContribution"},{"$ref":"#/$defs/compositionFinalContribution"},{"$ref":"#/$defs/compositionShareContribution"},{"$ref":"#/$defs/compositionRefineContribution"}],"properties":{"id":{"$ref":"#/$defs/contributionIdentity"},"kind":{"type":"string"},"ordinal":{"minimum":0,"type":"integer"},"span":{"$ref":"#/$defs/span"},"target":{"$ref":"#/$defs/typedReference"},"value":{}},"required":["id","ordinal","span","kind","target","value"],"type":"object"},"contributionIdentity":{"$comment":"Deterministically derived from the source document, source statement, and expanded statement part. It is not a runtime-generated UUID.","additionalProperties":false,"properties":{"part":{"minimum":0,"type":"integer"},"source":{"$ref":"#/$defs/relativeSourceId"},"statement":{"minimum":0,"type":"integer"}},"required":["source","statement","part"],"type":"object"},"coordinatePoint":{"allOf":[{"$ref":"#/$defs/taggedObject"},{"properties":{"entries":{"allOf":[{"contains":{"$ref":"#/$defs/coordinateXEntry"}},{"contains":{"$ref":"#/$defs/coordinateYEntry"}}],"items":{"oneOf":[{"$ref":"#/$defs/coordinateXEntry"},{"$ref":"#/$defs/coordinateYEntry"}]},"maxItems":2,"minItems":2,"type":"array"}}}]},"coordinateXEntry":{"allOf":[{"$ref":"#/$defs/taggedObjectEntry"},{"properties":{"key":{"const":"x"},"value":{"$ref":"#/$defs/taggedNumber"}}}]},"coordinateYEntry":{"allOf":[{"$ref":"#/$defs/taggedObjectEntry"},{"properties":{"key":{"const":"y"},"value":{"$ref":"#/$defs/taggedNumber"}}}]},"decorationBesideContribution":{"$comment":"Resolver accepts this kind only for net documents, where it lowers below annotations['petrinet.dsl/v1'].decorations. Only a place annotated fusion true has local copies to place.","properties":{"kind":{"const":"decoration.beside"},"target":{"$ref":"#/$defs/placeTarget"},"value":{"additionalProperties":false,"properties":{"share":{"const":false},"side":{"enum":["left","right"]}},"type":"object"}},"required":["kind","target","value"],"type":"object"},"decorationHighlightContribution":{"$comment":"Resolver accepts this kind only for net documents, where it lowers below annotations['petrinet.dsl/v1'].decorations. Presentation only.","properties":{"kind":{"const":"decoration.highlight"},"target":{"$ref":"#/$defs/decorationTarget"},"value":{"additionalProperties":false,"properties":{"label":{"type":"string"}},"type":"object"}},"required":["kind","target","value"],"type":"object"},"decorationNoteContribution":{"$comment":"Resolver accepts this kind only for net documents, where it lowers below annotations['petrinet.dsl/v1'].decorations. Presentation only.","properties":{"kind":{"const":"decoration.note"},"target":{"$ref":"#/$defs/decorationTarget"},"value":{"additionalProperties":false,"properties":{"text":{"type":"string"}},"required":["text"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"decorationQuietContribution":{"$comment":"Resolver accepts this kind only for net documents, where it lowers below annotations['petrinet.dsl/v1'].decorations. Presentation only.","properties":{"kind":{"const":"decoration.quiet"},"target":{"$ref":"#/$defs/colorTarget"},"value":{"additionalProperties":false,"properties":{},"type":"object"}},"required":["kind","target","value"],"type":"object"},"decorationShowContribution":{"$comment":"Resolver accepts this kind only for net documents, where it lowers below annotations['petrinet.dsl/v1'].decorations. Names the token fields a renderer shows for a color, in source order.","properties":{"kind":{"const":"decoration.show"},"target":{"$ref":"#/$defs/colorTarget"},"value":{"additionalProperties":false,"properties":{"fields":{"items":{"$comment":"A token field path: non-empty keys joined by dots. A dotted path reaches into a nested object.","pattern":"^[^.]+(\\.[^.]+)*$","type":"string"},"minItems":1,"type":"array","uniqueItems":true}},"required":["fields"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"decorationSingleContribution":{"$comment":"Resolver accepts this kind only for net documents, where it lowers below annotations['petrinet.dsl/v1'].decorations. Only a place annotated fusion true is drawn as local copies, so only that place has a fused drawing to collapse to one node.","properties":{"kind":{"const":"decoration.single"},"target":{"$ref":"#/$defs/placeTarget"},"value":{"additionalProperties":false,"properties":{},"type":"object"}},"required":["kind","target","value"],"type":"object"},"decorationSummaryContribution":{"$comment":"Resolver accepts this kind only for net documents, where it lowers below annotations['petrinet.dsl/v1'].decorations. Only transitions and arcs carry expressions to summarize.","properties":{"kind":{"const":"decoration.summary"},"target":{"oneOf":[{"$ref":"#/$defs/transitionTarget"},{"$ref":"#/$defs/arcHandleTarget"}]},"value":{"additionalProperties":false,"properties":{"text":{"type":"string"}},"required":["text"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"decorationTarget":{"oneOf":[{"$ref":"#/$defs/placeTarget"},{"$ref":"#/$defs/transitionTarget"},{"$ref":"#/$defs/arcHandleTarget"}]},"descriptionContribution":{"properties":{"kind":{"const":"documentation.description"},"target":{"$ref":"#/$defs/elementTarget"},"value":{"additionalProperties":false,"properties":{"text":{"type":"string"}},"required":["text"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"documentIdentity":{"additionalProperties":false,"properties":{"id":{"$ref":"#/$defs/relativeSourceId"}},"required":["id"],"type":"object"},"documentTarget":{"additionalProperties":false,"properties":{"type":{"const":"document"}},"required":["type"],"type":"object"},"domainValuesContribution":{"$comment":"Resolver accepts this kind only for net documents, where it lowers to the net's domains member under the key color.path. The engine enforces it (ADR 0037).","properties":{"kind":{"const":"domain.values"},"target":{"$ref":"#/$defs/colorTarget"},"value":{"additionalProperties":false,"properties":{"path":{"$comment":"A token field path: non-empty keys joined by dots.","pattern":"^[^.]+(\\.[^.]+)*$","type":"string"},"values":{"items":{"oneOf":[{"$ref":"#/$defs/taggedBoolean"},{"$ref":"#/$defs/taggedNumber"},{"$ref":"#/$defs/taggedString"}]},"minItems":1,"type":"array"}},"required":["path","values"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"elementTarget":{"oneOf":[{"$ref":"#/$defs/netDocumentTarget"},{"$ref":"#/$defs/placeTarget"},{"$ref":"#/$defs/transitionTarget"},{"$ref":"#/$defs/arcHandleTarget"}]},"endpoint":{"oneOf":[{"$ref":"#/$defs/placeTarget"},{"$ref":"#/$defs/transitionTarget"}]},"extensionsContribution":{"$comment":"Resolver accepts this kind only for net documents, where it lowers below annotations['petrinet.dsl/v1'].extensions.","properties":{"kind":{"const":"document.extensions"},"target":{"$ref":"#/$defs/documentTarget"},"value":{"additionalProperties":false,"properties":{"extensions":{"$ref":"#/$defs/taggedObject"}},"required":["extensions"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"markingAppendContribution":{"properties":{"kind":{"const":"marking.append"},"target":{"$ref":"#/$defs/placeTarget"},"value":{"additionalProperties":false,"properties":{"count":{"minimum":1,"type":"integer"},"token":{"$ref":"#/$defs/markingToken"}},"required":["token","count"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"markingToken":{"oneOf":[{"$ref":"#/$defs/tokenLiteral"},{"additionalProperties":false,"properties":{"template":{"$ref":"#/$defs/templateTarget"}},"required":["template"],"type":"object"}]},"name":{"minLength":1,"type":"string"},"namedMarkingContribution":{"$comment":"Resolver accepts this kind only for net documents, where it lowers below annotations['petrinet.dsl/v1'].markings.","properties":{"kind":{"const":"metadata.named-marking"},"target":{"$ref":"#/$defs/documentTarget"},"value":{"additionalProperties":false,"properties":{"entries":{"items":{"additionalProperties":false,"properties":{"count":{"minimum":1,"type":"integer"},"place":{"$ref":"#/$defs/placeTarget"},"token":{"$ref":"#/$defs/markingToken"}},"required":["place","token","count"],"type":"object"},"type":"array"},"name":{"$ref":"#/$defs/name"}},"required":["name","entries"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"netDocumentTarget":{"$comment":"The typed top-level net target for ordinary net description and annotation facts. Composition has no corresponding ordinary core metadata target.","additionalProperties":false,"properties":{"kind":{"const":"net"},"type":{"const":"document"}},"required":["type","kind"],"type":"object"},"netHeaderContribution":{"properties":{"kind":{"const":"document.net-header"},"target":{"$ref":"#/$defs/documentTarget"},"value":{"additionalProperties":false,"properties":{"description":{"type":"string"},"name":{"$ref":"#/$defs/name"}},"required":["name"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"placeAcceptsContribution":{"properties":{"kind":{"const":"place.accepts"},"target":{"$ref":"#/$defs/placeTarget"},"value":{"additionalProperties":false,"properties":{"colors":{"items":{"$ref":"#/$defs/name"},"minItems":1,"type":"array"}},"required":["colors"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"placeCapacityContribution":{"properties":{"kind":{"const":"place.capacity-per-color-key"},"target":{"$ref":"#/$defs/placeTarget"},"value":{"additionalProperties":false,"properties":{"key":{"$ref":"#/$defs/capacityKey"},"max":{"minimum":1,"type":"integer"}},"required":["key","max"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"placeDeclareContribution":{"properties":{"kind":{"const":"place.declare"},"target":{"$ref":"#/$defs/placeTarget"},"value":{"additionalProperties":false,"type":"object"}},"required":["kind","target","value"],"type":"object"},"placeCopyTarget":{"additionalProperties":false,"properties":{"place":{"$ref":"#/$defs/name"},"transition":{"$ref":"#/$defs/name"},"type":{"const":"placeCopy"}},"required":["type","place","transition"],"type":"object"},"placePortContribution":{"properties":{"kind":{"const":"place.port"},"target":{"$ref":"#/$defs/placeTarget"},"value":{"additionalProperties":false,"properties":{"color":{"$ref":"#/$defs/name"},"direction":{"enum":["input","output"]}},"required":["direction","color"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"placeTarget":{"additionalProperties":false,"properties":{"name":{"$ref":"#/$defs/name"},"type":{"const":"place"}},"required":["type","name"],"type":"object"},"position":{"additionalProperties":false,"properties":{"byteOffset":{"description":"Zero-based UTF-8 byte offset.","minimum":0,"type":"integer"},"column":{"description":"One-based Unicode-scalar column number.","minimum":1,"type":"integer"},"line":{"description":"One-based Unicode-scalar line number.","minimum":1,"type":"integer"}},"required":["byteOffset","line","column"],"type":"object"},"predicateValue":{"oneOf":[{"additionalProperties":false,"properties":{"cel":{"$ref":"#/$defs/name"},"kind":{"const":"cel"}},"required":["kind","cel"],"type":"object"},{"additionalProperties":false,"properties":{"handler":{"$ref":"#/$defs/name"},"kind":{"const":"handler"}},"required":["kind","handler"],"type":"object"}]},"proofFinalContribution":{"$comment":"Resolver accepts this kind only for net documents, where it lowers to proofs.final. One contribution per final marking: the target is its first place, and `with` lists the other places that must also hold a token.","properties":{"kind":{"const":"proof.final"},"target":{"$ref":"#/$defs/placeTarget"},"value":{"additionalProperties":false,"properties":{"with":{"items":{"$ref":"#/$defs/name"},"minItems":1,"type":"array"}},"type":"object"}},"required":["kind","target","value"],"type":"object"},"proofInvariantContribution":{"$comment":"Resolver accepts this kind only for net documents, where it lowers to proofs.invariants.","properties":{"kind":{"const":"proof.invariant"},"target":{"$ref":"#/$defs/netDocumentTarget"},"value":{"additionalProperties":false,"properties":{"constant":{"minimum":0,"type":"integer"},"name":{"minLength":1,"type":"string"},"terms":{"items":{"additionalProperties":false,"properties":{"place":{"$ref":"#/$defs/name"},"weight":{"minimum":1,"type":"integer"}},"required":["place","weight"],"type":"object"},"minItems":1,"type":"array"}},"required":["terms"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"relativePosition":{"$comment":"Authored relative view position: the rendered subject is offset from 'from' by 'delta'. The resolver checks shape and target references here, requires a place position for a bare place base and a copy position for a place-copy base, and resolves the chain at render time (ADR 0024).","additionalProperties":false,"properties":{"delta":{"$ref":"#/$defs/coordinatePoint"},"from":{"oneOf":[{"$ref":"#/$defs/placeTarget"},{"$ref":"#/$defs/placeCopyTarget"},{"$ref":"#/$defs/transitionTarget"}]}},"required":["from","delta"],"type":"object"},"relativeSourceId":{"$comment":"A logical source-relative identifier. The resolver, not this schema, verifies that it is relative to the loading root and identifies an available source.","minLength":1,"pattern":"^(?!/)(?![A-Za-z]:[\\\\/])(?![A-Za-z][A-Za-z0-9+.-]*:).+$","type":"string"},"span":{"$comment":"A half-open source span. start and end refer to the same UTF-8 source; end MUST NOT precede start. Equality with the containing contribution id.source is enforced by the resolver.","additionalProperties":false,"properties":{"end":{"$ref":"#/$defs/position"},"source":{"$ref":"#/$defs/relativeSourceId"},"start":{"$ref":"#/$defs/position"}},"required":["source","start","end"],"type":"object"},"taggedArray":{"additionalProperties":false,"properties":{"items":{"items":{"$ref":"#/$defs/taggedJsonValue"},"type":"array"},"type":{"const":"array"}},"required":["type","items"],"type":"object"},"taggedBoolean":{"additionalProperties":false,"properties":{"type":{"const":"boolean"},"value":{"type":"boolean"}},"required":["type","value"],"type":"object"},"taggedJsonValue":{"description":"A closed lossless representation of an RFC 8259 JSON value. Objects use ordered entries so object-entry order and number lexemes survive target-neutral reconstruction.","oneOf":[{"$ref":"#/$defs/taggedNull"},{"$ref":"#/$defs/taggedBoolean"},{"$ref":"#/$defs/taggedNumber"},{"$ref":"#/$defs/taggedString"},{"$ref":"#/$defs/taggedArray"},{"$ref":"#/$defs/taggedObject"}]},"taggedNull":{"additionalProperties":false,"properties":{"type":{"const":"null"}},"required":["type"],"type":"object"},"taggedNumber":{"$comment":"The resolver MUST parse lexeme as a finite IEEE-754 binary64 value. Integer lexemes MUST be in [-9007199254740991, 9007199254740991]. These numeric-profile checks cannot be expressed portably in JSON Schema.","additionalProperties":false,"properties":{"lexeme":{"description":"Original RFC 8259 number lexeme.","pattern":"^-?(?:0|[1-9][0-9]*)(?:\\.[0-9]+)?(?:[eE][+-]?[0-9]+)?$","type":"string"},"type":{"const":"number"}},"required":["type","lexeme"],"type":"object"},"taggedObject":{"additionalProperties":false,"properties":{"entries":{"$comment":"Entries are retained in source order. The resolver rejects duplicate keys.","items":{"$ref":"#/$defs/taggedObjectEntry"},"type":"array"},"type":{"const":"object"}},"required":["type","entries"],"type":"object"},"taggedObjectEntry":{"additionalProperties":false,"properties":{"key":{"type":"string"},"value":{"$ref":"#/$defs/taggedJsonValue"}},"required":["key","value"],"type":"object"},"taggedString":{"additionalProperties":false,"properties":{"type":{"const":"string"},"value":{"type":"string"}},"required":["type","value"],"type":"object"},"templateDefineContribution":{"properties":{"kind":{"const":"template.define"},"target":{"$ref":"#/$defs/templateTarget"},"value":{"additionalProperties":false,"properties":{"value":{"$ref":"#/$defs/taggedJsonValue"}},"required":["value"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"templateTarget":{"additionalProperties":false,"properties":{"name":{"$ref":"#/$defs/name"},"type":{"const":"template"}},"required":["type","name"],"type":"object"},"tokenLiteral":{"additionalProperties":false,"properties":{"color":{"$ref":"#/$defs/name"},"data":{"$ref":"#/$defs/taggedJsonValue"}},"required":["color","data"],"type":"object"},"transitionBindingNameContribution":{"properties":{"kind":{"const":"transition.binding-name"},"target":{"$ref":"#/$defs/transitionTarget"},"value":{"additionalProperties":false,"properties":{"name":{"$ref":"#/$defs/name"},"place":{"$ref":"#/$defs/placeTarget"}},"required":["name","place"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"transitionDeclareContribution":{"properties":{"kind":{"const":"transition.declare"},"target":{"$ref":"#/$defs/transitionTarget"},"value":{"additionalProperties":false,"type":"object"}},"required":["kind","target","value"],"type":"object"},"transitionGuardContribution":{"properties":{"kind":{"const":"transition.guard"},"target":{"$ref":"#/$defs/transitionTarget"},"value":{"additionalProperties":false,"properties":{"guard":{"$ref":"#/$defs/name"}},"required":["guard"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"transitionHandlerContribution":{"properties":{"kind":{"const":"transition.handler"},"target":{"$ref":"#/$defs/transitionTarget"},"value":{"additionalProperties":false,"properties":{"handler":{"$ref":"#/$defs/name"}},"required":["handler"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"transitionOrderContribution":{"properties":{"kind":{"const":"order.transition"},"target":{"$ref":"#/$defs/transitionTarget"},"value":{"additionalProperties":false,"properties":{"rank":{"minimum":1,"type":"integer"}},"required":["rank"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"transitionPriorityContribution":{"properties":{"kind":{"const":"transition.priority"},"target":{"$ref":"#/$defs/transitionTarget"},"value":{"additionalProperties":false,"properties":{"priority":{"minimum":0,"type":"integer"}},"required":["priority"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"transitionTarget":{"additionalProperties":false,"properties":{"name":{"$ref":"#/$defs/name"},"type":{"const":"transition"}},"required":["type","name"],"type":"object"},"transitionTimerBindContribution":{"properties":{"kind":{"const":"transition.timer-bind"},"target":{"$ref":"#/$defs/transitionTarget"},"value":{"additionalProperties":false,"properties":{"name":{"$ref":"#/$defs/name"},"place":{"$ref":"#/$defs/placeTarget"}},"required":["name","place"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"transitionTimerContribution":{"properties":{"kind":{"const":"transition.timer"},"target":{"$ref":"#/$defs/transitionTarget"},"value":{"additionalProperties":false,"properties":{"cel":{"$ref":"#/$defs/name"},"clock":{"$ref":"#/$defs/placeTarget"}},"required":["clock","cel"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"transitionTimerMaturityContribution":{"properties":{"kind":{"const":"transition.timer-maturity"},"target":{"$ref":"#/$defs/transitionTarget"},"value":{"additionalProperties":false,"properties":{"maturity":{"$ref":"#/$defs/name"}},"required":["maturity"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"typedReference":{"oneOf":[{"$ref":"#/$defs/documentTarget"},{"$ref":"#/$defs/netDocumentTarget"},{"$ref":"#/$defs/placeTarget"},{"$ref":"#/$defs/transitionTarget"},{"$ref":"#/$defs/arcHandleTarget"},{"$ref":"#/$defs/arcTarget"},{"$ref":"#/$defs/templateTarget"},{"$ref":"#/$defs/viewTarget"},{"$ref":"#/$defs/colorTarget"}]},"viewDetailContribution":{"$comment":"Resolver accepts this kind only for net documents. It sets the label detail level a renderer uses when it applies the view.","properties":{"kind":{"const":"view.detail"},"target":{"$ref":"#/$defs/viewTarget"},"value":{"additionalProperties":false,"properties":{"detail":{"enum":["full","summary","structure"]}},"required":["detail"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"viewFusionContribution":{"$comment":"Resolver accepts this kind only for net documents, where it lowers below annotations['petrinet.dsl/v1'].views. It chooses whether that view draws one fusion place as a single node or as per-transition copies.","properties":{"kind":{"const":"view.fusion"},"target":{"$ref":"#/$defs/viewTarget"},"value":{"additionalProperties":false,"properties":{"mode":{"enum":["single","copies"]},"place":{"$ref":"#/$defs/name"}},"required":["place","mode"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"viewPositionContribution":{"$comment":"Resolver accepts this kind only for net documents and validates position as the v1 {x:number,y:number} value or the v1 additive relative {from,delta} shape.","properties":{"kind":{"const":"view.position"},"target":{"$ref":"#/$defs/viewTarget"},"value":{"additionalProperties":false,"properties":{"position":{"oneOf":[{"$ref":"#/$defs/coordinatePoint"},{"$ref":"#/$defs/relativePosition"}]},"subject":{"$ref":"#/$defs/viewPositionSubjectTarget"}},"required":["subject","position"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"viewPositionSubjectTarget":{"oneOf":[{"$ref":"#/$defs/placeTarget"},{"$ref":"#/$defs/placeCopyTarget"},{"$ref":"#/$defs/transitionTarget"}]},"viewRouteContribution":{"$comment":"Resolver accepts this kind only for net documents and validates each point as the v1 {x:number,y:number} value.","properties":{"kind":{"const":"view.route"},"target":{"$ref":"#/$defs/arcHandleTarget"},"value":{"additionalProperties":false,"properties":{"points":{"items":{"$ref":"#/$defs/coordinatePoint"},"minItems":1,"type":"array"},"view":{"$ref":"#/$defs/viewTarget"}},"required":["view","points"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"viewSplinesContribution":{"$comment":"Resolver accepts this kind only for net documents. It sets the Graphviz edge style a renderer uses when it applies the view.","properties":{"kind":{"const":"view.splines"},"target":{"$ref":"#/$defs/viewTarget"},"value":{"additionalProperties":false,"properties":{"splines":{"enum":["ortho","spline","curved","polyline","line"]}},"required":["splines"],"type":"object"}},"required":["kind","target","value"],"type":"object"},"viewTarget":{"additionalProperties":false,"properties":{"name":{"$ref":"#/$defs/name"},"type":{"const":"view"}},"required":["type","name"],"type":"object"},"wireEndpoint":{"additionalProperties":false,"properties":{"alias":{"$ref":"#/$defs/name"},"place":{"$ref":"#/$defs/name"},"span":{"$comment":"The exact half-open span of the authored alias-dot-place endpoint.","$ref":"#/$defs/span"}},"required":["alias","place","span"],"type":"object"}},"$id":"https://velocitron.dev/spec/petrinet-contribution-ir.schema.json","$schema":"https://json-schema.org/draft/2020-12/schema","additionalProperties":false,"description":"A portable, progressive, target-neutral intermediate representation for .petrinet source documents.","properties":{"contributions":{"$comment":"Items MUST have unique source-derived id values and ordinal values 0..length-1 without gaps, ordered by ordinal.","items":{"$ref":"#/$defs/contribution"},"type":"array"},"document":{"$ref":"#/$defs/documentIdentity"},"documentKind":{"description":"The source document's explicit kind.","enum":["net","composition"]},"format":{"const":"velocitron.petrinet/contribution-ir","description":"The only supported IR format identifier."},"version":{"const":1,"description":"The only supported IR format version."}},"required":["format","version","documentKind","document","contributions"],"title":"Velocitron Petri Net Contribution IR v1","type":"object"};
+const schema32 = {"$comment":"The oneOf is deliberately closed: every kind has an exact typed target and exact value structure. No generic target or arbitrary host-language value is permitted.","additionalProperties":false,"oneOf":[{"$ref":"#/$defs/netHeaderContribution"},{"$ref":"#/$defs/compositionHeaderContribution"},{"$ref":"#/$defs/arcDeclareContribution"},{"$ref":"#/$defs/placeDeclareContribution"},{"$ref":"#/$defs/transitionDeclareContribution"},{"$ref":"#/$defs/arcHandleContribution"},{"$ref":"#/$defs/transitionHandlerContribution"},{"$ref":"#/$defs/transitionGuardContribution"},{"$ref":"#/$defs/transitionPriorityContribution"},{"$ref":"#/$defs/transitionTimerContribution"},{"$ref":"#/$defs/transitionTimerBindContribution"},{"$ref":"#/$defs/transitionTimerMaturityContribution"},{"$ref":"#/$defs/transitionBindingNameContribution"},{"$ref":"#/$defs/transitionOrderContribution"},{"$ref":"#/$defs/arcRunOrderContribution"},{"$ref":"#/$defs/arcPredicateContribution"},{"$ref":"#/$defs/arcWeightContribution"},{"$ref":"#/$defs/arcCorrelateContribution"},{"$ref":"#/$defs/arcProduceCelContribution"},{"$ref":"#/$defs/arcProduceDataContribution"},{"$ref":"#/$defs/placeAcceptsContribution"},{"$ref":"#/$defs/placePortContribution"},{"$ref":"#/$defs/placeCapacityContribution"},{"$ref":"#/$defs/templateDefineContribution"},{"$ref":"#/$defs/markingAppendContribution"},{"$ref":"#/$defs/descriptionContribution"},{"$ref":"#/$defs/annotationContribution"},{"$ref":"#/$defs/extensionsContribution"},{"$ref":"#/$defs/namedMarkingContribution"},{"$ref":"#/$defs/viewPositionContribution"},{"$ref":"#/$defs/viewRouteContribution"},{"$ref":"#/$defs/viewSplinesContribution"},{"$ref":"#/$defs/viewDetailContribution"},{"$ref":"#/$defs/viewFusionContribution"},{"$ref":"#/$defs/decorationHighlightContribution"},{"$ref":"#/$defs/decorationNoteContribution"},{"$ref":"#/$defs/decorationSummaryContribution"},{"$ref":"#/$defs/decorationQuietContribution"},{"$ref":"#/$defs/decorationBesideContribution"},{"$ref":"#/$defs/decorationSingleContribution"},{"$ref":"#/$defs/decorationShowContribution"},{"$ref":"#/$defs/domainValuesContribution"},{"$ref":"#/$defs/proofFinalContribution"},{"$ref":"#/$defs/proofInvariantContribution"},{"$ref":"#/$defs/actorDeclareContribution"},{"$ref":"#/$defs/compositionUseContribution"},{"$ref":"#/$defs/compositionWireContribution"},{"$ref":"#/$defs/compositionFinalContribution"},{"$ref":"#/$defs/compositionShareContribution"},{"$ref":"#/$defs/compositionRefineContribution"}],"properties":{"id":{"$ref":"#/$defs/contributionIdentity"},"kind":{"type":"string"},"ordinal":{"minimum":0,"type":"integer"},"span":{"$ref":"#/$defs/span"},"target":{"$ref":"#/$defs/typedReference"},"value":{}},"required":["id","ordinal","span","kind","target","value"],"type":"object"};
 const schema33 = {"properties":{"kind":{"const":"document.net-header"},"target":{"$ref":"#/$defs/documentTarget"},"value":{"additionalProperties":false,"properties":{"description":{"type":"string"},"name":{"$ref":"#/$defs/name"}},"required":["name"],"type":"object"}},"required":["kind","target","value"],"type":"object"};
 const schema34 = {"additionalProperties":false,"properties":{"type":{"const":"document"}},"required":["type"],"type":"object"};
 const schema35 = {"minLength":1,"type":"string"};
@@ -8557,13 +8557,175 @@ return errors === 0;
 }
 validate189.evaluated = {"props":{"kind":true,"target":true,"value":true},"dynamicProps":false,"dynamicItems":false};
 
-const schema134 = {"$comment":"Resolver accepts this kind only for net documents, where it lowers below annotations['petrinet.dsl/v1'].decorations. Presentation only.","properties":{"kind":{"const":"decoration.highlight"},"target":{"$ref":"#/$defs/decorationTarget"},"value":{"additionalProperties":false,"properties":{"label":{"type":"string"}},"type":"object"}},"required":["kind","target","value"],"type":"object"};
-const schema135 = {"oneOf":[{"$ref":"#/$defs/placeTarget"},{"$ref":"#/$defs/transitionTarget"},{"$ref":"#/$defs/arcHandleTarget"}]};
+const schema134 = {"$comment":"Resolver accepts this kind only for net documents, where it lowers below annotations['petrinet.dsl/v1'].views. It chooses whether that view draws one fusion place as a single node or as per-transition copies.","properties":{"kind":{"const":"view.fusion"},"target":{"$ref":"#/$defs/viewTarget"},"value":{"additionalProperties":false,"properties":{"mode":{"enum":["single","copies"]},"place":{"$ref":"#/$defs/name"}},"required":["place","mode"],"type":"object"}},"required":["kind","target","value"],"type":"object"};
 
-function validate193(data, {instancePath="", parentData, parentDataProperty, rootData=data, dynamicAnchors={}}={}){
+function validate192(data, {instancePath="", parentData, parentDataProperty, rootData=data, dynamicAnchors={}}={}){
 let vErrors = null;
 let errors = 0;
-const evaluated0 = validate193.evaluated;
+const evaluated0 = validate192.evaluated;
+if(evaluated0.dynamicProps){
+evaluated0.props = undefined;
+}
+if(evaluated0.dynamicItems){
+evaluated0.items = undefined;
+}
+if(data && typeof data == "object" && !Array.isArray(data)){
+if(data.kind === undefined){
+const err0 = {instancePath,schemaPath:"#/required",keyword:"required",params:{missingProperty: "kind"},message:"must have required property '"+"kind"+"'"};
+if(vErrors === null){
+vErrors = [err0];
+}
+else {
+vErrors.push(err0);
+}
+errors++;
+}
+if(data.target === undefined){
+const err1 = {instancePath,schemaPath:"#/required",keyword:"required",params:{missingProperty: "target"},message:"must have required property '"+"target"+"'"};
+if(vErrors === null){
+vErrors = [err1];
+}
+else {
+vErrors.push(err1);
+}
+errors++;
+}
+if(data.value === undefined){
+const err2 = {instancePath,schemaPath:"#/required",keyword:"required",params:{missingProperty: "value"},message:"must have required property '"+"value"+"'"};
+if(vErrors === null){
+vErrors = [err2];
+}
+else {
+vErrors.push(err2);
+}
+errors++;
+}
+if(data.kind !== undefined){
+if("view.fusion" !== data.kind){
+const err3 = {instancePath:instancePath+"/kind",schemaPath:"#/properties/kind/const",keyword:"const",params:{allowedValue: "view.fusion"},message:"must be equal to constant"};
+if(vErrors === null){
+vErrors = [err3];
+}
+else {
+vErrors.push(err3);
+}
+errors++;
+}
+}
+if(data.target !== undefined){
+if(!(validate155(data.target, {instancePath:instancePath+"/target",parentData:data,parentDataProperty:"target",rootData,dynamicAnchors}))){
+vErrors = vErrors === null ? validate155.errors : vErrors.concat(validate155.errors);
+errors = vErrors.length;
+}
+}
+if(data.value !== undefined){
+let data2 = data.value;
+if(data2 && typeof data2 == "object" && !Array.isArray(data2)){
+if(data2.place === undefined){
+const err4 = {instancePath:instancePath+"/value",schemaPath:"#/properties/value/required",keyword:"required",params:{missingProperty: "place"},message:"must have required property '"+"place"+"'"};
+if(vErrors === null){
+vErrors = [err4];
+}
+else {
+vErrors.push(err4);
+}
+errors++;
+}
+if(data2.mode === undefined){
+const err5 = {instancePath:instancePath+"/value",schemaPath:"#/properties/value/required",keyword:"required",params:{missingProperty: "mode"},message:"must have required property '"+"mode"+"'"};
+if(vErrors === null){
+vErrors = [err5];
+}
+else {
+vErrors.push(err5);
+}
+errors++;
+}
+for(const key0 in data2){
+if(!((key0 === "mode") || (key0 === "place"))){
+const err6 = {instancePath:instancePath+"/value",schemaPath:"#/properties/value/additionalProperties",keyword:"additionalProperties",params:{additionalProperty: key0},message:"must NOT have additional properties"};
+if(vErrors === null){
+vErrors = [err6];
+}
+else {
+vErrors.push(err6);
+}
+errors++;
+}
+}
+if(data2.mode !== undefined){
+let data3 = data2.mode;
+if(!((data3 === "single") || (data3 === "copies"))){
+const err7 = {instancePath:instancePath+"/value/mode",schemaPath:"#/properties/value/properties/mode/enum",keyword:"enum",params:{allowedValues: schema134.properties.value.properties.mode.enum},message:"must be equal to one of the allowed values"};
+if(vErrors === null){
+vErrors = [err7];
+}
+else {
+vErrors.push(err7);
+}
+errors++;
+}
+}
+if(data2.place !== undefined){
+let data4 = data2.place;
+if(typeof data4 === "string"){
+if(func1(data4) < 1){
+const err8 = {instancePath:instancePath+"/value/place",schemaPath:"#/$defs/name/minLength",keyword:"minLength",params:{limit: 1},message:"must NOT have fewer than 1 characters"};
+if(vErrors === null){
+vErrors = [err8];
+}
+else {
+vErrors.push(err8);
+}
+errors++;
+}
+}
+else {
+const err9 = {instancePath:instancePath+"/value/place",schemaPath:"#/$defs/name/type",keyword:"type",params:{type: "string"},message:"must be string"};
+if(vErrors === null){
+vErrors = [err9];
+}
+else {
+vErrors.push(err9);
+}
+errors++;
+}
+}
+}
+else {
+const err10 = {instancePath:instancePath+"/value",schemaPath:"#/properties/value/type",keyword:"type",params:{type: "object"},message:"must be object"};
+if(vErrors === null){
+vErrors = [err10];
+}
+else {
+vErrors.push(err10);
+}
+errors++;
+}
+}
+}
+else {
+const err11 = {instancePath,schemaPath:"#/type",keyword:"type",params:{type: "object"},message:"must be object"};
+if(vErrors === null){
+vErrors = [err11];
+}
+else {
+vErrors.push(err11);
+}
+errors++;
+}
+validate192.errors = vErrors;
+return errors === 0;
+}
+validate192.evaluated = {"props":{"kind":true,"target":true,"value":true},"dynamicProps":false,"dynamicItems":false};
+
+const schema136 = {"$comment":"Resolver accepts this kind only for net documents, where it lowers below annotations['petrinet.dsl/v1'].decorations. Presentation only.","properties":{"kind":{"const":"decoration.highlight"},"target":{"$ref":"#/$defs/decorationTarget"},"value":{"additionalProperties":false,"properties":{"label":{"type":"string"}},"type":"object"}},"required":["kind","target","value"],"type":"object"};
+const schema137 = {"oneOf":[{"$ref":"#/$defs/placeTarget"},{"$ref":"#/$defs/transitionTarget"},{"$ref":"#/$defs/arcHandleTarget"}]};
+
+function validate196(data, {instancePath="", parentData, parentDataProperty, rootData=data, dynamicAnchors={}}={}){
+let vErrors = null;
+let errors = 0;
+const evaluated0 = validate196.evaluated;
 if(evaluated0.dynamicProps){
 evaluated0.props = undefined;
 }
@@ -8643,17 +8805,17 @@ vErrors = null;
 }
 }
 }
-validate193.errors = vErrors;
+validate196.errors = vErrors;
 evaluated0.props = props0;
 return errors === 0;
 }
-validate193.evaluated = {"dynamicProps":true,"dynamicItems":false};
+validate196.evaluated = {"dynamicProps":true,"dynamicItems":false};
 
 
-function validate192(data, {instancePath="", parentData, parentDataProperty, rootData=data, dynamicAnchors={}}={}){
+function validate195(data, {instancePath="", parentData, parentDataProperty, rootData=data, dynamicAnchors={}}={}){
 let vErrors = null;
 let errors = 0;
-const evaluated0 = validate192.evaluated;
+const evaluated0 = validate195.evaluated;
 if(evaluated0.dynamicProps){
 evaluated0.props = undefined;
 }
@@ -8704,8 +8866,8 @@ errors++;
 }
 }
 if(data.target !== undefined){
-if(!(validate193(data.target, {instancePath:instancePath+"/target",parentData:data,parentDataProperty:"target",rootData,dynamicAnchors}))){
-vErrors = vErrors === null ? validate193.errors : vErrors.concat(validate193.errors);
+if(!(validate196(data.target, {instancePath:instancePath+"/target",parentData:data,parentDataProperty:"target",rootData,dynamicAnchors}))){
+vErrors = vErrors === null ? validate196.errors : vErrors.concat(validate196.errors);
 errors = vErrors.length;
 }
 }
@@ -8759,17 +8921,17 @@ vErrors.push(err7);
 }
 errors++;
 }
-validate192.errors = vErrors;
+validate195.errors = vErrors;
 return errors === 0;
 }
-validate192.evaluated = {"props":{"kind":true,"target":true,"value":true},"dynamicProps":false,"dynamicItems":false};
+validate195.evaluated = {"props":{"kind":true,"target":true,"value":true},"dynamicProps":false,"dynamicItems":false};
 
-const schema136 = {"$comment":"Resolver accepts this kind only for net documents, where it lowers below annotations['petrinet.dsl/v1'].decorations. Presentation only.","properties":{"kind":{"const":"decoration.note"},"target":{"$ref":"#/$defs/decorationTarget"},"value":{"additionalProperties":false,"properties":{"text":{"type":"string"}},"required":["text"],"type":"object"}},"required":["kind","target","value"],"type":"object"};
+const schema138 = {"$comment":"Resolver accepts this kind only for net documents, where it lowers below annotations['petrinet.dsl/v1'].decorations. Presentation only.","properties":{"kind":{"const":"decoration.note"},"target":{"$ref":"#/$defs/decorationTarget"},"value":{"additionalProperties":false,"properties":{"text":{"type":"string"}},"required":["text"],"type":"object"}},"required":["kind","target","value"],"type":"object"};
 
-function validate199(data, {instancePath="", parentData, parentDataProperty, rootData=data, dynamicAnchors={}}={}){
+function validate202(data, {instancePath="", parentData, parentDataProperty, rootData=data, dynamicAnchors={}}={}){
 let vErrors = null;
 let errors = 0;
-const evaluated0 = validate199.evaluated;
+const evaluated0 = validate202.evaluated;
 if(evaluated0.dynamicProps){
 evaluated0.props = undefined;
 }
@@ -8820,8 +8982,8 @@ errors++;
 }
 }
 if(data.target !== undefined){
-if(!(validate193(data.target, {instancePath:instancePath+"/target",parentData:data,parentDataProperty:"target",rootData,dynamicAnchors}))){
-vErrors = vErrors === null ? validate193.errors : vErrors.concat(validate193.errors);
+if(!(validate196(data.target, {instancePath:instancePath+"/target",parentData:data,parentDataProperty:"target",rootData,dynamicAnchors}))){
+vErrors = vErrors === null ? validate196.errors : vErrors.concat(validate196.errors);
 errors = vErrors.length;
 }
 }
@@ -8885,17 +9047,17 @@ vErrors.push(err8);
 }
 errors++;
 }
-validate199.errors = vErrors;
+validate202.errors = vErrors;
 return errors === 0;
 }
-validate199.evaluated = {"props":{"kind":true,"target":true,"value":true},"dynamicProps":false,"dynamicItems":false};
+validate202.evaluated = {"props":{"kind":true,"target":true,"value":true},"dynamicProps":false,"dynamicItems":false};
 
-const schema137 = {"$comment":"Resolver accepts this kind only for net documents, where it lowers below annotations['petrinet.dsl/v1'].decorations. Only transitions and arcs carry expressions to summarize.","properties":{"kind":{"const":"decoration.summary"},"target":{"oneOf":[{"$ref":"#/$defs/transitionTarget"},{"$ref":"#/$defs/arcHandleTarget"}]},"value":{"additionalProperties":false,"properties":{"text":{"type":"string"}},"required":["text"],"type":"object"}},"required":["kind","target","value"],"type":"object"};
+const schema139 = {"$comment":"Resolver accepts this kind only for net documents, where it lowers below annotations['petrinet.dsl/v1'].decorations. Only transitions and arcs carry expressions to summarize.","properties":{"kind":{"const":"decoration.summary"},"target":{"oneOf":[{"$ref":"#/$defs/transitionTarget"},{"$ref":"#/$defs/arcHandleTarget"}]},"value":{"additionalProperties":false,"properties":{"text":{"type":"string"}},"required":["text"],"type":"object"}},"required":["kind","target","value"],"type":"object"};
 
-function validate202(data, {instancePath="", parentData, parentDataProperty, rootData=data, dynamicAnchors={}}={}){
+function validate205(data, {instancePath="", parentData, parentDataProperty, rootData=data, dynamicAnchors={}}={}){
 let vErrors = null;
 let errors = 0;
-const evaluated0 = validate202.evaluated;
+const evaluated0 = validate205.evaluated;
 if(evaluated0.dynamicProps){
 evaluated0.props = undefined;
 }
@@ -9062,18 +9224,18 @@ vErrors.push(err9);
 }
 errors++;
 }
-validate202.errors = vErrors;
+validate205.errors = vErrors;
 return errors === 0;
 }
-validate202.evaluated = {"props":{"kind":true,"target":true,"value":true},"dynamicProps":false,"dynamicItems":false};
+validate205.evaluated = {"props":{"kind":true,"target":true,"value":true},"dynamicProps":false,"dynamicItems":false};
 
-const schema138 = {"$comment":"Resolver accepts this kind only for net documents, where it lowers below annotations['petrinet.dsl/v1'].decorations. Presentation only.","properties":{"kind":{"const":"decoration.quiet"},"target":{"$ref":"#/$defs/colorTarget"},"value":{"additionalProperties":false,"properties":{},"type":"object"}},"required":["kind","target","value"],"type":"object"};
-const schema139 = {"$comment":"A token color named by a decoration. The resolver requires some place to accept it.","additionalProperties":false,"properties":{"name":{"$ref":"#/$defs/name"},"type":{"const":"color"}},"required":["type","name"],"type":"object"};
+const schema140 = {"$comment":"Resolver accepts this kind only for net documents, where it lowers below annotations['petrinet.dsl/v1'].decorations. Presentation only.","properties":{"kind":{"const":"decoration.quiet"},"target":{"$ref":"#/$defs/colorTarget"},"value":{"additionalProperties":false,"properties":{},"type":"object"}},"required":["kind","target","value"],"type":"object"};
+const schema141 = {"$comment":"A token color named by a decoration. The resolver requires some place to accept it.","additionalProperties":false,"properties":{"name":{"$ref":"#/$defs/name"},"type":{"const":"color"}},"required":["type","name"],"type":"object"};
 
-function validate207(data, {instancePath="", parentData, parentDataProperty, rootData=data, dynamicAnchors={}}={}){
+function validate210(data, {instancePath="", parentData, parentDataProperty, rootData=data, dynamicAnchors={}}={}){
 let vErrors = null;
 let errors = 0;
-const evaluated0 = validate207.evaluated;
+const evaluated0 = validate210.evaluated;
 if(evaluated0.dynamicProps){
 evaluated0.props = undefined;
 }
@@ -9161,16 +9323,16 @@ vErrors.push(err6);
 }
 errors++;
 }
-validate207.errors = vErrors;
+validate210.errors = vErrors;
 return errors === 0;
 }
-validate207.evaluated = {"props":true,"dynamicProps":false,"dynamicItems":false};
+validate210.evaluated = {"props":true,"dynamicProps":false,"dynamicItems":false};
 
 
-function validate206(data, {instancePath="", parentData, parentDataProperty, rootData=data, dynamicAnchors={}}={}){
+function validate209(data, {instancePath="", parentData, parentDataProperty, rootData=data, dynamicAnchors={}}={}){
 let vErrors = null;
 let errors = 0;
-const evaluated0 = validate206.evaluated;
+const evaluated0 = validate209.evaluated;
 if(evaluated0.dynamicProps){
 evaluated0.props = undefined;
 }
@@ -9221,8 +9383,8 @@ errors++;
 }
 }
 if(data.target !== undefined){
-if(!(validate207(data.target, {instancePath:instancePath+"/target",parentData:data,parentDataProperty:"target",rootData,dynamicAnchors}))){
-vErrors = vErrors === null ? validate207.errors : vErrors.concat(validate207.errors);
+if(!(validate210(data.target, {instancePath:instancePath+"/target",parentData:data,parentDataProperty:"target",rootData,dynamicAnchors}))){
+vErrors = vErrors === null ? validate210.errors : vErrors.concat(validate210.errors);
 errors = vErrors.length;
 }
 }
@@ -9262,17 +9424,17 @@ vErrors.push(err6);
 }
 errors++;
 }
-validate206.errors = vErrors;
+validate209.errors = vErrors;
 return errors === 0;
 }
-validate206.evaluated = {"props":{"kind":true,"target":true,"value":true},"dynamicProps":false,"dynamicItems":false};
+validate209.evaluated = {"props":{"kind":true,"target":true,"value":true},"dynamicProps":false,"dynamicItems":false};
 
-const schema141 = {"$comment":"Resolver accepts this kind only for net documents, where it lowers below annotations['petrinet.dsl/v1'].decorations. Only a place annotated fusion true has local copies to place.","properties":{"kind":{"const":"decoration.beside"},"target":{"$ref":"#/$defs/placeTarget"},"value":{"additionalProperties":false,"properties":{"share":{"const":false},"side":{"enum":["left","right"]}},"type":"object"}},"required":["kind","target","value"],"type":"object"};
+const schema143 = {"$comment":"Resolver accepts this kind only for net documents, where it lowers below annotations['petrinet.dsl/v1'].decorations. Only a place annotated fusion true has local copies to place.","properties":{"kind":{"const":"decoration.beside"},"target":{"$ref":"#/$defs/placeTarget"},"value":{"additionalProperties":false,"properties":{"share":{"const":false},"side":{"enum":["left","right"]}},"type":"object"}},"required":["kind","target","value"],"type":"object"};
 
-function validate210(data, {instancePath="", parentData, parentDataProperty, rootData=data, dynamicAnchors={}}={}){
+function validate213(data, {instancePath="", parentData, parentDataProperty, rootData=data, dynamicAnchors={}}={}){
 let vErrors = null;
 let errors = 0;
-const evaluated0 = validate210.evaluated;
+const evaluated0 = validate213.evaluated;
 if(evaluated0.dynamicProps){
 evaluated0.props = undefined;
 }
@@ -9358,7 +9520,7 @@ errors++;
 if(data2.side !== undefined){
 let data4 = data2.side;
 if(!((data4 === "left") || (data4 === "right"))){
-const err6 = {instancePath:instancePath+"/value/side",schemaPath:"#/properties/value/properties/side/enum",keyword:"enum",params:{allowedValues: schema141.properties.value.properties.side.enum},message:"must be equal to one of the allowed values"};
+const err6 = {instancePath:instancePath+"/value/side",schemaPath:"#/properties/value/properties/side/enum",keyword:"enum",params:{allowedValues: schema143.properties.value.properties.side.enum},message:"must be equal to one of the allowed values"};
 if(vErrors === null){
 vErrors = [err6];
 }
@@ -9391,18 +9553,120 @@ vErrors.push(err8);
 }
 errors++;
 }
-validate210.errors = vErrors;
+validate213.errors = vErrors;
 return errors === 0;
 }
-validate210.evaluated = {"props":{"kind":true,"target":true,"value":true},"dynamicProps":false,"dynamicItems":false};
+validate213.evaluated = {"props":{"kind":true,"target":true,"value":true},"dynamicProps":false,"dynamicItems":false};
 
-const schema142 = {"$comment":"Resolver accepts this kind only for net documents, where it lowers below annotations['petrinet.dsl/v1'].decorations. Names the token fields a renderer shows for a color, in source order.","properties":{"kind":{"const":"decoration.show"},"target":{"$ref":"#/$defs/colorTarget"},"value":{"additionalProperties":false,"properties":{"fields":{"items":{"$comment":"A token field path: non-empty keys joined by dots. A dotted path reaches into a nested object.","pattern":"^[^.]+(\\.[^.]+)*$","type":"string"},"minItems":1,"type":"array","uniqueItems":true}},"required":["fields"],"type":"object"}},"required":["kind","target","value"],"type":"object"};
-const pattern9 = new RegExp("^[^.]+(\\.[^.]+)*$", "u");
+const schema144 = {"$comment":"Resolver accepts this kind only for net documents, where it lowers below annotations['petrinet.dsl/v1'].decorations. Only a place annotated fusion true is drawn as local copies, so only that place has a fused drawing to collapse to one node.","properties":{"kind":{"const":"decoration.single"},"target":{"$ref":"#/$defs/placeTarget"},"value":{"additionalProperties":false,"properties":{},"type":"object"}},"required":["kind","target","value"],"type":"object"};
 
-function validate213(data, {instancePath="", parentData, parentDataProperty, rootData=data, dynamicAnchors={}}={}){
+function validate216(data, {instancePath="", parentData, parentDataProperty, rootData=data, dynamicAnchors={}}={}){
 let vErrors = null;
 let errors = 0;
-const evaluated0 = validate213.evaluated;
+const evaluated0 = validate216.evaluated;
+if(evaluated0.dynamicProps){
+evaluated0.props = undefined;
+}
+if(evaluated0.dynamicItems){
+evaluated0.items = undefined;
+}
+if(data && typeof data == "object" && !Array.isArray(data)){
+if(data.kind === undefined){
+const err0 = {instancePath,schemaPath:"#/required",keyword:"required",params:{missingProperty: "kind"},message:"must have required property '"+"kind"+"'"};
+if(vErrors === null){
+vErrors = [err0];
+}
+else {
+vErrors.push(err0);
+}
+errors++;
+}
+if(data.target === undefined){
+const err1 = {instancePath,schemaPath:"#/required",keyword:"required",params:{missingProperty: "target"},message:"must have required property '"+"target"+"'"};
+if(vErrors === null){
+vErrors = [err1];
+}
+else {
+vErrors.push(err1);
+}
+errors++;
+}
+if(data.value === undefined){
+const err2 = {instancePath,schemaPath:"#/required",keyword:"required",params:{missingProperty: "value"},message:"must have required property '"+"value"+"'"};
+if(vErrors === null){
+vErrors = [err2];
+}
+else {
+vErrors.push(err2);
+}
+errors++;
+}
+if(data.kind !== undefined){
+if("decoration.single" !== data.kind){
+const err3 = {instancePath:instancePath+"/kind",schemaPath:"#/properties/kind/const",keyword:"const",params:{allowedValue: "decoration.single"},message:"must be equal to constant"};
+if(vErrors === null){
+vErrors = [err3];
+}
+else {
+vErrors.push(err3);
+}
+errors++;
+}
+}
+if(data.target !== undefined){
+if(!(validate31(data.target, {instancePath:instancePath+"/target",parentData:data,parentDataProperty:"target",rootData,dynamicAnchors}))){
+vErrors = vErrors === null ? validate31.errors : vErrors.concat(validate31.errors);
+errors = vErrors.length;
+}
+}
+if(data.value !== undefined){
+let data2 = data.value;
+if(data2 && typeof data2 == "object" && !Array.isArray(data2)){
+for(const key0 in data2){
+const err4 = {instancePath:instancePath+"/value",schemaPath:"#/properties/value/additionalProperties",keyword:"additionalProperties",params:{additionalProperty: key0},message:"must NOT have additional properties"};
+if(vErrors === null){
+vErrors = [err4];
+}
+else {
+vErrors.push(err4);
+}
+errors++;
+}
+}
+else {
+const err5 = {instancePath:instancePath+"/value",schemaPath:"#/properties/value/type",keyword:"type",params:{type: "object"},message:"must be object"};
+if(vErrors === null){
+vErrors = [err5];
+}
+else {
+vErrors.push(err5);
+}
+errors++;
+}
+}
+}
+else {
+const err6 = {instancePath,schemaPath:"#/type",keyword:"type",params:{type: "object"},message:"must be object"};
+if(vErrors === null){
+vErrors = [err6];
+}
+else {
+vErrors.push(err6);
+}
+errors++;
+}
+validate216.errors = vErrors;
+return errors === 0;
+}
+validate216.evaluated = {"props":{"kind":true,"target":true,"value":true},"dynamicProps":false,"dynamicItems":false};
+
+const schema145 = {"$comment":"Resolver accepts this kind only for net documents, where it lowers below annotations['petrinet.dsl/v1'].decorations. Names the token fields a renderer shows for a color, in source order.","properties":{"kind":{"const":"decoration.show"},"target":{"$ref":"#/$defs/colorTarget"},"value":{"additionalProperties":false,"properties":{"fields":{"items":{"$comment":"A token field path: non-empty keys joined by dots. A dotted path reaches into a nested object.","pattern":"^[^.]+(\\.[^.]+)*$","type":"string"},"minItems":1,"type":"array","uniqueItems":true}},"required":["fields"],"type":"object"}},"required":["kind","target","value"],"type":"object"};
+const pattern9 = new RegExp("^[^.]+(\\.[^.]+)*$", "u");
+
+function validate219(data, {instancePath="", parentData, parentDataProperty, rootData=data, dynamicAnchors={}}={}){
+let vErrors = null;
+let errors = 0;
+const evaluated0 = validate219.evaluated;
 if(evaluated0.dynamicProps){
 evaluated0.props = undefined;
 }
@@ -9453,8 +9717,8 @@ errors++;
 }
 }
 if(data.target !== undefined){
-if(!(validate207(data.target, {instancePath:instancePath+"/target",parentData:data,parentDataProperty:"target",rootData,dynamicAnchors}))){
-vErrors = vErrors === null ? validate207.errors : vErrors.concat(validate207.errors);
+if(!(validate210(data.target, {instancePath:instancePath+"/target",parentData:data,parentDataProperty:"target",rootData,dynamicAnchors}))){
+vErrors = vErrors === null ? validate210.errors : vErrors.concat(validate210.errors);
 errors = vErrors.length;
 }
 }
@@ -9581,17 +9845,17 @@ vErrors.push(err12);
 }
 errors++;
 }
-validate213.errors = vErrors;
+validate219.errors = vErrors;
 return errors === 0;
 }
-validate213.evaluated = {"props":{"kind":true,"target":true,"value":true},"dynamicProps":false,"dynamicItems":false};
+validate219.evaluated = {"props":{"kind":true,"target":true,"value":true},"dynamicProps":false,"dynamicItems":false};
 
-const schema143 = {"$comment":"Resolver accepts this kind only for net documents, where it lowers to the net's domains member under the key color.path. The engine enforces it (ADR 0037).","properties":{"kind":{"const":"domain.values"},"target":{"$ref":"#/$defs/colorTarget"},"value":{"additionalProperties":false,"properties":{"path":{"$comment":"A token field path: non-empty keys joined by dots.","pattern":"^[^.]+(\\.[^.]+)*$","type":"string"},"values":{"items":{"oneOf":[{"$ref":"#/$defs/taggedBoolean"},{"$ref":"#/$defs/taggedNumber"},{"$ref":"#/$defs/taggedString"}]},"minItems":1,"type":"array"}},"required":["path","values"],"type":"object"}},"required":["kind","target","value"],"type":"object"};
+const schema146 = {"$comment":"Resolver accepts this kind only for net documents, where it lowers to the net's domains member under the key color.path. The engine enforces it (ADR 0037).","properties":{"kind":{"const":"domain.values"},"target":{"$ref":"#/$defs/colorTarget"},"value":{"additionalProperties":false,"properties":{"path":{"$comment":"A token field path: non-empty keys joined by dots.","pattern":"^[^.]+(\\.[^.]+)*$","type":"string"},"values":{"items":{"oneOf":[{"$ref":"#/$defs/taggedBoolean"},{"$ref":"#/$defs/taggedNumber"},{"$ref":"#/$defs/taggedString"}]},"minItems":1,"type":"array"}},"required":["path","values"],"type":"object"}},"required":["kind","target","value"],"type":"object"};
 
-function validate216(data, {instancePath="", parentData, parentDataProperty, rootData=data, dynamicAnchors={}}={}){
+function validate222(data, {instancePath="", parentData, parentDataProperty, rootData=data, dynamicAnchors={}}={}){
 let vErrors = null;
 let errors = 0;
-const evaluated0 = validate216.evaluated;
+const evaluated0 = validate222.evaluated;
 if(evaluated0.dynamicProps){
 evaluated0.props = undefined;
 }
@@ -9642,8 +9906,8 @@ errors++;
 }
 }
 if(data.target !== undefined){
-if(!(validate207(data.target, {instancePath:instancePath+"/target",parentData:data,parentDataProperty:"target",rootData,dynamicAnchors}))){
-vErrors = vErrors === null ? validate207.errors : vErrors.concat(validate207.errors);
+if(!(validate210(data.target, {instancePath:instancePath+"/target",parentData:data,parentDataProperty:"target",rootData,dynamicAnchors}))){
+vErrors = vErrors === null ? validate210.errors : vErrors.concat(validate210.errors);
 errors = vErrors.length;
 }
 }
@@ -10037,17 +10301,17 @@ vErrors.push(err32);
 }
 errors++;
 }
-validate216.errors = vErrors;
+validate222.errors = vErrors;
 return errors === 0;
 }
-validate216.evaluated = {"props":{"kind":true,"target":true,"value":true},"dynamicProps":false,"dynamicItems":false};
+validate222.evaluated = {"props":{"kind":true,"target":true,"value":true},"dynamicProps":false,"dynamicItems":false};
 
-const schema147 = {"$comment":"Resolver accepts this kind only for net documents, where it lowers to proofs.final. One contribution per final marking: the target is its first place, and `with` lists the other places that must also hold a token.","properties":{"kind":{"const":"proof.final"},"target":{"$ref":"#/$defs/placeTarget"},"value":{"additionalProperties":false,"properties":{"with":{"items":{"$ref":"#/$defs/name"},"minItems":1,"type":"array"}},"type":"object"}},"required":["kind","target","value"],"type":"object"};
+const schema150 = {"$comment":"Resolver accepts this kind only for net documents, where it lowers to proofs.final. One contribution per final marking: the target is its first place, and `with` lists the other places that must also hold a token.","properties":{"kind":{"const":"proof.final"},"target":{"$ref":"#/$defs/placeTarget"},"value":{"additionalProperties":false,"properties":{"with":{"items":{"$ref":"#/$defs/name"},"minItems":1,"type":"array"}},"type":"object"}},"required":["kind","target","value"],"type":"object"};
 
-function validate219(data, {instancePath="", parentData, parentDataProperty, rootData=data, dynamicAnchors={}}={}){
+function validate225(data, {instancePath="", parentData, parentDataProperty, rootData=data, dynamicAnchors={}}={}){
 let vErrors = null;
 let errors = 0;
-const evaluated0 = validate219.evaluated;
+const evaluated0 = validate225.evaluated;
 if(evaluated0.dynamicProps){
 evaluated0.props = undefined;
 }
@@ -10192,17 +10456,17 @@ vErrors.push(err10);
 }
 errors++;
 }
-validate219.errors = vErrors;
+validate225.errors = vErrors;
 return errors === 0;
 }
-validate219.evaluated = {"props":{"kind":true,"target":true,"value":true},"dynamicProps":false,"dynamicItems":false};
+validate225.evaluated = {"props":{"kind":true,"target":true,"value":true},"dynamicProps":false,"dynamicItems":false};
 
-const schema149 = {"$comment":"Resolver accepts this kind only for net documents, where it lowers to proofs.invariants.","properties":{"kind":{"const":"proof.invariant"},"target":{"$ref":"#/$defs/netDocumentTarget"},"value":{"additionalProperties":false,"properties":{"constant":{"minimum":0,"type":"integer"},"name":{"minLength":1,"type":"string"},"terms":{"items":{"additionalProperties":false,"properties":{"place":{"$ref":"#/$defs/name"},"weight":{"minimum":1,"type":"integer"}},"required":["place","weight"],"type":"object"},"minItems":1,"type":"array"}},"required":["terms"],"type":"object"}},"required":["kind","target","value"],"type":"object"};
+const schema152 = {"$comment":"Resolver accepts this kind only for net documents, where it lowers to proofs.invariants.","properties":{"kind":{"const":"proof.invariant"},"target":{"$ref":"#/$defs/netDocumentTarget"},"value":{"additionalProperties":false,"properties":{"constant":{"minimum":0,"type":"integer"},"name":{"minLength":1,"type":"string"},"terms":{"items":{"additionalProperties":false,"properties":{"place":{"$ref":"#/$defs/name"},"weight":{"minimum":1,"type":"integer"}},"required":["place","weight"],"type":"object"},"minItems":1,"type":"array"}},"required":["terms"],"type":"object"}},"required":["kind","target","value"],"type":"object"};
 
-function validate222(data, {instancePath="", parentData, parentDataProperty, rootData=data, dynamicAnchors={}}={}){
+function validate228(data, {instancePath="", parentData, parentDataProperty, rootData=data, dynamicAnchors={}}={}){
 let vErrors = null;
 let errors = 0;
-const evaluated0 = validate222.evaluated;
+const evaluated0 = validate228.evaluated;
 if(evaluated0.dynamicProps){
 evaluated0.props = undefined;
 }
@@ -10544,17 +10808,17 @@ vErrors.push(err27);
 }
 errors++;
 }
-validate222.errors = vErrors;
+validate228.errors = vErrors;
 return errors === 0;
 }
-validate222.evaluated = {"props":{"kind":true,"target":true,"value":true},"dynamicProps":false,"dynamicItems":false};
+validate228.evaluated = {"props":{"kind":true,"target":true,"value":true},"dynamicProps":false,"dynamicItems":false};
 
-const schema152 = {"$comment":"Resolver accepts this kind only for net documents, where it lowers to the net annotation actors: one {name, kind} entry per actor, in source order.","properties":{"kind":{"const":"actor.declare"},"target":{"$ref":"#/$defs/netDocumentTarget"},"value":{"additionalProperties":false,"properties":{"kind":{"enum":["person","system","record"]},"name":{"minLength":1,"type":"string"}},"required":["name","kind"],"type":"object"}},"required":["kind","target","value"],"type":"object"};
+const schema155 = {"$comment":"Resolver accepts this kind only for net documents, where it lowers to the net annotation actors: one {name, kind} entry per actor, in source order.","properties":{"kind":{"const":"actor.declare"},"target":{"$ref":"#/$defs/netDocumentTarget"},"value":{"additionalProperties":false,"properties":{"kind":{"enum":["person","system","record"]},"name":{"minLength":1,"type":"string"}},"required":["name","kind"],"type":"object"}},"required":["kind","target","value"],"type":"object"};
 
-function validate224(data, {instancePath="", parentData, parentDataProperty, rootData=data, dynamicAnchors={}}={}){
+function validate230(data, {instancePath="", parentData, parentDataProperty, rootData=data, dynamicAnchors={}}={}){
 let vErrors = null;
 let errors = 0;
-const evaluated0 = validate224.evaluated;
+const evaluated0 = validate230.evaluated;
 if(evaluated0.dynamicProps){
 evaluated0.props = undefined;
 }
@@ -10713,7 +10977,7 @@ errors++;
 if(data4.kind !== undefined){
 let data5 = data4.kind;
 if(!(((data5 === "person") || (data5 === "system")) || (data5 === "record"))){
-const err13 = {instancePath:instancePath+"/value/kind",schemaPath:"#/properties/value/properties/kind/enum",keyword:"enum",params:{allowedValues: schema152.properties.value.properties.kind.enum},message:"must be equal to one of the allowed values"};
+const err13 = {instancePath:instancePath+"/value/kind",schemaPath:"#/properties/value/properties/kind/enum",keyword:"enum",params:{allowedValues: schema155.properties.value.properties.kind.enum},message:"must be equal to one of the allowed values"};
 if(vErrors === null){
 vErrors = [err13];
 }
@@ -10771,17 +11035,17 @@ vErrors.push(err17);
 }
 errors++;
 }
-validate224.errors = vErrors;
+validate230.errors = vErrors;
 return errors === 0;
 }
-validate224.evaluated = {"props":{"kind":true,"target":true,"value":true},"dynamicProps":false,"dynamicItems":false};
+validate230.evaluated = {"props":{"kind":true,"target":true,"value":true},"dynamicProps":false,"dynamicItems":false};
 
-const schema154 = {"$comment":"Resolver accepts this kind only for composition documents and resolves ref relative to the containing source.","properties":{"kind":{"const":"composition.use"},"target":{"$ref":"#/$defs/documentTarget"},"value":{"additionalProperties":false,"properties":{"alias":{"$ref":"#/$defs/name"},"ref":{"minLength":1,"type":"string"}},"required":["ref","alias"],"type":"object"}},"required":["kind","target","value"],"type":"object"};
+const schema157 = {"$comment":"Resolver accepts this kind only for composition documents and resolves ref relative to the containing source.","properties":{"kind":{"const":"composition.use"},"target":{"$ref":"#/$defs/documentTarget"},"value":{"additionalProperties":false,"properties":{"alias":{"$ref":"#/$defs/name"},"ref":{"minLength":1,"type":"string"}},"required":["ref","alias"],"type":"object"}},"required":["kind","target","value"],"type":"object"};
 
-function validate226(data, {instancePath="", parentData, parentDataProperty, rootData=data, dynamicAnchors={}}={}){
+function validate232(data, {instancePath="", parentData, parentDataProperty, rootData=data, dynamicAnchors={}}={}){
 let vErrors = null;
 let errors = 0;
-const evaluated0 = validate226.evaluated;
+const evaluated0 = validate232.evaluated;
 if(evaluated0.dynamicProps){
 evaluated0.props = undefined;
 }
@@ -10988,18 +11252,18 @@ vErrors.push(err16);
 }
 errors++;
 }
-validate226.errors = vErrors;
+validate232.errors = vErrors;
 return errors === 0;
 }
-validate226.evaluated = {"props":{"kind":true,"target":true,"value":true},"dynamicProps":false,"dynamicItems":false};
+validate232.evaluated = {"props":{"kind":true,"target":true,"value":true},"dynamicProps":false,"dynamicItems":false};
 
-const schema157 = {"$comment":"Resolver accepts this kind only for composition documents and validates output-to-input direction and equal port colors.","properties":{"kind":{"const":"composition.wire"},"target":{"$ref":"#/$defs/documentTarget"},"value":{"additionalProperties":false,"properties":{"from":{"$ref":"#/$defs/wireEndpoint"},"to":{"$ref":"#/$defs/wireEndpoint"}},"required":["from","to"],"type":"object"}},"required":["kind","target","value"],"type":"object"};
-const schema159 = {"additionalProperties":false,"properties":{"alias":{"$ref":"#/$defs/name"},"place":{"$ref":"#/$defs/name"},"span":{"$comment":"The exact half-open span of the authored alias-dot-place endpoint.","$ref":"#/$defs/span"}},"required":["alias","place","span"],"type":"object"};
+const schema160 = {"$comment":"Resolver accepts this kind only for composition documents and validates output-to-input direction and equal port colors.","properties":{"kind":{"const":"composition.wire"},"target":{"$ref":"#/$defs/documentTarget"},"value":{"additionalProperties":false,"properties":{"from":{"$ref":"#/$defs/wireEndpoint"},"to":{"$ref":"#/$defs/wireEndpoint"}},"required":["from","to"],"type":"object"}},"required":["kind","target","value"],"type":"object"};
+const schema162 = {"additionalProperties":false,"properties":{"alias":{"$ref":"#/$defs/name"},"place":{"$ref":"#/$defs/name"},"span":{"$comment":"The exact half-open span of the authored alias-dot-place endpoint.","$ref":"#/$defs/span"}},"required":["alias","place","span"],"type":"object"};
 
-function validate229(data, {instancePath="", parentData, parentDataProperty, rootData=data, dynamicAnchors={}}={}){
+function validate235(data, {instancePath="", parentData, parentDataProperty, rootData=data, dynamicAnchors={}}={}){
 let vErrors = null;
 let errors = 0;
-const evaluated0 = validate229.evaluated;
+const evaluated0 = validate235.evaluated;
 if(evaluated0.dynamicProps){
 evaluated0.props = undefined;
 }
@@ -11116,16 +11380,16 @@ vErrors.push(err8);
 }
 errors++;
 }
-validate229.errors = vErrors;
+validate235.errors = vErrors;
 return errors === 0;
 }
-validate229.evaluated = {"props":true,"dynamicProps":false,"dynamicItems":false};
+validate235.evaluated = {"props":true,"dynamicProps":false,"dynamicItems":false};
 
 
-function validate228(data, {instancePath="", parentData, parentDataProperty, rootData=data, dynamicAnchors={}}={}){
+function validate234(data, {instancePath="", parentData, parentDataProperty, rootData=data, dynamicAnchors={}}={}){
 let vErrors = null;
 let errors = 0;
-const evaluated0 = validate228.evaluated;
+const evaluated0 = validate234.evaluated;
 if(evaluated0.dynamicProps){
 evaluated0.props = undefined;
 }
@@ -11260,14 +11524,14 @@ errors++;
 }
 }
 if(data3.from !== undefined){
-if(!(validate229(data3.from, {instancePath:instancePath+"/value/from",parentData:data3,parentDataProperty:"from",rootData,dynamicAnchors}))){
-vErrors = vErrors === null ? validate229.errors : vErrors.concat(validate229.errors);
+if(!(validate235(data3.from, {instancePath:instancePath+"/value/from",parentData:data3,parentDataProperty:"from",rootData,dynamicAnchors}))){
+vErrors = vErrors === null ? validate235.errors : vErrors.concat(validate235.errors);
 errors = vErrors.length;
 }
 }
 if(data3.to !== undefined){
-if(!(validate229(data3.to, {instancePath:instancePath+"/value/to",parentData:data3,parentDataProperty:"to",rootData,dynamicAnchors}))){
-vErrors = vErrors === null ? validate229.errors : vErrors.concat(validate229.errors);
+if(!(validate235(data3.to, {instancePath:instancePath+"/value/to",parentData:data3,parentDataProperty:"to",rootData,dynamicAnchors}))){
+vErrors = vErrors === null ? validate235.errors : vErrors.concat(validate235.errors);
 errors = vErrors.length;
 }
 }
@@ -11294,17 +11558,17 @@ vErrors.push(err12);
 }
 errors++;
 }
-validate228.errors = vErrors;
+validate234.errors = vErrors;
 return errors === 0;
 }
-validate228.evaluated = {"props":{"kind":true,"target":true,"value":true},"dynamicProps":false,"dynamicItems":false};
+validate234.evaluated = {"props":{"kind":true,"target":true,"value":true},"dynamicProps":false,"dynamicItems":false};
 
-const schema162 = {"$comment":"Resolver accepts this kind only for composition documents, where it lowers to the composition's final markings; every alias must be declared by a use fact. One contribution per final fact; each marking lists places that must all hold a token.","properties":{"kind":{"const":"composition.final"},"target":{"$ref":"#/$defs/documentTarget"},"value":{"additionalProperties":false,"properties":{"markings":{"items":{"items":{"$ref":"#/$defs/wireEndpoint"},"minItems":1,"type":"array"},"minItems":1,"type":"array"}},"required":["markings"],"type":"object"}},"required":["kind","target","value"],"type":"object"};
+const schema165 = {"$comment":"Resolver accepts this kind only for composition documents, where it lowers to the composition's final markings; every alias must be declared by a use fact. One contribution per final fact; each marking lists places that must all hold a token.","properties":{"kind":{"const":"composition.final"},"target":{"$ref":"#/$defs/documentTarget"},"value":{"additionalProperties":false,"properties":{"markings":{"items":{"items":{"$ref":"#/$defs/wireEndpoint"},"minItems":1,"type":"array"},"minItems":1,"type":"array"}},"required":["markings"],"type":"object"}},"required":["kind","target","value"],"type":"object"};
 
-function validate234(data, {instancePath="", parentData, parentDataProperty, rootData=data, dynamicAnchors={}}={}){
+function validate240(data, {instancePath="", parentData, parentDataProperty, rootData=data, dynamicAnchors={}}={}){
 let vErrors = null;
 let errors = 0;
-const evaluated0 = validate234.evaluated;
+const evaluated0 = validate240.evaluated;
 if(evaluated0.dynamicProps){
 evaluated0.props = undefined;
 }
@@ -11457,8 +11721,8 @@ errors++;
 }
 const len1 = data5.length;
 for(let i1=0; i1<len1; i1++){
-if(!(validate229(data5[i1], {instancePath:instancePath+"/value/markings/" + i0+"/" + i1,parentData:data5,parentDataProperty:i1,rootData,dynamicAnchors}))){
-vErrors = vErrors === null ? validate229.errors : vErrors.concat(validate229.errors);
+if(!(validate235(data5[i1], {instancePath:instancePath+"/value/markings/" + i0+"/" + i1,parentData:data5,parentDataProperty:i1,rootData,dynamicAnchors}))){
+vErrors = vErrors === null ? validate235.errors : vErrors.concat(validate235.errors);
 errors = vErrors.length;
 }
 }
@@ -11509,17 +11773,17 @@ vErrors.push(err15);
 }
 errors++;
 }
-validate234.errors = vErrors;
+validate240.errors = vErrors;
 return errors === 0;
 }
-validate234.evaluated = {"props":{"kind":true,"target":true,"value":true},"dynamicProps":false,"dynamicItems":false};
+validate240.evaluated = {"props":{"kind":true,"target":true,"value":true},"dynamicProps":false,"dynamicItems":false};
 
-const schema164 = {"$comment":"Resolver accepts this kind only for composition documents; every alias must be declared by a use fact. A share has no direction: its places need not be ports.","properties":{"kind":{"const":"composition.share"},"target":{"$ref":"#/$defs/documentTarget"},"value":{"additionalProperties":false,"properties":{"places":{"items":{"$ref":"#/$defs/wireEndpoint"},"minItems":2,"type":"array"}},"required":["places"],"type":"object"}},"required":["kind","target","value"],"type":"object"};
+const schema167 = {"$comment":"Resolver accepts this kind only for composition documents; every alias must be declared by a use fact. A share has no direction: its places need not be ports.","properties":{"kind":{"const":"composition.share"},"target":{"$ref":"#/$defs/documentTarget"},"value":{"additionalProperties":false,"properties":{"places":{"items":{"$ref":"#/$defs/wireEndpoint"},"minItems":2,"type":"array"}},"required":["places"],"type":"object"}},"required":["kind","target","value"],"type":"object"};
 
-function validate237(data, {instancePath="", parentData, parentDataProperty, rootData=data, dynamicAnchors={}}={}){
+function validate243(data, {instancePath="", parentData, parentDataProperty, rootData=data, dynamicAnchors={}}={}){
 let vErrors = null;
 let errors = 0;
-const evaluated0 = validate237.evaluated;
+const evaluated0 = validate243.evaluated;
 if(evaluated0.dynamicProps){
 evaluated0.props = undefined;
 }
@@ -11658,8 +11922,8 @@ errors++;
 }
 const len0 = data4.length;
 for(let i0=0; i0<len0; i0++){
-if(!(validate229(data4[i0], {instancePath:instancePath+"/value/places/" + i0,parentData:data4,parentDataProperty:i0,rootData,dynamicAnchors}))){
-vErrors = vErrors === null ? validate229.errors : vErrors.concat(validate229.errors);
+if(!(validate235(data4[i0], {instancePath:instancePath+"/value/places/" + i0,parentData:data4,parentDataProperty:i0,rootData,dynamicAnchors}))){
+vErrors = vErrors === null ? validate235.errors : vErrors.concat(validate235.errors);
 errors = vErrors.length;
 }
 }
@@ -11698,17 +11962,17 @@ vErrors.push(err13);
 }
 errors++;
 }
-validate237.errors = vErrors;
+validate243.errors = vErrors;
 return errors === 0;
 }
-validate237.evaluated = {"props":{"kind":true,"target":true,"value":true},"dynamicProps":false,"dynamicItems":false};
+validate243.evaluated = {"props":{"kind":true,"target":true,"value":true},"dynamicProps":false,"dynamicItems":false};
 
-const schema166 = {"$comment":"Resolver accepts this kind only for composition documents; both aliases must be declared by use facts and differ.","properties":{"kind":{"const":"composition.refine"},"target":{"$ref":"#/$defs/documentTarget"},"value":{"additionalProperties":false,"properties":{"by":{"additionalProperties":false,"properties":{"alias":{"$ref":"#/$defs/name"},"span":{"$comment":"The exact half-open span of the authored refining alias.","$ref":"#/$defs/span"}},"required":["alias","span"],"type":"object"},"transition":{"additionalProperties":false,"properties":{"alias":{"$ref":"#/$defs/name"},"name":{"$ref":"#/$defs/name"},"span":{"$comment":"The exact half-open span of the authored alias-dot-transition endpoint.","$ref":"#/$defs/span"}},"required":["alias","name","span"],"type":"object"}},"required":["transition","by"],"type":"object"}},"required":["kind","target","value"],"type":"object"};
+const schema169 = {"$comment":"Resolver accepts this kind only for composition documents; both aliases must be declared by use facts and differ.","properties":{"kind":{"const":"composition.refine"},"target":{"$ref":"#/$defs/documentTarget"},"value":{"additionalProperties":false,"properties":{"by":{"additionalProperties":false,"properties":{"alias":{"$ref":"#/$defs/name"},"span":{"$comment":"The exact half-open span of the authored refining alias.","$ref":"#/$defs/span"}},"required":["alias","span"],"type":"object"},"transition":{"additionalProperties":false,"properties":{"alias":{"$ref":"#/$defs/name"},"name":{"$ref":"#/$defs/name"},"span":{"$comment":"The exact half-open span of the authored alias-dot-transition endpoint.","$ref":"#/$defs/span"}},"required":["alias","name","span"],"type":"object"}},"required":["transition","by"],"type":"object"}},"required":["kind","target","value"],"type":"object"};
 
-function validate240(data, {instancePath="", parentData, parentDataProperty, rootData=data, dynamicAnchors={}}={}){
+function validate246(data, {instancePath="", parentData, parentDataProperty, rootData=data, dynamicAnchors={}}={}){
 let vErrors = null;
 let errors = 0;
-const evaluated0 = validate240.evaluated;
+const evaluated0 = validate246.evaluated;
 if(evaluated0.dynamicProps){
 evaluated0.props = undefined;
 }
@@ -12056,17 +12320,17 @@ vErrors.push(err27);
 }
 errors++;
 }
-validate240.errors = vErrors;
+validate246.errors = vErrors;
 return errors === 0;
 }
-validate240.evaluated = {"props":{"kind":true,"target":true,"value":true},"dynamicProps":false,"dynamicItems":false};
+validate246.evaluated = {"props":{"kind":true,"target":true,"value":true},"dynamicProps":false,"dynamicItems":false};
 
-const schema171 = {"$comment":"Deterministically derived from the source document, source statement, and expanded statement part. It is not a runtime-generated UUID.","additionalProperties":false,"properties":{"part":{"minimum":0,"type":"integer"},"source":{"$ref":"#/$defs/relativeSourceId"},"statement":{"minimum":0,"type":"integer"}},"required":["source","statement","part"],"type":"object"};
+const schema174 = {"$comment":"Deterministically derived from the source document, source statement, and expanded statement part. It is not a runtime-generated UUID.","additionalProperties":false,"properties":{"part":{"minimum":0,"type":"integer"},"source":{"$ref":"#/$defs/relativeSourceId"},"statement":{"minimum":0,"type":"integer"}},"required":["source","statement","part"],"type":"object"};
 
-function validate244(data, {instancePath="", parentData, parentDataProperty, rootData=data, dynamicAnchors={}}={}){
+function validate250(data, {instancePath="", parentData, parentDataProperty, rootData=data, dynamicAnchors={}}={}){
 let vErrors = null;
 let errors = 0;
-const evaluated0 = validate244.evaluated;
+const evaluated0 = validate250.evaluated;
 if(evaluated0.dynamicProps){
 evaluated0.props = undefined;
 }
@@ -12212,17 +12476,17 @@ vErrors.push(err11);
 }
 errors++;
 }
-validate244.errors = vErrors;
+validate250.errors = vErrors;
 return errors === 0;
 }
-validate244.evaluated = {"props":true,"dynamicProps":false,"dynamicItems":false};
+validate250.evaluated = {"props":true,"dynamicProps":false,"dynamicItems":false};
 
-const schema173 = {"oneOf":[{"$ref":"#/$defs/documentTarget"},{"$ref":"#/$defs/netDocumentTarget"},{"$ref":"#/$defs/placeTarget"},{"$ref":"#/$defs/transitionTarget"},{"$ref":"#/$defs/arcHandleTarget"},{"$ref":"#/$defs/arcTarget"},{"$ref":"#/$defs/templateTarget"},{"$ref":"#/$defs/viewTarget"},{"$ref":"#/$defs/colorTarget"}]};
+const schema176 = {"oneOf":[{"$ref":"#/$defs/documentTarget"},{"$ref":"#/$defs/netDocumentTarget"},{"$ref":"#/$defs/placeTarget"},{"$ref":"#/$defs/transitionTarget"},{"$ref":"#/$defs/arcHandleTarget"},{"$ref":"#/$defs/arcTarget"},{"$ref":"#/$defs/templateTarget"},{"$ref":"#/$defs/viewTarget"},{"$ref":"#/$defs/colorTarget"}]};
 
-function validate247(data, {instancePath="", parentData, parentDataProperty, rootData=data, dynamicAnchors={}}={}){
+function validate253(data, {instancePath="", parentData, parentDataProperty, rootData=data, dynamicAnchors={}}={}){
 let vErrors = null;
 let errors = 0;
-const evaluated0 = validate247.evaluated;
+const evaluated0 = validate253.evaluated;
 if(evaluated0.dynamicProps){
 evaluated0.props = undefined;
 }
@@ -12476,8 +12740,8 @@ props0 = true;
 }
 }
 const _errs19 = errors;
-if(!(validate207(data, {instancePath,parentData,parentDataProperty,rootData,dynamicAnchors}))){
-vErrors = vErrors === null ? validate207.errors : vErrors.concat(validate207.errors);
+if(!(validate210(data, {instancePath,parentData,parentDataProperty,rootData,dynamicAnchors}))){
+vErrors = vErrors === null ? validate210.errors : vErrors.concat(validate210.errors);
 errors = vErrors.length;
 }
 var _valid0 = _errs19 === errors;
@@ -12522,11 +12786,11 @@ vErrors = null;
 }
 }
 }
-validate247.errors = vErrors;
+validate253.errors = vErrors;
 evaluated0.props = props0;
 return errors === 0;
 }
-validate247.evaluated = {"dynamicProps":true,"dynamicItems":false};
+validate253.evaluated = {"dynamicProps":true,"dynamicItems":false};
 
 
 function validate21(data, {instancePath="", parentData, parentDataProperty, rootData=data, dynamicAnchors={}}={}){
@@ -13250,8 +13514,8 @@ props0.value = true;
 }
 }
 const _errs37 = errors;
-if(!(validate199(data, {instancePath,parentData,parentDataProperty,rootData,dynamicAnchors}))){
-vErrors = vErrors === null ? validate199.errors : vErrors.concat(validate199.errors);
+if(!(validate195(data, {instancePath,parentData,parentDataProperty,rootData,dynamicAnchors}))){
+vErrors = vErrors === null ? validate195.errors : vErrors.concat(validate195.errors);
 errors = vErrors.length;
 }
 var _valid0 = _errs37 === errors;
@@ -13292,8 +13556,8 @@ props0.value = true;
 }
 }
 const _errs39 = errors;
-if(!(validate206(data, {instancePath,parentData,parentDataProperty,rootData,dynamicAnchors}))){
-vErrors = vErrors === null ? validate206.errors : vErrors.concat(validate206.errors);
+if(!(validate205(data, {instancePath,parentData,parentDataProperty,rootData,dynamicAnchors}))){
+vErrors = vErrors === null ? validate205.errors : vErrors.concat(validate205.errors);
 errors = vErrors.length;
 }
 var _valid0 = _errs39 === errors;
@@ -13313,8 +13577,8 @@ props0.value = true;
 }
 }
 const _errs40 = errors;
-if(!(validate210(data, {instancePath,parentData,parentDataProperty,rootData,dynamicAnchors}))){
-vErrors = vErrors === null ? validate210.errors : vErrors.concat(validate210.errors);
+if(!(validate209(data, {instancePath,parentData,parentDataProperty,rootData,dynamicAnchors}))){
+vErrors = vErrors === null ? validate209.errors : vErrors.concat(validate209.errors);
 errors = vErrors.length;
 }
 var _valid0 = _errs40 === errors;
@@ -13418,8 +13682,8 @@ props0.value = true;
 }
 }
 const _errs45 = errors;
-if(!(validate224(data, {instancePath,parentData,parentDataProperty,rootData,dynamicAnchors}))){
-vErrors = vErrors === null ? validate224.errors : vErrors.concat(validate224.errors);
+if(!(validate225(data, {instancePath,parentData,parentDataProperty,rootData,dynamicAnchors}))){
+vErrors = vErrors === null ? validate225.errors : vErrors.concat(validate225.errors);
 errors = vErrors.length;
 }
 var _valid0 = _errs45 === errors;
@@ -13439,8 +13703,8 @@ props0.value = true;
 }
 }
 const _errs46 = errors;
-if(!(validate226(data, {instancePath,parentData,parentDataProperty,rootData,dynamicAnchors}))){
-vErrors = vErrors === null ? validate226.errors : vErrors.concat(validate226.errors);
+if(!(validate228(data, {instancePath,parentData,parentDataProperty,rootData,dynamicAnchors}))){
+vErrors = vErrors === null ? validate228.errors : vErrors.concat(validate228.errors);
 errors = vErrors.length;
 }
 var _valid0 = _errs46 === errors;
@@ -13460,8 +13724,8 @@ props0.value = true;
 }
 }
 const _errs47 = errors;
-if(!(validate228(data, {instancePath,parentData,parentDataProperty,rootData,dynamicAnchors}))){
-vErrors = vErrors === null ? validate228.errors : vErrors.concat(validate228.errors);
+if(!(validate230(data, {instancePath,parentData,parentDataProperty,rootData,dynamicAnchors}))){
+vErrors = vErrors === null ? validate230.errors : vErrors.concat(validate230.errors);
 errors = vErrors.length;
 }
 var _valid0 = _errs47 === errors;
@@ -13481,8 +13745,8 @@ props0.value = true;
 }
 }
 const _errs48 = errors;
-if(!(validate234(data, {instancePath,parentData,parentDataProperty,rootData,dynamicAnchors}))){
-vErrors = vErrors === null ? validate234.errors : vErrors.concat(validate234.errors);
+if(!(validate232(data, {instancePath,parentData,parentDataProperty,rootData,dynamicAnchors}))){
+vErrors = vErrors === null ? validate232.errors : vErrors.concat(validate232.errors);
 errors = vErrors.length;
 }
 var _valid0 = _errs48 === errors;
@@ -13502,8 +13766,8 @@ props0.value = true;
 }
 }
 const _errs49 = errors;
-if(!(validate237(data, {instancePath,parentData,parentDataProperty,rootData,dynamicAnchors}))){
-vErrors = vErrors === null ? validate237.errors : vErrors.concat(validate237.errors);
+if(!(validate234(data, {instancePath,parentData,parentDataProperty,rootData,dynamicAnchors}))){
+vErrors = vErrors === null ? validate234.errors : vErrors.concat(validate234.errors);
 errors = vErrors.length;
 }
 var _valid0 = _errs49 === errors;
@@ -13541,6 +13805,50 @@ props0 = props0 || {};
 props0.kind = true;
 props0.target = true;
 props0.value = true;
+}
+}
+const _errs51 = errors;
+if(!(validate243(data, {instancePath,parentData,parentDataProperty,rootData,dynamicAnchors}))){
+vErrors = vErrors === null ? validate243.errors : vErrors.concat(validate243.errors);
+errors = vErrors.length;
+}
+var _valid0 = _errs51 === errors;
+if(_valid0 && valid0){
+valid0 = false;
+passing0 = [passing0, 48];
+}
+else {
+if(_valid0){
+valid0 = true;
+passing0 = 48;
+if(props0 !== true){
+props0 = props0 || {};
+props0.kind = true;
+props0.target = true;
+props0.value = true;
+}
+}
+const _errs52 = errors;
+if(!(validate246(data, {instancePath,parentData,parentDataProperty,rootData,dynamicAnchors}))){
+vErrors = vErrors === null ? validate246.errors : vErrors.concat(validate246.errors);
+errors = vErrors.length;
+}
+var _valid0 = _errs52 === errors;
+if(_valid0 && valid0){
+valid0 = false;
+passing0 = [passing0, 49];
+}
+else {
+if(_valid0){
+valid0 = true;
+passing0 = 49;
+if(props0 !== true){
+props0 = props0 || {};
+props0.kind = true;
+props0.target = true;
+props0.value = true;
+}
+}
 }
 }
 }
@@ -13685,8 +13993,8 @@ errors++;
 }
 }
 if(data.id !== undefined){
-if(!(validate244(data.id, {instancePath:instancePath+"/id",parentData:data,parentDataProperty:"id",rootData,dynamicAnchors}))){
-vErrors = vErrors === null ? validate244.errors : vErrors.concat(validate244.errors);
+if(!(validate250(data.id, {instancePath:instancePath+"/id",parentData:data,parentDataProperty:"id",rootData,dynamicAnchors}))){
+vErrors = vErrors === null ? validate250.errors : vErrors.concat(validate250.errors);
 errors = vErrors.length;
 }
 }
@@ -13734,8 +14042,8 @@ errors = vErrors.length;
 }
 }
 if(data.target !== undefined){
-if(!(validate247(data.target, {instancePath:instancePath+"/target",parentData:data,parentDataProperty:"target",rootData,dynamicAnchors}))){
-vErrors = vErrors === null ? validate247.errors : vErrors.concat(validate247.errors);
+if(!(validate253(data.target, {instancePath:instancePath+"/target",parentData:data,parentDataProperty:"target",rootData,dynamicAnchors}))){
+vErrors = vErrors === null ? validate253.errors : vErrors.concat(validate253.errors);
 errors = vErrors.length;
 }
 }
@@ -13755,12 +14063,12 @@ return errors === 0;
 }
 validate21.evaluated = {"props":true,"dynamicProps":false,"dynamicItems":false};
 
-const schema176 = {"additionalProperties":false,"properties":{"id":{"$ref":"#/$defs/relativeSourceId"}},"required":["id"],"type":"object"};
+const schema179 = {"additionalProperties":false,"properties":{"id":{"$ref":"#/$defs/relativeSourceId"}},"required":["id"],"type":"object"};
 
-function validate257(data, {instancePath="", parentData, parentDataProperty, rootData=data, dynamicAnchors={}}={}){
+function validate263(data, {instancePath="", parentData, parentDataProperty, rootData=data, dynamicAnchors={}}={}){
 let vErrors = null;
 let errors = 0;
-const evaluated0 = validate257.evaluated;
+const evaluated0 = validate263.evaluated;
 if(evaluated0.dynamicProps){
 evaluated0.props = undefined;
 }
@@ -13836,10 +14144,10 @@ vErrors.push(err5);
 }
 errors++;
 }
-validate257.errors = vErrors;
+validate263.errors = vErrors;
 return errors === 0;
 }
-validate257.evaluated = {"props":true,"dynamicProps":false,"dynamicItems":false};
+validate263.evaluated = {"props":true,"dynamicProps":false,"dynamicItems":false};
 
 
 function validate20(data, {instancePath="", parentData, parentDataProperty, rootData=data, dynamicAnchors={}}={}){
@@ -13939,8 +14247,8 @@ errors++;
 }
 }
 if(data.document !== undefined){
-if(!(validate257(data.document, {instancePath:instancePath+"/document",parentData:data,parentDataProperty:"document",rootData,dynamicAnchors}))){
-vErrors = vErrors === null ? validate257.errors : vErrors.concat(validate257.errors);
+if(!(validate263(data.document, {instancePath:instancePath+"/document",parentData:data,parentDataProperty:"document",rootData,dynamicAnchors}))){
+vErrors = vErrors === null ? validate263.errors : vErrors.concat(validate263.errors);
 errors = vErrors.length;
 }
 }

@@ -43,6 +43,7 @@ from velocitron_viz import (
     net_render_model,
     net_to_dot,
     read_decorations,
+    read_fusion_modes,
     view_setting,
 )
 
@@ -361,8 +362,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         "--no-fusion",
         action="store_true",
         help=(
-            "Render fusion-annotated places (annotations.fusion) as a single "
-            "node instead of per-transition local instances."
+            "Deprecated. Render every fusion-annotated place as one ordinary "
+            "node instead of per-transition copies. Still wins over "
+            "`decorate (P) single` and `view V fusion (P) single`."
         ),
     )
     view_options = parser.add_mutually_exclusive_group()
@@ -392,6 +394,12 @@ def main(argv: Sequence[str] | None = None) -> int:
         quiet_colors=frozenset(args.quiet_color),
     )
     render_fusion = not args.no_fusion
+    if args.no_fusion:
+        sys.stderr.write(
+            "velocitron-viz: warning: --no-fusion is deprecated; "
+            "draw one fusion place as a single node with `decorate (P) single`, "
+            "or in one view with `view V fusion (P) single`\n"
+        )
 
     has_marking_selector = args.marking is not None or args.marking_json is not None
     if args.legend:
@@ -446,6 +454,11 @@ def main(argv: Sequence[str] | None = None) -> int:
                             )
                         style = replace(style, detail=view_detail)
                 decorations = read_decorations(raw_document)
+                fusion_modes = (
+                    read_fusion_modes(raw_document, view_name)
+                    if view_name is not None
+                    else {}
+                )
                 style = replace(
                     style,
                     quiet_colors=style.quiet_colors | decorations.quiet_colors,
@@ -459,6 +472,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                     style=style,
                     render_fusion=render_fusion,
                     decorations=decorations,
+                    fusion_modes=fusion_modes,
                 )
                 if view_name is not None:
                     dot = apply_view(model, raw_document, view_name)
@@ -523,5 +537,3 @@ def main(argv: Sequence[str] | None = None) -> int:
         )
         return 1
     return 0
-
-

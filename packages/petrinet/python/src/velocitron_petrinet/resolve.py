@@ -337,11 +337,13 @@ _INVALID_CONTRIBUTION_MESSAGES: Final[Mapping[str, str]] = {
     "view.route": "invalid view route contribution",
     "view.splines": "invalid view splines contribution",
     "view.detail": "invalid view detail contribution",
+    "view.fusion": "invalid view fusion contribution",
     "decoration.highlight": "invalid highlight decoration contribution",
     "decoration.note": "invalid note decoration contribution",
     "decoration.summary": "invalid summary decoration contribution",
     "decoration.quiet": "invalid quiet decoration contribution",
     "decoration.beside": "invalid beside decoration contribution",
+    "decoration.single": "invalid single decoration contribution",
     "decoration.show": "invalid show decoration contribution",
     "document.extensions": "invalid document extensions contribution",
     "domain.values": "invalid domain contribution",
@@ -1336,6 +1338,7 @@ def resolve_contribution_ir(
     relative_bases: list[tuple[str, str, str, Mapping[str, Any]]] = []
     routes: dict[tuple[str, str], tuple[list[dict[str, Any]], Mapping[str, Any]]] = {}
     view_styles: dict[tuple[str, str], tuple[str, Mapping[str, Any]]] = {}
+    view_fusions: dict[tuple[str, str], tuple[str, Mapping[str, Any]]] = {}
     decorations: dict[str, dict[str, tuple[Any, Mapping[str, Any]]]] = {}
     extensions: tuple[dict[str, Any], Mapping[str, Any]] | None = None
     domains: dict[str, tuple[list[Any], Mapping[str, Any]]] = {}
@@ -2430,12 +2433,47 @@ def resolve_contribution_ir(
                     ((f"first {member} value was declared here", existing_style[1]),),
                 )
             view_styles.setdefault((view_name, member), (style_value, span))
+        elif kind == "view.fusion":
+            view_name, place, mode = (
+                target.get("name"),
+                value.get("place"),
+                value.get("mode"),
+            )
+            if (
+                set(target) != {"type", "name"}
+                or target.get("type") != "view"
+                or not isinstance(view_name, str)
+                or not view_name
+                or set(value) != {"place", "mode"}
+                or not isinstance(place, str)
+                or not place
+                or mode not in ("single", "copies")
+            ):
+                raise _resolution_error(
+                    "PN200", "invalid view fusion contribution", span
+                )
+            existing_fusion = view_fusions.get((view_name, place))
+            if existing_fusion is not None and existing_fusion[0] != mode:
+                raise _resolution_error(
+                    "PN202",
+                    f"conflicting fusion facts for place ({place}) in view {view_name!r}",
+                    span,
+                    "remove one declaration or make both values identical",
+                    (
+                        (
+                            "first fusion value was declared here",
+                            existing_fusion[1],
+                        ),
+                    ),
+                )
+            view_fusions.setdefault((view_name, place), (mode, span))
         elif kind in (
             "decoration.highlight",
             "decoration.note",
             "decoration.summary",
             "decoration.quiet",
             "decoration.beside",
+            "decoration.single",
             "decoration.show",
         ):
             member = kind.removeprefix("decoration.")
@@ -2444,7 +2482,7 @@ def resolve_contribution_ir(
                 {"color"}
                 if member in ("quiet", "show")
                 else {"place"}
-                if member == "beside"
+                if member in ("beside", "single")
                 else {"transition", "arcHandle"}
                 if member == "summary"
                 else {"place", "transition", "arcHandle"}
@@ -2462,6 +2500,9 @@ def resolve_contribution_ir(
                     and ("share" not in value or value.get("share") is False)
                 )
                 decoration_value = dict(value)
+            elif member == "single":
+                valid_value = not value
+                decoration_value = True
             elif member == "quiet":
                 valid_value = not value
                 decoration_value = True
@@ -3229,14 +3270,81 @@ def resolve_contribution_ir(
                 f"declare the {noun} before decorating it",
             )
         fusion = annotations.get(("place", subject_name), {}).get("fusion")
-        if "beside" in facts and (fusion is None or fusion[0] is not True):
+        fusion_true = fusion is not None and fusion[0] is True
+        missing_fusion = [
+            member
+            for member in ("beside", "single")
+            if member in facts and not fusion_true
+        ]
+        if missing_fusion:
+            member = min(
+                missing_fusion,
+                key=lambda item: facts[item][1]["start"]["byteOffset"],
+            )
+            if member == "beside":
+                message = (
+                    f"beside decoration needs a fusion place; ({subject_name}) is "
+                    "drawn once, so it has no local copies to place"
+                )
+                help_text = (
+                    f"annotate it with `({subject_name}) annotation fusion true`, "
+                    "or remove the beside decoration"
+                )
+            else:
+                message = (
+                    f"single decoration needs a fusion place; ({subject_name}) is "
+                    "drawn once, so there is no fused drawing to collapse"
+                )
+                help_text = (
+                    f"annotate it with `({subject_name}) annotation fusion true`, "
+                    "or remove the single decoration"
+                )
             raise _resolution_error(
                 "PN202",
-                f"beside decoration needs a fusion place; ({subject_name}) is "
-                "drawn once, so it has no local copies to place",
-                facts["beside"][1],
-                f"annotate it with `({subject_name}) annotation fusion true`, "
-                "or remove the beside decoration",
+                message,
+                facts[member][1],
+                help_text,
+            )
+        if "single" in facts and "beside" in facts:
+            single_span = facts["single"][1]
+            beside_span = facts["beside"][1]
+            if single_span["start"]["byteOffset"] <= beside_span["start"]["byteOffset"]:
+                earlier, earlier_span, later_span = (
+                    "single",
+                    single_span,
+                    beside_span,
+                )
+            else:
+                earlier, earlier_span, later_span = (
+                    "beside",
+                    beside_span,
+                    single_span,
+                )
+            raise _resolution_error(
+                "PN202",
+                f"conflicting single and beside decorations for ({subject_name})",
+                later_span,
+                "a single node has no copies to place; remove one declaration",
+                ((f"first {earlier} decoration was declared here", earlier_span),),
+            )
+    for (view_name, place), (_, fact_span) in view_fusions.items():
+        if place not in accepts:
+            raise _resolution_error(
+                "PN202",
+                f"view {view_name!r} fusion fact references unknown place "
+                f"{place!r}; presentation facts cannot declare semantic objects",
+                fact_span,
+                "declare the place in topology before choosing how to draw it",
+            )
+        fusion = annotations.get(("place", place), {}).get("fusion")
+        if fusion is None or fusion[0] is not True:
+            raise _resolution_error(
+                "PN202",
+                f"view {view_name!r} fusion fact needs a fusion place; "
+                f"({place}) is not annotated fusion true",
+                fact_span,
+                f"annotate it with `({place}) annotation fusion true`, "
+                "or remove the fusion fact",
             )
     for key, (_, fact_span) in domains.items():
         color = key.split(".", 1)[0]
@@ -3407,6 +3515,7 @@ def resolve_contribution_ir(
         or positions
         or routes
         or view_styles
+        or view_fusions
         or decorations
         or extensions is not None
     ):
@@ -3480,6 +3589,10 @@ def resolve_contribution_ir(
     for (view_name, member), (style_value, _) in view_styles.items():
         view = views.setdefault(view_name, {"positions": {}, "routes": {}})
         view[member] = style_value
+    for (view_name, place), (mode, _) in view_fusions.items():
+        view = views.setdefault(view_name, {"positions": {}, "routes": {}})
+        fusion_facts = view.setdefault("fusion", {})
+        fusion_facts[f"place:{place}"] = mode
     if (
         resolved_named_markings
         or views
