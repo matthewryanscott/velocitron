@@ -1,6 +1,6 @@
 # A view can position one fusion copy
 
-**Status:** Accepted (2026-11-25). Builds on ADR 0067.
+**Status:** Accepted (2026-11-25). Builds on ADR 0067. Drawing is amended by ADR 0072.
 
 ADR 0067 places each `beside` copy next to its transition when a view pins
 that transition. A whole-place `position (P)` does not move those copies.
@@ -59,9 +59,8 @@ copy. `place-position-overridden` warns. The entry still anchors
 - Python and TypeScript accept the same target, per ADR 0025 Decision 5.
   The grammar, the contribution schema, the resolver, and the formatter
   move together.
-- Drawing the copy at that point is a later change. Until then a renderer
-  still places `beside` copies by ADR 0067, and a view whose positions
-  include a copy key is not applied.
+- ADR 0072 draws the copy at that point. A copy entry wins over a
+  whole-place entry, which wins over the `beside` placement of ADR 0067.
 - Conformance group `28-place-copy-views` pins a valid view and the
   rejections: a non-fusion place, an unknown transition, a transition that
   does not use the place, a conflicting shared copy, and a bare place base

@@ -10,8 +10,9 @@ The net → view / render library, in two language packages:
 the render model's line index. Fusion places draw as one local copy per
 connected transition. Two neighbor transitions of one choice can share a
 copy when the place is `beside` and names no side. `beside unshared` keeps
-one copy per transition and pushes a choice's copies outward. A view that
-pins a transition places each unpositioned `beside` copy beside it.
+one copy per transition and pushes a choice's copies outward. A view places
+a copy from a `place:<P>@transition:<T>` entry, else from the whole-place
+entry, else beside its pinned transition.
 
 Nothing here is published to npm or PyPI. Consumers install a git
 subdirectory of `matthewryanscott/velocitron`. Each language

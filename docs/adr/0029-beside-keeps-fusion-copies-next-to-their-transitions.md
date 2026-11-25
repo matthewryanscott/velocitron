@@ -85,8 +85,9 @@ records the beside statements, and applying such a view removes them. Views
 with style facts only stay on `dot` and keep `beside`. The author of a
 positioned view sets the geometry by hand.
 
-*Amended by ADR 0067. A view that positions nodes places each unpositioned
-`beside` copy relative to its transition.*
+*Amended by ADR 0067 and ADR 0072. A view that positions nodes places a
+`beside` copy relative to its transition when the view positions neither
+that copy nor its place.*
 
 ## Consequences
 

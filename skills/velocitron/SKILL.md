@@ -71,9 +71,11 @@ If the output shows `velocitron CLI NOT INSTALLED` (or `velocitron-viz CLI NOT I
    keeps one copy per transition instead, and pushes those copies outside
    the choice's row (`P A B P`). `beside left unshared` parses and warns:
    a fixed side already never shares. The sides
-   are for `tb`/`bt`; `lr`/`rl` put left below. A view that pins a
-   transition places each copy beside that transition. A position on the
-   place itself does not move those copies; it still anchors `relative`.
+   are for `tb`/`bt`; `lr`/`rl` put left below. A view places a copy from
+   its `(P)@[T]` position, else from a whole-place `(P)` position, else
+   beside a pinned transition, on the side that row chose. A whole-place
+   position still anchors `relative (P)`.
+   `relative (P)@[T]` uses the point where that copy is drawn.
    The render-inspect loop for authoring: render the DOT to an image, LOOK at
    it, then re-edit the source. Any DOT renderer composes —
    `velocitron-viz net.petrinet --view wired | dot -Tpng -o /tmp/net.png` with a

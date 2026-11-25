@@ -56,6 +56,11 @@ its own row, and a copy with no side on the lighter side, left on a tie.
 The copy's node id stays `place@transition`. A shared copy's
 `place@first+second` id is not used for an unshared place.
 
+That row is the only layout. ADR 0072 places each drawn copy from its
+`(P)@[T]` entry, else from the whole-place entry, else from the `beside`
+offset of this row (ADR 0067). The outward push is that offset. It is not
+a second way to place the copy.
+
 ## Decision 3: a per-copy side wins for its own copy
 
 `unshared` is the place-wide switch. A later fact may name one copy,

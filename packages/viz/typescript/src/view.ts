@@ -193,8 +193,32 @@ export function applyView(model: RenderModel, raw: unknown, viewName: string): s
   const routeByArc = validateRoutes(viewName, facts.routes, handles);
   const lines = model.dot.split("\n");
   if (lines.at(-1) === "") lines.pop();
-  const shadowed = new Set((model.besidePlacements ?? []).map((item) => item.line));
+  // Copy entry, then the whole place, then beside (ADR 0072).
+  const pinned = new Set<number>();
+  const copyPoints = new Map<number, readonly [number, number]>();
   for (const [subject, pointValue] of Object.entries(resolved)) {
+    const parsed = copyTarget(subject);
+    if (parsed === undefined) continue;
+    const lineIndex = model.copyLines.get(copyLineKey(parsed[0], parsed[1]));
+    if (lineIndex === undefined) {
+      throw new ViewApplicationError(
+        `view ${pyStr(viewName)} positions unknown subject ${pyStr(subject)}`,
+      );
+    }
+    const previous = copyPoints.get(lineIndex);
+    if (previous !== undefined && (previous[0] !== pointValue[0] || previous[1] !== pointValue[1])) {
+      throw new ViewApplicationError(
+        `view ${pyStr(viewName)} gives the shared copy of place ${pyStr(parsed[0])} two positions`,
+      );
+    }
+    copyPoints.set(lineIndex, pointValue);
+  }
+  for (const [lineIndex, pointValue] of copyPoints) {
+    paint(lines, lineIndex, `${pointValue[0]},${pointValue[1]}!`);
+    pinned.add(lineIndex);
+  }
+  for (const [subject, pointValue] of Object.entries(resolved)) {
+    if (copyTarget(subject) !== undefined) continue;
     validateSubject(subject, viewName);
     const lineIndexes = model.nodeLines[subject];
     if (lineIndexes === undefined || lineIndexes.length === 0) {
@@ -204,14 +228,9 @@ export function applyView(model: RenderModel, raw: unknown, viewName: string): s
     }
     const rendered = `${pointValue[0]},${pointValue[1]}!`;
     for (const lineIndex of lineIndexes) {
-      if (shadowed.has(lineIndex)) continue;
-      const line = lines[lineIndex];
-      if (line === undefined) {
-        throw new ViewApplicationError(
-          `view ${pyStr(viewName)} positions unknown subject ${pyStr(subject)}`,
-        );
-      }
-      lines[lineIndex] = posStatementLine(line, rendered);
+      if (pinned.has(lineIndex)) continue;
+      paint(lines, lineIndex, rendered);
+      pinned.add(lineIndex);
     }
   }
   for (const [arcIndexText, route] of routeByArc) {
@@ -251,9 +270,9 @@ export function applyView(model: RenderModel, raw: unknown, viewName: string): s
       ...graphAttrs,
     ];
     // Rank clusters are for `dot`. `neato` ignores them, and the invisible
-    // edges would stay as springs. The offsets place the copies whose
-    // transitions this view pins.
-    pinBeside(lines, model, resolved);
+    // edges would stay as springs. Beside places a copy the view did not
+    // position.
+    pinBeside(lines, model, resolved, pinned);
     for (const lineIndex of [...model.besideLines].sort((left, right) => right - left)) {
       lines.splice(lineIndex, 1);
     }
@@ -304,21 +323,42 @@ function pinBeside(
   lines: string[],
   model: RenderModel,
   resolved: Readonly<Record<string, readonly [number, number]>>,
+  pinned: Set<number>,
 ): void {
   for (const placement of model.besidePlacements ?? []) {
+    if (pinned.has(placement.line)) continue;
     const point = besidePoint(placement, resolved);
     if (point === undefined) continue;
-    const line = lines[placement.line];
-    if (line === undefined) {
-      throw new ViewApplicationError(
-        `render model statement line does not end a statement: ${pyStr("")}`,
-      );
-    }
-    lines[placement.line] = posStatementLine(
-      line,
-      `${formatCoord(point[0])},${formatCoord(point[1])}!`,
+    paint(lines, placement.line, `${formatCoord(point[0])},${formatCoord(point[1])}!`);
+    pinned.add(placement.line);
+  }
+}
+
+function paint(lines: string[], lineIndex: number, rendered: string): void {
+  const line = lines[lineIndex];
+  if (line === undefined) {
+    throw new ViewApplicationError(
+      `render model statement line does not end a statement: ${pyStr("")}`,
     );
   }
+  lines[lineIndex] = posStatementLine(line, rendered);
+}
+
+function copyLineKey(place: string, transition: string): string {
+  // Same key as `copyKey` in render.ts. Kept here so view does not import render.
+  return `${place}\0${transition}`;
+}
+
+function copyTarget(subject: string): readonly [string, string] | undefined {
+  const marker = "@transition:";
+  if (!subject.startsWith("place:") || !subject.includes(marker)) return undefined;
+  const body = subject.slice("place:".length);
+  const splitAt = body.indexOf(marker);
+  if (splitAt <= 0) return undefined;
+  const place = body.slice(0, splitAt);
+  const transition = body.slice(splitAt + marker.length);
+  if (!place || !transition) return undefined;
+  return [place, transition];
 }
 
 function besidePoint(
@@ -364,12 +404,13 @@ function point(value: unknown, context: string): readonly [number, number] {
 }
 
 function validateSubject(subject: string, viewName: string): void {
+  if (copyTarget(subject) !== undefined) return;
   const separator = subject.indexOf(":");
   const kind = separator === -1 ? subject : subject.slice(0, separator);
   const name = separator === -1 ? "" : subject.slice(separator + 1);
   if (!name || (kind !== "place" && kind !== "transition")) {
     throw new ViewApplicationError(
-      `view ${pyStr(viewName)} has invalid view subject ${pyStr(subject)} (expected 'place:<name>' or 'transition:<name>')`,
+      `view ${pyStr(viewName)} has invalid view subject ${pyStr(subject)} (expected 'place:<name>', 'transition:<name>', or 'place:<name>@transition:<name>')`,
     );
   }
 }

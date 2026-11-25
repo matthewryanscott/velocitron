@@ -344,7 +344,9 @@ that stay usable as names; `=` is a token only here.
 
 Actor facts say who does each step of the net, in business words
 ([ADR 0038](https://github.com/matthewryanscott/velocitron/blob/main/docs/adr/0038-sequence-diagrams-project-scenarios-onto-actors.md)).
-A play's sequence diagram draws one lifeline per actor.
+A play's sequence diagram draws one lifeline per actor, and a queue for
+each place a token crosses between actors
+([ADR 0073](https://github.com/matthewryanscott/velocitron/blob/main/docs/adr/0073-hand-off-places-are-sequence-lifelines.md)).
 
 ```text
 person Name
@@ -559,7 +561,9 @@ drawn copy of a fusion place at that transition (ADR 0068). The place must be an
 shared copy (ADR 0035: neighbor transitions, `beside` with no side) must carry
 the same position; equal positions are idempotent and different ones conflict.
 The stored key is `place:<place>@transition:<transition>`. The entry is
-stored on the view. A renderer does not yet place the copy from that entry.
+stored on the view. A renderer places that copy at the entry's resolved
+point (ADR 0072). An ADR 0035 shared copy is one node, so the one agreed
+entry places it.
 A `relative`
 position names two targets: the subject it positions and the base it offsets
 from; the delta is added to the base's rendered position. The base may be any
@@ -567,7 +571,8 @@ positionable target. Relative entries never resolve into the stored payload:
 they lower verbatim (positions stay `{"from", "delta"}` facts). The resolver
 checks shape and that each target names a declared place or transition. A bare
 `(Place)` base is that place entry's point, so the view must position the
-place. A `(Place)@[Transition]` base must itself be positioned in the view. A
+place. A `(Place)@[Transition]` base must itself be positioned in the view,
+and applying the view adds the delta to the point where that copy is drawn. A
 transition base is only checked as declared; applying the view rejects one
 that carries no position. Applying a view resolves relative entries at render
 time against the other positions in the same view — chains resolve in
@@ -600,14 +605,17 @@ transitions would have shared that copy stays in one row, and the copies are
 pushed outward: the first sibling's copy on the left, the last sibling's on
 the right, and a middle sibling on the side with fewer of its own copies so
 far, left on a tie. A run of two is the copy, the first transition, the
-second transition, the copy. `beside left unshared` and `beside right
+second transition, the copy. That row is the `beside` side a view uses.
+`beside left unshared` and `beside right
 unshared` parse. A fixed side already never shares, so `velocitron validate`
 warns `beside-unshared-redundant` and the copies stay on that side. When a
-view positions nodes, each copy is placed beside
-its transition, at a horizontal offset on the side `beside` chooses, when
-that transition is positioned (ADR 0067). The offset is computed from the
-label widths. A whole-place position does not move those copies; it still
-anchors a relative position. A transition or a
+view positions nodes, a copy is placed by the
+first of these that applies (ADR 0072). A `(P)@[T]` entry places that copy.
+A whole-place `(P)` entry places every copy of `P` that has no copy entry.
+`beside` places a copy only when neither entry does, at a horizontal offset
+from its transition on the side `beside` chooses, when that transition is
+positioned (ADR 0067). The offset is computed from the label widths. A
+whole-place entry still anchors `relative (P)`. A transition or a
 handle has no copies, so `beside` on
 one is rejected while lowering, and `beside` on a place that is not annotated
 `fusion true` is rejected. `decorate color Color quiet` asks a renderer to hide the type

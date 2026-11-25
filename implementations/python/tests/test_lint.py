@@ -19,7 +19,6 @@ from velocitron_cli import main
 from velocitron_analysis import (
     RULE_CONSUME_WITHOUT_PRODUCE,
     RULE_CORRELATE_FREE_NAME,
-    RULE_BESIDE_POSITION_SHADOWED,
     RULE_BESIDE_UNSHARED_REDUNDANT,
     RULE_FUSION_PLACE_POSITION,
     RULE_PREDICATE_NAMES_COLOR_OR_PLACE,
@@ -842,7 +841,7 @@ def test_validate_warns_when_a_view_positions_a_multi_copy_fusion_place(
     )
 
 
-def test_validate_warns_when_beside_shadows_a_place_position(
+def test_validate_warns_when_beside_still_stacks_a_place_position(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
     # given: the same lock, kept beside its transitions, and still positioned
@@ -864,12 +863,15 @@ def test_validate_warns_when_beside_shadows_a_place_position(
     result = main(["validate", str(source)])
     captured = capsys.readouterr()
 
-    # then: the warning says beside shadows the position
+    # then: beside does not keep the copies apart, and the warning points at
+    # the position fact
     assert result == 0
     assert captured.out == "net\n"
-    assert f"warning[{RULE_BESIDE_POSITION_SHADOWED}]:" in captured.err
-    assert "shadows" in captured.err
-    assert f"warning[{RULE_FUSION_PLACE_POSITION}]" not in captured.err
+    assert captured.err == (
+        f"{source}:10:1: warning[{RULE_FUSION_PLACE_POSITION}]: "
+        "view 'lanes' positions fusion place 'lock', which draws 2 copies; "
+        "a whole-place position stacks every copy on one point\n"
+    )
 
 
 def test_validate_warns_when_beside_unshared_names_a_side(
