@@ -17,6 +17,7 @@ from __future__ import annotations
 from .canonical import render_canonical_json
 from .render import (
     DETAIL_LEVELS,
+    BesidePlacement,
     Detail,
     FusionLayout,
     MarkingRow,
@@ -57,6 +58,7 @@ from .schema import (
     Wire,
 )
 from .view import (
+    BESIDE_GAP,
     DEFAULT_VIEW,
     Decoration,
     Decorations,
@@ -69,9 +71,11 @@ from .view import (
 )
 
 __all__ = [
+    "BESIDE_GAP",
     "DEFAULT_VIEW",
     "DETAIL_LEVELS",
     "Arc",
+    "BesidePlacement",
     "Composition",
     "ConsumePattern",
     "Decoration",

@@ -9,7 +9,8 @@ The net → view / render library, in two language packages:
 `apply_view` / `applyView` pins an authored view onto that drawing through
 the render model's line index. Fusion places draw as one local copy per
 connected transition. Two neighbor transitions of one choice can share a
-copy when the place is `beside` and names no side.
+copy when the place is `beside` and names no side. A view that pins a
+transition places each unpositioned `beside` copy beside it.
 
 Nothing here is published to npm or PyPI. Consumers install a git
 subdirectory of `matthewryanscott/velocitron`. Each language

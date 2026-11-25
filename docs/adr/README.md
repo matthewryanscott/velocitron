@@ -65,5 +65,6 @@ current normative contracts live in `packages/spec/`.
 - [0064 — A failed output keeps its exception in-process](0064-a-failed-output-keeps-its-exception-in-process.md)
 - [0065 — A copy into a side output does not keep environment tokens apart](0065-a-copy-into-a-side-output-does-not-keep-environment-tokens-apart.md)
 - [0066 — The C++ CEL backend is a compatibility and conformance reference](0066-the-cpp-cel-backend-is-a-compatibility-and-conformance-reference.md)
+- [0067 — A pinned view places `beside` copies next to their transitions](0067-a-pinned-view-places-beside-copies-next-to-their-transitions.md)
 
 Historical numbering gaps are retained rather than filled by reconstructed records. Titles are likewise historical: an Accepted record's title keeps the words it was written with (ADR 0038's `scenarios`, now `play`); later-accepted renames do not rewrite them — the body and the index track the current word, the title stays as accepted.

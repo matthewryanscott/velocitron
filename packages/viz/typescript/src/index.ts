@@ -27,6 +27,7 @@ export {
   siblingGroups,
 } from "./render.js";
 export type {
+  BesidePlacement,
   Detail,
   FusionLayout,
   MarkingRow,
@@ -47,6 +48,7 @@ export type {
   Transition,
 } from "./schema/types.js";
 export {
+  BESIDE_GAP,
   DEFAULT_VIEW,
   ViewApplicationError,
   applyView,

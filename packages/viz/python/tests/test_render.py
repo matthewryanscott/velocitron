@@ -20,6 +20,7 @@ from velocitron_viz import (
     Transition,
     ViewApplicationError,
     Wire,
+    BESIDE_GAP,
     apply_view,
     composition_to_dot,
     fusion_layout,
@@ -230,6 +231,217 @@ def test_neighbor_siblings_share_one_fusion_copy() -> None:
     }
     assert paired.rows == (("hold", "switch@hold+skip", "skip"),)
     assert three.rows == (("hold", "switch@hold+skip", "skip", "send", "switch@send"),)
+
+
+def _lanes(positions: dict[str, object]) -> dict[str, object]:
+    return {
+        "annotations": {
+            "petrinet.dsl/v1": {
+                "views": {"lanes": {"positions": positions, "routes": {}}},
+                "arcHandles": {},
+            }
+        }
+    }
+
+
+def _node(dot: str, name: str) -> str:
+    matches = [line for line in dot.splitlines() if line.startswith(f'    "{name}" [')]
+    assert len(matches) == 1, (name, matches)
+    return matches[0]
+
+
+def _lease_lock() -> Net:
+    # given: one fusion lock, used by two workers' acquire and release
+    arcs: list[Arc] = []
+    places = [Place("lock", ["permit"], annotations={"fusion": True})]
+    transitions: list[Transition] = []
+    for worker in ("a", "b"):
+        places.extend(
+            [
+                Place(f"ready_{worker}", ["job"]),
+                Place(f"held_{worker}", ["job"]),
+                Place(f"done_{worker}", ["job"]),
+            ]
+        )
+        transitions.extend(
+            [Transition(f"acquire_{worker}"), Transition(f"release_{worker}")]
+        )
+        arcs.extend(
+            [
+                Arc(
+                    from_place=f"ready_{worker}",
+                    to_transition=f"acquire_{worker}",
+                    consume=ConsumePattern("job", None, "consume"),
+                ),
+                Arc(
+                    from_place="lock",
+                    to_transition=f"acquire_{worker}",
+                    consume=ConsumePattern("permit", None, "consume"),
+                ),
+                Arc(
+                    from_transition=f"acquire_{worker}",
+                    to_place=f"held_{worker}",
+                    produce=ProduceTemplate("job", f"held_{worker}"),
+                ),
+                Arc(
+                    from_place=f"held_{worker}",
+                    to_transition=f"release_{worker}",
+                    consume=ConsumePattern("job", None, "consume"),
+                ),
+                Arc(
+                    from_transition=f"release_{worker}",
+                    to_place=f"done_{worker}",
+                    produce=ProduceTemplate("job", f"done_{worker}"),
+                ),
+                Arc(
+                    from_transition=f"release_{worker}",
+                    to_place="lock",
+                    produce=ProduceTemplate("permit", "lock"),
+                ),
+            ]
+        )
+    return Net(name="lease_lock", places=places, transitions=transitions, arcs=arcs)
+
+
+def test_a_pinned_view_places_each_lease_lock_copy_beside_its_transition() -> None:
+    # given: the lock is beside left, and the view pins the four transitions
+    net = _lease_lock()
+    decorations = Decorations(
+        nodes={"place:lock": Decoration(beside=True, beside_side="left")}
+    )
+    model = net_render_model(net, decorations=decorations)
+    gap = BESIDE_GAP
+    # when: the view is applied
+    dot = apply_view(
+        model,
+        _lanes(
+            {
+                "transition:acquire_a": {"x": 0, "y": 300},
+                "transition:release_a": {"x": 0, "y": 100},
+                "transition:acquire_b": {
+                    "from": "transition:acquire_a",
+                    "delta": {"x": 300, "y": 0},
+                },
+                "transition:release_b": {
+                    "from": "transition:release_a",
+                    "delta": {"x": 300, "y": 0},
+                },
+            }
+        ),
+        "lanes",
+    )
+    # then: each copy sits one gap to the left of its own transition
+    assert f'pos="-{gap},300!"' in _node(dot, "lock@acquire_a")
+    assert f'pos="-{gap},100!"' in _node(dot, "lock@release_a")
+    assert f'pos="{300 - gap},300!"' in _node(dot, "lock@acquire_b")
+    assert f'pos="{300 - gap},100!"' in _node(dot, "lock@release_b")
+    assert "layout=neato;" in dot
+    assert "cluster_beside" not in dot
+    assert "style=invis" not in dot
+
+
+def test_beside_copies_on_one_side_step_out_by_one_gap() -> None:
+    # given: two left copies at one transition, switch first in arc order
+    switch = Place("switch", ["job"], annotations={"fusion": True})
+    budget = Place("budget", ["job"], annotations={"fusion": True})
+    net = Net(
+        name="stacked",
+        places=[
+            Place("queued", ["job"]),
+            switch,
+            budget,
+        ],
+        transitions=[Transition("start")],
+        arcs=[
+            Arc(
+                from_place="queued",
+                to_transition="start",
+                consume=ConsumePattern("job", None, "consume"),
+            ),
+            Arc(
+                from_place="switch",
+                to_transition="start",
+                consume=ConsumePattern("job", None, "read"),
+            ),
+            Arc(
+                from_place="budget",
+                to_transition="start",
+                consume=ConsumePattern("job", None, "read"),
+            ),
+        ],
+    )
+    decorations = Decorations(
+        nodes={
+            "place:switch": Decoration(beside=True, beside_side="left"),
+            "place:budget": Decoration(beside=True, beside_side="left"),
+        }
+    )
+    # when: the view pins start
+    dot = apply_view(
+        net_render_model(net, decorations=decorations),
+        _lanes({"transition:start": {"x": 0, "y": 0}}),
+        "lanes",
+    )
+    # then: the first copy is nearest, and the second is one gap farther
+    assert f'pos="-{BESIDE_GAP},0!"' in _node(dot, "switch@start")
+    assert f'pos="-{2 * BESIDE_GAP},0!"' in _node(dot, "budget@start")
+
+
+def test_a_shared_beside_copy_sits_between_two_pinned_transitions() -> None:
+    # given: hold and skip share one beside copy
+    switch = Place("switch", ["job"], annotations={"fusion": True})
+    net = _choice(
+        [_read_switch("hold"), _read_switch("skip")], [switch], ["hold", "skip"]
+    )
+    decorations = Decorations(nodes={"place:switch": Decoration(beside=True)})
+    model = net_render_model(net, decorations=decorations)
+    # when: both transitions are pinned, and when only the left one is
+    both = apply_view(
+        model,
+        _lanes(
+            {
+                "transition:hold": {"x": 0, "y": 0},
+                "transition:skip": {"x": 300, "y": 0},
+            }
+        ),
+        "lanes",
+    )
+    one = apply_view(
+        model,
+        _lanes({"transition:hold": {"x": 0, "y": 0}}),
+        "lanes",
+    )
+    # then: both pins put the copy at the midpoint, and one pin puts it one gap right
+    assert 'pos="150,0!"' in _node(both, "switch@hold+skip")
+    assert f'pos="{BESIDE_GAP},0!"' in _node(one, "switch@hold+skip")
+
+
+def test_a_whole_place_position_still_stacks_every_fusion_copy() -> None:
+    # given: the lease lock, with a position on the place as well as a transition
+    net = _lease_lock()
+    decorations = Decorations(
+        nodes={"place:lock": Decoration(beside=True, beside_side="left")}
+    )
+    # when: the view is applied
+    dot = apply_view(
+        net_render_model(net, decorations=decorations),
+        _lanes(
+            {
+                "transition:acquire_a": {"x": 0, "y": 0},
+                "place:lock": {"x": 10, "y": 20},
+            }
+        ),
+        "lanes",
+    )
+    # then: every copy takes the place position
+    for name in (
+        "lock@acquire_a",
+        "lock@release_a",
+        "lock@acquire_b",
+        "lock@release_b",
+    ):
+        assert 'pos="10,20!"' in _node(dot, name)
+    assert f'pos="-{BESIDE_GAP},0!"' not in dot
 
 
 def test_a_view_pins_positions_without_parsing_dot_text() -> None:

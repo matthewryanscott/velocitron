@@ -78,12 +78,24 @@ export interface NetRenderOptions {
   readonly decorations?: Decorations;
 }
 
+export interface BesidePlacement {
+  readonly line: number;
+  readonly place: string;
+  readonly anchor: string;
+  readonly slots: number;
+  readonly also?: string;
+  readonly alsoSlots?: number;
+  readonly betweenIndex: number;
+  readonly betweenCount: number;
+}
+
 export interface RenderModel {
   readonly dot: string;
   readonly nodeLines: Readonly<Record<string, readonly number[]>>;
   readonly arcLines: readonly number[];
   readonly graphAttrLine: number;
   readonly besideLines: readonly number[];
+  readonly besidePlacements: readonly BesidePlacement[];
 }
 
 export interface FusionLayout {
@@ -140,6 +152,7 @@ export function netRenderModel(net: Net, options: NetRenderOptions = {}): Render
     arcLines: recorder.arcLines,
     graphAttrLine: header.length,
     besideLines: recorder.besideLines,
+    besidePlacements: recorder.besidePlacements,
   };
 }
 
@@ -283,6 +296,77 @@ export function fusionLayout(
   return {copies, rows};
 }
 
+export function besidePlacements(
+  layout: FusionLayout,
+  drawn: ReadonlyMap<string, {line: number; place: string}>,
+): BesidePlacement[] {
+  // Keep this in step with `_beside_placements` in the Python renderer.
+  const users = new Map<string, Set<string>>();
+  for (const [key, copy] of layout.copies) {
+    const transition = key.split("\0")[1];
+    if (transition === undefined) continue;
+    const found = users.get(copy);
+    if (found === undefined) users.set(copy, new Set([transition]));
+    else found.add(transition);
+  }
+  const placements: BesidePlacement[] = [];
+  const own = (node: string, anchor: string, slots: number): void => {
+    const copy = drawn.get(node);
+    if (copy === undefined) return;
+    placements.push({
+      line: copy.line,
+      place: `place:${copy.place}`,
+      anchor: `transition:${anchor}`,
+      slots,
+      betweenIndex: 0,
+      betweenCount: 1,
+    });
+  };
+  for (const row of layout.rows) {
+    const transAt = row.flatMap((node, index) => (drawn.has(node) ? [] : [index]));
+    const first = transAt[0];
+    const last = transAt[transAt.length - 1];
+    if (first === undefined || last === undefined) continue;
+    row.slice(0, first).reverse().forEach((node, index) => own(node, row[first]!, -(index + 1)));
+    row.slice(last + 1).forEach((node, index) => own(node, row[last]!, index + 1));
+    for (let pair = 0; pair < transAt.length - 1; pair += 1) {
+      const leftIndex = transAt[pair]!;
+      const rightIndex = transAt[pair + 1]!;
+      const leftName = row[leftIndex]!;
+      const rightName = row[rightIndex]!;
+      const ownRight: string[] = [];
+      const ownLeft: string[] = [];
+      const shared: string[] = [];
+      for (const node of row.slice(leftIndex + 1, rightIndex)) {
+        const used = users.get(node) ?? new Set<string>();
+        if (used.has(leftName) && used.has(rightName)) shared.push(node);
+        else if (used.has(rightName) && !used.has(leftName)) ownLeft.push(node);
+        else ownRight.push(node);
+      }
+      ownRight.forEach((node, index) => own(node, leftName, index + 1));
+      ownLeft
+        .slice()
+        .reverse()
+        .forEach((node, index) => own(node, rightName, -(index + 1)));
+      shared.forEach((node, index) => {
+        const copy = drawn.get(node);
+        if (copy === undefined) return;
+        placements.push({
+          line: copy.line,
+          place: `place:${copy.place}`,
+          anchor: `transition:${leftName}`,
+          slots: ownRight.length + index + 1,
+          also: `transition:${rightName}`,
+          alsoSlots: -(ownLeft.length + (shared.length - index)),
+          betweenIndex: index,
+          betweenCount: shared.length,
+        });
+      });
+    }
+  }
+  return placements;
+}
+
 export function fusionCopy(
   layout: FusionLayout,
   place: string,
@@ -348,6 +432,7 @@ class RenderIndex {
   readonly nodeLines = new Map<string, number[]>();
   readonly arcLines: number[] = [];
   readonly besideLines: number[] = [];
+  readonly besidePlacements: BesidePlacement[] = [];
 
   constructor(private readonly offset: number) {}
 
@@ -363,6 +448,10 @@ class RenderIndex {
 
   recordBeside(position: number): void {
     this.besideLines.push(this.offset + position);
+  }
+
+  recordBesidePlacement(placement: BesidePlacement): void {
+    this.besidePlacements.push({...placement, line: this.offset + placement.line});
   }
 }
 
@@ -408,17 +497,17 @@ function netBody(
   }
   lines.push("");
   const layout = fusionLayout(net, fusion, args.decorations);
+  const drawn = new Map<string, {line: number; place: string}>();
   if (fusion.size > 0) {
     const places = new Map(net.places.map((place) => [place.name, place]));
     const transitions = new Map(net.transitions.map((transition) => [transition.name, transition]));
-    const drawn = new Set<string>();
     for (const [key, copy] of layout.copies) {
       if (drawn.has(copy)) continue;
-      drawn.add(copy);
       const [placeName, transitionName] = key.split("\0");
       const place = places.get(placeName!);
       if (place === undefined || placeName === undefined || transitionName === undefined) continue;
       args.recorder?.recordNode(`place:${placeName}`, lines.length);
+      drawn.set(copy, {line: lines.length, place: placeName});
       const attrs = placeAttrs(place, tokensOf(place), {
         label: memberLabel(placeName, transitions.get(transitionName)),
         style: args.style,
@@ -428,6 +517,11 @@ function netBody(
       lines.push(`${indent}${quote(`${prefix}${copy}`)} [${attrs}];`);
     }
     lines.push("");
+  }
+  if (args.recorder !== undefined) {
+    for (const placement of besidePlacements(layout, drawn)) {
+      args.recorder.recordBesidePlacement(placement);
+    }
   }
   const transitionNames = new Set(net.transitions.map((transition) => transition.name));
   const besideCopies = new Set<string>();

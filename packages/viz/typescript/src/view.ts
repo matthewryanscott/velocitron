@@ -7,9 +7,12 @@
  * discover which line belongs to which place.
  */
 
-import type {RenderModel} from "./render.js";
+import type {BesidePlacement, RenderModel} from "./render.js";
 
 export const DEFAULT_VIEW = "default";
+// Points. Clears a short name plus one color line on both the transition
+// and the copy, in the coordinates `inputscale=72` reads (ADR 0067).
+export const BESIDE_GAP = 130;
 const VIEW_SPLINES = ["ortho", "spline", "curved", "polyline", "line"] as const;
 
 export class ViewApplicationError extends Error {
@@ -226,6 +229,10 @@ export function applyView(model: RenderModel, raw: unknown, viewName: string): s
       "    overlap=scale;",
       ...graphAttrs,
     ];
+    // Rank clusters are for `dot`. `neato` ignores them, and the invisible
+    // edges would stay as springs. The offsets place the copies whose
+    // transitions this view pins.
+    pinBeside(lines, model, resolved);
     for (const lineIndex of [...model.besideLines].sort((left, right) => right - left)) {
       lines.splice(lineIndex, 1);
     }
@@ -270,6 +277,52 @@ function validateRoutes(
     routeByArc.set(handleValue.index, {handle, points});
   }
   return routeByArc;
+}
+
+function pinBeside(
+  lines: string[],
+  model: RenderModel,
+  resolved: Readonly<Record<string, readonly [number, number]>>,
+): void {
+  for (const placement of model.besidePlacements ?? []) {
+    const point = besidePoint(placement, resolved);
+    if (point === undefined) continue;
+    const line = lines[placement.line];
+    if (line === undefined) {
+      throw new ViewApplicationError(
+        `render model statement line does not end a statement: ${pyStr("")}`,
+      );
+    }
+    lines[placement.line] = posStatementLine(
+      line,
+      `${formatCoord(point[0])},${formatCoord(point[1])}!`,
+    );
+  }
+}
+
+function besidePoint(
+  placement: BesidePlacement,
+  resolved: Readonly<Record<string, readonly [number, number]>>,
+): readonly [number, number] | undefined {
+  if (Object.prototype.hasOwnProperty.call(resolved, placement.place)) return undefined;
+  const anchor = resolved[placement.anchor];
+  const other = placement.also === undefined ? undefined : resolved[placement.also];
+  if (placement.also !== undefined && anchor !== undefined && other !== undefined) {
+    const fraction = (placement.betweenIndex + 1) / (placement.betweenCount + 1);
+    return [
+      anchor[0] + fraction * (other[0] - anchor[0]),
+      anchor[1] + fraction * (other[1] - anchor[1]),
+    ];
+  }
+  if (anchor !== undefined) return [anchor[0] + placement.slots * BESIDE_GAP, anchor[1]];
+  if (other !== undefined && placement.alsoSlots !== undefined) {
+    return [other[0] + placement.alsoSlots * BESIDE_GAP, other[1]];
+  }
+  return undefined;
+}
+
+function formatCoord(value: number): string {
+  return Number.isInteger(value) ? String(value) : String(value);
 }
 
 function posStatementLine(line: string, rendered: string): string {

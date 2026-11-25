@@ -25,11 +25,15 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Final, cast
 
 VIEW_SPLINES: Final[tuple[str, ...]] = ("ortho", "spline", "curved", "polyline", "line")
+# Points. Clears a short name plus one color line on both the transition
+# and the copy, in the coordinates ``inputscale=72`` reads (ADR 0067).
+BESIDE_GAP: Final[int] = 130
 
 if TYPE_CHECKING:
     from .render import RenderModel
 
 __all__ = [
+    "BESIDE_GAP",
     "DEFAULT_VIEW",
     "Decoration",
     "Decorations",
@@ -320,6 +324,47 @@ def _validate_routes(
     return route_by_arc
 
 
+def _format_coord(value: float | int) -> str:
+    """A coordinate the way both renderers spell an integral value."""
+    number = float(value)
+    if number.is_integer():
+        return str(int(number))
+    return str(number)
+
+
+def _pin_beside_copies(
+    lines: list[str],
+    model: "RenderModel",
+    resolved: Mapping[str, tuple[float | int, float | int]],
+) -> None:
+    """Pin each unpositioned ``beside`` copy next to its pinned transition.
+
+    A whole-place position already wrote the same point onto every copy, so
+    those copies are left as the author placed them. A shared copy whose
+    two transitions are both pinned sits on the segment between them.
+    """
+    for placement in model.beside_placements:
+        if placement.place in resolved:
+            continue
+        anchor = resolved.get(placement.anchor)
+        other = resolved.get(placement.also) if placement.also is not None else None
+        if placement.also is not None and anchor is not None and other is not None:
+            span = placement.between_count + 1
+            fraction = (placement.between_index + 1) / span
+            point = (
+                anchor[0] + fraction * (other[0] - anchor[0]),
+                anchor[1] + fraction * (other[1] - anchor[1]),
+            )
+        elif anchor is not None:
+            point = (anchor[0] + placement.slots * BESIDE_GAP, anchor[1])
+        elif other is not None and placement.also_slots is not None:
+            point = (other[0] + placement.also_slots * BESIDE_GAP, other[1])
+        else:
+            continue
+        rendered = f"{_format_coord(point[0])},{_format_coord(point[1])}!"
+        lines[placement.line] = _pos_statement_line(lines[placement.line], rendered)
+
+
 def _pos_statement_line(line: str, rendered: str) -> str:
     """Rewrite one statement line to carry a ``pos`` attribute."""
     if line.endswith("];"):
@@ -343,8 +388,10 @@ def apply_view(
     semantically (``model.graph_attr_line``) after any view is applied, or
     the view's own ``splines`` style. A
     view that positions any node also selects ``layout=neato`` with
-    ``inputscale=72`` and drops the ``beside`` statements, which only
-    ``dot`` reads.
+    ``inputscale=72``. The ``beside`` rank clusters are removed, because
+    ``neato`` ignores them. A ``beside`` copy whose transition is pinned,
+    and whose place the view does not position, is pinned beside that
+    transition (ADR 0067).
     """
     positions, routes = _view_facts(raw, view_name)
     resolved = resolve_positions(view_name, positions)
@@ -397,8 +444,10 @@ def apply_view(
             "    overlap=scale;",
             *graph_attrs,
         ]
-        # The beside statements are rank constraints, which neato ignores;
-        # only their invisible ordering edges would stay, as extra springs.
+        # Rank clusters are for ``dot``. ``neato`` ignores them, and the
+        # invisible edges would stay as springs. The offsets below place
+        # the copies whose transitions this view pins.
+        _pin_beside_copies(lines, model, resolved)
         for line_index in sorted(model.beside_lines, reverse=True):
             del lines[line_index]
     lines[model.graph_attr_line : model.graph_attr_line] = graph_attrs

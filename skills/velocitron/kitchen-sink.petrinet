@@ -207,8 +207,8 @@ view sketch detail structure
 // `--detail summary`; `quiet` hides a color's type label on consume/produce
 // arcs; `show` names the fields a color's marking rows show. An arc decoration needs a handle covering exactly one arc.
 // `beside` keeps each copy of a fusion place on its transition's rank, next
-// to it (`left`/`right`, or no side to balance them); a view with positions
-// ignores it.
+// to it (`left`/`right`, or no side to balance them). A view that pins a
+// transition places each copy it does not position beside that transition.
 decorate [form_shipment] highlight "R2"
 decorate (open_shipments) note "one open shipment per customer"
 decorate @no_dup_shipment highlight

@@ -19,6 +19,7 @@ from velocitron_cli import main
 from velocitron_analysis import (
     RULE_CONSUME_WITHOUT_PRODUCE,
     RULE_CORRELATE_FREE_NAME,
+    RULE_FUSION_PLACE_POSITION,
     RULE_PREDICATE_NAMES_COLOR_OR_PLACE,
     RULE_READ_ONLY_PRODUCER,
     LintFinding,
@@ -806,3 +807,34 @@ def test_validate_cli_silences_a_composition_nets_sink_marked_as_an_end(
     assert warned.startswith(f"{sender}:4:17: warning[{RULE_CONSUME_WITHOUT_PRODUCE}]")
     assert result == 0
     assert captured.err == ""
+
+
+def test_validate_warns_when_a_view_positions_a_multi_copy_fusion_place(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    # given: a fusion lock drawn once per transition, positioned as one place
+    source = tmp_path / "lock.petrinet"
+    source.write_text(
+        "net lock\n\n"
+        "(ready) -job-> [acquire]\n"
+        "(lock) -permit-> [acquire]\n"
+        "[acquire] -job-> (held)\n"
+        "(held) -job-> [release]\n"
+        "[release] -permit-> (lock)\n"
+        "(lock) annotation fusion true\n"
+        'view lanes position (lock) at {"x": 10, "y": 20}\n',
+        encoding="utf-8",
+    )
+
+    # when: validating
+    result = main(["validate", str(source)])
+    captured = capsys.readouterr()
+
+    # then: the net is valid, and the warning points at the position fact
+    assert result == 0
+    assert captured.out == "net\n"
+    assert captured.err == (
+        f"{source}:9:1: warning[{RULE_FUSION_PLACE_POSITION}]: "
+        "view 'lanes' positions fusion place 'lock', which draws 2 copies; "
+        "a whole-place position stacks every copy on one point\n"
+    )

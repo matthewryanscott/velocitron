@@ -521,9 +521,14 @@ class _NetSourceMap:
     arcs: dict[int, SourcePosition]  # by index in net.arcs
     predicates: dict[int, SourcePosition]  # the arc's `predicate` fact
     correlates: dict[int, SourcePosition]  # the arc's `correlate` fact
+    positions: dict[tuple[str, str], SourcePosition]  # (view, place)
 
     def position(self, finding: LintFinding) -> SourcePosition | None:
         """The source position of what ``finding`` flags, if known."""
+        if finding.view is not None and finding.place is not None:
+            found = self.positions.get((finding.view, finding.place))
+            if found is not None:
+                return found
         if finding.arc is None:
             return self.transitions.get(finding.transition)
         facts = {"predicate": self.predicates, "correlate": self.correlates}
@@ -583,6 +588,7 @@ def _net_source_map(text: str, source_name: str, net: Net) -> _NetSourceMap:
     )
     source_bytes = text.encode("utf-8")
     transitions: dict[str, SourcePosition] = {}
+    positions: dict[tuple[str, str], SourcePosition] = {}
     declarations: dict[_ArcKey, list[tuple[tuple[str, int, int], SourcePosition]]] = {}
     handles: dict[str, list[tuple[str, int, int]]] = {}
     facts: dict[str, dict[str, SourcePosition]] = {"predicate": {}, "correlate": {}}
@@ -593,6 +599,14 @@ def _net_source_map(text: str, source_name: str, net: Net) -> _NetSourceMap:
         span = cast(dict[str, Any], contribution["span"])
         if kind == "transition.declare":
             transitions.setdefault(target["name"], _position(span))
+        elif kind == "view.position":
+            subject_raw = value.get("subject")
+            view_name = target.get("name")
+            if isinstance(subject_raw, dict) and isinstance(view_name, str):
+                subject = cast("dict[str, Any]", subject_raw)
+                place_name = subject.get("name")
+                if subject.get("type") == "place" and isinstance(place_name, str):
+                    positions.setdefault((view_name, place_name), _position(span))
         elif kind == "arc.declare":
             source, destination = value["from"], value["to"]
             is_input = source["type"] == "place"
@@ -638,7 +652,7 @@ def _net_source_map(text: str, source_name: str, net: Net) -> _NetSourceMap:
             predicates[index] = fact_by_arc_id["predicate"][arc_id]
         if arc_id in fact_by_arc_id["correlate"]:
             correlates[index] = fact_by_arc_id["correlate"][arc_id]
-    return _NetSourceMap(transitions, arcs, predicates, correlates)
+    return _NetSourceMap(transitions, arcs, predicates, correlates, positions)
 
 
 def _lint_warnings(path: str, net: Net) -> list[str]:
