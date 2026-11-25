@@ -1,6 +1,7 @@
 # Neighbor siblings share one fusion copy
 
-**Status:** Accepted. Amended 2026-11-25 (the `share` flag, by ADR 0070).
+**Status:** Accepted. Amended 2026-11-25 (the `share` flag, by ADR 0070;
+the group's order, by ADR 0069).
 
 A fusion place renders as one local copy per transition that uses it, and
 `beside` keeps each copy on its transition's rank (ADR 0029). A choice often
@@ -22,8 +23,9 @@ the net:
   is the same place. Fusion places do not count as inputs, because each copy
   sits beside its own transition. Any arc mode counts: consume, read and
   inhibit.
-- The group's order is the order of each transition's first arc from that
-  place. The author sets it by the order of the source lines.
+- The group's order is the structural emission order (ADR 0069): distance
+  from the initial marking, then name. It is not the order of the source
+  lines. Pairing from the left of that order is unchanged.
 - Two transitions are **neighbors** when they are next to each other in that
   order.
 
@@ -38,7 +40,8 @@ copy is always between its two transitions.
   row bends the graph.
 - Ask `dot` for a layout first, then share copies of nodes it put side by
   side. Rejected: two layout passes, and the second can move the nodes again.
-- One drawn input place, in arc order (chosen).
+- One drawn input place, in the structural emission order (chosen; ADR 0069
+  replaces the original source-line order).
 
 ## Decision 2: pair from the left
 
@@ -57,8 +60,10 @@ of neighbors in a group that all use the place:
 - Copies on transitions that are not neighbors stay separate.
 
 A run of three `A, B, C` gives `A P B C P`. Pairing from the right
-(`P A B P C`) would use the same number of copies. We chose the left because
-the first lines of the source are the ones authors read first.
+(`P A B P C`) would use the same number of copies. We pair from the left of
+the group's order. That order is the structural emission order (ADR 0069),
+so the left end is the transition closest to the initial marking, and the
+name breaks a tie.
 
 A place with `beside left` or `beside right` does not share copies. The
 author has fixed a side for every copy, and a shared copy is on the right of

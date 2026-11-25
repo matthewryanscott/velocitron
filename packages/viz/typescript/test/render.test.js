@@ -279,13 +279,43 @@ describe("net rendering", () => {
     const paired = fusionLayout(pair, fusion, beside);
     const three = fusionLayout(trio, fusion, beside);
     // then: two neighbors share the copy, and a run of three pairs from the left
-    assert.deepEqual(siblingGroups(trio, fusion), [["hold", "skip", "send"]]);
+    // of the structural order (rank, then name)
+    assert.deepEqual(siblingGroups(trio, fusion), [["hold", "send", "skip"]]);
     assert.equal(fusionCopy(paired, "switch", "hold"), "switch@hold+skip");
     assert.equal(fusionCopy(paired, "switch", "skip"), "switch@hold+skip");
     assert.deepEqual(paired.rows, [["hold", "switch@hold+skip", "skip"]]);
-    assert.deepEqual(three.rows, [["hold", "switch@hold+skip", "skip", "send", "switch@send"]]);
+    assert.deepEqual(three.rows, [["hold", "switch@hold+send", "send", "skip", "switch@skip"]]);
     const dot = netToDot(pair, {decorations: beside});
     assert.ok(dot.includes('    "hold" -> "switch@hold+skip" -> "skip" [style=invis];'));
+  });
+
+  it("draws the same graph when declarations are reversed", () => {
+    // given: a net and the same net with every declaration reversed
+    const net = featureNet();
+    const reversed = {
+      ...net,
+      places: [...net.places].reverse(),
+      transitions: [...net.transitions].reverse(),
+      arcs: [...net.arcs].reverse(),
+    };
+    const forward = choice(["hold", "skip", "send"], ["hold", "skip", "send"]);
+    const backward = {
+      ...forward,
+      places: [...forward.places].reverse(),
+      transitions: [...forward.transitions].reverse(),
+      arcs: [...forward.arcs].reverse(),
+    };
+    // when: each pair is drawn
+    const drawn = netToDot(net);
+    const choiceDot = netToDot(forward, {decorations: beside});
+    // then: the bytes match, and the initially marked place leads the places
+    assert.equal(drawn, netToDot(reversed));
+    assert.equal(choiceDot, netToDot(backward, {decorations: beside}));
+    assert.deepEqual(siblingGroups(forward, new Set(["switch"])), siblingGroups(backward, new Set(["switch"])));
+    const placeNames = drawn.split("\n").filter((line) => line.startsWith('    "') && !line.includes("->") && line.endsWith("];"))
+      .map((line) => line.split('"')[1]);
+    assert.ok(placeNames.indexOf("buffer") < placeNames.indexOf("in_port"));
+    assert.ok(placeNames.indexOf("buffer") < placeNames.indexOf("out_port"));
   });
 
   it("pushes unshared copies outside the choice row", () => {
@@ -301,7 +331,7 @@ describe("net rendering", () => {
     assert.equal(fusionCopy(paired, "switch", "hold"), "switch@hold");
     assert.equal(fusionCopy(paired, "switch", "skip"), "switch@skip");
     assert.deepEqual(paired.rows, [["switch@hold", "hold", "skip", "switch@skip"]]);
-    assert.deepEqual(three.rows, [["switch@hold", "hold", "switch@skip", "skip", "send", "switch@send"]]);
+    assert.deepEqual(three.rows, [["switch@hold", "hold", "switch@send", "send", "skip", "switch@skip"]]);
     assert.equal(dot.includes("switch@hold+skip"), false);
     assert.ok(dot.includes('    "switch@hold" -> "hold" -> "skip" -> "switch@skip" [style=invis];'));
   });
@@ -538,7 +568,7 @@ describe("net rendering", () => {
   });
 
   it("steps copies on one side out by one gap", () => {
-    // given: two left copies at one transition, switch first in arc order
+    // given: two left copies at one transition. Structural order is budget, then switch.
     const net = {
       name: "stacked",
       places: [
@@ -568,10 +598,10 @@ describe("net rendering", () => {
       lanes({"transition:start": {x: 0, y: 0}}),
       "lanes",
     );
-    // then: the first copy is nearest, and the second is one gap farther
+    // then: budget, first in the structural order, is nearest, and switch is one gap farther
     const step = gap("start", "switch", "job");
-    assert.ok(nodeLine(dot, "switch@start").includes(`pos="-${coord(step)},0!"`));
-    assert.ok(nodeLine(dot, "budget@start").includes(`pos="-${coord(2 * step)},0!"`));
+    assert.ok(nodeLine(dot, "budget@start").includes(`pos="-${coord(step)},0!"`));
+    assert.ok(nodeLine(dot, "switch@start").includes(`pos="-${coord(2 * step)},0!"`));
   });
 
   it("places a shared beside copy between two pinned transitions", () => {

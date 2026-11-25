@@ -72,6 +72,7 @@ from __future__ import annotations
 import itertools
 import json
 import textwrap
+from collections import deque
 from collections.abc import Callable, Mapping, Sequence
 from collections.abc import Set as AbstractSet
 from dataclasses import dataclass, field, replace
@@ -960,8 +961,11 @@ class _RenderIndex:
         """Index one drawn fusion copy. ``position`` is body-relative."""
         self.copy_lines[(place, transition)] = self.offset + position
 
-    def record_arc(self, position: int) -> None:
-        self.arc_lines.append(self.offset + position)
+    def record_arc(self, index: int, position: int) -> None:
+        """Record ``net.arcs[index]``'s edge line. Emission order is not index order."""
+        if len(self.arc_lines) <= index:
+            self.arc_lines.extend([-1] * (index + 1 - len(self.arc_lines)))
+        self.arc_lines[index] = self.offset + position
 
     def record_beside(self, position: int) -> None:
         self.beside_lines.append(self.offset + position)
@@ -1042,10 +1046,160 @@ def member_label(place: str, transition: Transition | None = None) -> str:
     return members[0]
 
 
-def _fusion_instances(net: Net, fusion: set[str]) -> list[tuple[str, str]]:
-    """(place, transition) pairs needing a local fusion instance, in arc
-    order, deduplicated (a transition touching the place via several arcs —
-    e.g. inhibit + produce — shares one instance)."""
+def _flow_ranks(net: Net) -> dict[tuple[str, str], int]:
+    """Distance of each place and transition from the initial marking.
+
+    Rank 0 is a place that holds a token in the initial marking, a place
+    nothing produces, or a transition with no input. Every other node is one
+    step farther than the nearest of those, along consume, read, inhibit, and
+    produce arcs. A component that has none of those starts is walked from
+    its alphabetically first node and ranked after everything already
+    reached. The same names always get the same ranks: declaration order is
+    not an input (ADR 0069).
+    """
+    place_names = [place.name for place in net.places]
+    transition_names = [transition.name for transition in net.transitions]
+    places = set(place_names)
+    transitions = set(transition_names)
+    place_out: dict[str, set[str]] = {name: set() for name in place_names}
+    transition_out: dict[str, set[str]] = {name: set() for name in transition_names}
+    place_in = {name: 0 for name in place_names}
+    transition_in = {name: 0 for name in transition_names}
+    for arc in net.arcs:
+        if (
+            arc.consume is not None
+            and arc.from_place in places
+            and arc.to_transition in transitions
+        ):
+            place_out[arc.from_place].add(arc.to_transition)
+            transition_in[arc.to_transition] += 1
+        elif (
+            arc.produce is not None
+            and arc.from_transition in transitions
+            and arc.to_place in places
+        ):
+            transition_out[arc.from_transition].add(arc.to_place)
+            place_in[arc.to_place] += 1
+
+    ranks: dict[tuple[str, str], int] = {}
+    queue: deque[tuple[str, str]] = deque()
+
+    def seed(kind: str, name: str, rank: int) -> None:
+        key = (kind, name)
+        if key in ranks:
+            return
+        ranks[key] = rank
+        queue.append(key)
+
+    def expand() -> None:
+        while queue:
+            kind, name = queue.popleft()
+            rank = ranks[(kind, name)]
+            if kind == "place":
+                nxt_kind, nxts = "transition", sorted(place_out[name])
+            else:
+                nxt_kind, nxts = "place", sorted(transition_out[name])
+            for nxt in nxts:
+                key = (nxt_kind, nxt)
+                if key not in ranks:
+                    ranks[key] = rank + 1
+                    queue.append(key)
+
+    marked: set[str] = set()
+    if net.initial_marking:
+        for name, tokens in net.initial_marking.items():
+            if tokens and name in places:
+                marked.add(name)
+    for name in sorted(marked | {name for name in place_names if place_in[name] == 0}):
+        seed("place", name, 0)
+    for name in sorted(name for name in transition_names if transition_in[name] == 0):
+        seed("transition", name, 0)
+    expand()
+    while True:
+        missing = [
+            ("place", name) for name in place_names if ("place", name) not in ranks
+        ] + [
+            ("transition", name)
+            for name in transition_names
+            if ("transition", name) not in ranks
+        ]
+        if not missing:
+            return ranks
+        missing.sort(key=lambda item: (item[1], item[0]))
+        base = max(ranks.values()) + 1 if ranks else 0
+        seed(missing[0][0], missing[0][1], base)
+        expand()
+
+
+def _node_order(kind: str, name: str, ranks: Mapping[tuple[str, str], int]) -> tuple[int, str]:
+    return (ranks[(kind, name)], name)
+
+
+def _decoration_order_key(decoration: Decoration) -> tuple[bool, bool, bool, str, str, str]:
+    return (
+        decoration.faded,
+        decoration.failure,
+        decoration.highlight,
+        decoration.highlight_label or "",
+        decoration.note or "",
+        decoration.summary or "",
+    )
+
+
+def _arc_order_key(
+    arc: Arc, ranks: Mapping[tuple[str, str], int], decoration: Decoration
+) -> tuple[object, ...]:
+    """Structural sort key for one edge statement. Ties render the same line."""
+    if arc.consume is not None:
+        source = ("place", arc.from_place or "")
+        target = ("transition", arc.to_transition or "")
+        predicate = arc.consume.predicate
+        detail: tuple[object, ...] = (
+            "consume",
+            arc.consume.mode,
+            arc.consume.type,
+            arc.consume.weight,
+            "" if predicate is None else (predicate.cel or ""),
+            "" if predicate is None else (predicate.handler or ""),
+            arc.consume.correlate or "",
+            "",
+            "",
+        )
+    else:
+        source = ("transition", arc.from_transition or "")
+        target = ("place", arc.to_place or "")
+        template = arc.produce
+        assert template is not None
+        data = (
+            ""
+            if template.data is None
+            else json.dumps(template.data, ensure_ascii=False)
+        )
+        detail = ("produce", "produce", template.type, 0, "", "", "", data, template.cel or "")
+
+    def endpoint(kind_name: tuple[str, str]) -> tuple[int, str]:
+        if kind_name in ranks:
+            return _node_order(kind_name[0], kind_name[1], ranks)
+        return (10**9, kind_name[1])
+
+    return (
+        *endpoint(source),
+        *endpoint(target),
+        *detail,
+        arc.description or "",
+        _decoration_order_key(decoration),
+    )
+
+
+def _fusion_instances(
+    net: Net, fusion: set[str], ranks: Mapping[tuple[str, str], int]
+) -> list[tuple[str, str]]:
+    """(place, transition) pairs needing a local fusion instance.
+
+    A transition that touches the place via several arcs (inhibit and
+    produce, for example) shares one instance. The pairs come back in
+    structural order, not arc order.
+    """
     pairs: list[tuple[str, str]] = []
     seen: set[tuple[str, str]] = set()
     for arc in net.arcs:
@@ -1060,6 +1214,12 @@ def _fusion_instances(net: Net, fusion: set[str]) -> list[tuple[str, str]]:
         if pair not in seen:
             seen.add(pair)
             pairs.append(pair)
+    pairs.sort(
+        key=lambda pair: (
+            *_node_order("place", pair[0], ranks),
+            *_node_order("transition", pair[1], ranks),
+        )
+    )
     return pairs
 
 
@@ -1067,25 +1227,32 @@ def sibling_groups(net: Net, fusion: AbstractSet[str]) -> list[tuple[str, ...]]:
     """Choices: transitions whose one drawn input place is the same place.
 
     Fusion places do not count as inputs, since each copy sits beside its
-    own transition. A group lists its transitions in the order of their
-    first arc from the shared place; groups follow the order of their
-    place's first such arc. Only groups of two or more are returned.
+    own transition. A group lists its transitions in structural order
+    (:func:`_flow_ranks`, then name); groups follow their place's structural
+    order. Only groups of two or more are returned.
     """
+    ranks = _flow_ranks(net)
     inputs: dict[str, set[str]] = {}
-    first_arcs: list[tuple[str, str]] = []
     for arc in net.arcs:
         place, transition = arc.from_place, arc.to_transition
         if place is None or transition is None or place in fusion:
             continue
-        places = inputs.setdefault(transition, set())
-        if place not in places:
-            places.add(place)
-            first_arcs.append((place, transition))
+        inputs.setdefault(transition, set()).add(place)
     groups: dict[str, list[str]] = {}
-    for place, transition in first_arcs:
-        if inputs[transition] == {place}:
+    for transition, places in inputs.items():
+        if len(places) == 1:
+            place = next(iter(places))
             groups.setdefault(place, []).append(transition)
-    return [tuple(group) for group in groups.values() if len(group) > 1]
+    ordered = [
+        (
+            place,
+            tuple(sorted(names, key=lambda name: _node_order("transition", name, ranks))),
+        )
+        for place, names in groups.items()
+        if len(names) > 1
+    ]
+    ordered.sort(key=lambda item: _node_order("place", item[0], ranks))
+    return [names for _, names in ordered]
 
 
 @dataclass(frozen=True)
@@ -1111,9 +1278,9 @@ def fusion_layout(
     """The fusion copies of ``net`` and the ``beside`` rows that place them.
 
     Each transition with ``beside`` copies gets a row: ``left`` copies
-    before it, ``right`` copies after it, the first copy nearest; a copy
-    with no side goes to the side that has fewer copies so far, ``left`` on
-    a tie (ADR 0029).
+    before it, ``right`` copies after it, the first copy in structural
+    order nearest; a copy with no side goes to the side that has fewer
+    copies so far, ``left`` on a tie (ADR 0029, ADR 0069).
 
     Two transitions that are neighbors in a sibling group (see
     :func:`sibling_groups`) and both have a copy of the same ``beside``
@@ -1133,7 +1300,8 @@ def fusion_layout(
     the ``beside`` order a view reads (ADR 0072): a copy entry, else the
     whole-place entry, else the offset of this row.
     """
-    instances = _fusion_instances(net, set(fusion))
+    ranks = _flow_ranks(net)
+    instances = _fusion_instances(net, set(fusion), ranks)
 
     def beside(place: str) -> Decoration | None:
         decoration = decorations.nodes.get(f"place:{place}", _NO_DECORATION)
@@ -1152,10 +1320,15 @@ def fusion_layout(
     segments: list[tuple[str, ...]] = []
     for group in sibling_groups(net, fusion):
         linked = [False] * (len(group) - 1)
-        places = [
-            place for transition in group for place in beside_places.get(transition, ())
-        ]
-        for place in dict.fromkeys(places):
+        places = sorted(
+            {
+                place
+                for transition in group
+                for place in beside_places.get(transition, ())
+            },
+            key=lambda place: _node_order("place", place, ranks),
+        )
+        for place in places:
             decoration = beside(place)
             if decoration is None or decoration.beside_side is not None:
                 continue
@@ -1229,6 +1402,19 @@ def fusion_layout(
                 )
         return tuple(order)
 
+    for transition, places_beside in beside_places.items():
+        # An authored side is placed before an unsided copy, so a later name
+        # cannot take the side the author already chose. Within each group
+        # the structural order still decides which copy sits nearest.
+        places_beside.sort(
+            key=lambda place: (
+                0
+                if (decoration := beside(place)) is not None
+                and decoration.beside_side is not None
+                else 1,
+                *_node_order("place", place, ranks),
+            )
+        )
     rows: dict[str | int, tuple[str, ...]] = {}
     for transition in beside_places:
         key = segment_of.get(transition, transition)
@@ -1238,13 +1424,21 @@ def fusion_layout(
                 if transition in segment_of
                 else (transition,)
             )
+    transition_names = {transition.name for transition in net.transitions}
+
+    def _row_key(nodes: tuple[str, ...]) -> tuple[int, str]:
+        for node in nodes:
+            if node in transition_names:
+                return _node_order("transition", node, ranks)
+        return (10**9, "")
+
     copies = {
         (place, transition): shared.get(
             (place, transition), _copy_id(place, [transition])
         )
         for place, transition in instances
     }
-    return FusionLayout(copies=copies, rows=tuple(rows.values()))
+    return FusionLayout(copies=copies, rows=tuple(sorted(rows.values(), key=_row_key)))
 
 
 def _beside_placements(
@@ -1439,8 +1633,9 @@ def _net_body(
         return ()
 
     lines: list[str] = []
+    ranks = _flow_ranks(net)
     widths: dict[str, float] = {}
-    for place in net.places:
+    for place in sorted(net.places, key=lambda place: _node_order("place", place.name, ranks)):
         if place.name in fusion:
             continue  # rendered as local instances below
         node = _quote(f"{prefix}{place.name}")
@@ -1460,7 +1655,9 @@ def _net_body(
         )
         lines.append(f"{indent}{node} [{attrs}];")
     lines.append("")
-    for transition in net.transitions:
+    for transition in sorted(
+        net.transitions, key=lambda transition: _node_order("transition", transition.name, ranks)
+    ):
         node = _quote(f"{prefix}{transition.name}")
         if recorder is not None:
             recorder.record_node(f"transition:{transition.name}", len(lines))
@@ -1481,7 +1678,14 @@ def _net_body(
     if fusion:
         place_by_name = {p.name: p for p in net.places}
         transition_by_name = {t.name: t for t in net.transitions}
-        for (place_name, transition_name), copy in layout.copies.items():
+        copy_order = sorted(
+            layout.copies.items(),
+            key=lambda item: (
+                *_node_order("place", item[0][0], ranks),
+                *_node_order("transition", item[0][1], ranks),
+            ),
+        )
+        for (place_name, transition_name), copy in copy_order:
             if copy in drawn_copies:
                 if recorder is not None:
                     recorder.record_copy(
@@ -1519,7 +1723,14 @@ def _net_body(
     beside_copies = set(itertools.chain.from_iterable(layout.rows)) - {
         transition.name for transition in net.transitions
     }
-    for index, arc in enumerate(net.arcs):
+    arc_order = sorted(
+        range(len(net.arcs)),
+        key=lambda index: _arc_order_key(
+            net.arcs[index], ranks, decorations.arcs.get(index, _NO_DECORATION)
+        ),
+    )
+    for index in arc_order:
+        arc = net.arcs[index]
         lines.append(
             _arc_edge(
                 arc,
@@ -1532,7 +1743,7 @@ def _net_body(
             )
         )
         if recorder is not None:
-            recorder.record_arc(len(lines) - 1)
+            recorder.record_arc(index, len(lines) - 1)
     beside_lines = _beside_statements(layout, indent=indent, prefix=prefix)
     for statement in beside_lines:
         if recorder is not None:
@@ -1879,7 +2090,8 @@ def composition_ports_dot(
 
     def leaf(alias: str, net: Net, indent: str) -> list[str]:
         body = _cluster_head(alias, net, [], indent, style)
-        for place in net.places:
+        ranks = _flow_ranks(net)
+        for place in sorted(net.places, key=lambda place: _node_order("place", place.name, ranks)):
             if place.port is None and f"{alias}.{place.name}" not in shared:
                 continue
             node = _quote(f"{alias}.{place.name}")
@@ -2089,6 +2301,8 @@ def composition_overview_dot(
         place_lines.setdefault(scope([a for a, _ in entry.members]), []).append(
             f"{place_node(root)} [{attrs_by_kind[entry.kind]}, {label}];"
         )
+    for body in place_lines.values():
+        body.sort()
 
     refining = {r.by: r for r in composition.refinements}
     counter = itertools.count()
@@ -2160,6 +2374,7 @@ def composition_overview_dot(
     emit((), "    ")
     lines.append("")
 
+    edge_lines: list[str] = []
     for root, entry in drawn.items():
         node = place_node(root)
         taken = any("takes" in uses for uses in entry.uses.values())
@@ -2171,11 +2386,11 @@ def composition_overview_dot(
                 # drawn as the place's producer only when no other net fills it.
                 looped = {"writes", "takes"} <= uses
                 if "writes" in uses and not (looped and writers - {alias}):
-                    lines.append(f"    {part_node(alias)} -> {node} [{flow}];")
+                    edge_lines.append(f"    {part_node(alias)} -> {node} [{flow}];")
                 if "takes" in uses and not (looped and not writers - {alias}):
-                    lines.append(f"    {node} -> {part_node(alias)} [{flow}];")
+                    edge_lines.append(f"    {node} -> {part_node(alias)} [{flow}];")
                 elif "reads" in uses:
-                    lines.append(
+                    edge_lines.append(
                         f'    {node} -> {part_node(alias)} [{_RECORD_EDGE_ATTRS}, dir=forward, label="reads"];'
                     )
                 continue
@@ -2191,14 +2406,15 @@ def composition_overview_dot(
             # A record nothing takes or reads is a signal: its lines need no label.
             silent = not taken and not any("reads" in u for u in entry.uses.values())
             label = "" if silent else f', label="{", ".join(words)}"'
-            lines.append(
+            edge_lines.append(
                 f"    {part_node(alias)} -> {node} [{_RECORD_EDGE_ATTRS}{label}];"
             )
     for refinement in composition.refinements:
-        lines.append(
+        edge_lines.append(
             f"    {part_node(refinement.net)} -> {part_node(refinement.by)} "
             f"[{_REFINES_EDGE_ATTRS}];"
         )
+    lines.extend(sorted(edge_lines))
     lines.append("}")
     return "\n".join(lines) + "\n"
 
@@ -2286,7 +2502,7 @@ def _composition_edges(
         names = [node(net, place) for net, place in share.members]
         for first, second in zip(names, names[1:]):
             lines.append(f"    {first} -> {second} [{_SHARE_ATTRS}];")
-    return lines
+    return sorted(lines)
 
 
 # ── Legend ───────────────────────────────────────────────────────────────

@@ -259,11 +259,11 @@
               "y": 20
             },
             "place:badge@transition:recall": {
-              "x": 40,
+              "x": 80,
               "y": 20
             },
             "place:badge@transition:keep": {
-              "x": 80,
+              "x": 40,
               "y": 20
             }
           },

@@ -1400,7 +1400,7 @@
               "key": "x",
               "value": {
                 "type": "number",
-                "lexeme": "40"
+                "lexeme": "80"
               }
             },
             {
@@ -1452,7 +1452,7 @@
               "key": "x",
               "value": {
                 "type": "number",
-                "lexeme": "80"
+                "lexeme": "40"
               }
             },
             {
