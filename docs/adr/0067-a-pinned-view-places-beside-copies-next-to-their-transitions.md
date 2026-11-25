@@ -20,23 +20,27 @@ When a view positions any node it still selects `neato` (`layout=neato`,
 `inputscale=72`, `overlap=scale`) and still omits the rank clusters. Those
 clusters are for `dot`. Their invisible edges would remain as springs.
 
-For each `beside` copy the view does not position, if the view pins the
-transition that copy sits with, the renderer pins the copy as well:
+For each `beside` copy, if the view pins the transition that copy sits
+with, the renderer pins the copy as well. A whole-place position does not
+paint those copies. It stays in the resolved positions, so another node
+can still be `relative` to `(P)`.
 
-- The offset is `slots × 130` points on x, and `0` on y, added to the
-  transition's resolved position. `130` clears a short name plus one color
-  line on both nodes at the default Helvetica sizes. Both implementations
-  use this constant.
+- The offset is `slots × gap` points on x, and `0` on y, added to the
+  transition's resolved position. `gap` is half the transition's width,
+  plus half the wider copy's width on that side, plus a margin of 24
+  points. Width is the longest label line plus 20 points of chrome. A
+  character advances half its point size: names are 14pt, and color and
+  behavior lines are 9pt. Both implementations use these numbers, so the
+  pictures match. Marking rows are not part of the estimate.
 - Left is negative x and right is positive x. `neato` does not turn the
   picture with `rankdir`, so the offset stays horizontal in the view's
   coordinates. The side is still the one ADR 0029 Decision 3 chooses,
-  including a copy with no side.
+  including a copy with no side: the side with fewer copies so far, left
+  on a tie.
 - The copy nearest the transition, in the beside row's order, is one gap
   away. The next on that side is two gaps, and so on.
 - A copy whose transition the view does not pin stays unpinned. `neato`
-  places it.
-- A position of the place itself still applies to every copy of that place.
-  The offset does not replace it.
+  places it. The copy arcs keep `constraint=false`.
 
 A view with no positions stays on `dot` and keeps the rank clusters.
 
@@ -45,11 +49,14 @@ A view with no positions stays on `dot` and keeps the rank clusters.
 - Keep dropping `beside` (ADR 0029 Decision 4). Rejected: the copies drift,
   and a shared lock drawn once per transition collapses when the view also
   positions the place.
-- Derive the gap from label width. Rejected for this change: both
-  implementations would need the same font metrics. A fixed gap keeps the
-  pictures identical. A later change can measure labels.
+- A fixed gap. Rejected: a long label overlaps the transition, and a short
+  one leaves a hole. The width estimate is the same function in both
+  languages, so parity does not require a constant.
 - Give the offset a y component so it follows `rankdir`. Rejected: `neato`
   ignores `rankdir`, and the view's coordinates are already the picture.
+- Paint the whole-place position onto every copy. Rejected: that is the
+  stack this record exists to stop. The position remains the anchor for
+  `relative (P)`.
 
 ## Decision 2: a shared copy sits between its two transitions
 
@@ -62,29 +69,39 @@ anchors.
 - When the view pins only one, the copy takes the gap offset from that
   transition, on the inner side, past any copy that is nearer.
 
-## Decision 3: a whole-place position on several copies is a lint warning
+## Decision 3: two lint warnings for a whole-place position
 
-`fusion-place-position` flags a view that sets a whole-place `position` on
-a fusion place the renderer draws as more than one copy. The finding names
-the view and the place. It is advisory, like every lint rule (ADR 0016).
-The place silences it with `annotations.lint.suppress`. A place drawn as
-one copy is not flagged: one transition uses it, or `beside` with no side
-has already shared every use into one copy.
+Both findings name the view and the place. They are advisory (ADR 0016).
+The place silences one with `annotations.lint.suppress`.
+
+- `beside-position-shadowed` flags a whole-place `position` on a fusion
+  place that has `beside` and draws at least one copy. The position is
+  shadowed for those copies. The message says it still anchors
+  `relative (P)`.
+- `fusion-place-position` flags a whole-place `position` on a fusion place
+  with no `beside` that draws more than one copy. Those copies still share
+  one point.
+
+A fusion place drawn once, with no `beside`, is not flagged. The position
+lands on that one copy.
 
 **Considered options:**
 
 - Reject the position while resolving the net. Rejected: the position is a
   defined picture, and a warning can be acknowledged. A later per-copy
   position can override one copy without making today's documents invalid.
-- Let the offset replace the place position. Rejected: the author asked for
-  that point. The warning says the point hits every copy.
+- One rule for both shapes. Rejected: one shape is shadowed and still
+  useful as an anchor, and the other stacks the drawing. A suppression
+  should name which one it acknowledges.
 
 ## Consequences
 
 - Python and TypeScript `apply_view` / `applyView` move together, per ADR
   0025 Decision 5. The render model records where each `beside` copy sits;
   applying the view writes the point. It does not parse the DOT text.
-- No grammar, payload, or contribution-IR change. A per-copy position is a
+- No grammar or payload-schema change. A per-copy `(P)@[T]` position is a
   later change.
-- `velocitron validate` prints the warning and still exits 0. For a
-  `.petrinet` file the warning points at the view's `position` fact.
+- The beside conformance source has a pinned view and a `lanes_lock` view
+  that also positions the fusion place.
+- `velocitron validate` prints the warnings and still exits 0. For a
+  `.petrinet` file each warning points at the view's `position` fact.

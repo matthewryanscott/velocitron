@@ -1,143 +1,41 @@
 {
-  "annotations": {
-    "petrinet.dsl/v1": {
-      "arcHandles": {},
-      "decorations": {
-        "place:budget": {
-          "beside": {}
-        },
-        "place:switch": {
-          "beside": {
-            "side": "left"
-          }
-        }
-      },
-      "extensions": {},
-      "markings": {},
-      "views": {}
-    }
-  },
-  "arcs": [
-    {
-      "consume": {
-        "type": "job"
-      },
-      "from": {
-        "place": "queued"
-      },
-      "to": {
-        "transition": "start"
-      }
-    },
-    {
-      "from": {
-        "transition": "start"
-      },
-      "produce": {
-        "destination": "running",
-        "type": "job"
-      },
-      "to": {
-        "place": "running"
-      }
-    },
-    {
-      "consume": {
-        "type": "job"
-      },
-      "from": {
-        "place": "running"
-      },
-      "to": {
-        "transition": "finish"
-      }
-    },
-    {
-      "from": {
-        "transition": "finish"
-      },
-      "produce": {
-        "destination": "done",
-        "type": "job"
-      },
-      "to": {
-        "place": "done"
-      }
-    },
-    {
-      "consume": {
-        "mode": "read",
-        "type": "flag"
-      },
-      "from": {
-        "place": "switch"
-      },
-      "to": {
-        "transition": "start"
-      }
-    },
-    {
-      "consume": {
-        "mode": "read",
-        "type": "flag"
-      },
-      "from": {
-        "place": "switch"
-      },
-      "to": {
-        "transition": "finish"
-      }
-    },
-    {
-      "consume": {
-        "mode": "read",
-        "type": "credit"
-      },
-      "from": {
-        "place": "budget"
-      },
-      "to": {
-        "transition": "start"
-      }
-    }
-  ],
   "name": "beside",
   "places": [
     {
+      "name": "queued",
       "accepts": [
         "job"
-      ],
-      "name": "queued"
+      ]
     },
     {
+      "name": "running",
       "accepts": [
         "job"
-      ],
-      "name": "running"
+      ]
     },
     {
+      "name": "done",
       "accepts": [
         "job"
-      ],
-      "name": "done"
+      ]
     },
     {
+      "name": "switch",
       "accepts": [
         "flag"
       ],
       "annotations": {
         "fusion": true
-      },
-      "name": "switch"
+      }
     },
     {
+      "name": "budget",
       "accepts": [
         "credit"
       ],
       "annotations": {
         "fusion": true
-      },
-      "name": "budget"
+      }
     }
   ],
   "transitions": [
@@ -147,5 +45,151 @@
     {
       "name": "finish"
     }
-  ]
+  ],
+  "arcs": [
+    {
+      "from": {
+        "place": "queued"
+      },
+      "to": {
+        "transition": "start"
+      },
+      "consume": {
+        "type": "job"
+      }
+    },
+    {
+      "from": {
+        "transition": "start"
+      },
+      "to": {
+        "place": "running"
+      },
+      "produce": {
+        "destination": "running",
+        "type": "job"
+      }
+    },
+    {
+      "from": {
+        "place": "running"
+      },
+      "to": {
+        "transition": "finish"
+      },
+      "consume": {
+        "type": "job"
+      }
+    },
+    {
+      "from": {
+        "transition": "finish"
+      },
+      "to": {
+        "place": "done"
+      },
+      "produce": {
+        "destination": "done",
+        "type": "job"
+      }
+    },
+    {
+      "from": {
+        "place": "switch"
+      },
+      "to": {
+        "transition": "start"
+      },
+      "consume": {
+        "type": "flag",
+        "mode": "read"
+      }
+    },
+    {
+      "from": {
+        "place": "switch"
+      },
+      "to": {
+        "transition": "finish"
+      },
+      "consume": {
+        "type": "flag",
+        "mode": "read"
+      }
+    },
+    {
+      "from": {
+        "place": "budget"
+      },
+      "to": {
+        "transition": "start"
+      },
+      "consume": {
+        "type": "credit",
+        "mode": "read"
+      }
+    }
+  ],
+  "annotations": {
+    "petrinet.dsl/v1": {
+      "arcHandles": {},
+      "markings": {},
+      "views": {
+        "lanes": {
+          "positions": {
+            "transition:start": {
+              "x": 0,
+              "y": 200
+            },
+            "transition:finish": {
+              "from": "transition:start",
+              "delta": {
+                "x": 0,
+                "y": -200
+              }
+            }
+          },
+          "routes": {}
+        },
+        "lanes_lock": {
+          "positions": {
+            "transition:start": {
+              "x": 0,
+              "y": 200
+            },
+            "transition:finish": {
+              "from": "transition:start",
+              "delta": {
+                "x": 0,
+                "y": -200
+              }
+            },
+            "place:switch": {
+              "x": 40,
+              "y": 0
+            },
+            "place:done": {
+              "from": "place:switch",
+              "delta": {
+                "x": 80,
+                "y": 0
+              }
+            }
+          },
+          "routes": {}
+        }
+      },
+      "extensions": {},
+      "decorations": {
+        "place:switch": {
+          "beside": {
+            "side": "left"
+          }
+        },
+        "place:budget": {
+          "beside": {}
+        }
+      }
+    }
+  }
 }

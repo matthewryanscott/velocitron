@@ -85,8 +85,12 @@ from .schema import (
     Transition,
 )
 from .view import (
+    NAME_POINT,
+    SMALL_POINT,
     Decoration,
     Decorations,
+    beside_gap,
+    node_width,
 )
 
 
@@ -592,6 +596,46 @@ def _is_fusion(place: Place) -> bool:
     return bool(place.annotations and place.annotations.get("fusion"))
 
 
+def _measure_place(name: str, place: Place, decoration: Decoration) -> list[tuple[str, int]]:
+    """Plain lines that set a place node's width. Markings are left out."""
+    lines = [(name, NAME_POINT)]
+    colors = [type_ for type_ in place.accepts if type_ != _GENERIC_TOKEN_TYPE]
+    if colors:
+        lines.append((f"⟨{', '.join(colors)}⟩", SMALL_POINT))
+    if decoration.highlight_label:
+        lines.append((decoration.highlight_label, SMALL_POINT))
+    if decoration.note:
+        lines.append((decoration.note, SMALL_POINT))
+    return lines
+
+
+def _measure_transition(
+    transition: Transition, decoration: Decoration, style: RenderStyle
+) -> list[tuple[str, int]]:
+    """Plain lines that set a transition node's width. Markings are left out."""
+    lines = [(transition.name, NAME_POINT)]
+    if decoration.faded:
+        return lines
+    summary = decoration.summary if style.detail == "summary" else None
+    if style.detail != "structure":
+        if transition.handler is not None:
+            lines.append((f"{transition.handler}()", SMALL_POINT))
+        if summary is not None:
+            lines.append((summary, SMALL_POINT))
+        elif transition.guard is not None:
+            lines.append((f"guard: {transition.guard}?", SMALL_POINT))
+        if summary is None:
+            if transition.timer is not None:
+                lines.append((f"timer: {transition.timer.cel}", SMALL_POINT))
+            if transition.priority is not None:
+                lines.append((f"priority {transition.priority}", SMALL_POINT))
+    if decoration.highlight_label:
+        lines.append((decoration.highlight_label, SMALL_POINT))
+    if decoration.note:
+        lines.append((decoration.note, SMALL_POINT))
+    return lines
+
+
 def _place_attrs(
     place: Place,
     tokens: Sequence[Token] = (),
@@ -831,10 +875,11 @@ class BesidePlacement:
 
     ``line`` is the copy's node statement in ``dot``. ``place`` and
     ``anchor`` are subject keys (``place:<name>``, ``transition:<name>``).
-    ``slots`` is the signed gap count from ``anchor``: negative is left,
+    ``slots`` is the signed count from ``anchor``: negative is left,
     positive is right, and ``1`` is the copy nearest the transition.
+    ``gap`` is that side's center-to-center distance for one count.
     ``also`` is the other transition of a shared copy (ADR 0035), and
-    ``also_slots`` is the signed gap count from that transition. When both
+    ``also_slots`` / ``also_gap`` measure from that transition. When both
     transitions are pinned, ``between_index`` / ``between_count`` space the
     shared copies evenly along the segment that joins them.
     """
@@ -843,8 +888,10 @@ class BesidePlacement:
     place: str
     anchor: str
     slots: int
+    gap: float
     also: str | None = None
     also_slots: int | None = None
+    also_gap: float | None = None
     between_index: int = 0
     between_count: int = 1
 
@@ -1156,25 +1203,35 @@ def fusion_layout(
 
 
 def _beside_placements(
-    layout: FusionLayout, drawn: Mapping[str, tuple[int, str]]
+    layout: FusionLayout,
+    drawn: Mapping[str, tuple[int, str]],
+    widths: Mapping[str, float],
 ) -> list[BesidePlacement]:
     """Where each ``beside`` copy sits relative to the transitions in its row.
 
     ``drawn`` maps a copy's node id to its body-relative statement line and
-    place name. A copy on one transition takes a signed slot from that
-    transition (nearest is ``1``). A shared copy records both transitions;
-    the view places it on the segment between them when both are pinned.
-    Keep this in step with ``besidePlacements`` in the TypeScript renderer.
+    place name. ``widths`` maps a copy id or a transition name to its node
+    width. A copy on one transition takes a signed slot from that
+    transition (nearest is ``1``). The side's gap uses the wider copy, and
+    the k-th copy sits at ``k`` times that gap. A shared copy records both
+    transitions; the view places it on the segment between them when both
+    are pinned. Keep this in step with ``besidePlacements`` in the
+    TypeScript renderer.
     """
     users: dict[str, set[str]] = {}
     for (_place, transition), copy in layout.copies.items():
         users.setdefault(copy, set()).add(transition)
     placements: list[BesidePlacement] = []
 
-    def own(node: str, anchor: str, slots: int) -> None:
+    def side_gap(anchor: str, nodes: Sequence[str]) -> float:
+        return beside_gap(widths[anchor], max(widths[node] for node in nodes))
+
+    def own(node: str, anchor: str, slots: int, gap: float) -> None:
         line, place = drawn[node]
         placements.append(
-            BesidePlacement(line, f"place:{place}", f"transition:{anchor}", slots)
+            BesidePlacement(
+                line, f"place:{place}", f"transition:{anchor}", slots, gap
+            )
         )
 
     for row in layout.rows:
@@ -1182,11 +1239,17 @@ def _beside_placements(
         if not trans_at:
             continue
         first = trans_at[0]
-        for slot, node in enumerate(reversed(row[:first]), start=1):
-            own(node, row[first], -slot)
+        left_nodes = list(reversed(row[:first]))
+        if left_nodes:
+            gap = side_gap(row[first], left_nodes)
+            for slot, node in enumerate(left_nodes, start=1):
+                own(node, row[first], -slot, gap)
         last = trans_at[-1]
-        for slot, node in enumerate(row[last + 1 :], start=1):
-            own(node, row[last], slot)
+        right_nodes = list(row[last + 1 :])
+        if right_nodes:
+            gap = side_gap(row[last], right_nodes)
+            for slot, node in enumerate(right_nodes, start=1):
+                own(node, row[last], slot, gap)
         for left_i, right_i in itertools.pairwise(trans_at):
             left_name, right_name = row[left_i], row[right_i]
             own_right: list[str] = []
@@ -1200,10 +1263,20 @@ def _beside_placements(
                     own_left.append(node)
                 else:
                     own_right.append(node)
+            gap_right = (
+                side_gap(left_name, [*own_right, *shared])
+                if own_right or shared
+                else 0.0
+            )
+            gap_left = (
+                side_gap(right_name, [*own_left, *shared])
+                if own_left or shared
+                else 0.0
+            )
             for slot, node in enumerate(own_right, start=1):
-                own(node, left_name, slot)
+                own(node, left_name, slot, gap_right)
             for slot, node in enumerate(reversed(own_left), start=1):
-                own(node, right_name, -slot)
+                own(node, right_name, -slot, gap_left)
             count = len(shared)
             for index, node in enumerate(shared):
                 line, place = drawn[node]
@@ -1213,8 +1286,10 @@ def _beside_placements(
                         f"place:{place}",
                         f"transition:{left_name}",
                         len(own_right) + index + 1,
+                        gap_right,
                         also=f"transition:{right_name}",
                         also_slots=-(len(own_left) + (count - index)),
+                        also_gap=gap_left,
                         between_index=index,
                         between_count=count,
                     )
@@ -1308,6 +1383,7 @@ def _net_body(
         return ()
 
     lines: list[str] = []
+    widths: dict[str, float] = {}
     for place in net.places:
         if place.name in fusion:
             continue  # rendered as local instances below
@@ -1331,10 +1407,14 @@ def _net_body(
         node = _quote(f"{prefix}{transition.name}")
         if recorder is not None:
             recorder.record_node(f"transition:{transition.name}", len(lines))
+        decoration = _node_decoration(f"transition:{transition.name}")
+        widths[transition.name] = node_width(
+            _measure_transition(transition, decoration, style)
+        )
         attrs = _transition_attrs(
             transition,
             style=style,
-            decoration=_node_decoration(f"transition:{transition.name}"),
+            decoration=decoration,
             twin_label=_twin(f"transition:{transition.name}"),
         )
         lines.append(f"{indent}{node} [{attrs}];")
@@ -1352,10 +1432,14 @@ def _net_body(
             if recorder is not None:
                 recorder.record_node(f"place:{place_name}", len(lines))
             drawn_copies[copy] = (len(lines), place_name)
+            label = member_label(place_name, transition_by_name.get(transition_name))
+            widths[copy] = node_width(
+                _measure_place(label, place, _node_decoration(f"place:{place_name}"))
+            )
             attrs = _place_attrs(
                 place,
                 _tokens(place),
-                label=member_label(place_name, transition_by_name.get(transition_name)),
+                label=label,
                 style=style,
                 fusion=True,
                 decoration=_node_decoration(f"place:{place_name}"),
@@ -1367,7 +1451,7 @@ def _net_body(
             lines.append(f"{indent}{node} [{attrs}];")
         lines.append("")
     if recorder is not None:
-        for placement in _beside_placements(layout, drawn_copies):
+        for placement in _beside_placements(layout, drawn_copies, widths):
             recorder.record_beside_placement(placement)
     beside_copies = set(itertools.chain.from_iterable(layout.rows)) - {
         transition.name for transition in net.transitions

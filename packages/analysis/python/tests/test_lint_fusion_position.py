@@ -2,7 +2,12 @@
 
 from __future__ import annotations
 
-from velocitron_analysis import RULE_FUSION_PLACE_POSITION, LintFinding, lint_net
+from velocitron_analysis import (
+    RULE_BESIDE_POSITION_SHADOWED,
+    RULE_FUSION_PLACE_POSITION,
+    LintFinding,
+    lint_net,
+)
 from velocitron_engine import (
     Arc,
     ConsumePattern,
@@ -165,7 +170,39 @@ def test_the_place_can_silence_the_rule() -> None:
     ] == [RULE_FUSION_PLACE_POSITION]
 
 
-def test_a_shared_beside_copy_is_one_copy() -> None:
+def test_beside_shadows_a_whole_place_position() -> None:
+    # given: the lock is beside its transitions, and the view positions it
+    net = _lock()
+    shadowed = Net(
+        name=net.name,
+        places=net.places,
+        transitions=net.transitions,
+        arcs=net.arcs,
+        annotations={
+            "petrinet.dsl/v1": {
+                "decorations": {"place:lock": {"beside": {"side": "left"}}},
+                "views": {
+                    "lanes": {
+                        "positions": {"place:lock": {"x": 10, "y": 20}},
+                        "routes": {},
+                    }
+                },
+            }
+        },
+    )
+
+    # when: linting
+    findings = lint_net(shadowed)
+
+    # then: the position is shadowed, and the copies are not described as stacked
+    assert [finding.rule for finding in findings] == [RULE_BESIDE_POSITION_SHADOWED]
+    assert findings[0].place == "lock"
+    assert findings[0].view == "lanes"
+    assert "shadows" in findings[0].message
+    assert "relative (lock)" in findings[0].message
+
+
+def test_a_shared_beside_copy_is_shadowed_rather_than_stacked() -> None:
     # given: two neighbor transitions share one beside copy, and the view
     # positions that place
     switch = Place("switch", ["job"], annotations={"fusion": True})
@@ -210,8 +247,9 @@ def test_a_shared_beside_copy_is_one_copy() -> None:
         },
     )
 
-    # when/then: one drawn copy is not a stack
-    assert lint_net(net) == []
+    # when/then: one drawn copy is not a stack, and beside still shadows the position
+    findings = lint_net(net)
+    assert [finding.rule for finding in findings] == [RULE_BESIDE_POSITION_SHADOWED]
 
 
 def test_invalid_decorations_do_not_raise() -> None:

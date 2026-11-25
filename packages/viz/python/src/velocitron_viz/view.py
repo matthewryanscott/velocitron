@@ -20,28 +20,39 @@ lands.
 from __future__ import annotations
 
 import math
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Final, cast
 
 VIEW_SPLINES: Final[tuple[str, ...]] = ("ortho", "spline", "curved", "polyline", "line")
-# Points. Clears a short name plus one color line on both the transition
-# and the copy, in the coordinates ``inputscale=72`` reads (ADR 0067).
-BESIDE_GAP: Final[int] = 130
+# Shared with the TypeScript renderer (ADR 0067). Helvetica's average
+# advance is half the point size. Names are 14pt; color and behavior
+# lines are 9pt. ``NODE_PAD`` is the horizontal chrome around the longest
+# line. ``BESIDE_MARGIN`` is the clear space between the facing edges.
+NAME_POINT: Final[int] = 14
+SMALL_POINT: Final[int] = 9
+NODE_PAD: Final[int] = 20
+BESIDE_MARGIN: Final[int] = 24
 
 if TYPE_CHECKING:
     from .render import RenderModel
 
 __all__ = [
-    "BESIDE_GAP",
+    "BESIDE_MARGIN",
     "DEFAULT_VIEW",
+    "NAME_POINT",
+    "NODE_PAD",
+    "SMALL_POINT",
     "Decoration",
     "Decorations",
     "ViewApplicationError",
     "apply_view",
+    "beside_gap",
     "has_view",
+    "node_width",
     "read_decorations",
     "resolve_positions",
+    "text_width",
     "view_setting",
 ]
 
@@ -324,6 +335,31 @@ def _validate_routes(
     return route_by_arc
 
 
+def text_width(text: str, point_size: int) -> float:
+    """Width of ``text`` at ``point_size``, in points.
+
+    One character advances half the point size. Both renderers use this
+    estimate, so a label of the same length produces the same gap.
+    """
+    return len(text) * point_size / 2
+
+
+def node_width(lines: Sequence[tuple[str, int]]) -> float:
+    """Width of a node whose lines are ``(text, point size)`` pairs."""
+    widest = max((text_width(text, size) for text, size in lines), default=0.0)
+    return widest + NODE_PAD
+
+
+def beside_gap(transition_width: float, copy_width: float) -> float:
+    """Center-to-center distance from a transition to the nearest copy.
+
+    Half of each width, plus :data:`BESIDE_MARGIN` between the facing edges.
+    The k-th copy on a side sits at ``k`` times the gap of that side, and
+    the side's gap uses the wider copy.
+    """
+    return (transition_width + copy_width) / 2 + BESIDE_MARGIN
+
+
 def _format_coord(value: float | int) -> str:
     """A coordinate the way both renderers spell an integral value."""
     number = float(value)
@@ -337,15 +373,14 @@ def _pin_beside_copies(
     model: "RenderModel",
     resolved: Mapping[str, tuple[float | int, float | int]],
 ) -> None:
-    """Pin each unpositioned ``beside`` copy next to its pinned transition.
+    """Pin each ``beside`` copy next to its pinned transition.
 
-    A whole-place position already wrote the same point onto every copy, so
-    those copies are left as the author placed them. A shared copy whose
-    two transitions are both pinned sits on the segment between them.
+    A whole-place position is not written onto these lines. It stays in
+    ``resolved``, so a relative position can still use it as a base. A
+    shared copy whose two transitions are both pinned sits on the segment
+    between them.
     """
     for placement in model.beside_placements:
-        if placement.place in resolved:
-            continue
         anchor = resolved.get(placement.anchor)
         other = resolved.get(placement.also) if placement.also is not None else None
         if placement.also is not None and anchor is not None and other is not None:
@@ -356,9 +391,13 @@ def _pin_beside_copies(
                 anchor[1] + fraction * (other[1] - anchor[1]),
             )
         elif anchor is not None:
-            point = (anchor[0] + placement.slots * BESIDE_GAP, anchor[1])
-        elif other is not None and placement.also_slots is not None:
-            point = (other[0] + placement.also_slots * BESIDE_GAP, other[1])
+            point = (anchor[0] + placement.slots * placement.gap, anchor[1])
+        elif (
+            other is not None
+            and placement.also_slots is not None
+            and placement.also_gap is not None
+        ):
+            point = (other[0] + placement.also_slots * placement.also_gap, other[1])
         else:
             continue
         rendered = f"{_format_coord(point[0])},{_format_coord(point[1])}!"
@@ -389,9 +428,10 @@ def apply_view(
     the view's own ``splines`` style. A
     view that positions any node also selects ``layout=neato`` with
     ``inputscale=72``. The ``beside`` rank clusters are removed, because
-    ``neato`` ignores them. A ``beside`` copy whose transition is pinned,
-    and whose place the view does not position, is pinned beside that
-    transition (ADR 0067).
+    ``neato`` ignores them. Each ``beside`` copy whose transition is pinned
+    is pinned beside that transition, including when the view also positions
+    the place (ADR 0067). The place position still resolves, so another
+    node can be relative to it.
     """
     positions, routes = _view_facts(raw, view_name)
     resolved = resolve_positions(view_name, positions)
@@ -406,6 +446,9 @@ def apply_view(
     route_by_arc = _validate_routes(view_name, routes, handles)
 
     lines = model.dot.splitlines()
+    # Beside wins for the drawn copies. The place position stays in
+    # ``resolved`` and is not painted onto those lines.
+    shadowed = {placement.line for placement in model.beside_placements}
     for subject, point in resolved.items():
         _validate_subject(subject, view_name)
         line_index_set = model.node_lines.get(subject)
@@ -415,6 +458,8 @@ def apply_view(
             )
         rendered = f"{point[0]},{point[1]}!"
         for line_index in line_index_set:
+            if line_index in shadowed:
+                continue
             lines[line_index] = _pos_statement_line(lines[line_index], rendered)
     for arc_index, (handle, points) in route_by_arc.items():
         if arc_index < 0 or arc_index >= len(model.arc_lines):

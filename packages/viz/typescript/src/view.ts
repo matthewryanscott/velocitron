@@ -10,9 +10,25 @@
 import type {BesidePlacement, RenderModel} from "./render.js";
 
 export const DEFAULT_VIEW = "default";
-// Points. Clears a short name plus one color line on both the transition
-// and the copy, in the coordinates `inputscale=72` reads (ADR 0067).
-export const BESIDE_GAP = 130;
+// Shared with the Python renderer (ADR 0067). Helvetica's average advance
+// is half the point size. Names are 14pt; color and behavior lines are 9pt.
+export const NAME_POINT = 14;
+export const SMALL_POINT = 9;
+export const NODE_PAD = 20;
+export const BESIDE_MARGIN = 24;
+
+export function textWidth(text: string, pointSize: number): number {
+  return (text.length * pointSize) / 2;
+}
+
+export function nodeWidth(lines: readonly (readonly [string, number])[]): number {
+  const widest = lines.reduce((width, [text, size]) => Math.max(width, textWidth(text, size)), 0);
+  return widest + NODE_PAD;
+}
+
+export function besideGap(transitionWidth: number, copyWidth: number): number {
+  return (transitionWidth + copyWidth) / 2 + BESIDE_MARGIN;
+}
 const VIEW_SPLINES = ["ortho", "spline", "curved", "polyline", "line"] as const;
 
 export class ViewApplicationError extends Error {
@@ -174,6 +190,7 @@ export function applyView(model: RenderModel, raw: unknown, viewName: string): s
   const routeByArc = validateRoutes(viewName, facts.routes, handles);
   const lines = model.dot.split("\n");
   if (lines.at(-1) === "") lines.pop();
+  const shadowed = new Set((model.besidePlacements ?? []).map((item) => item.line));
   for (const [subject, pointValue] of Object.entries(resolved)) {
     validateSubject(subject, viewName);
     const lineIndexes = model.nodeLines[subject];
@@ -184,6 +201,7 @@ export function applyView(model: RenderModel, raw: unknown, viewName: string): s
     }
     const rendered = `${pointValue[0]},${pointValue[1]}!`;
     for (const lineIndex of lineIndexes) {
+      if (shadowed.has(lineIndex)) continue;
       const line = lines[lineIndex];
       if (line === undefined) {
         throw new ViewApplicationError(
@@ -304,7 +322,6 @@ function besidePoint(
   placement: BesidePlacement,
   resolved: Readonly<Record<string, readonly [number, number]>>,
 ): readonly [number, number] | undefined {
-  if (Object.prototype.hasOwnProperty.call(resolved, placement.place)) return undefined;
   const anchor = resolved[placement.anchor];
   const other = placement.also === undefined ? undefined : resolved[placement.also];
   if (placement.also !== undefined && anchor !== undefined && other !== undefined) {
@@ -314,9 +331,9 @@ function besidePoint(
       anchor[1] + fraction * (other[1] - anchor[1]),
     ];
   }
-  if (anchor !== undefined) return [anchor[0] + placement.slots * BESIDE_GAP, anchor[1]];
-  if (other !== undefined && placement.alsoSlots !== undefined) {
-    return [other[0] + placement.alsoSlots * BESIDE_GAP, other[1]];
+  if (anchor !== undefined) return [anchor[0] + placement.slots * placement.gap, anchor[1]];
+  if (other !== undefined && placement.alsoSlots !== undefined && placement.alsoGap !== undefined) {
+    return [other[0] + placement.alsoSlots * placement.alsoGap, other[1]];
   }
   return undefined;
 }

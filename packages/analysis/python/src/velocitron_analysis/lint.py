@@ -65,6 +65,11 @@ RULE_READ_ONLY_PRODUCER = "read-only-producer"
 # (ADR 0067).
 RULE_FUSION_PLACE_POSITION = "fusion-place-position"
 
+# Stable rule id: a whole-place ``position`` on a fusion place that has
+# ``beside``. The copies are placed beside their transitions, so the
+# position does not land on them. It still anchors ``relative (P)``.
+RULE_BESIDE_POSITION_SHADOWED = "beside-position-shadowed"
+
 # CEL macros whose first argument binds a loop variable, not a free name.
 _BINDING_MACROS = frozenset({"all", "exists", "exists_one", "map", "filter"})
 
@@ -403,10 +408,29 @@ def _fusion_position_findings(net: Net) -> list[LintFinding]:
         if (view_name, name) in reported:
             continue
         reported.add((view_name, name))
-        if RULE_FUSION_PLACE_POSITION in suppressed_rules(fusion[name].annotations):
-            continue
+        decoration = decorations.nodes.get(f"place:{name}")
+        has_beside = decoration is not None and decoration.beside
         count = len(drawn.get(name, ()))
-        if count <= 1:
+        suppressed = suppressed_rules(fusion[name].annotations)
+        if has_beside and count >= 1:
+            if RULE_BESIDE_POSITION_SHADOWED in suppressed:
+                continue
+            noun = "copy" if count == 1 else "copies"
+            findings.append(
+                LintFinding(
+                    rule=RULE_BESIDE_POSITION_SHADOWED,
+                    transition="",
+                    place=name,
+                    view=view_name,
+                    message=(
+                        f"view {view_name!r} positions fusion place {name!r}; "
+                        f"beside shadows that position for the {count} drawn "
+                        f"{noun}, and the position still anchors relative ({name})"
+                    ),
+                )
+            )
+            continue
+        if count <= 1 or RULE_FUSION_PLACE_POSITION in suppressed:
             continue
         findings.append(
             LintFinding(
@@ -488,6 +512,7 @@ def lint_net(net: Net) -> list[LintFinding]:
 
 
 __all__ = [
+    "RULE_BESIDE_POSITION_SHADOWED",
     "RULE_CONSUME_WITHOUT_PRODUCE",
     "RULE_CORRELATE_FREE_NAME",
     "RULE_FUSION_PLACE_POSITION",

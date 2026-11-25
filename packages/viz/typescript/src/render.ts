@@ -25,7 +25,14 @@ import type {
   Token,
   Transition,
 } from "./schema/types.js";
-import type {Decoration, Decorations} from "./view.js";
+import {
+  NAME_POINT,
+  SMALL_POINT,
+  besideGap,
+  nodeWidth,
+  type Decoration,
+  type Decorations,
+} from "./view.js";
 
 const INPUT_PORT_FILL = "#e7f1fb";
 const INPUT_PORT_BORDER = "#1f6feb";
@@ -83,8 +90,10 @@ export interface BesidePlacement {
   readonly place: string;
   readonly anchor: string;
   readonly slots: number;
+  readonly gap: number;
   readonly also?: string;
   readonly alsoSlots?: number;
+  readonly alsoGap?: number;
   readonly betweenIndex: number;
   readonly betweenCount: number;
 }
@@ -299,9 +308,14 @@ export function fusionLayout(
 export function besidePlacements(
   layout: FusionLayout,
   drawn: ReadonlyMap<string, {line: number; place: string}>,
+  widths: ReadonlyMap<string, number>,
 ): BesidePlacement[] {
   // Keep this in step with `_beside_placements` in the Python renderer.
   const users = new Map<string, Set<string>>();
+  const sideGap = (anchor: string, nodes: readonly string[]): number => {
+    const widest = nodes.reduce((width, node) => Math.max(width, widths.get(node) ?? 0), 0);
+    return besideGap(widths.get(anchor) ?? 0, widest);
+  };
   for (const [key, copy] of layout.copies) {
     const transition = key.split("\0")[1];
     if (transition === undefined) continue;
@@ -310,7 +324,7 @@ export function besidePlacements(
     else found.add(transition);
   }
   const placements: BesidePlacement[] = [];
-  const own = (node: string, anchor: string, slots: number): void => {
+  const own = (node: string, anchor: string, slots: number, gap: number): void => {
     const copy = drawn.get(node);
     if (copy === undefined) return;
     placements.push({
@@ -318,6 +332,7 @@ export function besidePlacements(
       place: `place:${copy.place}`,
       anchor: `transition:${anchor}`,
       slots,
+      gap,
       betweenIndex: 0,
       betweenCount: 1,
     });
@@ -327,8 +342,16 @@ export function besidePlacements(
     const first = transAt[0];
     const last = transAt[transAt.length - 1];
     if (first === undefined || last === undefined) continue;
-    row.slice(0, first).reverse().forEach((node, index) => own(node, row[first]!, -(index + 1)));
-    row.slice(last + 1).forEach((node, index) => own(node, row[last]!, index + 1));
+    const leftNodes = row.slice(0, first).reverse();
+    if (leftNodes.length > 0) {
+      const gap = sideGap(row[first]!, leftNodes);
+      leftNodes.forEach((node, index) => own(node, row[first]!, -(index + 1), gap));
+    }
+    const rightNodes = row.slice(last + 1);
+    if (rightNodes.length > 0) {
+      const gap = sideGap(row[last]!, rightNodes);
+      rightNodes.forEach((node, index) => own(node, row[last]!, index + 1, gap));
+    }
     for (let pair = 0; pair < transAt.length - 1; pair += 1) {
       const leftIndex = transAt[pair]!;
       const rightIndex = transAt[pair + 1]!;
@@ -343,11 +366,13 @@ export function besidePlacements(
         else if (used.has(rightName) && !used.has(leftName)) ownLeft.push(node);
         else ownRight.push(node);
       }
-      ownRight.forEach((node, index) => own(node, leftName, index + 1));
+      const gapRight = ownRight.length + shared.length > 0 ? sideGap(leftName, [...ownRight, ...shared]) : 0;
+      const gapLeft = ownLeft.length + shared.length > 0 ? sideGap(rightName, [...ownLeft, ...shared]) : 0;
+      ownRight.forEach((node, index) => own(node, leftName, index + 1, gapRight));
       ownLeft
         .slice()
         .reverse()
-        .forEach((node, index) => own(node, rightName, -(index + 1)));
+        .forEach((node, index) => own(node, rightName, -(index + 1), gapLeft));
       shared.forEach((node, index) => {
         const copy = drawn.get(node);
         if (copy === undefined) return;
@@ -356,8 +381,10 @@ export function besidePlacements(
           place: `place:${copy.place}`,
           anchor: `transition:${leftName}`,
           slots: ownRight.length + index + 1,
+          gap: gapRight,
           also: `transition:${rightName}`,
           alsoSlots: -(ownLeft.length + (shared.length - index)),
+          alsoGap: gapLeft,
           betweenIndex: index,
           betweenCount: shared.length,
         });
@@ -479,6 +506,7 @@ function netBody(
   const tokensOf = (place: Place): readonly Token[] => selected?.[place.name] ?? [];
   const nodeDecoration = (key: string): Decoration => args.decorations.nodes[key] ?? NO_DECORATION;
   const lines: string[] = [];
+  const widths = new Map<string, number>();
   for (const place of net.places) {
     if (fusion.has(place.name)) continue;
     args.recorder?.recordNode(`place:${place.name}`, lines.length);
@@ -492,7 +520,9 @@ function netBody(
   lines.push("");
   for (const transition of net.transitions) {
     args.recorder?.recordNode(`transition:${transition.name}`, lines.length);
-    const attrs = transitionAttrs(transition, args.style, nodeDecoration(`transition:${transition.name}`));
+    const transitionDecoration = nodeDecoration(`transition:${transition.name}`);
+    widths.set(transition.name, nodeWidth(measureTransition(transition, args.style, transitionDecoration)));
+    const attrs = transitionAttrs(transition, args.style, transitionDecoration);
     lines.push(`${indent}${quote(`${prefix}${transition.name}`)} [${attrs}];`);
   }
   lines.push("");
@@ -508,8 +538,10 @@ function netBody(
       if (place === undefined || placeName === undefined || transitionName === undefined) continue;
       args.recorder?.recordNode(`place:${placeName}`, lines.length);
       drawn.set(copy, {line: lines.length, place: placeName});
+      const label = memberLabel(placeName, transitions.get(transitionName));
+      widths.set(copy, nodeWidth(measurePlace(label, place, nodeDecoration(`place:${placeName}`))));
       const attrs = placeAttrs(place, tokensOf(place), {
-        label: memberLabel(placeName, transitions.get(transitionName)),
+        label,
         style: args.style,
         fusion: true,
         decoration: nodeDecoration(`place:${placeName}`),
@@ -519,7 +551,7 @@ function netBody(
     lines.push("");
   }
   if (args.recorder !== undefined) {
-    for (const placement of besidePlacements(layout, drawn)) {
+    for (const placement of besidePlacements(layout, drawn, widths)) {
       args.recorder.recordBesidePlacement(placement);
     }
   }
@@ -538,6 +570,43 @@ function netBody(
     args.recorder?.recordBeside(lines.length);
     lines.push(statement);
   }
+  return lines;
+}
+
+function measurePlace(
+  name: string,
+  place: Place,
+  decoration: Decoration,
+): Array<readonly [string, number]> {
+  const lines: Array<readonly [string, number]> = [[name, NAME_POINT]];
+  const colors = place.accepts.filter((type) => type !== GENERIC);
+  if (colors.length > 0) lines.push([`⟨${colors.join(", ")}⟩`, SMALL_POINT]);
+  if (typeof decoration.highlightLabel === "string") lines.push([decoration.highlightLabel, SMALL_POINT]);
+  if (typeof decoration.note === "string") lines.push([decoration.note, SMALL_POINT]);
+  return lines;
+}
+
+function measureTransition(
+  transition: Transition,
+  style: Style,
+  decoration: Decoration,
+): Array<readonly [string, number]> {
+  const lines: Array<readonly [string, number]> = [[transition.name, NAME_POINT]];
+  if (decoration.faded === true) return lines;
+  const summary = style.detail === "summary" && typeof decoration.summary === "string"
+    ? decoration.summary
+    : undefined;
+  if (style.detail !== "structure") {
+    if (transition.handler !== undefined) lines.push([`${transition.handler}()`, SMALL_POINT]);
+    if (summary !== undefined) lines.push([summary, SMALL_POINT]);
+    else if (transition.guard !== undefined) lines.push([`guard: ${transition.guard}?`, SMALL_POINT]);
+    if (summary === undefined) {
+      if (transition.timer !== undefined) lines.push([`timer: ${transition.timer.cel}`, SMALL_POINT]);
+      if (transition.priority !== undefined) lines.push([`priority ${transition.priority}`, SMALL_POINT]);
+    }
+  }
+  if (typeof decoration.highlightLabel === "string") lines.push([decoration.highlightLabel, SMALL_POINT]);
+  if (typeof decoration.note === "string") lines.push([decoration.note, SMALL_POINT]);
   return lines;
 }
 

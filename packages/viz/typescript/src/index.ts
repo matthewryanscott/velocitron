@@ -48,10 +48,16 @@ export type {
   Transition,
 } from "./schema/types.js";
 export {
-  BESIDE_GAP,
+  BESIDE_MARGIN,
   DEFAULT_VIEW,
+  NAME_POINT,
+  NODE_PAD,
+  SMALL_POINT,
   ViewApplicationError,
   applyView,
+  besideGap,
+  nodeWidth,
+  textWidth,
   hasView,
   readDecorations,
   resolvePositions,

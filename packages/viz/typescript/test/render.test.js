@@ -1,9 +1,12 @@
 import assert from "node:assert/strict";
 import {describe, it} from "node:test";
 import {
-  BESIDE_GAP,
+  NAME_POINT,
+  SMALL_POINT,
   ViewApplicationError,
   applyView,
+  besideGap,
+  nodeWidth,
   fusionCopy,
   fusionLayout,
   netRenderModel,
@@ -207,6 +210,22 @@ describe("net rendering", () => {
     assert.throws(() => applyView(model, raw, "missing"), ViewApplicationError);
   });
 
+  function coord(value) {
+    return Number.isInteger(value) ? String(value) : String(value);
+  }
+
+  function placeWidth(name, color) {
+    return nodeWidth([[name, NAME_POINT], [`⟨${color}⟩`, SMALL_POINT]]);
+  }
+
+  function transitionWidth(name) {
+    return nodeWidth([[name, NAME_POINT]]);
+  }
+
+  function gap(transition, place, color) {
+    return besideGap(transitionWidth(transition), placeWidth(place, color));
+  }
+
   function lanes(positions) {
     return {
       annotations: {
@@ -283,10 +302,11 @@ describe("net rendering", () => {
       "lanes",
     );
     // then: each copy sits one gap to the left of its own transition
-    assert.ok(nodeLine(dot, "lock@acquire_a").includes(`pos="-${BESIDE_GAP},300!"`));
-    assert.ok(nodeLine(dot, "lock@release_a").includes(`pos="-${BESIDE_GAP},100!"`));
-    assert.ok(nodeLine(dot, "lock@acquire_b").includes(`pos="${300 - BESIDE_GAP},300!"`));
-    assert.ok(nodeLine(dot, "lock@release_b").includes(`pos="${300 - BESIDE_GAP},100!"`));
+    const lockGap = gap("acquire_a", "lock", "permit");
+    assert.ok(nodeLine(dot, "lock@acquire_a").includes(`pos="-${coord(lockGap)},300!"`));
+    assert.ok(nodeLine(dot, "lock@release_a").includes(`pos="-${coord(lockGap)},100!"`));
+    assert.ok(nodeLine(dot, "lock@acquire_b").includes(`pos="${coord(300 - lockGap)},300!"`));
+    assert.ok(nodeLine(dot, "lock@release_b").includes(`pos="${coord(300 - lockGap)},100!"`));
     assert.ok(dot.includes("layout=neato;"));
     assert.equal(dot.includes("cluster_beside"), false);
     assert.equal(dot.includes("style=invis"), false);
@@ -324,8 +344,9 @@ describe("net rendering", () => {
       "lanes",
     );
     // then: the first copy is nearest, and the second is one gap farther
-    assert.ok(nodeLine(dot, "switch@start").includes(`pos="-${BESIDE_GAP},0!"`));
-    assert.ok(nodeLine(dot, "budget@start").includes(`pos="-${2 * BESIDE_GAP},0!"`));
+    const step = gap("start", "switch", "job");
+    assert.ok(nodeLine(dot, "switch@start").includes(`pos="-${coord(step)},0!"`));
+    assert.ok(nodeLine(dot, "budget@start").includes(`pos="-${coord(2 * step)},0!"`));
   });
 
   it("places a shared beside copy between two pinned transitions", () => {
@@ -344,11 +365,77 @@ describe("net rendering", () => {
     const one = applyView(model, lanes({"transition:hold": {x: 0, y: 0}}), "lanes");
     // then: both pins put the copy at the midpoint, and one pin puts it one gap right
     assert.ok(nodeLine(both, "switch@hold+skip").includes('pos="150,0!"'));
-    assert.ok(nodeLine(one, "switch@hold+skip").includes(`pos="${BESIDE_GAP},0!"`));
+    assert.ok(nodeLine(one, "switch@hold+skip").includes(`pos="${coord(gap("hold", "switch", "job"))},0!"`));
   });
 
-  it("keeps a whole-place position on every fusion copy", () => {
-    // given: the lease lock, with a position on the place as well as a transition
+  it("places the beside conformance net the way lanes and lanes_lock ask", () => {
+    // given: the 20-decoration-beside net, with a pinned view and a lanes_lock view
+    const net = {
+      name: "beside",
+      places: [
+        {name: "queued", accepts: ["job"]},
+        {name: "running", accepts: ["job"]},
+        {name: "done", accepts: ["job"]},
+        {name: "switch", accepts: ["flag"], annotations: {fusion: true}},
+        {name: "budget", accepts: ["credit"], annotations: {fusion: true}},
+      ],
+      transitions: [{name: "start"}, {name: "finish"}],
+      arcs: [
+        arc("queued", "start", "job"),
+        arc("start", {place: "running", type: "job"}, "produce"),
+        arc("running", "finish", "job"),
+        arc("finish", {place: "done", type: "job"}, "produce"),
+        arc("switch", "start", "flag"),
+        arc("switch", "finish", "flag"),
+        arc("budget", "start", "flag"),
+      ],
+    };
+    const decorations = {
+      nodes: {
+        "place:switch": {beside: true, besideSide: "left"},
+        "place:budget": {beside: true},
+      },
+      arcs: {},
+      quietColors: [],
+      shownFields: {},
+    };
+    const model = netRenderModel(net, {decorations});
+    const start = gap("start", "switch", "flag");
+    const finish = gap("finish", "switch", "flag");
+    const budget = gap("start", "budget", "credit");
+    // when: lanes pins the transitions
+    const lanesDot = applyView(
+      model,
+      lanes({
+        "transition:start": {x: 0, y: 200},
+        "transition:finish": {from: "transition:start", delta: {x: 0, y: -200}},
+      }),
+      "lanes",
+    );
+    // then: switch is left of each transition and budget is right of start
+    assert.ok(nodeLine(lanesDot, "switch@start").includes(`pos="-${coord(start)},200!"`));
+    assert.ok(nodeLine(lanesDot, "switch@finish").includes(`pos="-${coord(finish)},0!"`));
+    assert.ok(nodeLine(lanesDot, "budget@start").includes(`pos="${coord(budget)},200!"`));
+    assert.ok(lanesDot.includes("constraint=false"));
+    // when: lanes_lock also positions switch, and done is relative to it
+    const locked = applyView(
+      model,
+      lanes({
+        "transition:start": {x: 0, y: 200},
+        "transition:finish": {from: "transition:start", delta: {x: 0, y: -200}},
+        "place:switch": {x: 40, y: 0},
+        "place:done": {from: "place:switch", delta: {x: 80, y: 0}},
+      }),
+      "lanes",
+    );
+    // then: beside still places the copies, and done sits on the place anchor
+    assert.ok(nodeLine(locked, "switch@start").includes(`pos="-${coord(start)},200!"`));
+    assert.equal(nodeLine(locked, "switch@start").includes('pos="40,0!"'), false);
+    assert.ok(nodeLine(locked, "done").includes('pos="120,0!"'));
+  });
+
+  it("lets beside win for copies while the place position anchors relative", () => {
+    // given: a fusion lock with beside, a place position, and one pinned transition
     const net = {
       name: "lease_lock",
       places: [
@@ -378,12 +465,15 @@ describe("net rendering", () => {
       lanes({
         "transition:acquire": {x: 0, y: 0},
         "place:lock": {x: 10, y: 20},
+        "place:ready": {from: "place:lock", delta: {x: 10, y: 0}},
       }),
       "lanes",
     );
-    // then: every copy takes the place position
-    assert.ok(nodeLine(dot, "lock@acquire").includes('pos="10,20!"'));
-    assert.ok(nodeLine(dot, "lock@release").includes('pos="10,20!"'));
-    assert.equal(dot.includes(`pos="-${BESIDE_GAP},0!"`), false);
+    // then: the pinned copy sits beside acquire, and ready uses the place point
+    const lockGap = gap("acquire", "lock", "permit");
+    assert.ok(nodeLine(dot, "lock@acquire").includes(`pos="-${coord(lockGap)},0!"`));
+    assert.equal(nodeLine(dot, "lock@acquire").includes('pos="10,20!"'), false);
+    assert.equal(nodeLine(dot, "lock@release").includes("pos="), false);
+    assert.ok(nodeLine(dot, "ready").includes('pos="20,20!"'));
   });
 });

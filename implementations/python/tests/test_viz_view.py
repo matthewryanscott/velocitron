@@ -10,7 +10,10 @@ from velocitron_petrinet import compile_petrinet_text
 from velocitron_petrinet import parse_net
 from velocitron_cli import viz_main as main
 from velocitron_viz import (
-    BESIDE_GAP,
+    NAME_POINT,
+    SMALL_POINT,
+    beside_gap,
+    node_width,
     RenderModel,
     net_render_model,
     net_to_dot,
@@ -812,7 +815,13 @@ def test_a_positioned_view_places_a_beside_copy_and_drops_rank_clusters(
         assert "newrank" not in dot
         assert "cluster_beside" not in dot
         assert "style=invis" not in dot
-    assert f'pos="-{BESIDE_GAP},0!"' in _line_with(pinned, '"switch@start" [')
+    gap = beside_gap(
+        node_width([("start", NAME_POINT)]),
+        node_width([("switch", NAME_POINT), ("⟨flag⟩", SMALL_POINT)]),
+    )
+    number = float(gap)
+    rendered = str(int(number)) if number.is_integer() else str(number)
+    assert f'pos="-{rendered},0!"' in _line_with(pinned, '"switch@start" [')
     assert "pos=" not in _line_with(pinned, '"switch@finish" [')
 
 
@@ -853,11 +862,19 @@ def test_a_lease_lock_view_places_each_fused_copy_beside_its_transition(
     assert main([str(source), "--view", "lanes", "--plain-labels"]) == 0
     dot = capsys.readouterr().out
     # then: each copy sits one gap to the left of its transition, not on one point
-    gap = BESIDE_GAP
-    assert f'pos="-{gap},300!"' in _line_with(dot, '"lock@acquire_a" [')
-    assert f'pos="-{gap},100!"' in _line_with(dot, '"lock@release_a" [')
-    assert f'pos="{300 - gap},300!"' in _line_with(dot, '"lock@acquire_b" [')
-    assert f'pos="{300 - gap},100!"' in _line_with(dot, '"lock@release_b" [')
+    gap = beside_gap(
+        node_width([("acquire_a", NAME_POINT)]),
+        node_width([("lock", NAME_POINT), ("⟨permit⟩", SMALL_POINT)]),
+    )
+
+    def coord(value: float) -> str:
+        number = float(value)
+        return str(int(number)) if number.is_integer() else str(number)
+
+    assert f'pos="-{coord(gap)},300!"' in _line_with(dot, '"lock@acquire_a" [')
+    assert f'pos="-{coord(gap)},100!"' in _line_with(dot, '"lock@release_a" [')
+    assert f'pos="{coord(300 - gap)},300!"' in _line_with(dot, '"lock@acquire_b" [')
+    assert f'pos="{coord(300 - gap)},100!"' in _line_with(dot, '"lock@release_b" [')
     assert "layout=neato;" in dot
     assert "cluster_beside" not in dot
 
