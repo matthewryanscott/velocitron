@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+import shutil
+import subprocess
+from pathlib import Path
+
 import velocitron_viz
 from velocitron_viz import (
     Arc,
@@ -439,7 +443,7 @@ def test_a_shared_beside_copy_sits_between_two_pinned_transitions() -> None:
     )
 
 
-def test_beside_wins_for_copies_and_the_place_position_stays_an_anchor() -> None:
+def test_a_whole_place_position_beats_beside_and_stays_an_anchor() -> None:
     # given: the lease lock, with a position on the place and on one transition
     net = _lease_lock()
     decorations = Decorations(
@@ -451,17 +455,16 @@ def test_beside_wins_for_copies_and_the_place_position_stays_an_anchor() -> None
         _lanes(
             {
                 "transition:acquire_a": {"x": 0, "y": 0},
+                "transition:release_a": {"x": 200, "y": 0},
                 "place:lock": {"x": 10, "y": 20},
                 "place:ready_a": {"from": "place:lock", "delta": {"x": 10, "y": 0}},
             }
         ),
         "lanes",
     )
-    # then: the pinned transition's copy sits beside it, and ready_a uses the place
-    gap = _gap("acquire_a", "lock", "permit")
-    assert f'pos="-{_coord(gap)},0!"' in _node(dot, "lock@acquire_a")
-    assert 'pos="10,20!"' not in _node(dot, "lock@acquire_a")
-    assert "pos=" not in _node(dot, "lock@release_a")
+    # then: both copies take the place point, and ready_a uses that anchor
+    assert 'pos="10,20!"' in _node(dot, "lock@acquire_a")
+    assert 'pos="10,20!"' in _node(dot, "lock@release_a")
     assert 'pos="20,20!"' in _node(dot, "ready_a")
 
 
@@ -540,3 +543,252 @@ def test_a_composition_draws_clusters_and_wires_from_parsed_nets() -> None:
     assert legend_dot().startswith("digraph ")
     assert not hasattr(velocitron_viz, "main")
     assert not hasattr(render_mod, "main")
+
+
+def test_a_copy_position_beats_the_place_which_beats_beside() -> None:
+    # given: beside lock, a place position, one copy position, and a relative base
+    net = _lease_lock()
+    decorations = Decorations(
+        nodes={"place:lock": Decoration(beside=True, beside_side="left")}
+    )
+    model = net_render_model(net, decorations=decorations)
+    # when: the view is applied
+    dot = apply_view(
+        model,
+        _lanes(
+            {
+                "transition:acquire_a": {"x": 0, "y": 0},
+                "transition:release_a": {"x": 200, "y": 0},
+                "place:lock": {"x": 10, "y": 20},
+                "place:lock@transition:acquire_a": {
+                    "from": "transition:acquire_a",
+                    "delta": {"x": -70, "y": 0},
+                },
+                "place:ready_a": {
+                    "from": "place:lock@transition:acquire_a",
+                    "delta": {"x": 5, "y": 0},
+                },
+            }
+        ),
+        "lanes",
+    )
+    # then: the copy entry wins, the other copy takes the place, and ready_a
+    # sits on the copy's rendered point
+    assert model.copy_lines[("lock", "acquire_a")] != model.copy_lines[
+        ("lock", "release_a")
+    ]
+    assert 'pos="-70,0!"' in _node(dot, "lock@acquire_a")
+    assert 'pos="10,20!"' in _node(dot, "lock@release_a")
+    assert 'pos="-65,0!"' in _node(dot, "ready_a")
+    assert f'pos="-{_coord(_gap("release_a", "lock", "permit"))},0!"' not in _node(
+        dot, "lock@release_a"
+    )
+
+
+def test_a_shared_copy_uses_its_one_agreed_position() -> None:
+    # given: hold and skip share one beside copy
+    switch = Place("switch", ["job"], annotations={"fusion": True})
+    net = _choice(
+        [_read_switch("hold"), _read_switch("skip")], [switch], ["hold", "skip"]
+    )
+    decorations = Decorations(nodes={"place:switch": Decoration(beside=True)})
+    model = net_render_model(net, decorations=decorations)
+    # when: one agreed entry places the shared copy, and pending is relative to it
+    dot = apply_view(
+        model,
+        _lanes(
+            {
+                "transition:hold": {"x": 0, "y": 0},
+                "transition:skip": {"x": 300, "y": 0},
+                "place:switch": {"x": 10, "y": 10},
+                "place:switch@transition:hold": {"x": 40, "y": 80},
+                "place:switch@transition:skip": {"x": 40, "y": 80},
+                "place:pending": {
+                    "from": "place:switch@transition:skip",
+                    "delta": {"x": 0, "y": -10},
+                },
+            }
+        ),
+        "lanes",
+    )
+    # then: both transitions name the same line, and that line is the entry
+    assert model.copy_lines[("switch", "hold")] == model.copy_lines[("switch", "skip")]
+    assert 'pos="40,80!"' in _node(dot, "switch@hold+skip")
+    assert 'pos="150,0!"' not in _node(dot, "switch@hold+skip")
+    assert 'pos="40,70!"' in _node(dot, "pending")
+    # and: two different points for that one copy are rejected
+    try:
+        apply_view(
+            model,
+            _lanes(
+                {
+                    "place:switch@transition:hold": {"x": 1, "y": 1},
+                    "place:switch@transition:skip": {"x": 2, "y": 2},
+                }
+            ),
+            "lanes",
+        )
+    except ViewApplicationError as error:
+        assert "shared copy of place 'switch'" in str(error)
+    else:
+        raise AssertionError("disagreeing shared-copy positions were accepted")
+
+
+def _six_lock() -> Net:
+    # given: one fusion lock used by three workers, six drawn copies
+    arcs: list[Arc] = []
+    places = [Place("lock", ["permit"], annotations={"fusion": True})]
+    transitions: list[Transition] = []
+    for worker in ("a", "b", "c"):
+        places.extend(
+            [
+                Place(f"ready_{worker}", ["job"]),
+                Place(f"held_{worker}", ["job"]),
+                Place(f"done_{worker}", ["job"]),
+            ]
+        )
+        transitions.extend(
+            [Transition(f"acquire_{worker}"), Transition(f"release_{worker}")]
+        )
+        arcs.extend(
+            [
+                Arc(
+                    from_place=f"ready_{worker}",
+                    to_transition=f"acquire_{worker}",
+                    consume=ConsumePattern("job", None, "consume"),
+                ),
+                Arc(
+                    from_place="lock",
+                    to_transition=f"acquire_{worker}",
+                    consume=ConsumePattern("permit", None, "consume"),
+                ),
+                Arc(
+                    from_transition=f"acquire_{worker}",
+                    to_place=f"held_{worker}",
+                    produce=ProduceTemplate("job", f"held_{worker}"),
+                ),
+                Arc(
+                    from_place=f"held_{worker}",
+                    to_transition=f"release_{worker}",
+                    consume=ConsumePattern("job", None, "consume"),
+                ),
+                Arc(
+                    from_transition=f"release_{worker}",
+                    to_place=f"done_{worker}",
+                    produce=ProduceTemplate("job", f"done_{worker}"),
+                ),
+                Arc(
+                    from_transition=f"release_{worker}",
+                    to_place="lock",
+                    produce=ProduceTemplate("permit", "lock"),
+                ),
+            ]
+        )
+    return Net(name="lease_lock", places=places, transitions=transitions, arcs=arcs)
+
+
+def _six_positions() -> dict[str, object]:
+    positions: dict[str, object] = {"place:lock": {"x": 9999, "y": 9999}}
+    for index, worker in enumerate(("a", "b", "c")):
+        origin = index * 640
+        positions[f"transition:acquire_{worker}"] = {"x": origin, "y": 560}
+        positions[f"transition:release_{worker}"] = {"x": origin, "y": 0}
+        positions[f"place:lock@transition:acquire_{worker}"] = {
+            "x": origin - 220,
+            "y": 560,
+        }
+        positions[f"place:lock@transition:release_{worker}"] = {
+            "x": origin - 220,
+            "y": 0,
+        }
+        positions[f"place:held_{worker}"] = {"x": origin, "y": 280}
+        positions[f"place:done_{worker}"] = {"x": origin, "y": -280}
+        if worker == "a":
+            positions["place:ready_a"] = {
+                "from": "place:lock@transition:acquire_a",
+                "delta": {"x": 0, "y": 280},
+            }
+        else:
+            positions[f"place:ready_{worker}"] = {"x": origin, "y": 840}
+    return positions
+
+
+def six_lock_dot() -> str:
+    """The pinned six-copy lock, the golden both renderers must match."""
+    decorations = Decorations(
+        nodes={"place:lock": Decoration(beside=True, beside_side="left")}
+    )
+    return apply_view(
+        net_render_model(_six_lock(), decorations=decorations),
+        _lanes(_six_positions()),
+        "lanes",
+    )
+
+
+def _plain_layout(dot: str) -> tuple[float, dict[str, tuple[float, float]]]:
+    binary = shutil.which("dot")
+    assert binary is not None, "graphviz dot is required"
+    completed = subprocess.run(
+        [binary, "-Tplain"],
+        input=dot,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    assert completed.returncode == 0, completed.stderr
+    scale = 0.0
+    nodes: dict[str, tuple[float, float]] = {}
+    for line in completed.stdout.splitlines():
+        parts = line.split()
+        if not parts:
+            continue
+        if parts[0] == "graph":
+            scale = float(parts[1])
+        elif parts[0] == "node":
+            # Plain output quotes a name that contains ``@``. The origin is
+            # the layout's corner, so callers compare distances, not raw x, y.
+            nodes[parts[1].strip('"')] = (float(parts[2]), float(parts[3]))
+    return scale, nodes
+
+
+def test_six_pinned_lock_copies_do_not_stack_or_scale() -> None:
+    # given: three workers, six copies, each copy pinned on its own point
+    dot = six_lock_dot()
+    copies = [
+        f"lock@{step}_{worker}"
+        for worker in ("a", "b", "c")
+        for step in ("acquire", "release")
+    ]
+    # when: the golden drawing is read, and neato lays it out
+    golden = (
+        Path(__file__).resolve().parents[2] / "fixtures" / "lease-lock-six-copies.dot"
+    )
+    placed = [_node(dot, name) for name in copies]
+    points = []
+    for line in placed:
+        start = line.index('pos="') + 5
+        points.append(line[start : line.index("!", start)])
+    scale, plain = _plain_layout(dot)
+    # then: the drawing matches the other renderer, no two copies share a point,
+    # the whole-place point is unused, and overlap=scale does not shrink it
+    assert dot == golden.read_text(encoding="utf-8")
+    assert len(set(points)) == 6
+    assert "9999,9999" not in dot
+    assert 'pos="-220,840!"' in _node(dot, "ready_a")
+    # overlap=scale leaves the pins. Plain coordinates are shifted to the
+    # layout corner; the distances between copies stay the authored ones.
+    assert scale == 1
+    anchor = plain["lock@acquire_a"]
+    shift = (anchor[0] - (-220 / 72), anchor[1] - (560 / 72))
+    for worker_index, worker in enumerate(("a", "b", "c")):
+        origin = worker_index * 640
+        for name, point in (
+            (f"lock@acquire_{worker}", (origin - 220, 560)),
+            (f"lock@release_{worker}", (origin - 220, 0)),
+        ):
+            found = plain[name]
+            assert abs(found[0] - (point[0] / 72 + shift[0])) < 0.02, (name, found)
+            assert abs(found[1] - (point[1] / 72 + shift[1])) < 0.02, (name, found)
+    ready = plain["ready_a"]
+    copy = plain["lock@acquire_a"]
+    assert abs((ready[1] - copy[1]) - (280 / 72)) < 0.02
