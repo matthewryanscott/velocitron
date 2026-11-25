@@ -9,6 +9,9 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
+import shutil
+import subprocess
 import sys
 from collections.abc import Mapping, Sequence
 from dataclasses import replace
@@ -30,21 +33,28 @@ from velocitron_viz import (
     DEFAULT_VIEW,
     DETAIL_LEVELS,
     Composition,
+    LayoutMetricsError,
     Marking,
     Net,
     RenderStyle,
     Token,
     apply_view,
+    arc_handle_index,
     composition_overview_dot,
     composition_ports_dot,
     composition_to_dot,
     has_view,
+    layout_metrics,
     legend_dot,
     net_render_model,
     net_to_dot,
     read_decorations,
+    stamp_arc_ids,
     view_setting,
 )
+
+_LAYOUT_LINE = re.compile(r"(?m)^[ \t]*layout=([A-Za-z_][A-Za-z0-9_]*)\s*;\s*$")
+_GRAPHVIZ_VERSION = re.compile(r"graphviz version (\S+)")
 
 __all__ = ["main"]
 
@@ -219,6 +229,121 @@ def _named_marking(raw_document: Mapping[str, Any], name: str) -> Mapping[str, A
     return cast(dict[str, Any], marking)
 
 
+def _layout_engine(dot: str) -> str:
+    """The engine named by a ``layout=`` line, or ``dot`` when the DOT names none."""
+    match = _LAYOUT_LINE.search(dot)
+    return match.group(1) if match is not None else "dot"
+
+
+def _graphviz_binary(engine: str) -> str:
+    binary = shutil.which(engine)
+    if binary is None:
+        raise _VizError(
+            f"Graphviz is required for --metrics but {engine!r} was not found on PATH"
+        )
+    return binary
+
+
+def _graphviz_version(engine: str) -> str | None:
+    """The version Graphviz prints for ``engine -V``, when that binary exists."""
+    binary = shutil.which(engine) or shutil.which("dot")
+    if binary is None:
+        return None
+    try:
+        completed = subprocess.run(
+            [binary, "-V"],
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    match = _GRAPHVIZ_VERSION.search(completed.stderr or completed.stdout)
+    return match.group(1) if match is not None else None
+
+
+def _run_graphviz(dot: str, engine: str) -> str:
+    """Lay ``dot`` out with ``engine -Tjson`` and return the JSON text."""
+    try:
+        completed = subprocess.run(
+            [_graphviz_binary(engine), "-Tjson"],
+            input=dot,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=60,
+        )
+    except subprocess.TimeoutExpired as error:
+        raise _VizError(f"Graphviz {engine} timed out") from error
+    except OSError as error:
+        raise _VizError(f"Graphviz {engine} could not be started") from error
+    if completed.returncode != 0:
+        detail = completed.stderr.strip().splitlines()
+        suffix = detail[-1] if detail else f"exit {completed.returncode}"
+        raise _VizError(f"Graphviz {engine} failed: {suffix}")
+    return completed.stdout
+
+
+def _metrics_document(
+    report: Mapping[str, Any], *, graphviz_version: str | None, engine: str | None
+) -> dict[str, Any]:
+    """The printed metrics object, with the engine that actually drew it."""
+    return {
+        "crossings": report["crossings"],
+        "pairs": report["pairs"],
+        "overlaps": report["overlaps"],
+        "edge_node_overlaps": report["edge_node_overlaps"],
+        "edge_length": report["edge_length"],
+        "bends": report["bends"],
+        "graphviz_version": graphviz_version,
+        "engine": engine,
+    }
+
+
+def _measure_dot(dot: str) -> dict[str, Any]:
+    engine = _layout_engine(dot)
+    try:
+        measured = layout_metrics(_run_graphviz(dot, engine))
+    except LayoutMetricsError as error:
+        raise _VizError(str(error)) from error
+    return _metrics_document(
+        measured,
+        graphviz_version=_graphviz_version(engine),
+        engine=engine,
+    )
+
+
+def _measure_json(text: str) -> dict[str, Any]:
+    try:
+        measured = layout_metrics(text)
+    except LayoutMetricsError as error:
+        raise _VizError(str(error)) from error
+    engine = measured["engine"]
+    version_engine = engine if isinstance(engine, str) else "dot"
+    return _metrics_document(
+        measured,
+        graphviz_version=_graphviz_version(version_engine),
+        engine=engine if isinstance(engine, str) else None,
+    )
+
+
+def _write_metrics(report: Mapping[str, Any], output: Path | None) -> int:
+    text = json.dumps(report, indent=2, ensure_ascii=False) + "\n"
+    try:
+        if output is not None:
+            output.write_text(text, encoding="utf-8")
+        else:
+            sys.stdout.write(text)
+    except OSError:
+        destination = output if output is not None else Path("<stdout>")
+        sys.stderr.write(
+            f"velocitron-viz: error: could not write output {_json_quote(str(destination))}\n"
+        )
+        return 1
+    return 0
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     """CLI: render a net or composition document to Graphviz DOT."""
     parser = argparse.ArgumentParser(
@@ -244,7 +369,12 @@ def main(argv: Sequence[str] | None = None) -> int:
             "  velocitron-viz design.petrinet --marking-json "
             '\'{"request_in":[{"type":"request","data":{"id":"r-17"}}]}\'\n'
             "  velocitron-viz design.petrinet --no-marking\n"
-            "  velocitron-viz design.petrinet --direction=lr"
+            "  velocitron-viz design.petrinet --direction=lr\n"
+            "\n"
+            "Layout metrics (JSON on stdout):\n"
+            "  velocitron-viz design.petrinet --metrics\n"
+            "  velocitron-viz design.petrinet --metrics --view window\n"
+            "  velocitron-viz --metrics -"
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
@@ -383,7 +513,32 @@ def main(argv: Sequence[str] | None = None) -> int:
         action="store_true",
         help="Emit the feature legend instead of rendering a document.",
     )
+    parser.add_argument(
+        "--metrics",
+        action="store_true",
+        help=(
+            "Print layout metrics as JSON instead of DOT. "
+            "Runs the Graphviz engine named in the DOT (dot, or neato when "
+            "a view pins positions). With source -, read Graphviz -Tjson "
+            "from stdin."
+        ),
+    )
     args = parser.parse_args(argv)
+
+    if args.metrics and args.fence:
+        parser.error("--fence cannot be combined with --metrics")
+    if args.metrics and args.legend:
+        parser.error("--legend cannot be combined with --metrics")
+    if args.source is not None and str(args.source) == "-":
+        if not args.metrics:
+            parser.error("reading - requires --metrics")
+        if args.legend or args.view is not None or args.no_view:
+            parser.error("--metrics - reads Graphviz JSON and does not take a view")
+        try:
+            return _write_metrics(_measure_json(sys.stdin.read()), args.output)
+        except _VizError as error:
+            sys.stderr.write(f"velocitron-viz: error: {error}\n")
+            return 1
 
     style = RenderStyle(
         html_labels=not (args.plain_labels or args.doc),
@@ -460,11 +615,19 @@ def main(argv: Sequence[str] | None = None) -> int:
                     render_fusion=render_fusion,
                     decorations=decorations,
                 )
+                model = replace(
+                    model,
+                    dot=stamp_arc_ids(model, arc_handle_index(raw_document)),
+                )
                 if view_name is not None:
                     dot = apply_view(model, raw_document, view_name)
                 else:
                     dot = model.dot
+                if args.metrics:
+                    return _write_metrics(_measure_dot(dot), args.output)
             else:
+                if args.metrics:
+                    raise _VizError("--metrics applies to a standalone net")
                 assert isinstance(document, Composition)
                 if has_marking_selector:
                     parser.error(
@@ -523,5 +686,3 @@ def main(argv: Sequence[str] | None = None) -> int:
         )
         return 1
     return 0
-
-
