@@ -271,7 +271,7 @@ viewDetail
     ;
 
 viewTarget
-    : place
+    : place (AT transition)?
     | transition
     ;
 

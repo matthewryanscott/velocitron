@@ -1651,11 +1651,20 @@ class LoweringVisitor {
   #viewTarget(target: ViewTargetContext): ReadonlyJsonObject {
     const place = target.place() as PlaceContext | undefined;
     if (place) {
-      return { type: "place", name: decodeName(place.name().getText()) };
+      const placeName = decodeName(place.name().getText());
+      const copy = target.transition() as TransitionContext | undefined;
+      if (copy) {
+        return {
+          type: "placeCopy",
+          place: placeName,
+          transition: decodeName(copy.name().getText()),
+        };
+      }
+      return { type: "place", name: placeName };
     }
     const transition = target.transition() as TransitionContext | undefined;
     if (!transition) {
-      throw new Error("view target must be a place or transition");
+      throw new Error("view target must be a place, place copy, or transition");
     }
     return { type: "transition", name: decodeName(transition.name().getText()) };
   }

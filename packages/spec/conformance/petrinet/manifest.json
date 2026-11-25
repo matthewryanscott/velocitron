@@ -1791,6 +1791,51 @@
           "source": "27-kept-records/errors.source.json"
         }
       }
+    },
+    {
+      "id": "28-place-copy-views",
+      "invalid": [
+        {
+          "expectation": "28-place-copy-views/copies.not-fusion.json",
+          "id": "not-fusion",
+          "phase": "resolution",
+          "structureParses": true
+        },
+        {
+          "expectation": "28-place-copy-views/copies.unknown-copy.json",
+          "id": "unknown-copy",
+          "phase": "resolution",
+          "structureParses": true
+        },
+        {
+          "expectation": "28-place-copy-views/copies.transition-not-using-place.json",
+          "id": "transition-not-using-place",
+          "phase": "resolution",
+          "structureParses": true
+        },
+        {
+          "expectation": "28-place-copy-views/copies.shared-conflict.json",
+          "id": "shared-conflict",
+          "phase": "resolution",
+          "structureParses": true
+        },
+        {
+          "expectation": "28-place-copy-views/copies.relative-place-missing.json",
+          "id": "relative-place-missing",
+          "phase": "resolution",
+          "structureParses": true
+        }
+      ],
+      "valid": {
+        "canonicalNet": "28-place-copy-views/copies.net.json",
+        "canonicalSource": "28-place-copy-views/copies.canonical.source.json",
+        "contributionIr": "28-place-copy-views/copies.contribution-ir.json",
+        "expect": {
+          "canonicalSourceFixedPoint": true,
+          "contributionIrVersion": 1,
+          "source": "28-place-copy-views/copies.source.json"
+        }
+      }
     }
   ],
   "format": "velocitron.petrinet/conformance-corpus",

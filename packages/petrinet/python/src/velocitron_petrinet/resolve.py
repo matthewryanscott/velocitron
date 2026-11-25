@@ -30,11 +30,20 @@ from velocitron_dsl import (
     valid_capacity_key,
     valid_field_path,
 )
+from velocitron_engine import (
+    Arc,
+    ConsumePattern,
+    Net,
+    Place,
+    ProduceTemplate,
+    Transition,
+)
 from velocitron_ir import (
     CONTRIBUTION_IR_FORMAT,
     CONTRIBUTION_IR_VERSION,
     contribution_ir_schema,
 )
+from velocitron_viz import Decoration, Decorations, fusion_layout
 
 from .parse import NetValidationError, parse_composition, parse_net
 
@@ -433,7 +442,10 @@ def _reject_schema_invalid_ir(
     The order mirrors the replaced handwritten preflight so every pinned
     PN-coded diagnostic keeps its code, message, and span (ADR 0026).
     """
-    if document_ir.get("format") != CONTRIBUTION_IR_FORMAT or document_ir.get("version") != CONTRIBUTION_IR_VERSION:
+    if (
+        document_ir.get("format") != CONTRIBUTION_IR_FORMAT
+        or document_ir.get("version") != CONTRIBUTION_IR_VERSION
+    ):
         raise _resolution_error(
             "PN200", "unsupported Contribution IR format or version"
         )
@@ -1069,6 +1081,122 @@ _REFINE_HELP: Final[tuple[tuple[str, str], ...]] = (
     ("wired to it carry", "wire the place to a port that carries the arc's color"),
     ("is a composition", "refine by the alias of a net, not of a composition"),
 )
+
+
+def _view_position_target(raw: object) -> tuple[str, str] | None:
+    """Return ``(kind, payload key)`` for a view position subject or base.
+
+    A place copy's payload key is ``place:<place>@transition:<transition>``.
+    """
+    if not isinstance(raw, Mapping):
+        return None
+    value = cast(Mapping[str, Any], raw)
+    kind = value.get("type")
+    if kind == "placeCopy":
+        place, transition = value.get("place"), value.get("transition")
+        if (
+            set(value) != {"type", "place", "transition"}
+            or not isinstance(place, str)
+            or not place
+            or not isinstance(transition, str)
+            or not transition
+        ):
+            return None
+        return "placeCopy", f"place:{place}@transition:{transition}"
+    name = value.get("name")
+    if (
+        kind not in {"place", "transition"}
+        or set(value) != {"type", "name"}
+        or not isinstance(name, str)
+        or not name
+    ):
+        return None
+    return str(kind), f"{kind}:{name}"
+
+
+def _copy_parts(key: str) -> tuple[str, str]:
+    place, transition = key.removeprefix("place:").split("@transition:", 1)
+    return place, transition
+
+
+def _fusion_copy_ids(
+    accepts: Mapping[str, Sequence[str]],
+    transition_names: Sequence[str],
+    arcs: Sequence[Mapping[str, Any]],
+    annotations: Mapping[tuple[str, str], Mapping[str, tuple[Any, Any]]],
+    decorations: Mapping[str, Mapping[str, tuple[Any, Any]]],
+) -> dict[tuple[str, str], str]:
+    """The drawn copy id of each fusion place at each transition that uses it.
+
+    Shared ids match ``fusion_layout`` (ADR 0035): two neighbor transitions
+    that share one non-fusion input and a ``beside`` place with no side draw
+    one copy.
+    """
+    nodes: dict[str, Decoration] = {}
+    for subject, facts in decorations.items():
+        beside = facts.get("beside")
+        if beside is None or not subject.startswith("place:"):
+            continue
+        raw_beside = beside[0]
+        side_value = (
+            cast(Mapping[str, Any], raw_beside).get("side")
+            if isinstance(raw_beside, Mapping)
+            else None
+        )
+        nodes[subject] = Decoration(
+            beside=True, beside_side=side_value if isinstance(side_value, str) else None
+        )
+    places: list[Place] = []
+    fusion: set[str] = set()
+    for name, colors in accepts.items():
+        fact = annotations.get(("place", name), {}).get("fusion")
+        is_fusion = fact is not None and fact[0] is True
+        if is_fusion:
+            fusion.add(name)
+        places.append(
+            Place(
+                name,
+                list(colors),
+                annotations={"fusion": True} if is_fusion else None,
+            )
+        )
+    engine_arcs: list[Arc] = []
+    for arc in arcs:
+        if "consume" in arc:
+            consume = cast(Mapping[str, Any], arc["consume"])
+            mode = consume.get("mode", "consume")
+            engine_arcs.append(
+                Arc(
+                    from_place=cast(str, arc["from"]["place"]),
+                    to_transition=cast(str, arc["to"]["transition"]),
+                    consume=ConsumePattern(
+                        type=cast(str, consume["type"]),
+                        predicate=None,
+                        mode=mode
+                        if mode in {"consume", "read", "inhibit"}
+                        else "consume",
+                    ),
+                )
+            )
+        else:
+            produce = cast(Mapping[str, Any], arc["produce"])
+            engine_arcs.append(
+                Arc(
+                    from_transition=cast(str, arc["from"]["transition"]),
+                    to_place=cast(str, arc["to"]["place"]),
+                    produce=ProduceTemplate(
+                        type=cast(str, produce["type"]),
+                        destination=cast(str, produce["destination"]),
+                    ),
+                )
+            )
+    net = Net(
+        name="place-copies",
+        places=places,
+        transitions=[Transition(name) for name in transition_names],
+        arcs=engine_arcs,
+    )
+    return dict(fusion_layout(net, fusion, Decorations(nodes=nodes)).copies)
 
 
 def resolve_contribution_ir(
@@ -2041,7 +2169,9 @@ def resolve_contribution_ir(
                     "use extensions for opaque full-document data",
                 )
             try:
-                annotation_value = untag_json_value(cast(Mapping[str, Any], raw_annotation))
+                annotation_value = untag_json_value(
+                    cast(Mapping[str, Any], raw_annotation)
+                )
             except (TypeError, ValueError, json.JSONDecodeError) as error:
                 raise _resolution_error(
                     "PN200", "invalid documentation annotation contribution", span
@@ -2131,45 +2261,29 @@ def resolve_contribution_ir(
                 value.get("subject"),
                 value.get("position"),
             )
-            subject = (
-                cast(Mapping[str, Any], raw_subject)
-                if isinstance(raw_subject, Mapping)
-                else None
-            )
+            parsed_subject = _view_position_target(raw_subject)
             if (
                 set(target) != {"type", "name"}
                 or target.get("type") != "view"
                 or not isinstance(view_name, str)
                 or not view_name
                 or set(value) != {"subject", "position"}
-                or subject is None
-                or subject.get("type") not in {"place", "transition"}
-                or set(subject) != {"type", "name"}
-                or not isinstance(subject.get("name"), str)
+                or parsed_subject is None
                 or not isinstance(raw_position, Mapping)
             ):
                 raise _resolution_error(
                     "PN200", "invalid view position contribution", span
                 )
+            subject_type, subject_key = parsed_subject
             raw_position_mapping = cast(Mapping[str, Any], raw_position)
             position: dict[str, Any]
             if set(raw_position_mapping) == {"from", "delta"}:
-                raw_base = raw_position_mapping["from"]
-                if not isinstance(raw_base, Mapping):
+                parsed_base = _view_position_target(raw_position_mapping["from"])
+                if parsed_base is None:
                     raise _resolution_error(
                         "PN200", "invalid view position contribution", span
                     )
-                base = cast(Mapping[str, Any], raw_base)
-                if (
-                    set(base) != {"type", "name"}
-                    or base.get("type") not in {"place", "transition"}
-                    or not isinstance(base.get("name"), str)
-                ):
-                    raise _resolution_error(
-                        "PN200", "invalid view position contribution", span
-                    )
-                base_type = cast(str, base["type"])
-                base_name_value = cast(str, base["name"])
+                base_type, base_key = parsed_base
                 try:
                     decoded_delta = untag_json_value(raw_position_mapping["delta"])
                 except (TypeError, ValueError, json.JSONDecodeError) as error:
@@ -2180,11 +2294,11 @@ def resolve_contribution_ir(
                     raise _resolution_error(
                         "PN200", "invalid view position contribution", span
                     )
-                position = {
-                    "from": f"{base_type}:{base_name_value}",
-                    "delta": decoded_delta,
-                }
-                relative_bases.append((view_name, base_type, base_name_value, span))
+                position = {"from": base_key, "delta": decoded_delta}
+                stored_base = (
+                    base_key if base_type == "placeCopy" else base_key.split(":", 1)[1]
+                )
+                relative_bases.append((view_name, base_type, stored_base, span))
             else:
                 try:
                     decoded_position = untag_json_value(raw_position_mapping)
@@ -2201,21 +2315,23 @@ def resolve_contribution_ir(
                     raise _resolution_error(
                         "PN200", "invalid view position contribution", span
                     )
-            subject_key = f"{subject['type']}:{subject['name']}"
-            view_positions = positions.setdefault(
-                (view_name, cast(str, subject["type"])), {}
-            )
+            view_positions = positions.setdefault((view_name, subject_type), {})
             existing = view_positions.get(subject_key)
             if existing is not None and not json_values_equal(existing[0], position):
+                label = (
+                    f"place copy ({_copy_parts(subject_key)[0]})"
+                    f"@[{_copy_parts(subject_key)[1]}]"
+                    if subject_type == "placeCopy"
+                    else f"{subject_type} "
+                    + (
+                        f"({subject_key.split(':', 1)[1]})"
+                        if subject_type == "place"
+                        else f"[{subject_key.split(':', 1)[1]}]"
+                    )
+                )
                 raise _resolution_error(
                     "PN202",
-                    f"conflicting position facts for {subject['type']} "
-                    + (
-                        f"({subject['name']})"
-                        if subject["type"] == "place"
-                        else f"[{subject['name']}]"
-                    )
-                    + f" in view {view_name!r}",
+                    f"conflicting position facts for {label} in view {view_name!r}",
                     span,
                     "remove one declaration or make both positions identical",
                     (("first position was declared here", existing[1]),),
@@ -2404,7 +2520,9 @@ def resolve_contribution_ir(
                     "PN200", "invalid document extensions contribution", span
                 )
             try:
-                decoded_extensions = untag_json_value(cast(Mapping[str, Any], raw_extensions))
+                decoded_extensions = untag_json_value(
+                    cast(Mapping[str, Any], raw_extensions)
+                )
             except (TypeError, ValueError, json.JSONDecodeError) as error:
                 raise _resolution_error(
                     "PN200", "invalid document extensions contribution", span
@@ -2902,7 +3020,77 @@ def resolve_contribution_ir(
         check_metadata_target(
             target_type, target_name, next(iter(facts.values()))[1], "annotation"
         )
+    needs_copies = any(
+        subject_type == "placeCopy" for _, subject_type in positions
+    ) or any(base_kind == "placeCopy" for _, base_kind, _, _ in relative_bases)
+    copy_ids = (
+        _fusion_copy_ids(accepts, list(transitions), arcs, annotations, decorations)
+        if needs_copies
+        else {}
+    )
+
+    def reject_copy(
+        view_name: str,
+        place: str,
+        transition: str,
+        fact_span: Mapping[str, Any],
+        *,
+        role: str,
+    ) -> None:
+        if place not in accepts:
+            raise _resolution_error(
+                "PN202",
+                f"view {view_name!r} references unknown place {place!r}; "
+                "presentation facts cannot declare semantic objects",
+                fact_span,
+                "declare the place in topology before positioning it",
+            )
+        if transition not in transitions:
+            raise _resolution_error(
+                "PN202",
+                f"view {view_name!r} references unknown transition {transition!r}; "
+                "presentation facts cannot declare semantic objects",
+                fact_span,
+                "declare the transition in topology before positioning it",
+            )
+        fusion = annotations.get(("place", place), {}).get("fusion")
+        if fusion is None or fusion[0] is not True:
+            raise _resolution_error(
+                "PN202",
+                f"view {view_name!r} {role} ({place})@[{transition}], but "
+                f"({place}) is not a fusion place",
+                fact_span,
+                f"annotate ({place}) with `fusion true`, or position the place",
+            )
+        if (place, transition) not in copy_ids:
+            raise _resolution_error(
+                "PN202",
+                f"view {view_name!r} {role} ({place})@[{transition}], but "
+                f"[{transition}] does not use ({place})",
+                fact_span,
+                f"draw an arc between ({place}) and [{transition}]",
+            )
+
+    shared_groups: dict[
+        tuple[str, str, str],
+        list[tuple[str, dict[str, Any], Mapping[str, Any]]],
+    ] = {}
     for (view_name, subject_type), view_positions in positions.items():
+        if subject_type == "placeCopy":
+            for subject_key, (position, fact_span) in view_positions.items():
+                place, transition = _copy_parts(subject_key)
+                reject_copy(
+                    view_name,
+                    place,
+                    transition,
+                    fact_span,
+                    role="positions place copy",
+                )
+                copy = copy_ids[(place, transition)]
+                shared_groups.setdefault((view_name, place, copy), []).append(
+                    (transition, position, fact_span)
+                )
+            continue
         known = (
             accepts if subject_type == "place" else {name: None for name in transitions}
         )
@@ -2932,7 +3120,45 @@ def resolve_contribution_ir(
                     target_span,
                     f"declare the {subject_type} in topology before positioning it",
                 )
+    for (view_name, place, _), entries in shared_groups.items():
+        if len(entries) < 2:
+            continue
+        first_position = entries[0][1]
+        if all(
+            json_values_equal(position, first_position) for _, position, _ in entries
+        ):
+            continue
+        labels = " and ".join(
+            f"({place})@[{transition}]" for transition, _, _ in entries
+        )
+        raise _resolution_error(
+            "PN202",
+            f"conflicting position facts for shared place copy {labels} "
+            f"in view {view_name!r}",
+            entries[-1][2],
+            "give the shared copy one position",
+            (("first position was declared here", entries[0][2]),),
+        )
     for view_name, base_kind, base_name, fact_span in relative_bases:
+        if base_kind == "placeCopy":
+            place, transition = _copy_parts(base_name)
+            reject_copy(
+                view_name,
+                place,
+                transition,
+                fact_span,
+                role="offsets from place copy",
+            )
+            if base_name not in positions.get((view_name, "placeCopy"), {}):
+                raise _resolution_error(
+                    "PN202",
+                    f"view {view_name!r} relative base ({place})@[{transition}] "
+                    "has no position in that view",
+                    fact_span,
+                    f"position ({place})@[{transition}] in view {view_name!r} "
+                    "before offsetting from it",
+                )
+            continue
         base_known = (
             accepts if base_kind == "place" else {name: None for name in transitions}
         )
@@ -2950,6 +3176,17 @@ def resolve_contribution_ir(
                 fact_span,
                 "declare the "
                 + f"{base_kind} in topology before using it as a relative base",
+            )
+        if base_kind == "place" and f"place:{base_name}" not in positions.get(
+            (view_name, "place"), {}
+        ):
+            raise _resolution_error(
+                "PN202",
+                f"view {view_name!r} relative base ({base_name}) has no place "
+                "position in that view",
+                fact_span,
+                f"position ({base_name}) in view {view_name!r}; a bare place "
+                "base is that place entry's point",
             )
     for (view_name, handle), (_, fact_span) in routes.items():
         if handle not in arc_handles:

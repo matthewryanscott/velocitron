@@ -1,0 +1,27 @@
+{
+  "diagnostic": {
+    "code": "PN202",
+    "column": 1,
+    "file": "copies.unknown-copy.petrinet",
+    "line": 7,
+    "message": "view 'lanes' references unknown transition 'missing'; presentation facts cannot declare semantic objects",
+    "span": {
+      "source": "copies.unknown-copy.petrinet",
+      "start": {
+        "byteOffset": 132,
+        "line": 7,
+        "column": 1
+      },
+      "end": {
+        "byteOffset": 188,
+        "line": 7,
+        "column": 57
+      }
+    },
+    "help": "declare the transition in topology before positioning it"
+  },
+  "source": {
+    "sourceId": "copies.unknown-copy.petrinet",
+    "text": "net place_copies\n\n(lock) -pulse-> [acquire] -pulse-> (done)\n(lock) annotation fusion true\n[acquire] handler \"acquire@place_copies\"\n\nview lanes position (lock)@[missing] at {\"x\": 1, \"y\": 0}\n"
+  }
+}

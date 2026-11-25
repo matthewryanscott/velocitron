@@ -7,7 +7,8 @@
     "@velocitron/cel": "workspace:*",
     "@velocitron/dsl": "workspace:*",
     "@velocitron/engine": "workspace:*",
-    "@velocitron/merge": "workspace:*"
+    "@velocitron/merge": "workspace:*",
+    "@velocitron/viz": "workspace:*"
   },
   "description": "Compiles .petrinet text and contribution IR to canonical JSON. Does not fire nets, check plays, or own the CLI.",
   "devDependencies": {

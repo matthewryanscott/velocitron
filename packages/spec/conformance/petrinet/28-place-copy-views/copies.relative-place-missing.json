@@ -1,0 +1,27 @@
+{
+  "diagnostic": {
+    "code": "PN202",
+    "column": 1,
+    "file": "copies.relative-place-missing.petrinet",
+    "line": 7,
+    "message": "view 'lanes' relative base (lock) has no place position in that view",
+    "span": {
+      "source": "copies.relative-place-missing.petrinet",
+      "start": {
+        "byteOffset": 132,
+        "line": 7,
+        "column": 1
+      },
+      "end": {
+        "byteOffset": 193,
+        "line": 7,
+        "column": 62
+      }
+    },
+    "help": "position (lock) in view 'lanes'; a bare place base is that place entry's point"
+  },
+  "source": {
+    "sourceId": "copies.relative-place-missing.petrinet",
+    "text": "net place_copies\n\n(lock) -pulse-> [acquire] -pulse-> (done)\n(lock) annotation fusion true\n[acquire] handler \"acquire@place_copies\"\n\nview lanes position (done) relative (lock) + {\"x\": 1, \"y\": 0}\n"
+  }
+}

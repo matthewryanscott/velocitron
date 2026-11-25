@@ -79,7 +79,7 @@ layers:
   petrinet:
     python: velocitron_petrinet
     typescript: "@velocitron/petrinet"
-    allow: [spec, ir, grammar, cel, dsl, engine, merge]
+    allow: [spec, ir, grammar, cel, dsl, engine, merge, viz]
   viz:
     python: velocitron_viz
     typescript: "@velocitron/viz"

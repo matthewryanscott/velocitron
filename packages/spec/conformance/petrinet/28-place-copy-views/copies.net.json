@@ -1,0 +1,286 @@
+{
+  "name": "place_copies",
+  "places": [
+    {
+      "name": "seed",
+      "accepts": [
+        "pulse"
+      ]
+    },
+    {
+      "name": "lock",
+      "accepts": [
+        "pulse"
+      ],
+      "annotations": {
+        "fusion": true
+      }
+    },
+    {
+      "name": "badge",
+      "accepts": [
+        "pulse"
+      ],
+      "annotations": {
+        "fusion": true
+      }
+    },
+    {
+      "name": "done",
+      "accepts": [
+        "pulse"
+      ]
+    },
+    {
+      "name": "out",
+      "accepts": [
+        "pulse"
+      ]
+    }
+  ],
+  "transitions": [
+    {
+      "name": "lend",
+      "handler": "lend@place_copies"
+    },
+    {
+      "name": "recall",
+      "handler": "recall@place_copies"
+    },
+    {
+      "name": "keep",
+      "handler": "keep@place_copies"
+    },
+    {
+      "name": "acquire",
+      "handler": "acquire@place_copies"
+    },
+    {
+      "name": "release",
+      "handler": "release@place_copies"
+    }
+  ],
+  "arcs": [
+    {
+      "from": {
+        "place": "seed"
+      },
+      "to": {
+        "transition": "lend"
+      },
+      "consume": {
+        "type": "pulse"
+      }
+    },
+    {
+      "from": {
+        "place": "seed"
+      },
+      "to": {
+        "transition": "recall"
+      },
+      "consume": {
+        "type": "pulse"
+      }
+    },
+    {
+      "from": {
+        "place": "seed"
+      },
+      "to": {
+        "transition": "keep"
+      },
+      "consume": {
+        "type": "pulse"
+      }
+    },
+    {
+      "from": {
+        "place": "lock"
+      },
+      "to": {
+        "transition": "acquire"
+      },
+      "consume": {
+        "type": "pulse"
+      }
+    },
+    {
+      "from": {
+        "place": "lock"
+      },
+      "to": {
+        "transition": "release"
+      },
+      "consume": {
+        "type": "pulse"
+      }
+    },
+    {
+      "from": {
+        "place": "badge"
+      },
+      "to": {
+        "transition": "lend"
+      },
+      "consume": {
+        "type": "pulse"
+      }
+    },
+    {
+      "from": {
+        "place": "badge"
+      },
+      "to": {
+        "transition": "recall"
+      },
+      "consume": {
+        "type": "pulse"
+      }
+    },
+    {
+      "from": {
+        "place": "badge"
+      },
+      "to": {
+        "transition": "keep"
+      },
+      "consume": {
+        "type": "pulse"
+      }
+    },
+    {
+      "from": {
+        "transition": "acquire"
+      },
+      "to": {
+        "place": "done"
+      },
+      "produce": {
+        "destination": "done",
+        "type": "pulse"
+      }
+    },
+    {
+      "from": {
+        "transition": "release"
+      },
+      "to": {
+        "place": "out"
+      },
+      "produce": {
+        "destination": "out",
+        "type": "pulse"
+      }
+    },
+    {
+      "from": {
+        "transition": "lend"
+      },
+      "to": {
+        "place": "done"
+      },
+      "produce": {
+        "destination": "done",
+        "type": "pulse"
+      }
+    },
+    {
+      "from": {
+        "transition": "recall"
+      },
+      "to": {
+        "place": "done"
+      },
+      "produce": {
+        "destination": "done",
+        "type": "pulse"
+      }
+    },
+    {
+      "from": {
+        "transition": "keep"
+      },
+      "to": {
+        "place": "done"
+      },
+      "produce": {
+        "destination": "done",
+        "type": "pulse"
+      }
+    }
+  ],
+  "annotations": {
+    "petrinet.dsl/v1": {
+      "arcHandles": {},
+      "markings": {},
+      "views": {
+        "lanes": {
+          "positions": {
+            "transition:acquire": {
+              "x": 0,
+              "y": 0
+            },
+            "transition:release": {
+              "x": 300,
+              "y": 0
+            },
+            "place:lock": {
+              "x": 150,
+              "y": 80
+            },
+            "place:done": {
+              "from": "place:lock",
+              "delta": {
+                "x": 0,
+                "y": -40
+              }
+            },
+            "place:out": {
+              "from": "place:lock@transition:release",
+              "delta": {
+                "x": 10,
+                "y": 0
+              }
+            },
+            "place:lock@transition:acquire": {
+              "from": "transition:acquire",
+              "delta": {
+                "x": -70,
+                "y": 0
+              }
+            },
+            "place:lock@transition:release": {
+              "x": 370,
+              "y": 0
+            },
+            "place:badge@transition:lend": {
+              "x": 40,
+              "y": 20
+            },
+            "place:badge@transition:recall": {
+              "x": 40,
+              "y": 20
+            },
+            "place:badge@transition:keep": {
+              "x": 80,
+              "y": 20
+            }
+          },
+          "routes": {}
+        }
+      },
+      "extensions": {},
+      "decorations": {
+        "place:lock": {
+          "beside": {
+            "side": "left"
+          }
+        },
+        "place:badge": {
+          "beside": {}
+        }
+      }
+    }
+  }
+}

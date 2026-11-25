@@ -23,6 +23,7 @@ dependencies = [
     "velocitron-dsl",
     "velocitron-engine",
     "velocitron-merge",
+    "velocitron-viz",
 ]
 
 [tool.uv.sources]
@@ -32,6 +33,7 @@ velocitron-cel = { path = "../../cel/python", editable = false }
 velocitron-dsl = { path = "../../dsl/python", editable = false }
 velocitron-engine = { path = "../../engine/python", editable = false }
 velocitron-merge = { path = "../../merge/python", editable = false }
+velocitron-viz = { path = "../../viz/python", editable = false }
 
 [project.urls]
 Homepage = "https://github.com/matthewryanscott/velocitron"

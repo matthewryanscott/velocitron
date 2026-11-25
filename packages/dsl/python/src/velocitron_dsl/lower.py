@@ -26,6 +26,7 @@ from .diagnostics import (
     SourcePosition,
     SourceSpan,
 )
+
 # TODO: this lowerer vendors a second copy of the ANTLR parser that
 # packages/grammar already generates. Layer lint forbids importing
 # velocitron_grammar.generated, and grammar's public parse_petrinet returns
@@ -1153,10 +1154,18 @@ class _LoweringVisitor(VelocitronPetriNetVisitor):
     def _view_target(target: Any) -> dict[str, str]:
         place = target.place()
         if place is not None:
-            return {"type": "place", "name": _decode_name(place.name().getText())}
+            place_name = _decode_name(place.name().getText())
+            copy = target.transition()
+            if copy is not None:
+                return {
+                    "type": "placeCopy",
+                    "place": place_name,
+                    "transition": _decode_name(copy.name().getText()),
+                }
+            return {"type": "place", "name": place_name}
         transition = target.transition()
         if transition is None:
-            raise ValueError("view target must be a place or transition")
+            raise ValueError("view target must be a place, place copy, or transition")
         return {
             "type": "transition",
             "name": _decode_name(transition.name().getText()),
