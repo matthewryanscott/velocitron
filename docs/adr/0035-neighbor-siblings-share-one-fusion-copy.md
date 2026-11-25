@@ -1,6 +1,6 @@
 # Neighbor siblings share one fusion copy
 
-**Status:** Accepted. Amended 2026-11-25 (the `share` flag, by ADR 0068).
+**Status:** Accepted. Amended 2026-11-25 (the `share` flag, by ADR 0070).
 
 A fusion place renders as one local copy per transition that uses it, and
 `beside` keeps each copy on its transition's rank (ADR 0029). A choice often
@@ -64,7 +64,7 @@ A place with `beside left` or `beside right` does not share copies. The
 author has fixed a side for every copy, and a shared copy is on the right of
 one of its transitions.
 
-*Amended by ADR 0068. `beside unshared` sets `share: false` and turns this
+*Amended by ADR 0070. `beside unshared` sets `share: false` and turns this
 sharing off for that place. The siblings stay in one row, and each copy is
 pushed outward.*
 
@@ -87,7 +87,7 @@ order. The renderer sets it next to `newrank=true`, only when the net has a
 
 - No syntax, IR or payload change. Sharing is automatic for every `beside`
   place with no side. A later branch may add a decoration to turn it off for
-  one place. ADR 0068 is that decoration: `beside unshared` sets
+  one place. ADR 0070 is that decoration: `beside unshared` sets
   `share: false`.
 - A shared copy's node id is `place@first+second`. The render model records
   it under `place:<name>` with the other copies, so a view that positions the

@@ -228,7 +228,7 @@ export function fusionLayout(
         let end = start;
         while (end < group.length && (besidePlaces.get(group[end]!) ?? []).includes(place)) end += 1;
         const run = group.slice(start, end);
-        // Unshared (ADR 0068): one row, copies outside it. A missing
+        // Unshared (ADR 0070): one row, copies outside it. A missing
         // besideShare still shares, which is the ADR 0035 default.
         if (run.length > 1 && decoration.besideShare === false) {
           for (let index = start; index < end - 1; index += 1) linked[index] = true;

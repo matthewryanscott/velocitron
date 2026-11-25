@@ -77,7 +77,7 @@ RULE_BESIDE_POSITION_SHADOWED = "beside-position-shadowed"
 
 # Stable rule id: ``beside left unshared`` or ``beside right unshared``.
 # A fixed side already never shares a copy (ADR 0035), so ``unshared``
-# changes nothing (ADR 0068). The net is still valid.
+# changes nothing (ADR 0070). The net is still valid.
 RULE_BESIDE_UNSHARED_REDUNDANT = "beside-unshared-redundant"
 
 # CEL macros whose first argument binds a loop variable, not a free name.

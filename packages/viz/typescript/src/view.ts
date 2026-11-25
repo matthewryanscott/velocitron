@@ -46,7 +46,7 @@ export interface Decoration {
   readonly summary?: string | null;
   readonly beside?: boolean;
   readonly besideSide?: string | null;
-  /** False is `beside unshared`: one copy per transition (ADR 0068). */
+  /** False is `beside unshared`: one copy per transition (ADR 0070). */
   readonly besideShare?: boolean;
   readonly failure?: boolean;
   readonly faded?: boolean;

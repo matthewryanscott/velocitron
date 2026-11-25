@@ -125,7 +125,7 @@ class Decoration:
     summary: str | None = None
     beside: bool = False
     beside_side: str | None = None
-    # False is ``beside unshared``: one copy per transition (ADR 0068).
+    # False is ``beside unshared``: one copy per transition (ADR 0070).
     # Absent ``share`` stays True, so a place with no side still shares.
     beside_share: bool = True
     failure: bool = False

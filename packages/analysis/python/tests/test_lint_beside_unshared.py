@@ -1,4 +1,4 @@
-"""The redundant beside-unshared lint (ADR 0068)."""
+"""The redundant beside-unshared lint (ADR 0070)."""
 
 from __future__ import annotations
 

@@ -60,7 +60,7 @@ If the output shows `velocitron CLI NOT INSTALLED` (or `velocitron-viz CLI NOT I
    consume and produce arcs, and `decorate color C show "f" "g.h"` shows
    only those fields (dotted paths reach into nested objects) in `C`'s
    marking rows. An arc decoration needs a handle that covers
-   exactly one arc.    `decorate (p) beside [left|right] [unshared]` draws each local copy
+   exactly one arc. `decorate (p) beside [left|right] [unshared]` draws each local copy
    of a fusion place (`(p) annotation fusion true`) on its transition's rank,
    next to it; with no side the copies are balanced, first one left. Use it
    when a copy lands far away and its read arc crosses the net; a copy the

@@ -48,7 +48,7 @@ every net-schema feature (`spec/net-schema.md`, `spec/composition.md`):
   copy of a place next to its transition (ADR 0029). A view that pins the
   transition places an unpositioned copy there too (ADR 0067). With no side,
   two neighbor transitions of one choice share one copy between them (ADR 0035),
-  unless the place is ``beside unshared`` (ADR 0068).
+  unless the place is ``beside unshared`` (ADR 0070).
 
 Output is markdown-embeddable on request: :class:`RenderStyle` (CLI
 ``--plain-labels`` / ``--no-tooltips``, or the ``--doc`` preset) swaps the
@@ -1098,7 +1098,7 @@ def fusion_layout(
     Two transitions that are neighbors in a sibling group (see
     :func:`sibling_groups`) and both have a copy of the same ``beside``
     place with no side share one copy, drawn between them (ADR 0035), unless
-    that place is ``unshared`` (``beside_share`` is false, ADR 0068). A run
+    that place is ``unshared`` (``beside_share`` is false, ADR 0070). A run
     of more such neighbors pairs from the left; when the run is odd, the
     last one keeps its own copy, on its right. The transitions a run links
     share one row, in group order, so the shared copy is always between
