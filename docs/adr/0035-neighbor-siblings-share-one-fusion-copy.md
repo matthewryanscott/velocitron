@@ -1,6 +1,6 @@
 # Neighbor siblings share one fusion copy
 
-**Status:** Accepted. Amended by ADR 0067: a group's order is the structural
+**Status:** Accepted. Amended by ADR 0069: a group's order is the structural
 emission order, not the order of the source lines.
 
 A fusion place renders as one local copy per transition that uses it, and
@@ -23,7 +23,7 @@ the net:
   is the same place. Fusion places do not count as inputs, because each copy
   sits beside its own transition. Any arc mode counts: consume, read and
   inhibit.
-- The group's order is the structural emission order (ADR 0067): distance
+- The group's order is the structural emission order (ADR 0069): distance
   from the initial marking, then name. It is not the order of the source
   lines. Pairing from the left of that order is unchanged.
 - Two transitions are **neighbors** when they are next to each other in that
@@ -40,7 +40,7 @@ copy is always between its two transitions.
   row bends the graph.
 - Ask `dot` for a layout first, then share copies of nodes it put side by
   side. Rejected: two layout passes, and the second can move the nodes again.
-- One drawn input place, in the structural emission order (chosen; ADR 0067
+- One drawn input place, in the structural emission order (chosen; ADR 0069
   replaces the original source-line order).
 
 ## Decision 2: pair from the left
@@ -61,7 +61,7 @@ of neighbors in a group that all use the place:
 
 A run of three `A, B, C` gives `A P B C P`. Pairing from the right
 (`P A B P C`) would use the same number of copies. We pair from the left of
-the group's order. That order is the structural emission order (ADR 0067),
+the group's order. That order is the structural emission order (ADR 0069),
 so the left end is the transition closest to the initial marking, and the
 name breaks a tie.
 

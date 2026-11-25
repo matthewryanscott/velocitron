@@ -955,7 +955,7 @@ def _flow_ranks(net: Net) -> dict[tuple[str, str], int]:
     produce arcs. A component that has none of those starts is walked from
     its alphabetically first node and ranked after everything already
     reached. The same names always get the same ranks: declaration order is
-    not an input (ADR 0067).
+    not an input (ADR 0069).
     """
     place_names = [place.name for place in net.places]
     transition_names = [transition.name for transition in net.transitions]
@@ -1180,7 +1180,7 @@ def fusion_layout(
     Each transition with ``beside`` copies gets a row: ``left`` copies
     before it, ``right`` copies after it, the first copy in structural
     order nearest; a copy with no side goes to the side that has fewer
-    copies so far, ``left`` on a tie (ADR 0029, ADR 0067).
+    copies so far, ``left`` on a tie (ADR 0029, ADR 0069).
 
     Two transitions that are neighbors in a sibling group (see
     :func:`sibling_groups`) and both have a copy of the same ``beside``

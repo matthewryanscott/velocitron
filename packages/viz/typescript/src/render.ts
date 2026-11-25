@@ -145,7 +145,7 @@ export function netRenderModel(net: Net, options: NetRenderOptions = {}): Render
 
 type FlowKey = readonly ["place" | "transition", string];
 
-/** Distance from the initial marking. Same rule as Python `_flow_ranks` (ADR 0067). */
+/** Distance from the initial marking. Same rule as Python `_flow_ranks` (ADR 0069). */
 function flowRanks(net: Net): Map<string, number> {
   const places = net.places.map((place) => place.name);
   const transitions = net.transitions.map((transition) => transition.name);

@@ -1248,7 +1248,7 @@ class TestMarkedPlaceGrammar:
 
 # Two workers share a lock and read one clock. Each worker's ready place is
 # produced again when the work finishes, which is the cycle that used to make
-# Graphviz rank ready_b from the order of the source lines (ADR 0067).
+# Graphviz rank ready_b from the order of the source lines (ADR 0069).
 _LEASE_A = """
 (ready_a) -job-> [start_a] -job-> (busy_a) -job-> [finish_a] -job-> (done_a)
 (done_a) -job-> [restock_a] -job-> (ready_a)

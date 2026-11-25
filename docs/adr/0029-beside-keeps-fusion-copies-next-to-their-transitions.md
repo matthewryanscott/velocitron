@@ -1,6 +1,6 @@
 # `beside` keeps fusion copies next to their transitions
 
-**Status:** Accepted. Amended by ADR 0067: the copy that sits nearest is the
+**Status:** Accepted. Amended by ADR 0069: the copy that sits nearest is the
 first in the structural emission order, not the first in arc order.
 
 A fusion place renders as one local copy per transition that uses it
@@ -66,7 +66,7 @@ subgraph "cluster_beside_0" { label=""; peripheries=0; margin=0;
 ## Decision 3: sides, defaults and directions
 
 - `left` copies go before the transition and `right` copies after it. The
-  first copy, in the structural emission order (ADR 0067), sits nearest.
+  first copy, in the structural emission order (ADR 0069), sits nearest.
 - A copy with no side goes to the side that has fewer copies so far, `left` on
   a tie. Two copies then sit one on each side. Each read arc is a short
   straight edge, and no arc arches over another copy.
