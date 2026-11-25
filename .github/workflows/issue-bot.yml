@@ -1,0 +1,86 @@
+---
+# Forwards a new issue or pull request comment that contains @velocitron.
+# Only the repository owner's comment runs a step. A reply, when one is
+# sent, comes from a GitHub App. Set the repository secrets
+# GROK_BOT_WEBHOOK_URL and GROK_BOT_WEBHOOK_SECRET. Details are in
+# CONTRIBUTING.md.
+name: Forward owner mentions
+
+"on":
+  issue_comment:
+    types: [created]
+
+permissions: {}
+
+concurrency:
+  group: issue-bot-${{ github.repository }}-${{ github.event.issue.number }}
+  cancel-in-progress: false
+
+jobs:
+  forward:
+    name: Forward an owner mention
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    if: >-
+      github.event.comment.user.login == 'matthewryanscott' &&
+      github.event.comment.author_association == 'OWNER' &&
+      github.event.comment.user.type == 'User' &&
+      contains(github.event.comment.body, '@velocitron') &&
+      github.repository == 'matthewryanscott/velocitron'
+    steps:
+      - name: Post the comment to the webhook
+        env:
+          GROK_BOT_WEBHOOK_URL: ${{ secrets.GROK_BOT_WEBHOOK_URL }}
+          GROK_BOT_WEBHOOK_SECRET: ${{ secrets.GROK_BOT_WEBHOOK_SECRET }}
+        run: |
+          set -euo pipefail
+          umask 077
+
+          if [[ -z "${GROK_BOT_WEBHOOK_URL:-}" \
+            || -z "${GROK_BOT_WEBHOOK_SECRET:-}" ]]; then
+            notice="GROK_BOT_WEBHOOK_URL or GROK_BOT_WEBHOOK_SECRET"
+            echo "::notice::${notice} is unset; skipping the forward"
+            exit 0
+          fi
+
+          payload="$(mktemp)"
+          trap 'rm -f "$payload"' EXIT
+
+          jq -nc \
+            --slurpfile event "$GITHUB_EVENT_PATH" \
+            '{
+              repo: $event[0].repository.full_name,
+              number: $event[0].issue.number,
+              is_pull_request: ($event[0].issue | has("pull_request")),
+              issue_title: $event[0].issue.title,
+              issue_url: $event[0].issue.html_url,
+              comment_id: $event[0].comment.id,
+              comment_url: $event[0].comment.html_url,
+              comment_body: $event[0].comment.body,
+              commenter_login: $event[0].comment.user.login,
+              author_association: $event[0].comment.author_association,
+              created_at: $event[0].comment.created_at
+            }' > "$payload"
+
+          signature="$(
+            openssl dgst -sha256 \
+              -hmac "$GROK_BOT_WEBHOOK_SECRET" \
+              -hex "$payload"
+          )"
+          signature="${signature##*=}"
+          signature="${signature//[[:space:]]/}"
+          signature="${signature,,}"
+          if [[ ! "$signature" =~ ^[0-9a-f]{64}$ ]]; then
+            echo "failed to compute the webhook signature" >&2
+            exit 1
+          fi
+
+          curl --fail-with-body --max-time 20 \
+            --silent --show-error \
+            --request POST \
+            --header "Content-Type: application/json" \
+            --header "X-Hub-Signature-256: sha256=${signature}" \
+            --data-binary @"${payload}" \
+            "$GROK_BOT_WEBHOOK_URL"
+
+          echo "forwarded comment $(jq -r '.comment_id' "$payload")"
