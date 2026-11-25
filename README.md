@@ -196,7 +196,9 @@ The `velocitron` CLI provides:
   directory.
 
 `velocitron-viz` renders a net or composition JSON/`.petrinet` document as
-Graphviz DOT.
+Graphviz DOT. `velocitron-viz design.petrinet --metrics` prints crossings,
+overlaps, edge length, and bends for that drawing. Compare those numbers
+only when they come from the same Graphviz version.
 
 Import the Python library from the package that owns the concept:
 `velocitron_petrinet`, `velocitron_engine`, `velocitron_runtime` (its

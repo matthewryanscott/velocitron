@@ -35,6 +35,9 @@ optional.
 The console scripts are `velocitron = velocitron_cli:main` and
 `velocitron-viz = velocitron_cli:viz_main`. `main` calls
 `install_default_hooks` before it parses arguments.
+`velocitron-viz --metrics` prints layout metrics for a net. It runs the
+Graphviz engine named in the DOT, and `--metrics -` reads `-Tjson` from
+stdin. Compare the numbers only across the same Graphviz version.
 
 ## What stays outside
 

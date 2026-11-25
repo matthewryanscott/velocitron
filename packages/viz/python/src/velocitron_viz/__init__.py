@@ -4,7 +4,9 @@
 routes onto that drawing. ``fusion_layout`` is the fusion-copy placement,
 including a shared copy between two neighbor transitions of one choice.
 ``beside unshared`` keeps one copy per transition and pushes those copies
-outside the choice's row.
+outside the choice's row. ``layout_metrics`` measures a Graphviz ``-Tjson``
+drawing. ``stamp_arc_ids`` names each arc edge from the render model's arc
+lines.
 Pass a net the caller already built. This package does not parse documents,
 compile CEL, merge compositions, or install a console script, and it does
 not import ``velocitron``.
@@ -17,6 +19,14 @@ keeps the console-script entry.
 from __future__ import annotations
 
 from .canonical import render_canonical_json
+from .metrics import (
+    FLATTEN_TOLERANCE_PT,
+    LONGEST_EDGES,
+    LayoutMetricsError,
+    arc_handle_index,
+    layout_metrics,
+    stamp_arc_ids,
+)
 from .render import (
     DETAIL_LEVELS,
     BesidePlacement,
@@ -85,6 +95,8 @@ __all__ = [
     "BESIDE_MARGIN",
     "DEFAULT_VIEW",
     "DETAIL_LEVELS",
+    "FLATTEN_TOLERANCE_PT",
+    "LONGEST_EDGES",
     "NAME_POINT",
     "NODE_PAD",
     "SMALL_POINT",
@@ -96,6 +108,7 @@ __all__ = [
     "Decorations",
     "Detail",
     "FusionLayout",
+    "LayoutMetricsError",
     "Marking",
     "MarkingRow",
     "Net",
@@ -118,6 +131,7 @@ __all__ = [
     "ViewApplicationError",
     "Wire",
     "apply_view",
+    "arc_handle_index",
     "beside_gap",
     "composition_overview_dot",
     "composition_ports_dot",
@@ -125,6 +139,7 @@ __all__ = [
     "fusion_layout",
     "fusion_modes_of",
     "has_view",
+    "layout_metrics",
     "legend_dot",
     "marking_rows",
     "member_label",
@@ -138,6 +153,7 @@ __all__ = [
     "resolve_fusion_mode",
     "resolve_positions",
     "sibling_groups",
+    "stamp_arc_ids",
     "text_width",
     "view_setting",
 ]

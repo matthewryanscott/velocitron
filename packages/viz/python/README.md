@@ -16,10 +16,18 @@ workloads.
 
 `net_to_dot` draws one net. `net_render_model` returns that DOT plus the
 line index a view needs. `apply_view` writes positions and routes through
-that index. `fusion_layout` places fusion copies. `composition_to_dot`,
-`composition_ports_dot`, and `composition_overview_dot` draw an
-already-parsed composition. `net_twin_dots` draws one net twice so a caller
-can show two markings with one layout.
+that index. `fusion_layout` places fusion copies. `stamp_arc_ids` writes
+`id="arc:<handle>"` on each arc edge from that line index.
+`layout_metrics` reads Graphviz `-Tjson` and reports crossings, overlaps,
+edge length, and bends. `composition_to_dot`, `composition_ports_dot`, and
+`composition_overview_dot` draw an already-parsed composition.
+`net_twin_dots` draws one net twice so a caller can show two markings with
+one layout.
+
+Compare metric numbers only when they come from the same Graphviz version.
+The report includes `graphviz_version` and `engine` for that reason. The
+command is `velocitron-viz design.petrinet --metrics`. See
+`packages/viz/README.md` for what each count includes.
 
 Construct the net from the dataclasses in this package (`Net`, `Place`,
 `Arc`, and the rest). Pass `parsed_nets` yourself when drawing a

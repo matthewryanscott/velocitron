@@ -91,7 +91,12 @@ If the output shows `velocitron CLI NOT INSTALLED` (or `velocitron-viz CLI NOT I
    local Graphviz, or `velocitron-viz net.petrinet | curl --data-binary @- \
    https://kroki.example/graphviz/png > /tmp/net.png` against a Kroki server.
    Keep the output path fixed across iterations so every look reads the freshest
-   render. Marking selectors do not apply to composition, `--merged`,
+   render. `velocitron-viz design.petrinet --metrics` prints crossings,
+   overlaps, edge length, and bends for that drawing, as JSON. Compare those
+   numbers only when they come from the same Graphviz version; the report
+   names the version and the engine (`dot`, or `neato` when a view pins
+   positions).
+   Marking selectors do not apply to composition, `--merged`,
    `--ports-only`, `--overview`, or `--legend`; use `--doc --fence` for a
    Markdown-embeddable diagram.
    For a reader who wants what each part of a composition is for,
