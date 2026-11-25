@@ -1,0 +1,27 @@
+{
+  "diagnostic": {
+    "code": "PN202",
+    "column": 20,
+    "file": "copy-views.copy-unknown.petrinet",
+    "help": "declare the place and the transition in topology before positioning the copy",
+    "line": 7,
+    "message": "view 'laid' references unknown copy (ghost)@[emit]; presentation facts cannot declare semantic objects",
+    "span": {
+      "end": {
+        "byteOffset": 142,
+        "column": 34,
+        "line": 7
+      },
+      "source": "copy-views.copy-unknown.petrinet",
+      "start": {
+        "byteOffset": 128,
+        "column": 20,
+        "line": 7
+      }
+    }
+  },
+  "source": {
+    "sourceId": "copy-views.copy-unknown.petrinet",
+    "text": "net copy_views\n\n(seed) -pulse-> [emit] -pulse-> (out)\n(lock) -permit-> [emit]\n(lock) annotation fusion true\n\nview laid position (ghost)@[emit] at {\"x\": 1, \"y\": 2}\n"
+  }
+}

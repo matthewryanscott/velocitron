@@ -1529,6 +1529,27 @@
       ],
       "type": "object"
     },
+    "placeCopyTarget": {
+      "$comment": "One drawn copy of a fusion place: the copy next to a transition. The resolved payload key is place:<place>@transition:<transition> in the view's positions map.",
+      "additionalProperties": false,
+      "properties": {
+        "place": {
+          "$ref": "#/$defs/name"
+        },
+        "transition": {
+          "$ref": "#/$defs/name"
+        },
+        "type": {
+          "const": "placeCopy"
+        }
+      },
+      "required": [
+        "type",
+        "place",
+        "transition"
+      ],
+      "type": "object"
+    },
     "placeDeclareContribution": {
       "properties": {
         "kind": {
@@ -1748,7 +1769,7 @@
       "type": "object"
     },
     "relativePosition": {
-      "$comment": "Authored relative view position: the rendered subject is offset from 'from' by 'delta'. The resolver resolves relative chains at render time (ADR 0024); it only validates shape and target references here.",
+      "$comment": "Authored relative view position: the rendered subject is offset from 'from' by 'delta'. The resolver keeps the {from, delta} fact. A bare place base is that place entry's point, so the view must position the place. A placeCopy base names one fusion copy. Chains resolve at render time (ADR 0024).",
       "additionalProperties": false,
       "properties": {
         "delta": {
@@ -1758,6 +1779,9 @@
           "oneOf": [
             {
               "$ref": "#/$defs/placeTarget"
+            },
+            {
+              "$ref": "#/$defs/placeCopyTarget"
             },
             {
               "$ref": "#/$defs/transitionTarget"
@@ -2381,6 +2405,9 @@
       "oneOf": [
         {
           "$ref": "#/$defs/placeTarget"
+        },
+        {
+          "$ref": "#/$defs/placeCopyTarget"
         },
         {
           "$ref": "#/$defs/transitionTarget"

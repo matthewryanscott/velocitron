@@ -70,6 +70,11 @@ RULE_FUSION_PLACE_POSITION = "fusion-place-position"
 # position does not land on them. It still anchors ``relative (P)``.
 RULE_BESIDE_POSITION_SHADOWED = "beside-position-shadowed"
 
+# Stable rule id: a whole-place ``position`` that every drawn copy of the
+# place overrides. The place entry does not land on a copy. It still
+# anchors ``relative (P)``.
+RULE_PLACE_POSITION_OVERRIDDEN = "place-position-overridden"
+
 # CEL macros whose first argument binds a loop variable, not a free name.
 _BINDING_MACROS = frozenset({"all", "exists", "exists_one", "map", "filter"})
 
@@ -387,7 +392,7 @@ def _fusion_position_findings(net: Net) -> list[LintFinding]:
             continue
         positions = cast("Mapping[str, Any]", positions_raw)
         for subject in positions:
-            if not subject.startswith("place:"):
+            if not subject.startswith("place:") or "@transition:" in subject:
                 continue
             name = subject.removeprefix("place:")
             if name in fusion:
@@ -410,11 +415,27 @@ def _fusion_position_findings(net: Net) -> list[LintFinding]:
         reported.add((view_name, name))
         decoration = decorations.nodes.get(f"place:{name}")
         has_beside = decoration is not None and decoration.beside
-        count = len(drawn.get(name, ()))
+        view = cast("Mapping[str, Any]", views[view_name])
+        position_keys = cast("Mapping[str, Any]", view.get("positions", {}))
+        copies: dict[str, list[str]] = {}
+        for (place, transition), copy in layout.copies.items():
+            if place == name:
+                copies.setdefault(copy, []).append(transition)
+        count = len(copies)
+        unoverridden = [
+            copy
+            for copy, transitions in copies.items()
+            if not any(
+                f"place:{name}@transition:{transition}" in position_keys
+                for transition in transitions
+            )
+        ]
         suppressed = suppressed_rules(fusion[name].annotations)
-        if has_beside and count >= 1:
-            if RULE_BESIDE_POSITION_SHADOWED in suppressed:
-                continue
+        if (
+            has_beside
+            and count >= 1
+            and RULE_BESIDE_POSITION_SHADOWED not in suppressed
+        ):
             noun = "copy" if count == 1 else "copies"
             findings.append(
                 LintFinding(
@@ -429,22 +450,42 @@ def _fusion_position_findings(net: Net) -> list[LintFinding]:
                     ),
                 )
             )
-            continue
-        if count <= 1 or RULE_FUSION_PLACE_POSITION in suppressed:
-            continue
-        findings.append(
-            LintFinding(
-                rule=RULE_FUSION_PLACE_POSITION,
-                transition="",
-                place=name,
-                view=view_name,
-                message=(
-                    f"view {view_name!r} positions fusion place {name!r}, which "
-                    f"draws {count} copies; a whole-place position stacks every "
-                    "copy on one point"
-                ),
+        elif (
+            count > 1
+            and len(unoverridden) > 1
+            and RULE_FUSION_PLACE_POSITION not in suppressed
+        ):
+            findings.append(
+                LintFinding(
+                    rule=RULE_FUSION_PLACE_POSITION,
+                    transition="",
+                    place=name,
+                    view=view_name,
+                    message=(
+                        f"view {view_name!r} positions fusion place {name!r}, which "
+                        f"draws {count} copies; a whole-place position stacks every "
+                        "copy on one point"
+                    ),
+                )
             )
-        )
+        if (
+            count >= 1
+            and not unoverridden
+            and RULE_PLACE_POSITION_OVERRIDDEN not in suppressed
+        ):
+            findings.append(
+                LintFinding(
+                    rule=RULE_PLACE_POSITION_OVERRIDDEN,
+                    transition="",
+                    place=name,
+                    view=view_name,
+                    message=(
+                        f"view {view_name!r} positions place {name!r}, and every "
+                        f"drawn copy overrides that position; the position still "
+                        f"anchors relative ({name})"
+                    ),
+                )
+            )
     return findings
 
 
@@ -514,6 +555,7 @@ def lint_net(net: Net) -> list[LintFinding]:
 __all__ = [
     "RULE_BESIDE_POSITION_SHADOWED",
     "RULE_CONSUME_WITHOUT_PRODUCE",
+    "RULE_PLACE_POSITION_OVERRIDDEN",
     "RULE_CORRELATE_FREE_NAME",
     "RULE_FUSION_PLACE_POSITION",
     "RULE_PREDICATE_NAMES_COLOR_OR_PLACE",

@@ -609,7 +609,7 @@ This transition-level rule honors `annotations.lint.suppress` on the transition.
 
 ### Rule `fusion-place-position`
 
-A view is flagged when it sets a whole-place `position` on a fusion place that the renderer draws as **more than one copy** and that has no `beside` decoration. The position is written onto every copy, so the copies share one point. With `overlap=scale` the drawing collapses, and Graphviz can fail on the stacked nodes (ADR 0067). A fusion place drawn once is not flagged. A place with `beside` is flagged by `beside-position-shadowed` instead. A position of a transition, or of a place that is not a fusion place, is not flagged.
+A view is flagged when it sets a whole-place `position` on a fusion place that the renderer draws as **more than one copy** and that has no `beside` decoration. The position is written onto every copy that has no copy position of its own, so those copies share one point. With `overlap=scale` the drawing collapses, and Graphviz can fail on the stacked nodes (ADR 0067). A fusion place drawn once is not flagged. A place with `beside` is flagged by `beside-position-shadowed` instead. A place whose every copy has its own copy position is flagged by `place-position-overridden` instead. A position of a transition, or of a place that is not a fusion place, is not flagged.
 
 The finding names the view and the place. One view that positions two such places produces two findings, in the order of the position facts. The same place positioned by two views produces one finding per view. The rule honors `annotations.lint.suppress` on the **place**.
 
@@ -617,7 +617,13 @@ The finding names the view and the place. One view that positions two such place
 
 A view is flagged when it sets a whole-place `position` on a fusion place that has `beside` and draws at least one copy. In a positioned view, `beside` places those copies, so the position does not land on them. The position still anchors `relative (P)`. The finding says the position is shadowed. It honors `annotations.lint.suppress` on the place.
 
-`velocitron validate` runs every lint rule on a net, or on each net a composition uses (as written, not merged, since each net's CEL keeps its own place names; ADR 0032), and prints each finding to stderr as `PATH:LINE:COL: warning[RULE]: MESSAGE`; the exit code stays 0. For a `.petrinet` file, `LINE:COL` is where the source writes what the finding flags: a transition's name where it first appears, an arc's `predicate` or `correlate` fact when the rule is about that expression, else the arc itself, or the view's `position` fact for `fusion-place-position` and `beside-position-shadowed`. A composition's findings point into the file of the net they come from, and a net used twice reports each finding once. A JSON net has no source positions, so its findings report `1:1`.
+### Rule `place-position-overridden`
+
+A view is flagged when it sets a whole-place `position` and every drawn copy of that place has its own copy position (`(P)@[T]`, ADR 0068). The place entry does not land on a copy. It still anchors `relative (P)`. A shared copy (ADR 0035) counts as overridden when either of its names is positioned. A place whose copies are only partly overridden is not flagged by this rule. It honors `annotations.lint.suppress` on the place.
+
+`fusion-place-position` does not also flag a place whose every copy is overridden: those copies no longer share the place point. A place with `beside` is still flagged by `beside-position-shadowed`.
+
+`velocitron validate` runs every lint rule on a net, or on each net a composition uses (as written, not merged, since each net's CEL keeps its own place names; ADR 0032), and prints each finding to stderr as `PATH:LINE:COL: warning[RULE]: MESSAGE`; the exit code stays 0. For a `.petrinet` file, `LINE:COL` is where the source writes what the finding flags: a transition's name where it first appears, an arc's `predicate` or `correlate` fact when the rule is about that expression, else the arc itself, or the view's `position` fact for `fusion-place-position`, `beside-position-shadowed`, and `place-position-overridden`. A composition's findings point into the file of the net they come from, and a net used twice reports each finding once. A JSON net has no source positions, so its findings report `1:1`.
 
 ### Suppressing an intentional sink (ADR 0016)
 
@@ -633,7 +639,7 @@ An intentional sink is acknowledged per-transition through the documentation-fie
 
 Suppression is **rule-specific** (the list names exactly the rule ids being acknowledged) and **fails open**: anything other than the documented shape — a `lint` object carrying a `suppress` array of rule-id strings — suppresses nothing, so a malformed acknowledgement surfaces as the finding still firing rather than silently silencing a rule. The engine continues to ignore `annotations` entirely; only the opt-in lint surface reads the `lint` key. See `docs/adr/0016-lint-surface-annotations-suppression.md`.
 
-`fusion-place-position` and `beside-position-shadowed` are acknowledged on the place, with the same `lint.suppress` list (`(lock) annotation lint {"suppress": ["fusion-place-position"]}`). A transition's list does not silence them.
+`fusion-place-position`, `beside-position-shadowed`, and `place-position-overridden` are acknowledged on the place, with the same `lint.suppress` list (`(lock) annotation lint {"suppress": ["fusion-place-position"]}`). A transition's list does not silence them.
 
 A shorter form says why the sink is there: mark the transition as an **intended end** with the annotation `"end": true` (in `.petrinet`, `[clear_flag] annotation end true`). It silences `consume-without-produce` for that transition and no other rule. Only the JSON boolean `true` marks an end; any other value (`"true"`, `1`) fails open like a malformed suppression. The `consume-without-produce` message names this form.
 

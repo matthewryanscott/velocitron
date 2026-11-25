@@ -61,13 +61,39 @@ _ALIAS_RESERVED = _RESERVED | {
 }
 
 
-
 def _name(name: str) -> str:
     return (
         name
         if _IDENTIFIER.fullmatch(name) and name not in _RESERVED
         else render_canonical_json(name)
     )
+
+
+_COPY_KEY = "@transition:"
+
+
+def _copy_target(key: str) -> tuple[str, str] | None:
+    """``(place, transition)`` when ``key`` is ``place:<P>@transition:<T>``."""
+    if key.startswith("place:") and _COPY_KEY in key:
+        place, transition = key.removeprefix("place:").split(_COPY_KEY, 1)
+        if place and transition:
+            return place, transition
+    return None
+
+
+def _view_subject(subject: str) -> str:
+    """A positions-map key as a view target.
+
+    A copy is ``place:<P>@transition:<T>``, written ``(P)@[T]``.
+    """
+    copy = _copy_target(subject)
+    if copy is not None:
+        place, transition = copy
+        return f"({_name(place)})@[{_name(transition)}]"
+    subject_type, subject_name = subject.split(":", 1)
+    if subject_type == "place":
+        return f"({_name(subject_name)})"
+    return f"[{_name(subject_name)}]"
 
 
 def _valid_capacity_key(value: object) -> bool:
@@ -438,51 +464,43 @@ def _reserved_payload(
             raise ValueError(f"{view_path} positions and routes must be objects")
         position_values = cast(Mapping[str, Any], positions)
         route_values = cast(Mapping[str, Any], view_routes)
+
+        def require_position_target(key: object, *, base: bool) -> None:
+            copy = _copy_target(key) if isinstance(key, str) else None
+            if copy is not None:
+                place, transition = copy
+                if place not in place_names or transition not in transition_names:
+                    raise ValueError(
+                        f"{position_path} references unknown copy "
+                        f"({place})@[{transition}]"
+                    )
+                return
+            parts = key.split(":", 1) if isinstance(key, str) else []
+            if not (
+                len(parts) == 2 and parts[0] in {"place", "transition"} and parts[1]
+            ):
+                expected = (
+                    "must use from: place:<name> or transition:<name>"
+                    if base
+                    else "must target place:<name> or transition:<name>"
+                )
+                raise ValueError(f"{position_path} {expected}")
+            kind, name = parts
+            known = place_names if kind == "place" else transition_names
+            if name not in known:
+                raise ValueError(f"{position_path} references unknown {kind} {name!r}")
+
         for subject, raw_position in position_values.items():
             position_path = f"{view_path}.positions.{subject}"
             if not isinstance(raw_position, Mapping):
                 raise ValueError(f"{position_path} is invalid")
             position = cast(Mapping[str, Any], raw_position)
-            subject_parts = subject.split(":", 1)
-            if (
-                len(subject_parts) != 2
-                or subject_parts[0]
-                not in {
-                    "place",
-                    "transition",
-                }
-                or not subject_parts[1]
-            ):
-                raise ValueError(
-                    f"{position_path} must target place:<name> or transition:<name>"
-                )
-            subject_kind, subject_name = subject_parts
-            known_names = place_names if subject_kind == "place" else transition_names
-            if subject_name not in known_names:
-                raise ValueError(
-                    f"{position_path} references unknown {subject_kind} {subject_name!r}"
-                )
+            require_position_target(subject, base=False)
             if "from" in position:
                 _unsupported_fields(position, {"from", "delta"}, position_path)
                 if set(position) != {"from", "delta"}:
                     raise ValueError(f"{position_path} is invalid")
-                raw_base = position["from"]
-                base = raw_base.split(":", 1) if isinstance(raw_base, str) else []
-                base_kind, base_name = (
-                    (base[0], base[1])
-                    if len(base) == 2 and base[0] in {"place", "transition"} and base[1]
-                    else (None, None)
-                )
-                if base_kind is None:
-                    raise ValueError(
-                        f"{position_path} must use from: place:<name> "
-                        + "or transition:<name>"
-                    )
-                base_known = place_names if base_kind == "place" else transition_names
-                if base_name not in base_known:
-                    raise ValueError(
-                        f"{position_path} references unknown {base_kind} {base_name!r}"
-                    )
+                require_position_target(position["from"], base=True)
                 delta = position["delta"]
                 if not isinstance(delta, Mapping):
                     raise ValueError(f"{position_path} is invalid")
@@ -1374,34 +1392,16 @@ def emit_petrinet(document: Mapping[str, Any], compact: bool = False) -> str:
                 key=lambda item: (item[1]["x"], item[1]["y"], item[0]),
             )
             for subject, position in ordered_positions:
-                subject_type, subject_name = cast(str, subject).split(":", 1)
-                rendered_subject = (
-                    f"({_name(subject_name)})"
-                    if subject_type == "place"
-                    else f"[{_name(subject_name)}]"
-                )
                 view_facts.append(
                     f"view {_name(cast(str, view_name))} position "
-                    f"{rendered_subject} at {_json(position)}"
+                    f"{_view_subject(cast(str, subject))} at {_json(position)}"
                 )
             for base, subject, position in sorted(
                 ordered_relative, key=lambda item: (item[0], item[1])
             ):
-                subject_type, subject_name = subject.split(":", 1)
-                base_type, base_name = base.split(":", 1)
-                rendered_subject = (
-                    f"({_name(subject_name)})"
-                    if subject_type == "place"
-                    else f"[{_name(subject_name)}]"
-                )
-                rendered_base = (
-                    f"({_name(base_name)})"
-                    if base_type == "place"
-                    else f"[{_name(base_name)}]"
-                )
                 view_facts.append(
                     f"view {_name(cast(str, view_name))} position "
-                    f"{rendered_subject} relative {rendered_base} "
+                    f"{_view_subject(subject)} relative {_view_subject(base)} "
                     f"+ {_json(position['delta'])}"
                 )
             for handle, route in sorted(view["routes"].items()):

@@ -5,6 +5,7 @@ from __future__ import annotations
 from velocitron_analysis import (
     RULE_BESIDE_POSITION_SHADOWED,
     RULE_FUSION_PLACE_POSITION,
+    RULE_PLACE_POSITION_OVERRIDDEN,
     LintFinding,
     lint_net,
 )
@@ -262,3 +263,79 @@ def test_invalid_decorations_do_not_raise() -> None:
 
     # when/then: the lint fails open
     assert lint_net(net) == []
+
+
+def test_every_copy_override_warns_and_does_not_stack() -> None:
+    # given: both drawn copies of the lock have their own position
+    net = _with_view(
+        _lock(),
+        {
+            "place:lock": {"x": 0, "y": 0},
+            "place:lock@transition:acquire": {"x": 10, "y": 0},
+            "place:lock@transition:release": {"x": 80, "y": 0},
+        },
+    )
+
+    # when: linting
+    findings = lint_net(net)
+
+    # then: the place entry is fully overridden, and the copies are not stacked
+    assert findings == [
+        LintFinding(
+            rule=RULE_PLACE_POSITION_OVERRIDDEN,
+            transition="",
+            place="lock",
+            view="lanes",
+            message=(
+                "view 'lanes' positions place 'lock', and every drawn copy "
+                "overrides that position; the position still anchors relative (lock)"
+            ),
+        )
+    ]
+
+
+def test_one_copy_override_leaves_the_stack_warning_quiet() -> None:
+    # given: one of two copies has its own position
+    net = _with_view(
+        _lock(),
+        {
+            "place:lock": {"x": 0, "y": 0},
+            "place:lock@transition:acquire": {"x": 10, "y": 0},
+        },
+    )
+
+    # when/then: the remaining copy does not share the point with another
+    assert lint_net(net) == []
+
+
+def test_the_place_can_silence_a_full_override() -> None:
+    # given: the place acknowledges the override warning
+    net = _lock()
+    place = net.places[2]
+    silenced = Net(
+        name=net.name,
+        places=[
+            *net.places[:2],
+            Place(
+                place.name,
+                place.accepts,
+                annotations={
+                    "fusion": True,
+                    "lint": {"suppress": [RULE_PLACE_POSITION_OVERRIDDEN]},
+                },
+            ),
+        ],
+        transitions=net.transitions,
+        arcs=net.arcs,
+    )
+    viewed = _with_view(
+        silenced,
+        {
+            "place:lock": {"x": 0, "y": 0},
+            "place:lock@transition:acquire": {"x": 1, "y": 0},
+            "place:lock@transition:release": {"x": 2, "y": 0},
+        },
+    )
+
+    # when/then: the finding is silent
+    assert lint_net(viewed) == []

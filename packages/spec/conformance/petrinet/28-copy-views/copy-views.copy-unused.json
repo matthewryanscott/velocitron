@@ -1,0 +1,27 @@
+{
+  "diagnostic": {
+    "code": "PN202",
+    "column": 20,
+    "file": "copy-views.copy-unused.petrinet",
+    "help": "draw an arc between [skip] and (lock), or remove the copy target",
+    "line": 8,
+    "message": "transition [skip] has no arc to place (lock), so (lock)@[skip] is not a copy",
+    "span": {
+      "end": {
+        "byteOffset": 165,
+        "column": 33,
+        "line": 8
+      },
+      "source": "copy-views.copy-unused.petrinet",
+      "start": {
+        "byteOffset": 152,
+        "column": 20,
+        "line": 8
+      }
+    }
+  },
+  "source": {
+    "sourceId": "copy-views.copy-unused.petrinet",
+    "text": "net copy_views\n\n(seed) -pulse-> [emit] -pulse-> (out)\n(other) -pulse-> [skip]\n(lock) -permit-> [emit]\n(lock) annotation fusion true\n\nview laid position (lock)@[skip] at {\"x\": 1, \"y\": 2}\n"
+  }
+}

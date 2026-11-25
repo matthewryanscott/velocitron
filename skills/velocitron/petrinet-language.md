@@ -552,17 +552,27 @@ decorate color Color show JsonString ...
 ```
 
 `MetadataTarget` is `net`, `(Place)`, `[Transition]`, or `@Handle`.
-`ViewTarget` is only `(Place)` or `[Transition]`; views cannot position the
-document or an arc. A `relative` position names two targets: the subject it
+`ViewTarget` is `(Place)`, `(Place)@[Transition]`, or `[Transition]`; views
+cannot position the document or an arc. `(Place)@[Transition]` names the one
+copy of a fusion place drawn for that transition (ADR 0068). The place must
+be annotated `fusion true`, and the transition must have an arc to the place;
+otherwise the fact is a `PN202` diagnostic. Two names for one shared copy
+(ADR 0035) are one position: equal facts are idempotent and different facts
+conflict. A copy entry overrides the whole-place entry for that copy. The
+whole-place entry stays the point of a bare `relative (Place)`. That base is
+a `PN202` diagnostic when the view has no position for the place.
+
+A `relative` position names two targets: the subject it
 positions and the base it offsets from; the delta is added to the base's
-rendered position. The base may be any positionable target of either kind.
+rendered position. The base may be any positionable target, including a copy.
 Relative entries never resolve into the stored payload: they lower verbatim
-(positions stay `{"from", "delta"}` facts), and the resolver only checks shape
-and that the base names a declared place or transition. Applying a view
+(positions stay `{"from", "delta"}` facts). The resolver checks shape, that
+each target names a declared place or transition, and the copy and
+place-entry rules above. Applying a view
 resolves relative entries at render time against the other positions in the
 same view — chains resolve in dependency order, a base that carries no
 position in that view is rejected, and a relative chain that never becomes
-grounded is rejected. Relative entries are inert at compile time.
+grounded is rejected.
 `splines` picks the Graphviz edge style a renderer uses when it applies the
 view; without it the style is `ortho`. `detail` picks how much behavior the
 labels show when the view applies: `full` shows every expression whole,
@@ -636,6 +646,11 @@ decorations?: { Subject: { highlight?: { label?: String },
               | { "color:" Color: { quiet?: true,
                                     show?: [FieldPath, ...] } } }
 ```
+
+A position `Target` is `place:<name>`, `transition:<name>`, or
+`place:<place>@transition:<transition>`. The copy key lives in that same
+`positions` map. A copy entry overrides the whole-place entry for that one
+copy. `relative` to `place:<name>` uses the place entry's point.
 
 A decoration `Subject` is `place:<name>`, `transition:<name>`, or
 `arc:<handle>`; a place subject carries no `summary`, and only a place subject

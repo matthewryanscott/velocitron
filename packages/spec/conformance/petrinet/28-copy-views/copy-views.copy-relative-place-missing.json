@@ -1,0 +1,27 @@
+{
+  "diagnostic": {
+    "code": "PN202",
+    "column": 1,
+    "file": "copy-views.copy-relative-place-missing.petrinet",
+    "help": "position (lock) in this view before offsetting from it",
+    "line": 7,
+    "message": "view 'laid' relative base (lock) is the place entry's point, but view 'laid' has no position for (lock)",
+    "span": {
+      "end": {
+        "byteOffset": 169,
+        "column": 61,
+        "line": 7
+      },
+      "source": "copy-views.copy-relative-place-missing.petrinet",
+      "start": {
+        "byteOffset": 109,
+        "column": 1,
+        "line": 7
+      }
+    }
+  },
+  "source": {
+    "sourceId": "copy-views.copy-relative-place-missing.petrinet",
+    "text": "net copy_views\n\n(seed) -pulse-> [emit] -pulse-> (out)\n(lock) -permit-> [emit]\n(lock) annotation fusion true\n\nview laid position (seed) relative (lock) + {\"x\": 1, \"y\": 0}\n"
+  }
+}

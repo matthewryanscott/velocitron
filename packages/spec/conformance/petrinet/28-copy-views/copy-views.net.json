@@ -1,0 +1,208 @@
+{
+  "annotations": {
+    "petrinet.dsl/v1": {
+      "arcHandles": {},
+      "decorations": {
+        "place:lock": {
+          "beside": {}
+        }
+      },
+      "extensions": {},
+      "markings": {},
+      "views": {
+        "laid": {
+          "positions": {
+            "place:lock": {
+              "x": 0,
+              "y": 0
+            },
+            "place:lock@transition:echo": {
+              "x": 80,
+              "y": 0
+            },
+            "place:lock@transition:emit": {
+              "delta": {
+                "x": -10,
+                "y": 0
+              },
+              "from": "transition:emit"
+            },
+            "place:lock@transition:lend": {
+              "x": 10,
+              "y": 1
+            },
+            "place:lock@transition:recall": {
+              "x": 10,
+              "y": 1
+            },
+            "place:out": {
+              "delta": {
+                "x": 5,
+                "y": 0
+              },
+              "from": "place:lock@transition:emit"
+            },
+            "place:seed": {
+              "delta": {
+                "x": 1,
+                "y": 2
+              },
+              "from": "place:lock"
+            },
+            "transition:emit": {
+              "x": 40,
+              "y": 0
+            }
+          },
+          "routes": {}
+        }
+      }
+    }
+  },
+  "arcs": [
+    {
+      "consume": {
+        "type": "pulse"
+      },
+      "from": {
+        "place": "seed"
+      },
+      "to": {
+        "transition": "emit"
+      }
+    },
+    {
+      "from": {
+        "transition": "emit"
+      },
+      "produce": {
+        "destination": "out",
+        "type": "pulse"
+      },
+      "to": {
+        "place": "out"
+      }
+    },
+    {
+      "consume": {
+        "type": "permit"
+      },
+      "from": {
+        "place": "lock"
+      },
+      "to": {
+        "transition": "emit"
+      }
+    },
+    {
+      "consume": {
+        "type": "pulse"
+      },
+      "from": {
+        "place": "out"
+      },
+      "to": {
+        "transition": "echo"
+      }
+    },
+    {
+      "consume": {
+        "type": "permit"
+      },
+      "from": {
+        "place": "lock"
+      },
+      "to": {
+        "transition": "echo"
+      }
+    },
+    {
+      "consume": {
+        "type": "job"
+      },
+      "from": {
+        "place": "requested"
+      },
+      "to": {
+        "transition": "lend"
+      }
+    },
+    {
+      "consume": {
+        "type": "job"
+      },
+      "from": {
+        "place": "requested"
+      },
+      "to": {
+        "transition": "recall"
+      }
+    },
+    {
+      "consume": {
+        "type": "permit"
+      },
+      "from": {
+        "place": "lock"
+      },
+      "to": {
+        "transition": "lend"
+      }
+    },
+    {
+      "consume": {
+        "type": "permit"
+      },
+      "from": {
+        "place": "lock"
+      },
+      "to": {
+        "transition": "recall"
+      }
+    }
+  ],
+  "name": "copy_views",
+  "places": [
+    {
+      "accepts": [
+        "pulse"
+      ],
+      "name": "seed"
+    },
+    {
+      "accepts": [
+        "pulse"
+      ],
+      "name": "out"
+    },
+    {
+      "accepts": [
+        "permit"
+      ],
+      "annotations": {
+        "fusion": true
+      },
+      "name": "lock"
+    },
+    {
+      "accepts": [
+        "job"
+      ],
+      "name": "requested"
+    }
+  ],
+  "transitions": [
+    {
+      "name": "emit"
+    },
+    {
+      "name": "echo"
+    },
+    {
+      "name": "lend"
+    },
+    {
+      "name": "recall"
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+{
+  "sourceId": "copy-views.canonical.petrinet",
+  "text": "net copy_views\n\n(seed) -pulse-> [emit]\n[emit] -pulse-> (out)\n(lock) -permit-> [emit]\n(out) -pulse-> [echo]\n(lock) -permit-> [echo]\n(requested) -job-> [lend]\n(requested) -job-> [recall]\n(lock) -permit-> [lend]\n(lock) -permit-> [recall]\n\n(lock) annotation fusion true\n\nview laid position (lock) at {\"x\":0,\"y\":0}\nview laid position (lock)@[lend] at {\"x\":10,\"y\":1}\nview laid position (lock)@[recall] at {\"x\":10,\"y\":1}\nview laid position [emit] at {\"x\":40,\"y\":0}\nview laid position (lock)@[echo] at {\"x\":80,\"y\":0}\nview laid position (seed) relative (lock) + {\"x\":1,\"y\":2}\nview laid position (out) relative (lock)@[emit] + {\"x\":5,\"y\":0}\nview laid position (lock)@[emit] relative [emit] + {\"x\":-10,\"y\":0}\ndecorate (lock) beside\nextensions {}\n"
+}

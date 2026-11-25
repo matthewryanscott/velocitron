@@ -1,0 +1,27 @@
+{
+  "diagnostic": {
+    "code": "PN202",
+    "column": 20,
+    "file": "copy-views.copy-not-fusion.petrinet",
+    "help": "annotate it with `(seed) annotation fusion true`, or position the place",
+    "line": 5,
+    "message": "copy target (seed)@[emit] needs a fusion place; (seed) is drawn once, so it has no copies",
+    "span": {
+      "end": {
+        "byteOffset": 87,
+        "column": 33,
+        "line": 5
+      },
+      "source": "copy-views.copy-not-fusion.petrinet",
+      "start": {
+        "byteOffset": 74,
+        "column": 20,
+        "line": 5
+      }
+    }
+  },
+  "source": {
+    "sourceId": "copy-views.copy-not-fusion.petrinet",
+    "text": "net copy_views\n\n(seed) -pulse-> [emit] -pulse-> (out)\n\nview laid position (seed)@[emit] at {\"x\": 1, \"y\": 2}\n"
+  }
+}

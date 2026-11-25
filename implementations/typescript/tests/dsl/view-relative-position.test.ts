@@ -73,9 +73,18 @@ describe("view position relative fact", () => {
   });
 
   it("resolves to the from-string payload shape owned by the compiler", () => {
-    // given: the same relative net
+    // given: the relative net, with a place entry for the bare base
+    const source = [
+      "net laid_out",
+      "(origin)",
+      "(work)",
+      'view board position (origin) at {"x": 0, "y": 0}',
+      'view board position (work) relative (origin) + {"x": 10, "y": 20}',
+      "",
+    ].join("\n");
+
     // when: compiling through the full pipeline
-    const compiled = compilePetrinetText(RELATIVE_NET, "board.petrinet");
+    const compiled = compilePetrinetText(source, "board.petrinet");
 
     // then: the canonical payload entry is resolved (from is a kind:name string)
     const payload = (compiled.document.annotations as Record<string, Record<string, any>>)[
@@ -118,6 +127,16 @@ describe("view position relative fact", () => {
       () => compilePetrinetText(text, "board.petrinet"),
       "PN200",
       "invalid view position contribution",
+    );
+  });
+
+  it("rejects a bare place base when the view has no place entry", () => {
+    // given: a relative fact whose base is a declared place with no position
+    // when/then: the base is the place entry's point, so the missing entry is PN202
+    expectDslDiagnostic(
+      () => compilePetrinetText(RELATIVE_NET, "board.petrinet"),
+      "PN202",
+      "view 'board' relative base (origin) is the place entry's point, but view 'board' has no position for (origin)",
     );
   });
 

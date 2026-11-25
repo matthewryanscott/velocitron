@@ -1,0 +1,45 @@
+{
+  "diagnostic": {
+    "code": "PN202",
+    "column": 1,
+    "file": "copy-views.copy-shared-conflict.petrinet",
+    "help": "remove one declaration or make both positions identical",
+    "line": 11,
+    "message": "conflicting position facts for shared copy (lock)@[lend] and (lock)@[recall] in view 'laid'",
+    "related": [
+      {
+        "message": "first position was declared here",
+        "span": {
+          "end": {
+            "byteOffset": 226,
+            "column": 53,
+            "line": 10
+          },
+          "source": "copy-views.copy-shared-conflict.petrinet",
+          "start": {
+            "byteOffset": 174,
+            "column": 1,
+            "line": 10
+          }
+        }
+      }
+    ],
+    "span": {
+      "end": {
+        "byteOffset": 281,
+        "column": 55,
+        "line": 11
+      },
+      "source": "copy-views.copy-shared-conflict.petrinet",
+      "start": {
+        "byteOffset": 227,
+        "column": 1,
+        "line": 11
+      }
+    }
+  },
+  "source": {
+    "sourceId": "copy-views.copy-shared-conflict.petrinet",
+    "text": "net copy_views\n\n(requested) -job-> [lend]\n(requested) -job-> [recall]\n(lock) -permit-> [lend]\n(lock) -permit-> [recall]\n(lock) annotation fusion true\ndecorate (lock) beside\n\nview laid position (lock)@[lend] at {\"x\": 1, \"y\": 0}\nview laid position (lock)@[recall] at {\"x\": 2, \"y\": 0}\n"
+  }
+}
