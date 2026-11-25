@@ -67,6 +67,7 @@ current normative contracts live in `packages/spec/`.
 - [0066 — The C++ CEL backend is a compatibility and conformance reference](0066-the-cpp-cel-backend-is-a-compatibility-and-conformance-reference.md)
 - [0067 — A pinned view places `beside` copies next to their transitions](0067-a-pinned-view-places-beside-copies-next-to-their-transitions.md)
 - [0068 — A view can position one fusion copy](0068-a-view-can-position-one-fusion-copy.md)
+- [0070 — `beside unshared` keeps one fusion copy per transition](0070-beside-unshared-keeps-one-fusion-copy-per-transition.md)
 - [0072 — A renderer places each fusion copy from its own position](0072-a-renderer-places-each-fusion-copy-from-its-own-position.md)
 - [0073 — Hand-off places are sequence lifelines](0073-hand-off-places-are-sequence-lifelines.md)
 

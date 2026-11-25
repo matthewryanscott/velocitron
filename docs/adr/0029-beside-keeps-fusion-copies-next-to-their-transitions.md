@@ -1,6 +1,7 @@
 # `beside` keeps fusion copies next to their transitions
 
-**Status:** Accepted. Amended 2026-11-25 (Decision 4, by ADR 0067).
+**Status:** Accepted. Amended 2026-11-25 (Decision 4, by ADR 0067; the
+`unshared` modifier, by ADR 0070).
 
 A fusion place renders as one local copy per transition that uses it
 (CONTEXT.md "Fusion place"). With the default `dot` layout, crossing
@@ -12,13 +13,13 @@ keeps the copies beside their transitions, and settles how `dot` draws it.
 ## Decision 1: a `beside` decoration on the fusion place
 
 ```text
-decorate (Place) beside [ left | right ]
+decorate (Place) beside [ left | right ] [ unshared ]
 ```
 
 It lowers to the closed IR kind `decoration.beside` and resolves into the
 ADR 0028 payload as `decorations["place:P"].beside`, an object with an
 optional `side`. It is one fact per place, and it applies to every copy of
-that place.
+that place. `unshared` is ADR 0070.
 
 **Considered options:**
 

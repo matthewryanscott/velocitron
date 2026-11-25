@@ -645,9 +645,13 @@ def _reserved_payload(
             beside = decoration["beside"]
             if (
                 not isinstance(beside, Mapping)
-                or set(cast(Mapping[str, Any], beside)) - {"side"}
+                or set(cast(Mapping[str, Any], beside)) - {"side", "share"}
                 or cast(Mapping[str, Any], beside).get("side", "left")
                 not in ("left", "right")
+                or (
+                    "share" in cast(Mapping[str, Any], beside)
+                    and cast(Mapping[str, Any], beside).get("share") is not False
+                )
             ):
                 raise ValueError(f"{decoration_path}.beside is invalid")
             if subject_name not in fusion_place_names:
@@ -1465,10 +1469,12 @@ def emit_petrinet(document: Mapping[str, Any], compact: bool = False) -> str:
                         f"decorate {rendered_subject} {member} {_json(decoration[member])}"
                     )
             if "beside" in decoration:
-                side = decoration["beside"].get("side")
+                beside = decoration["beside"]
+                side = beside.get("side")
                 view_facts.append(
                     f"decorate {rendered_subject} beside"
                     + ("" if side is None else f" {side}")
+                    + (" unshared" if beside.get("share") is False else "")
                 )
         view_facts.append(f"extensions {_json(metadata['extensions'])}")
 

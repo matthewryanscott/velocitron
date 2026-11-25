@@ -1214,13 +1214,18 @@ function fusionCopyIds(
   annotations: ReadonlyMap<string, ReadonlyMap<string, Fact<JsonValue>>>,
   decorations: ReadonlyMap<string, ReadonlyMap<string, Fact<JsonValue>>>,
 ): ReadonlyMap<string, string> {
-  const nodes: Record<string, {beside: true; besideSide: string | null}> = {};
+  const nodes: Record<string, {beside: true; besideSide: string | null; besideShare: boolean}> = {};
   for (const [subject, facts] of decorations) {
     const beside = facts.get("beside");
     if (beside === undefined || !subject.startsWith("place:")) continue;
     const rawBeside: unknown = beside.value;
     const side = isObject(rawBeside) ? rawBeside.side : undefined;
-    nodes[subject] = {beside: true, besideSide: typeof side === "string" ? side : null};
+    const share = isObject(rawBeside) ? rawBeside.share : undefined;
+    nodes[subject] = {
+      beside: true,
+      besideSide: typeof side === "string" ? side : null,
+      besideShare: share !== false,
+    };
   }
   const places = [...accepts].map(([name, colors]) => {
     const fusion = annotations.get(JSON.stringify(["place", name]))?.get("fusion");
@@ -2469,10 +2474,16 @@ export function resolveContributionIr(
           (value.label === undefined || typeof value.label === "string");
         decorationValue = value.label === undefined ? {} : {label: value.label as string};
       } else if (member === "beside") {
+        const side = value.side;
+        const share = value.share;
         validValue =
-          Object.keys(value).every((key) => key === "side") &&
-          (value.side === undefined || value.side === "left" || value.side === "right");
-        decorationValue = value.side === undefined ? {} : {side: value.side as string};
+          Object.keys(value).every((key) => key === "side" || key === "share") &&
+          (side === undefined || side === "left" || side === "right") &&
+          (share === undefined || share === false);
+        const besideValue: Record<string, JsonValue> = {};
+        if (typeof side === "string") besideValue.side = side;
+        if (share === false) besideValue.share = false;
+        decorationValue = besideValue;
       } else if (member === "quiet") {
         validValue = Object.keys(value).length === 0;
         decorationValue = true;

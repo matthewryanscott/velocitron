@@ -68,50 +68,51 @@ export default class VelocitronPetriNetParser extends Parser {
 	public static readonly BESIDE = 48;
 	public static readonly LEFT = 49;
 	public static readonly RIGHT = 50;
-	public static readonly SHOW = 51;
-	public static readonly DOMAIN = 52;
-	public static readonly FINAL = 53;
-	public static readonly INVARIANT = 54;
-	public static readonly ACTOR = 55;
-	public static readonly PERSON = 56;
-	public static readonly SYSTEM = 57;
-	public static readonly RECORD = 58;
-	public static readonly LIVES = 59;
-	public static readonly IN = 60;
-	public static readonly READS = 61;
-	public static readonly KEPT = 62;
-	public static readonly STARTS = 63;
-	public static readonly TRUE = 64;
-	public static readonly FALSE = 65;
-	public static readonly NULL = 66;
-	public static readonly AT = 67;
-	public static readonly LPAREN = 68;
-	public static readonly RPAREN = 69;
-	public static readonly LBRACK = 70;
-	public static readonly RBRACK = 71;
-	public static readonly LBRACE = 72;
-	public static readonly RBRACE = 73;
-	public static readonly HYPHEN = 74;
-	public static readonly READ_ARROW = 75;
-	public static readonly INHIBIT_ARROW = 76;
-	public static readonly ARROW = 77;
-	public static readonly LEFT_ARROW = 78;
-	public static readonly DOLLAR = 79;
-	public static readonly STAR = 80;
-	public static readonly COLON = 81;
-	public static readonly COMMA = 82;
-	public static readonly DOT = 83;
-	public static readonly TILDE = 84;
-	public static readonly POSITIVE_INTEGER = 85;
-	public static readonly ZERO = 86;
-	public static readonly NUMBER = 87;
-	public static readonly STRING = 88;
-	public static readonly IDENT = 89;
-	public static readonly LINE_COMMENT = 90;
-	public static readonly BLOCK_COMMENT = 91;
-	public static readonly WS = 92;
-	public static readonly CRLF = 93;
-	public static readonly UNSUPPORTED = 94;
+	public static readonly UNSHARED = 51;
+	public static readonly SHOW = 52;
+	public static readonly DOMAIN = 53;
+	public static readonly FINAL = 54;
+	public static readonly INVARIANT = 55;
+	public static readonly ACTOR = 56;
+	public static readonly PERSON = 57;
+	public static readonly SYSTEM = 58;
+	public static readonly RECORD = 59;
+	public static readonly LIVES = 60;
+	public static readonly IN = 61;
+	public static readonly READS = 62;
+	public static readonly KEPT = 63;
+	public static readonly STARTS = 64;
+	public static readonly TRUE = 65;
+	public static readonly FALSE = 66;
+	public static readonly NULL = 67;
+	public static readonly AT = 68;
+	public static readonly LPAREN = 69;
+	public static readonly RPAREN = 70;
+	public static readonly LBRACK = 71;
+	public static readonly RBRACK = 72;
+	public static readonly LBRACE = 73;
+	public static readonly RBRACE = 74;
+	public static readonly HYPHEN = 75;
+	public static readonly READ_ARROW = 76;
+	public static readonly INHIBIT_ARROW = 77;
+	public static readonly ARROW = 78;
+	public static readonly LEFT_ARROW = 79;
+	public static readonly DOLLAR = 80;
+	public static readonly STAR = 81;
+	public static readonly COLON = 82;
+	public static readonly COMMA = 83;
+	public static readonly DOT = 84;
+	public static readonly TILDE = 85;
+	public static readonly POSITIVE_INTEGER = 86;
+	public static readonly ZERO = 87;
+	public static readonly NUMBER = 88;
+	public static readonly STRING = 89;
+	public static readonly IDENT = 90;
+	public static readonly LINE_COMMENT = 91;
+	public static readonly BLOCK_COMMENT = 92;
+	public static readonly WS = 93;
+	public static readonly CRLF = 94;
+	public static readonly UNSUPPORTED = 95;
 	public static override readonly EOF = Token.EOF;
 	public static readonly RULE_document = 0;
 	public static readonly RULE_netHeader = 1;
@@ -229,6 +230,7 @@ export default class VelocitronPetriNetParser extends Parser {
                                                             "'quiet'", "'color'", 
                                                             "'beside'", 
                                                             "'left'", "'right'", 
+                                                            "'unshared'", 
                                                             "'show'", "'domain'", 
                                                             "'final'", "'invariant'", 
                                                             "'actor'", "'person'", 
@@ -284,9 +286,9 @@ export default class VelocitronPetriNetParser extends Parser {
                                                              "NOTE", "SUMMARY", 
                                                              "QUIET", "COLOR_KEYWORD", 
                                                              "BESIDE", "LEFT", 
-                                                             "RIGHT", "SHOW", 
-                                                             "DOMAIN", "FINAL", 
-                                                             "INVARIANT", 
+                                                             "RIGHT", "UNSHARED", 
+                                                             "SHOW", "DOMAIN", 
+                                                             "FINAL", "INVARIANT", 
                                                              "ACTOR", "PERSON", 
                                                              "SYSTEM", "RECORD", 
                                                              "LIVES", "IN", 
@@ -361,16 +363,16 @@ export default class VelocitronPetriNetParser extends Parser {
 			case 31:
 			case 32:
 			case 42:
-			case 52:
 			case 53:
 			case 54:
-			case 56:
+			case 55:
 			case 57:
 			case 58:
-			case 67:
+			case 59:
 			case 68:
-			case 70:
-			case 79:
+			case 69:
+			case 71:
+			case 80:
 				this.enterOuterAlt(localctx, 1);
 				{
 				this.state = 163;
@@ -386,7 +388,7 @@ export default class VelocitronPetriNetParser extends Parser {
 				this.state = 205;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-				while ((((_la) & ~0x1F) === 0 && ((1 << _la) & 2281701378) !== 0) || ((((_la - 32)) & ~0x1F) === 0 && ((1 << (_la - 32)) & 124781569) !== 0) || ((((_la - 67)) & ~0x1F) === 0 && ((1 << (_la - 67)) & 4107) !== 0)) {
+				while ((((_la) & ~0x1F) === 0 && ((1 << _la) & 2281701378) !== 0) || ((((_la - 32)) & ~0x1F) === 0 && ((1 << (_la - 32)) & 249562113) !== 0) || ((((_la - 68)) & ~0x1F) === 0 && ((1 << (_la - 68)) & 4107) !== 0)) {
 					{
 					this.state = 203;
 					this._errHandler.sync(this);
@@ -637,7 +639,7 @@ export default class VelocitronPetriNetParser extends Parser {
 				this.state = 217;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-				while ((((_la) & ~0x1F) === 0 && ((1 << _la) & 232) !== 0) || _la===53) {
+				while ((((_la) & ~0x1F) === 0 && ((1 << _la) & 232) !== 0) || _la===54) {
 					{
 					this.state = 215;
 					this._errHandler.sync(this);
@@ -666,7 +668,7 @@ export default class VelocitronPetriNetParser extends Parser {
 						this.compositionRefine();
 						}
 						break;
-					case 53:
+					case 54:
 						{
 						this.state = 214;
 						this.compositionFinal();
@@ -717,7 +719,7 @@ export default class VelocitronPetriNetParser extends Parser {
 			this.state = 227;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
-			if (_la===88) {
+			if (_la===89) {
 				{
 				this.state = 226;
 				this.match(VelocitronPetriNetParser.STRING);
@@ -872,7 +874,7 @@ export default class VelocitronPetriNetParser extends Parser {
 				this.state = 256;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-			} while (_la===84);
+			} while (_la===85);
 			}
 		}
 		catch (re) {
@@ -939,7 +941,7 @@ export default class VelocitronPetriNetParser extends Parser {
 			this.state = 271;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
-			while (_la===82) {
+			while (_la===83) {
 				{
 				{
 				this.state = 267;
@@ -1033,7 +1035,7 @@ export default class VelocitronPetriNetParser extends Parser {
 			this.state = 292;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
-			while (_la===83) {
+			while (_la===84) {
 				{
 				{
 				this.state = 288;
@@ -1079,7 +1081,7 @@ export default class VelocitronPetriNetParser extends Parser {
 			this.state = 303;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
-			while (_la===83) {
+			while (_la===84) {
 				{
 				{
 				this.state = 299;
@@ -1121,7 +1123,7 @@ export default class VelocitronPetriNetParser extends Parser {
 			this.state = 309;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
-			if (_la===67) {
+			if (_la===68) {
 				{
 				this.state = 308;
 				this.chainHandle();
@@ -1145,7 +1147,7 @@ export default class VelocitronPetriNetParser extends Parser {
 				this.state = 317;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-			} while (((((_la - 74)) & ~0x1F) === 0 && ((1 << (_la - 74)) & 15) !== 0));
+			} while (((((_la - 75)) & ~0x1F) === 0 && ((1 << (_la - 75)) & 15) !== 0));
 			}
 		}
 		catch (re) {
@@ -1170,14 +1172,14 @@ export default class VelocitronPetriNetParser extends Parser {
 			this.state = 321;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
-			case 68:
+			case 69:
 				this.enterOuterAlt(localctx, 1);
 				{
 				this.state = 319;
 				this.place();
 				}
 				break;
-			case 70:
+			case 71:
 				this.enterOuterAlt(localctx, 2);
 				{
 				this.state = 320;
@@ -1213,7 +1215,7 @@ export default class VelocitronPetriNetParser extends Parser {
 			this.state = 325;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
-			if (_la===74) {
+			if (_la===75) {
 				{
 				this.state = 323;
 				this.match(VelocitronPetriNetParser.HYPHEN);
@@ -1250,7 +1252,7 @@ export default class VelocitronPetriNetParser extends Parser {
 			{
 			this.state = 329;
 			_la = this._input.LA(1);
-			if(!(((((_la - 75)) & ~0x1F) === 0 && ((1 << (_la - 75)) & 7) !== 0))) {
+			if(!(((((_la - 76)) & ~0x1F) === 0 && ((1 << (_la - 76)) & 7) !== 0))) {
 			this._errHandler.recoverInline(this);
 			}
 			else {
@@ -1722,7 +1724,7 @@ export default class VelocitronPetriNetParser extends Parser {
 			this.state = 393;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
-			case 89:
+			case 90:
 				this.enterOuterAlt(localctx, 1);
 				{
 				this.state = 390;
@@ -1796,6 +1798,7 @@ export default class VelocitronPetriNetParser extends Parser {
 			case 61:
 			case 62:
 			case 63:
+			case 64:
 				this.enterOuterAlt(localctx, 3);
 				{
 				this.state = 392;
@@ -1928,7 +1931,7 @@ export default class VelocitronPetriNetParser extends Parser {
 			this.state = 416;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
-			while (_la===82) {
+			while (_la===83) {
 				{
 				{
 				this.state = 412;
@@ -2205,7 +2208,7 @@ export default class VelocitronPetriNetParser extends Parser {
 			{
 			this.state = 459;
 			_la = this._input.LA(1);
-			if(!(_la===85 || _la===86)) {
+			if(!(_la===86 || _la===87)) {
 			this._errHandler.recoverInline(this);
 			}
 			else {
@@ -2334,7 +2337,7 @@ export default class VelocitronPetriNetParser extends Parser {
 				this.state = 478;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-				if (_la===85) {
+				if (_la===86) {
 					{
 					this.state = 475;
 					this.positiveInteger();
@@ -2445,21 +2448,21 @@ export default class VelocitronPetriNetParser extends Parser {
 				this.match(VelocitronPetriNetParser.NET);
 				}
 				break;
-			case 68:
+			case 69:
 				this.enterOuterAlt(localctx, 2);
 				{
 				this.state = 494;
 				this.place();
 				}
 				break;
-			case 70:
+			case 71:
 				this.enterOuterAlt(localctx, 3);
 				{
 				this.state = 495;
 				this.transition();
 				}
 				break;
-			case 67:
+			case 68:
 				this.enterOuterAlt(localctx, 4);
 				{
 				this.state = 496;
@@ -2656,7 +2659,7 @@ export default class VelocitronPetriNetParser extends Parser {
 			this.state = 542;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
-			case 68:
+			case 69:
 				this.enterOuterAlt(localctx, 1);
 				{
 				this.state = 536;
@@ -2664,7 +2667,7 @@ export default class VelocitronPetriNetParser extends Parser {
 				this.state = 539;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-				if (_la===67) {
+				if (_la===68) {
 					{
 					this.state = 537;
 					this.match(VelocitronPetriNetParser.AT);
@@ -2675,7 +2678,7 @@ export default class VelocitronPetriNetParser extends Parser {
 
 				}
 				break;
-			case 70:
+			case 71:
 				this.enterOuterAlt(localctx, 2);
 				{
 				this.state = 541;
@@ -2706,9 +2709,9 @@ export default class VelocitronPetriNetParser extends Parser {
 		this.enterRule(localctx, 110, VelocitronPetriNetParser.RULE_decoration);
 		let _la: number;
 		try {
-			this.state = 580;
+			this.state = 583;
 			this._errHandler.sync(this);
-			switch ( this._interp.adaptivePredict(this._input, 28, this._ctx) ) {
+			switch ( this._interp.adaptivePredict(this._input, 29, this._ctx) ) {
 			case 1:
 				this.enterOuterAlt(localctx, 1);
 				{
@@ -2721,7 +2724,7 @@ export default class VelocitronPetriNetParser extends Parser {
 				this.state = 548;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-				if (_la===88) {
+				if (_la===89) {
 					{
 					this.state = 547;
 					this.match(VelocitronPetriNetParser.STRING);
@@ -2782,46 +2785,56 @@ export default class VelocitronPetriNetParser extends Parser {
 					}
 				}
 
+				this.state = 567;
+				this._errHandler.sync(this);
+				_la = this._input.LA(1);
+				if (_la===51) {
+					{
+					this.state = 566;
+					this.match(VelocitronPetriNetParser.UNSHARED);
+					}
+				}
+
 				}
 				break;
 			case 5:
 				this.enterOuterAlt(localctx, 5);
 				{
-				this.state = 566;
-				this.match(VelocitronPetriNetParser.DECORATE);
-				this.state = 567;
-				this.match(VelocitronPetriNetParser.COLOR_KEYWORD);
-				this.state = 568;
-				this.color();
 				this.state = 569;
+				this.match(VelocitronPetriNetParser.DECORATE);
+				this.state = 570;
+				this.match(VelocitronPetriNetParser.COLOR_KEYWORD);
+				this.state = 571;
+				this.color();
+				this.state = 572;
 				this.match(VelocitronPetriNetParser.QUIET);
 				}
 				break;
 			case 6:
 				this.enterOuterAlt(localctx, 6);
 				{
-				this.state = 571;
-				this.match(VelocitronPetriNetParser.DECORATE);
-				this.state = 572;
-				this.match(VelocitronPetriNetParser.COLOR_KEYWORD);
-				this.state = 573;
-				this.color();
 				this.state = 574;
-				this.match(VelocitronPetriNetParser.SHOW);
+				this.match(VelocitronPetriNetParser.DECORATE);
+				this.state = 575;
+				this.match(VelocitronPetriNetParser.COLOR_KEYWORD);
 				this.state = 576;
+				this.color();
+				this.state = 577;
+				this.match(VelocitronPetriNetParser.SHOW);
+				this.state = 579;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 				do {
 					{
 					{
-					this.state = 575;
+					this.state = 578;
 					this.match(VelocitronPetriNetParser.STRING);
 					}
 					}
-					this.state = 578;
+					this.state = 581;
 					this._errHandler.sync(this);
 					_la = this._input.LA(1);
-				} while (_la===88);
+				} while (_la===89);
 				}
 				break;
 			}
@@ -2845,29 +2858,29 @@ export default class VelocitronPetriNetParser extends Parser {
 		let localctx: DecorationTargetContext = new DecorationTargetContext(this, this._ctx, this.state);
 		this.enterRule(localctx, 112, VelocitronPetriNetParser.RULE_decorationTarget);
 		try {
-			this.state = 586;
+			this.state = 589;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
-			case 68:
+			case 69:
 				this.enterOuterAlt(localctx, 1);
 				{
-				this.state = 582;
+				this.state = 585;
 				this.place();
 				}
 				break;
-			case 70:
+			case 71:
 				this.enterOuterAlt(localctx, 2);
 				{
-				this.state = 583;
+				this.state = 586;
 				this.transition();
 				}
 				break;
-			case 67:
+			case 68:
 				this.enterOuterAlt(localctx, 3);
 				{
-				this.state = 584;
+				this.state = 587;
 				this.match(VelocitronPetriNetParser.AT);
-				this.state = 585;
+				this.state = 588;
 				this.name();
 				}
 				break;
@@ -2896,9 +2909,9 @@ export default class VelocitronPetriNetParser extends Parser {
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 588;
+			this.state = 591;
 			this.match(VelocitronPetriNetParser.EXTENSIONS);
-			this.state = 589;
+			this.state = 592;
 			this.jsonObject();
 			}
 		}
@@ -2924,28 +2937,28 @@ export default class VelocitronPetriNetParser extends Parser {
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 591;
-			this.match(VelocitronPetriNetParser.DOMAIN);
-			this.state = 592;
-			this.color();
-			this.state = 593;
-			this.match(VelocitronPetriNetParser.DOT);
 			this.state = 594;
-			this.fieldPath();
+			this.match(VelocitronPetriNetParser.DOMAIN);
+			this.state = 595;
+			this.color();
 			this.state = 596;
+			this.match(VelocitronPetriNetParser.DOT);
+			this.state = 597;
+			this.fieldPath();
+			this.state = 599;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			do {
 				{
 				{
-				this.state = 595;
+				this.state = 598;
 				this.domainValue();
 				}
 				}
-				this.state = 598;
+				this.state = 601;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-			} while (((((_la - 64)) & ~0x1F) === 0 && ((1 << (_la - 64)) & 31457283) !== 0));
+			} while (((((_la - 65)) & ~0x1F) === 0 && ((1 << (_la - 65)) & 31457283) !== 0));
 			}
 		}
 		catch (re) {
@@ -2970,21 +2983,21 @@ export default class VelocitronPetriNetParser extends Parser {
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 600;
+			this.state = 603;
 			this.name();
-			this.state = 605;
+			this.state = 608;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
-			while (_la===83) {
+			while (_la===84) {
 				{
 				{
-				this.state = 601;
+				this.state = 604;
 				this.match(VelocitronPetriNetParser.DOT);
-				this.state = 602;
+				this.state = 605;
 				this.name();
 				}
 				}
-				this.state = 607;
+				this.state = 610;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 			}
@@ -3012,9 +3025,9 @@ export default class VelocitronPetriNetParser extends Parser {
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 608;
+			this.state = 611;
 			_la = this._input.LA(1);
-			if(!(((((_la - 64)) & ~0x1F) === 0 && ((1 << (_la - 64)) & 31457283) !== 0))) {
+			if(!(((((_la - 65)) & ~0x1F) === 0 && ((1 << (_la - 65)) & 31457283) !== 0))) {
 			this._errHandler.recoverInline(this);
 			}
 			else {
@@ -3045,23 +3058,23 @@ export default class VelocitronPetriNetParser extends Parser {
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 610;
+			this.state = 613;
 			this.match(VelocitronPetriNetParser.FINAL);
-			this.state = 611;
+			this.state = 614;
 			this.finalMarking();
-			this.state = 616;
+			this.state = 619;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
-			while (_la===82) {
+			while (_la===83) {
 				{
 				{
-				this.state = 612;
+				this.state = 615;
 				this.match(VelocitronPetriNetParser.COMMA);
-				this.state = 613;
+				this.state = 616;
 				this.finalMarking();
 				}
 				}
-				this.state = 618;
+				this.state = 621;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 			}
@@ -3089,21 +3102,21 @@ export default class VelocitronPetriNetParser extends Parser {
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 619;
+			this.state = 622;
 			this.place();
-			this.state = 624;
+			this.state = 627;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			while (_la===37) {
 				{
 				{
-				this.state = 620;
+				this.state = 623;
 				this.match(VelocitronPetriNetParser.PLUS);
-				this.state = 621;
+				this.state = 624;
 				this.place();
 				}
 				}
-				this.state = 626;
+				this.state = 629;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 			}
@@ -3131,44 +3144,44 @@ export default class VelocitronPetriNetParser extends Parser {
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 627;
+			this.state = 630;
 			this.match(VelocitronPetriNetParser.INVARIANT);
-			this.state = 629;
+			this.state = 632;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
-			if (_la===88) {
+			if (_la===89) {
 				{
-				this.state = 628;
+				this.state = 631;
 				this.match(VelocitronPetriNetParser.STRING);
 				}
 			}
 
-			this.state = 631;
+			this.state = 634;
 			this.invariantTerm();
-			this.state = 636;
+			this.state = 639;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			while (_la===37) {
 				{
 				{
-				this.state = 632;
+				this.state = 635;
 				this.match(VelocitronPetriNetParser.PLUS);
-				this.state = 633;
+				this.state = 636;
 				this.invariantTerm();
 				}
 				}
-				this.state = 638;
+				this.state = 641;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 			}
-			this.state = 641;
+			this.state = 644;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			if (_la===38) {
 				{
-				this.state = 639;
+				this.state = 642;
 				this.match(VelocitronPetriNetParser.EQUALS);
-				this.state = 640;
+				this.state = 643;
 				this.nonnegativeInteger();
 				}
 			}
@@ -3197,19 +3210,19 @@ export default class VelocitronPetriNetParser extends Parser {
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 646;
+			this.state = 649;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
-			if (_la===85) {
+			if (_la===86) {
 				{
-				this.state = 643;
+				this.state = 646;
 				this.positiveInteger();
-				this.state = 644;
+				this.state = 647;
 				this.match(VelocitronPetriNetParser.STAR);
 				}
 			}
 
-			this.state = 648;
+			this.state = 651;
 			this.place();
 			}
 		}
@@ -3234,11 +3247,11 @@ export default class VelocitronPetriNetParser extends Parser {
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 650;
+			this.state = 653;
 			this.actorTarget();
-			this.state = 651;
+			this.state = 654;
 			this.match(VelocitronPetriNetParser.ACTOR);
-			this.state = 652;
+			this.state = 655;
 			this.name();
 			}
 		}
@@ -3261,27 +3274,27 @@ export default class VelocitronPetriNetParser extends Parser {
 		let localctx: ActorTargetContext = new ActorTargetContext(this, this._ctx, this.state);
 		this.enterRule(localctx, 132, VelocitronPetriNetParser.RULE_actorTarget);
 		try {
-			this.state = 657;
+			this.state = 660;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
 			case 1:
 				this.enterOuterAlt(localctx, 1);
 				{
-				this.state = 654;
+				this.state = 657;
 				this.match(VelocitronPetriNetParser.NET);
 				}
 				break;
-			case 68:
+			case 69:
 				this.enterOuterAlt(localctx, 2);
 				{
-				this.state = 655;
+				this.state = 658;
 				this.place();
 				}
 				break;
-			case 70:
+			case 71:
 				this.enterOuterAlt(localctx, 3);
 				{
-				this.state = 656;
+				this.state = 659;
 				this.transition();
 				}
 				break;
@@ -3311,16 +3324,16 @@ export default class VelocitronPetriNetParser extends Parser {
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 659;
+			this.state = 662;
 			_la = this._input.LA(1);
-			if(!(((((_la - 56)) & ~0x1F) === 0 && ((1 << (_la - 56)) & 7) !== 0))) {
+			if(!(((((_la - 57)) & ~0x1F) === 0 && ((1 << (_la - 57)) & 7) !== 0))) {
 			this._errHandler.recoverInline(this);
 			}
 			else {
 				this._errHandler.reportMatch(this);
 			    this.consume();
 			}
-			this.state = 660;
+			this.state = 663;
 			this.name();
 			}
 		}
@@ -3345,26 +3358,26 @@ export default class VelocitronPetriNetParser extends Parser {
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 662;
+			this.state = 665;
 			this.place();
-			this.state = 663;
+			this.state = 666;
 			this.match(VelocitronPetriNetParser.LIVES);
-			this.state = 664;
+			this.state = 667;
 			this.match(VelocitronPetriNetParser.IN);
-			this.state = 668;
+			this.state = 671;
 			this._errHandler.sync(this);
-			switch ( this._interp.adaptivePredict(this._input, 39, this._ctx) ) {
+			switch ( this._interp.adaptivePredict(this._input, 40, this._ctx) ) {
 			case 1:
 				{
-				this.state = 665;
+				this.state = 668;
 				this.match(VelocitronPetriNetParser.CEL);
-				this.state = 666;
+				this.state = 669;
 				this.match(VelocitronPetriNetParser.STRING);
 				}
 				break;
 			case 2:
 				{
-				this.state = 667;
+				this.state = 670;
 				this.name();
 				}
 				break;
@@ -3392,15 +3405,15 @@ export default class VelocitronPetriNetParser extends Parser {
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 670;
-			this.place();
-			this.state = 671;
-			this.match(VelocitronPetriNetParser.READS);
-			this.state = 672;
-			this.match(VelocitronPetriNetParser.AS);
 			this.state = 673;
-			this.match(VelocitronPetriNetParser.CEL);
+			this.place();
 			this.state = 674;
+			this.match(VelocitronPetriNetParser.READS);
+			this.state = 675;
+			this.match(VelocitronPetriNetParser.AS);
+			this.state = 676;
+			this.match(VelocitronPetriNetParser.CEL);
+			this.state = 677;
 			this.match(VelocitronPetriNetParser.STRING);
 			}
 		}
@@ -3425,21 +3438,21 @@ export default class VelocitronPetriNetParser extends Parser {
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 676;
-			this.place();
-			this.state = 677;
-			this.match(VelocitronPetriNetParser.KEPT);
-			this.state = 678;
-			this.match(VelocitronPetriNetParser.BY);
 			this.state = 679;
-			this.name();
+			this.place();
 			this.state = 680;
-			this.match(VelocitronPetriNetParser.STARTS);
+			this.match(VelocitronPetriNetParser.KEPT);
 			this.state = 681;
-			this.match(VelocitronPetriNetParser.AS);
+			this.match(VelocitronPetriNetParser.BY);
 			this.state = 682;
-			this.match(VelocitronPetriNetParser.CEL);
+			this.name();
 			this.state = 683;
+			this.match(VelocitronPetriNetParser.STARTS);
+			this.state = 684;
+			this.match(VelocitronPetriNetParser.AS);
+			this.state = 685;
+			this.match(VelocitronPetriNetParser.CEL);
+			this.state = 686;
 			this.match(VelocitronPetriNetParser.STRING);
 			}
 		}
@@ -3464,13 +3477,13 @@ export default class VelocitronPetriNetParser extends Parser {
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 685;
-			this.templateReference();
-			this.state = 686;
-			this.match(VelocitronPetriNetParser.COLON);
-			this.state = 687;
-			this.color();
 			this.state = 688;
+			this.templateReference();
+			this.state = 689;
+			this.match(VelocitronPetriNetParser.COLON);
+			this.state = 690;
+			this.color();
+			this.state = 691;
 			this.jsonValue();
 			}
 		}
@@ -3495,7 +3508,7 @@ export default class VelocitronPetriNetParser extends Parser {
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 690;
+			this.state = 693;
 			this.templateDefinition();
 			}
 		}
@@ -3520,9 +3533,9 @@ export default class VelocitronPetriNetParser extends Parser {
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 692;
+			this.state = 695;
 			this.match(VelocitronPetriNetParser.DOLLAR);
-			this.state = 693;
+			this.state = 696;
 			this.name();
 			}
 		}
@@ -3547,7 +3560,7 @@ export default class VelocitronPetriNetParser extends Parser {
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 695;
+			this.state = 698;
 			this.name();
 			}
 		}
@@ -3570,27 +3583,27 @@ export default class VelocitronPetriNetParser extends Parser {
 		let localctx: NameContext = new NameContext(this, this._ctx, this.state);
 		this.enterRule(localctx, 150, VelocitronPetriNetParser.RULE_name);
 		try {
-			this.state = 701;
+			this.state = 704;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
-			case 89:
+			case 90:
 				this.enterOuterAlt(localctx, 1);
 				{
-				this.state = 697;
+				this.state = 700;
 				this.match(VelocitronPetriNetParser.IDENT);
 				}
 				break;
-			case 88:
+			case 89:
 				this.enterOuterAlt(localctx, 2);
 				{
-				this.state = 698;
+				this.state = 701;
 				this.match(VelocitronPetriNetParser.STRING);
 				}
 				break;
 			case 28:
 				this.enterOuterAlt(localctx, 3);
 				{
-				this.state = 699;
+				this.state = 702;
 				this.match(VelocitronPetriNetParser.INITIAL);
 				}
 				break;
@@ -3654,9 +3667,10 @@ export default class VelocitronPetriNetParser extends Parser {
 			case 61:
 			case 62:
 			case 63:
+			case 64:
 				this.enterOuterAlt(localctx, 4);
 				{
-				this.state = 700;
+				this.state = 703;
 				this.keyword();
 				}
 				break;
@@ -3683,20 +3697,20 @@ export default class VelocitronPetriNetParser extends Parser {
 		let localctx: MarkingNameContext = new MarkingNameContext(this, this._ctx, this.state);
 		this.enterRule(localctx, 152, VelocitronPetriNetParser.RULE_markingName);
 		try {
-			this.state = 706;
+			this.state = 709;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
-			case 89:
+			case 90:
 				this.enterOuterAlt(localctx, 1);
 				{
-				this.state = 703;
+				this.state = 706;
 				this.match(VelocitronPetriNetParser.IDENT);
 				}
 				break;
-			case 88:
+			case 89:
 				this.enterOuterAlt(localctx, 2);
 				{
-				this.state = 704;
+				this.state = 707;
 				this.match(VelocitronPetriNetParser.STRING);
 				}
 				break;
@@ -3760,9 +3774,10 @@ export default class VelocitronPetriNetParser extends Parser {
 			case 61:
 			case 62:
 			case 63:
+			case 64:
 				this.enterOuterAlt(localctx, 3);
 				{
-				this.state = 705;
+				this.state = 708;
 				this.keyword();
 				}
 				break;
@@ -3792,9 +3807,9 @@ export default class VelocitronPetriNetParser extends Parser {
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 708;
+			this.state = 711;
 			_la = this._input.LA(1);
-			if(!((((_la) & ~0x1F) === 0 && ((1 << _la) & 4026531838) !== 0) || ((((_la - 32)) & ~0x1F) === 0 && ((1 << (_la - 32)) & 4294967199) !== 0))) {
+			if(!(((((_la - 1)) & ~0x1F) === 0 && ((1 << (_la - 1)) & 4160749567) !== 0) || ((((_la - 33)) & ~0x1F) === 0 && ((1 << (_la - 33)) & 4294967247) !== 0))) {
 			this._errHandler.recoverInline(this);
 			}
 			else {
@@ -3822,69 +3837,69 @@ export default class VelocitronPetriNetParser extends Parser {
 		let localctx: JsonValueContext = new JsonValueContext(this, this._ctx, this.state);
 		this.enterRule(localctx, 156, VelocitronPetriNetParser.RULE_jsonValue);
 		try {
-			this.state = 719;
+			this.state = 722;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
-			case 72:
+			case 73:
 				this.enterOuterAlt(localctx, 1);
 				{
-				this.state = 710;
+				this.state = 713;
 				this.jsonObject();
 				}
 				break;
-			case 70:
+			case 71:
 				this.enterOuterAlt(localctx, 2);
 				{
-				this.state = 711;
+				this.state = 714;
 				this.jsonArray();
 				}
 				break;
-			case 88:
+			case 89:
 				this.enterOuterAlt(localctx, 3);
 				{
-				this.state = 712;
+				this.state = 715;
 				this.match(VelocitronPetriNetParser.STRING);
 				}
 				break;
-			case 87:
+			case 88:
 				this.enterOuterAlt(localctx, 4);
 				{
-				this.state = 713;
+				this.state = 716;
 				this.match(VelocitronPetriNetParser.NUMBER);
 				}
 				break;
-			case 85:
+			case 86:
 				this.enterOuterAlt(localctx, 5);
 				{
-				this.state = 714;
+				this.state = 717;
 				this.match(VelocitronPetriNetParser.POSITIVE_INTEGER);
 				}
 				break;
-			case 86:
+			case 87:
 				this.enterOuterAlt(localctx, 6);
 				{
-				this.state = 715;
+				this.state = 718;
 				this.match(VelocitronPetriNetParser.ZERO);
 				}
 				break;
-			case 64:
+			case 65:
 				this.enterOuterAlt(localctx, 7);
 				{
-				this.state = 716;
+				this.state = 719;
 				this.match(VelocitronPetriNetParser.TRUE);
 				}
 				break;
-			case 65:
+			case 66:
 				this.enterOuterAlt(localctx, 8);
 				{
-				this.state = 717;
+				this.state = 720;
 				this.match(VelocitronPetriNetParser.FALSE);
 				}
 				break;
-			case 66:
+			case 67:
 				this.enterOuterAlt(localctx, 9);
 				{
-				this.state = 718;
+				this.state = 721;
 				this.match(VelocitronPetriNetParser.NULL);
 				}
 				break;
@@ -3914,43 +3929,43 @@ export default class VelocitronPetriNetParser extends Parser {
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 721;
+			this.state = 724;
 			this.match(VelocitronPetriNetParser.LBRACE);
-			this.state = 734;
+			this.state = 737;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
-			if (_la===88) {
+			if (_la===89) {
 				{
-				this.state = 722;
+				this.state = 725;
 				this.match(VelocitronPetriNetParser.STRING);
-				this.state = 723;
+				this.state = 726;
 				this.match(VelocitronPetriNetParser.COLON);
-				this.state = 724;
+				this.state = 727;
 				this.jsonValue();
-				this.state = 731;
+				this.state = 734;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-				while (_la===82) {
+				while (_la===83) {
 					{
 					{
-					this.state = 725;
-					this.match(VelocitronPetriNetParser.COMMA);
-					this.state = 726;
-					this.match(VelocitronPetriNetParser.STRING);
-					this.state = 727;
-					this.match(VelocitronPetriNetParser.COLON);
 					this.state = 728;
+					this.match(VelocitronPetriNetParser.COMMA);
+					this.state = 729;
+					this.match(VelocitronPetriNetParser.STRING);
+					this.state = 730;
+					this.match(VelocitronPetriNetParser.COLON);
+					this.state = 731;
 					this.jsonValue();
 					}
 					}
-					this.state = 733;
+					this.state = 736;
 					this._errHandler.sync(this);
 					_la = this._input.LA(1);
 				}
 				}
 			}
 
-			this.state = 736;
+			this.state = 739;
 			this.match(VelocitronPetriNetParser.RBRACE);
 			}
 		}
@@ -3976,35 +3991,35 @@ export default class VelocitronPetriNetParser extends Parser {
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 738;
+			this.state = 741;
 			this.match(VelocitronPetriNetParser.LBRACK);
-			this.state = 747;
+			this.state = 750;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
-			if (((((_la - 64)) & ~0x1F) === 0 && ((1 << (_la - 64)) & 31457607) !== 0)) {
+			if (((((_la - 65)) & ~0x1F) === 0 && ((1 << (_la - 65)) & 31457607) !== 0)) {
 				{
-				this.state = 739;
+				this.state = 742;
 				this.jsonValue();
-				this.state = 744;
+				this.state = 747;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-				while (_la===82) {
+				while (_la===83) {
 					{
 					{
-					this.state = 740;
+					this.state = 743;
 					this.match(VelocitronPetriNetParser.COMMA);
-					this.state = 741;
+					this.state = 744;
 					this.jsonValue();
 					}
 					}
-					this.state = 746;
+					this.state = 749;
 					this._errHandler.sync(this);
 					_la = this._input.LA(1);
 				}
 				}
 			}
 
-			this.state = 749;
+			this.state = 752;
 			this.match(VelocitronPetriNetParser.RBRACK);
 			}
 		}
@@ -4023,7 +4038,7 @@ export default class VelocitronPetriNetParser extends Parser {
 		return localctx;
 	}
 
-	public static readonly _serializedATN: number[] = [4,1,94,752,2,0,7,0,2,
+	public static readonly _serializedATN: number[] = [4,1,95,755,2,0,7,0,2,
 	1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,6,2,7,7,7,2,8,7,8,2,9,7,9,2,
 	10,7,10,2,11,7,11,2,12,7,12,2,13,7,13,2,14,7,14,2,15,7,15,2,16,7,16,2,17,
 	7,17,2,18,7,18,2,19,7,19,2,20,7,20,2,21,7,21,2,22,7,22,2,23,7,23,2,24,7,
@@ -4063,208 +4078,210 @@ export default class VelocitronPetriNetParser extends Parser {
 	51,1,52,1,52,1,52,1,52,1,52,1,53,1,53,1,53,1,53,1,53,1,54,1,54,1,54,3,54,
 	540,8,54,1,54,3,54,543,8,54,1,55,1,55,1,55,1,55,3,55,549,8,55,1,55,1,55,
 	1,55,1,55,1,55,1,55,1,55,1,55,1,55,1,55,1,55,1,55,1,55,1,55,3,55,565,8,
-	55,1,55,1,55,1,55,1,55,1,55,1,55,1,55,1,55,1,55,1,55,4,55,577,8,55,11,55,
-	12,55,578,3,55,581,8,55,1,56,1,56,1,56,1,56,3,56,587,8,56,1,57,1,57,1,57,
-	1,58,1,58,1,58,1,58,1,58,4,58,597,8,58,11,58,12,58,598,1,59,1,59,1,59,5,
-	59,604,8,59,10,59,12,59,607,9,59,1,60,1,60,1,61,1,61,1,61,1,61,5,61,615,
-	8,61,10,61,12,61,618,9,61,1,62,1,62,1,62,5,62,623,8,62,10,62,12,62,626,
-	9,62,1,63,1,63,3,63,630,8,63,1,63,1,63,1,63,5,63,635,8,63,10,63,12,63,638,
-	9,63,1,63,1,63,3,63,642,8,63,1,64,1,64,1,64,3,64,647,8,64,1,64,1,64,1,65,
-	1,65,1,65,1,65,1,66,1,66,1,66,3,66,658,8,66,1,67,1,67,1,67,1,68,1,68,1,
-	68,1,68,1,68,1,68,3,68,669,8,68,1,69,1,69,1,69,1,69,1,69,1,69,1,70,1,70,
-	1,70,1,70,1,70,1,70,1,70,1,70,1,70,1,71,1,71,1,71,1,71,1,71,1,72,1,72,1,
-	73,1,73,1,73,1,74,1,74,1,75,1,75,1,75,1,75,3,75,702,8,75,1,76,1,76,1,76,
-	3,76,707,8,76,1,77,1,77,1,78,1,78,1,78,1,78,1,78,1,78,1,78,1,78,1,78,3,
-	78,720,8,78,1,79,1,79,1,79,1,79,1,79,1,79,1,79,1,79,5,79,730,8,79,10,79,
-	12,79,733,9,79,3,79,735,8,79,1,79,1,79,1,80,1,80,1,80,1,80,5,80,743,8,80,
-	10,80,12,80,746,9,80,3,80,748,8,80,1,80,1,80,1,80,0,0,81,0,2,4,6,8,10,12,
-	14,16,18,20,22,24,26,28,30,32,34,36,38,40,42,44,46,48,50,52,54,56,58,60,
-	62,64,66,68,70,72,74,76,78,80,82,84,86,88,90,92,94,96,98,100,102,104,106,
-	108,110,112,114,116,118,120,122,124,126,128,130,132,134,136,138,140,142,
-	144,146,148,150,152,154,156,158,160,0,8,1,0,75,77,1,0,10,11,2,0,12,12,25,
-	25,1,0,85,86,1,0,49,50,2,0,64,65,85,88,1,0,56,58,3,0,1,27,29,36,39,63,775,
-	0,222,1,0,0,0,2,224,1,0,0,0,4,229,1,0,0,0,6,232,1,0,0,0,8,237,1,0,0,0,10,
-	246,1,0,0,0,12,258,1,0,0,0,14,265,1,0,0,0,16,274,1,0,0,0,18,286,1,0,0,0,
-	20,297,1,0,0,0,22,309,1,0,0,0,24,321,1,0,0,0,26,325,1,0,0,0,28,329,1,0,
-	0,0,30,331,1,0,0,0,32,333,1,0,0,0,34,337,1,0,0,0,36,341,1,0,0,0,38,345,
-	1,0,0,0,40,347,1,0,0,0,42,349,1,0,0,0,44,354,1,0,0,0,46,356,1,0,0,0,48,
-	360,1,0,0,0,50,362,1,0,0,0,52,366,1,0,0,0,54,373,1,0,0,0,56,379,1,0,0,0,
-	58,385,1,0,0,0,60,393,1,0,0,0,62,395,1,0,0,0,64,399,1,0,0,0,66,403,1,0,
-	0,0,68,408,1,0,0,0,70,421,1,0,0,0,72,425,1,0,0,0,74,441,1,0,0,0,76,443,
-	1,0,0,0,78,449,1,0,0,0,80,455,1,0,0,0,82,457,1,0,0,0,84,459,1,0,0,0,86,
-	461,1,0,0,0,88,467,1,0,0,0,90,469,1,0,0,0,92,482,1,0,0,0,94,484,1,0,0,0,
-	96,488,1,0,0,0,98,498,1,0,0,0,100,516,1,0,0,0,102,518,1,0,0,0,104,526,1,
-	0,0,0,106,531,1,0,0,0,108,542,1,0,0,0,110,580,1,0,0,0,112,586,1,0,0,0,114,
-	588,1,0,0,0,116,591,1,0,0,0,118,600,1,0,0,0,120,608,1,0,0,0,122,610,1,0,
-	0,0,124,619,1,0,0,0,126,627,1,0,0,0,128,646,1,0,0,0,130,650,1,0,0,0,132,
-	657,1,0,0,0,134,659,1,0,0,0,136,662,1,0,0,0,138,670,1,0,0,0,140,676,1,0,
-	0,0,142,685,1,0,0,0,144,690,1,0,0,0,146,692,1,0,0,0,148,695,1,0,0,0,150,
-	701,1,0,0,0,152,706,1,0,0,0,154,708,1,0,0,0,156,719,1,0,0,0,158,721,1,0,
-	0,0,160,738,1,0,0,0,162,164,3,2,1,0,163,162,1,0,0,0,163,164,1,0,0,0,164,
-	205,1,0,0,0,165,204,3,22,11,0,166,204,3,38,19,0,167,204,3,40,20,0,168,204,
-	3,46,23,0,169,204,3,50,25,0,170,204,3,52,26,0,171,204,3,54,27,0,172,204,
-	3,56,28,0,173,204,3,58,29,0,174,204,3,62,31,0,175,204,3,64,32,0,176,204,
-	3,66,33,0,177,204,3,42,21,0,178,204,3,68,34,0,179,204,3,70,35,0,180,204,
-	3,72,36,0,181,204,3,74,37,0,182,204,3,76,38,0,183,204,3,78,39,0,184,204,
-	3,86,43,0,185,204,3,142,71,0,186,204,3,90,45,0,187,204,3,94,47,0,188,204,
-	3,96,48,0,189,204,3,100,50,0,190,204,3,102,51,0,191,204,3,104,52,0,192,
-	204,3,106,53,0,193,204,3,110,55,0,194,204,3,114,57,0,195,204,3,116,58,0,
-	196,204,3,122,61,0,197,204,3,126,63,0,198,204,3,130,65,0,199,204,3,134,
-	67,0,200,204,3,136,68,0,201,204,3,138,69,0,202,204,3,140,70,0,203,165,1,
-	0,0,0,203,166,1,0,0,0,203,167,1,0,0,0,203,168,1,0,0,0,203,169,1,0,0,0,203,
-	170,1,0,0,0,203,171,1,0,0,0,203,172,1,0,0,0,203,173,1,0,0,0,203,174,1,0,
-	0,0,203,175,1,0,0,0,203,176,1,0,0,0,203,177,1,0,0,0,203,178,1,0,0,0,203,
-	179,1,0,0,0,203,180,1,0,0,0,203,181,1,0,0,0,203,182,1,0,0,0,203,183,1,0,
-	0,0,203,184,1,0,0,0,203,185,1,0,0,0,203,186,1,0,0,0,203,187,1,0,0,0,203,
-	188,1,0,0,0,203,189,1,0,0,0,203,190,1,0,0,0,203,191,1,0,0,0,203,192,1,0,
-	0,0,203,193,1,0,0,0,203,194,1,0,0,0,203,195,1,0,0,0,203,196,1,0,0,0,203,
-	197,1,0,0,0,203,198,1,0,0,0,203,199,1,0,0,0,203,200,1,0,0,0,203,201,1,0,
-	0,0,203,202,1,0,0,0,204,207,1,0,0,0,205,203,1,0,0,0,205,206,1,0,0,0,206,
-	208,1,0,0,0,207,205,1,0,0,0,208,223,5,0,0,1,209,217,3,4,2,0,210,216,3,6,
-	3,0,211,216,3,8,4,0,212,216,3,10,5,0,213,216,3,12,6,0,214,216,3,14,7,0,
-	215,210,1,0,0,0,215,211,1,0,0,0,215,212,1,0,0,0,215,213,1,0,0,0,215,214,
-	1,0,0,0,216,219,1,0,0,0,217,215,1,0,0,0,217,218,1,0,0,0,218,220,1,0,0,0,
-	219,217,1,0,0,0,220,221,5,0,0,1,221,223,1,0,0,0,222,163,1,0,0,0,222,209,
-	1,0,0,0,223,1,1,0,0,0,224,225,5,1,0,0,225,227,3,150,75,0,226,228,5,88,0,
-	0,227,226,1,0,0,0,227,228,1,0,0,0,228,3,1,0,0,0,229,230,5,2,0,0,230,231,
-	3,150,75,0,231,5,1,0,0,0,232,233,5,3,0,0,233,234,5,88,0,0,234,235,5,4,0,
-	0,235,236,5,89,0,0,236,7,1,0,0,0,237,238,5,5,0,0,238,239,5,89,0,0,239,240,
-	5,83,0,0,240,241,3,18,9,0,241,242,5,77,0,0,242,243,5,89,0,0,243,244,5,83,
-	0,0,244,245,3,18,9,0,245,9,1,0,0,0,246,247,5,6,0,0,247,248,5,89,0,0,248,
-	249,5,83,0,0,249,254,3,18,9,0,250,251,5,84,0,0,251,252,5,89,0,0,252,253,
-	5,83,0,0,253,255,3,18,9,0,254,250,1,0,0,0,255,256,1,0,0,0,256,254,1,0,0,
-	0,256,257,1,0,0,0,257,11,1,0,0,0,258,259,5,7,0,0,259,260,5,89,0,0,260,261,
-	5,83,0,0,261,262,3,20,10,0,262,263,5,8,0,0,263,264,5,89,0,0,264,13,1,0,
-	0,0,265,266,5,53,0,0,266,271,3,16,8,0,267,268,5,82,0,0,268,270,3,16,8,0,
-	269,267,1,0,0,0,270,273,1,0,0,0,271,269,1,0,0,0,271,272,1,0,0,0,272,15,
-	1,0,0,0,273,271,1,0,0,0,274,275,5,89,0,0,275,276,5,83,0,0,276,283,3,18,
-	9,0,277,278,5,37,0,0,278,279,5,89,0,0,279,280,5,83,0,0,280,282,3,18,9,0,
-	281,277,1,0,0,0,282,285,1,0,0,0,283,281,1,0,0,0,283,284,1,0,0,0,284,17,
-	1,0,0,0,285,283,1,0,0,0,286,287,5,68,0,0,287,292,3,150,75,0,288,289,5,83,
-	0,0,289,291,3,150,75,0,290,288,1,0,0,0,291,294,1,0,0,0,292,290,1,0,0,0,
-	292,293,1,0,0,0,293,295,1,0,0,0,294,292,1,0,0,0,295,296,5,69,0,0,296,19,
-	1,0,0,0,297,298,5,70,0,0,298,303,3,150,75,0,299,300,5,83,0,0,300,302,3,
-	150,75,0,301,299,1,0,0,0,302,305,1,0,0,0,303,301,1,0,0,0,303,304,1,0,0,
-	0,304,306,1,0,0,0,305,303,1,0,0,0,306,307,5,71,0,0,307,21,1,0,0,0,308,310,
-	3,32,16,0,309,308,1,0,0,0,309,310,1,0,0,0,310,311,1,0,0,0,311,315,3,24,
-	12,0,312,313,3,26,13,0,313,314,3,24,12,0,314,316,1,0,0,0,315,312,1,0,0,
-	0,316,317,1,0,0,0,317,315,1,0,0,0,317,318,1,0,0,0,318,23,1,0,0,0,319,322,
-	3,34,17,0,320,322,3,36,18,0,321,319,1,0,0,0,321,320,1,0,0,0,322,25,1,0,
-	0,0,323,324,5,74,0,0,324,326,3,148,74,0,325,323,1,0,0,0,325,326,1,0,0,0,
-	326,327,1,0,0,0,327,328,3,28,14,0,328,27,1,0,0,0,329,330,7,0,0,0,330,29,
-	1,0,0,0,331,332,3,22,11,0,332,31,1,0,0,0,333,334,5,67,0,0,334,335,3,150,
-	75,0,335,336,5,81,0,0,336,33,1,0,0,0,337,338,5,68,0,0,338,339,3,150,75,
-	0,339,340,5,69,0,0,340,35,1,0,0,0,341,342,5,70,0,0,342,343,3,150,75,0,343,
-	344,5,71,0,0,344,37,1,0,0,0,345,346,3,34,17,0,346,39,1,0,0,0,347,348,3,
-	36,18,0,348,41,1,0,0,0,349,350,3,34,17,0,350,351,5,9,0,0,351,352,3,44,22,
-	0,352,353,3,148,74,0,353,43,1,0,0,0,354,355,7,1,0,0,355,45,1,0,0,0,356,
-	357,3,36,18,0,357,358,5,12,0,0,358,359,5,88,0,0,359,47,1,0,0,0,360,361,
-	3,46,23,0,361,49,1,0,0,0,362,363,3,36,18,0,363,364,5,13,0,0,364,365,5,88,
-	0,0,365,51,1,0,0,0,366,367,3,36,18,0,367,368,5,15,0,0,368,369,5,16,0,0,
-	369,370,3,34,17,0,370,371,5,25,0,0,371,372,5,88,0,0,372,53,1,0,0,0,373,
-	374,3,36,18,0,374,375,5,15,0,0,375,376,5,17,0,0,376,377,3,60,30,0,377,378,
-	3,34,17,0,378,55,1,0,0,0,379,380,3,36,18,0,380,381,5,15,0,0,381,382,5,18,
-	0,0,382,383,5,25,0,0,383,384,5,88,0,0,384,57,1,0,0,0,385,386,3,36,18,0,
-	386,387,5,17,0,0,387,388,3,150,75,0,388,389,3,34,17,0,389,59,1,0,0,0,390,
-	394,5,89,0,0,391,394,5,28,0,0,392,394,3,154,77,0,393,390,1,0,0,0,393,391,
-	1,0,0,0,393,392,1,0,0,0,394,61,1,0,0,0,395,396,3,36,18,0,396,397,5,19,0,
-	0,397,398,3,84,42,0,398,63,1,0,0,0,399,400,3,36,18,0,400,401,5,14,0,0,401,
-	402,3,82,41,0,402,65,1,0,0,0,403,404,5,67,0,0,404,405,3,150,75,0,405,406,
-	5,14,0,0,406,407,3,82,41,0,407,67,1,0,0,0,408,409,3,34,17,0,409,410,5,20,
-	0,0,410,411,5,70,0,0,411,416,3,148,74,0,412,413,5,82,0,0,413,415,3,148,
-	74,0,414,412,1,0,0,0,415,418,1,0,0,0,416,414,1,0,0,0,416,417,1,0,0,0,417,
-	419,1,0,0,0,418,416,1,0,0,0,419,420,5,71,0,0,420,69,1,0,0,0,421,422,3,34,
-	17,0,422,423,5,21,0,0,423,424,3,158,79,0,424,71,1,0,0,0,425,426,5,67,0,
-	0,426,427,3,150,75,0,427,428,5,22,0,0,428,429,3,156,78,0,429,73,1,0,0,0,
-	430,431,5,67,0,0,431,432,3,150,75,0,432,433,5,23,0,0,433,434,5,25,0,0,434,
-	435,5,88,0,0,435,442,1,0,0,0,436,437,5,67,0,0,437,438,3,150,75,0,438,439,
-	5,23,0,0,439,440,3,156,78,0,440,442,1,0,0,0,441,430,1,0,0,0,441,436,1,0,
-	0,0,442,75,1,0,0,0,443,444,5,67,0,0,444,445,3,150,75,0,445,446,5,24,0,0,
-	446,447,3,80,40,0,447,448,5,88,0,0,448,77,1,0,0,0,449,450,5,67,0,0,450,
-	451,3,150,75,0,451,452,5,26,0,0,452,453,5,25,0,0,453,454,5,88,0,0,454,79,
-	1,0,0,0,455,456,7,2,0,0,456,81,1,0,0,0,457,458,5,85,0,0,458,83,1,0,0,0,
-	459,460,7,3,0,0,460,85,1,0,0,0,461,462,5,27,0,0,462,463,5,28,0,0,463,464,
-	3,34,17,0,464,465,5,78,0,0,465,466,3,92,46,0,466,87,1,0,0,0,467,468,3,86,
-	43,0,468,89,1,0,0,0,469,470,5,27,0,0,470,471,3,152,76,0,471,472,3,34,17,
-	0,472,473,5,78,0,0,473,474,3,92,46,0,474,91,1,0,0,0,475,476,3,82,41,0,476,
-	477,5,80,0,0,477,479,1,0,0,0,478,475,1,0,0,0,478,479,1,0,0,0,479,480,1,
-	0,0,0,480,483,3,146,73,0,481,483,3,82,41,0,482,478,1,0,0,0,482,481,1,0,
-	0,0,483,93,1,0,0,0,484,485,3,98,49,0,485,486,5,29,0,0,486,487,5,88,0,0,
-	487,95,1,0,0,0,488,489,3,98,49,0,489,490,5,30,0,0,490,491,3,150,75,0,491,
-	492,3,156,78,0,492,97,1,0,0,0,493,499,5,1,0,0,494,499,3,34,17,0,495,499,
-	3,36,18,0,496,497,5,67,0,0,497,499,3,150,75,0,498,493,1,0,0,0,498,494,1,
-	0,0,0,498,495,1,0,0,0,498,496,1,0,0,0,499,99,1,0,0,0,500,501,5,32,0,0,501,
-	502,3,150,75,0,502,503,5,33,0,0,503,504,3,108,54,0,504,505,5,35,0,0,505,
-	506,3,158,79,0,506,517,1,0,0,0,507,508,5,32,0,0,508,509,3,150,75,0,509,
-	510,5,33,0,0,510,511,3,108,54,0,511,512,5,36,0,0,512,513,3,108,54,0,513,
-	514,5,37,0,0,514,515,3,158,79,0,515,517,1,0,0,0,516,500,1,0,0,0,516,507,
-	1,0,0,0,517,101,1,0,0,0,518,519,5,32,0,0,519,520,3,150,75,0,520,521,5,34,
-	0,0,521,522,5,67,0,0,522,523,3,150,75,0,523,524,5,39,0,0,524,525,3,160,
-	80,0,525,103,1,0,0,0,526,527,5,32,0,0,527,528,3,150,75,0,528,529,5,40,0,
-	0,529,530,3,150,75,0,530,105,1,0,0,0,531,532,5,32,0,0,532,533,3,150,75,
-	0,533,534,5,41,0,0,534,535,3,150,75,0,535,107,1,0,0,0,536,539,3,34,17,0,
-	537,538,5,67,0,0,538,540,3,36,18,0,539,537,1,0,0,0,539,540,1,0,0,0,540,
-	543,1,0,0,0,541,543,3,36,18,0,542,536,1,0,0,0,542,541,1,0,0,0,543,109,1,
-	0,0,0,544,545,5,42,0,0,545,546,3,112,56,0,546,548,5,43,0,0,547,549,5,88,
-	0,0,548,547,1,0,0,0,548,549,1,0,0,0,549,581,1,0,0,0,550,551,5,42,0,0,551,
-	552,3,112,56,0,552,553,5,44,0,0,553,554,5,88,0,0,554,581,1,0,0,0,555,556,
-	5,42,0,0,556,557,3,112,56,0,557,558,5,45,0,0,558,559,5,88,0,0,559,581,1,
-	0,0,0,560,561,5,42,0,0,561,562,3,112,56,0,562,564,5,48,0,0,563,565,7,4,
-	0,0,564,563,1,0,0,0,564,565,1,0,0,0,565,581,1,0,0,0,566,567,5,42,0,0,567,
-	568,5,47,0,0,568,569,3,148,74,0,569,570,5,46,0,0,570,581,1,0,0,0,571,572,
-	5,42,0,0,572,573,5,47,0,0,573,574,3,148,74,0,574,576,5,51,0,0,575,577,5,
-	88,0,0,576,575,1,0,0,0,577,578,1,0,0,0,578,576,1,0,0,0,578,579,1,0,0,0,
-	579,581,1,0,0,0,580,544,1,0,0,0,580,550,1,0,0,0,580,555,1,0,0,0,580,560,
-	1,0,0,0,580,566,1,0,0,0,580,571,1,0,0,0,581,111,1,0,0,0,582,587,3,34,17,
-	0,583,587,3,36,18,0,584,585,5,67,0,0,585,587,3,150,75,0,586,582,1,0,0,0,
-	586,583,1,0,0,0,586,584,1,0,0,0,587,113,1,0,0,0,588,589,5,31,0,0,589,590,
-	3,158,79,0,590,115,1,0,0,0,591,592,5,52,0,0,592,593,3,148,74,0,593,594,
-	5,83,0,0,594,596,3,118,59,0,595,597,3,120,60,0,596,595,1,0,0,0,597,598,
-	1,0,0,0,598,596,1,0,0,0,598,599,1,0,0,0,599,117,1,0,0,0,600,605,3,150,75,
-	0,601,602,5,83,0,0,602,604,3,150,75,0,603,601,1,0,0,0,604,607,1,0,0,0,605,
-	603,1,0,0,0,605,606,1,0,0,0,606,119,1,0,0,0,607,605,1,0,0,0,608,609,7,5,
-	0,0,609,121,1,0,0,0,610,611,5,53,0,0,611,616,3,124,62,0,612,613,5,82,0,
-	0,613,615,3,124,62,0,614,612,1,0,0,0,615,618,1,0,0,0,616,614,1,0,0,0,616,
-	617,1,0,0,0,617,123,1,0,0,0,618,616,1,0,0,0,619,624,3,34,17,0,620,621,5,
-	37,0,0,621,623,3,34,17,0,622,620,1,0,0,0,623,626,1,0,0,0,624,622,1,0,0,
-	0,624,625,1,0,0,0,625,125,1,0,0,0,626,624,1,0,0,0,627,629,5,54,0,0,628,
-	630,5,88,0,0,629,628,1,0,0,0,629,630,1,0,0,0,630,631,1,0,0,0,631,636,3,
-	128,64,0,632,633,5,37,0,0,633,635,3,128,64,0,634,632,1,0,0,0,635,638,1,
-	0,0,0,636,634,1,0,0,0,636,637,1,0,0,0,637,641,1,0,0,0,638,636,1,0,0,0,639,
-	640,5,38,0,0,640,642,3,84,42,0,641,639,1,0,0,0,641,642,1,0,0,0,642,127,
-	1,0,0,0,643,644,3,82,41,0,644,645,5,80,0,0,645,647,1,0,0,0,646,643,1,0,
-	0,0,646,647,1,0,0,0,647,648,1,0,0,0,648,649,3,34,17,0,649,129,1,0,0,0,650,
-	651,3,132,66,0,651,652,5,55,0,0,652,653,3,150,75,0,653,131,1,0,0,0,654,
-	658,5,1,0,0,655,658,3,34,17,0,656,658,3,36,18,0,657,654,1,0,0,0,657,655,
-	1,0,0,0,657,656,1,0,0,0,658,133,1,0,0,0,659,660,7,6,0,0,660,661,3,150,75,
-	0,661,135,1,0,0,0,662,663,3,34,17,0,663,664,5,59,0,0,664,668,5,60,0,0,665,
-	666,5,25,0,0,666,669,5,88,0,0,667,669,3,150,75,0,668,665,1,0,0,0,668,667,
-	1,0,0,0,669,137,1,0,0,0,670,671,3,34,17,0,671,672,5,61,0,0,672,673,5,4,
-	0,0,673,674,5,25,0,0,674,675,5,88,0,0,675,139,1,0,0,0,676,677,3,34,17,0,
-	677,678,5,62,0,0,678,679,5,8,0,0,679,680,3,150,75,0,680,681,5,63,0,0,681,
-	682,5,4,0,0,682,683,5,25,0,0,683,684,5,88,0,0,684,141,1,0,0,0,685,686,3,
-	146,73,0,686,687,5,81,0,0,687,688,3,148,74,0,688,689,3,156,78,0,689,143,
-	1,0,0,0,690,691,3,142,71,0,691,145,1,0,0,0,692,693,5,79,0,0,693,694,3,150,
-	75,0,694,147,1,0,0,0,695,696,3,150,75,0,696,149,1,0,0,0,697,702,5,89,0,
-	0,698,702,5,88,0,0,699,702,5,28,0,0,700,702,3,154,77,0,701,697,1,0,0,0,
-	701,698,1,0,0,0,701,699,1,0,0,0,701,700,1,0,0,0,702,151,1,0,0,0,703,707,
-	5,89,0,0,704,707,5,88,0,0,705,707,3,154,77,0,706,703,1,0,0,0,706,704,1,
-	0,0,0,706,705,1,0,0,0,707,153,1,0,0,0,708,709,7,7,0,0,709,155,1,0,0,0,710,
-	720,3,158,79,0,711,720,3,160,80,0,712,720,5,88,0,0,713,720,5,87,0,0,714,
-	720,5,85,0,0,715,720,5,86,0,0,716,720,5,64,0,0,717,720,5,65,0,0,718,720,
-	5,66,0,0,719,710,1,0,0,0,719,711,1,0,0,0,719,712,1,0,0,0,719,713,1,0,0,
-	0,719,714,1,0,0,0,719,715,1,0,0,0,719,716,1,0,0,0,719,717,1,0,0,0,719,718,
-	1,0,0,0,720,157,1,0,0,0,721,734,5,72,0,0,722,723,5,88,0,0,723,724,5,81,
-	0,0,724,731,3,156,78,0,725,726,5,82,0,0,726,727,5,88,0,0,727,728,5,81,0,
-	0,728,730,3,156,78,0,729,725,1,0,0,0,730,733,1,0,0,0,731,729,1,0,0,0,731,
-	732,1,0,0,0,732,735,1,0,0,0,733,731,1,0,0,0,734,722,1,0,0,0,734,735,1,0,
-	0,0,735,736,1,0,0,0,736,737,5,73,0,0,737,159,1,0,0,0,738,747,5,70,0,0,739,
-	744,3,156,78,0,740,741,5,82,0,0,741,743,3,156,78,0,742,740,1,0,0,0,743,
-	746,1,0,0,0,744,742,1,0,0,0,744,745,1,0,0,0,745,748,1,0,0,0,746,744,1,0,
-	0,0,747,739,1,0,0,0,747,748,1,0,0,0,748,749,1,0,0,0,749,750,5,71,0,0,750,
-	161,1,0,0,0,47,163,203,205,215,217,222,227,256,271,283,292,303,309,317,
-	321,325,393,416,441,478,482,498,516,539,542,548,564,578,580,586,598,605,
-	616,624,629,636,641,646,657,668,701,706,719,731,734,744,747];
+	55,1,55,3,55,568,8,55,1,55,1,55,1,55,1,55,1,55,1,55,1,55,1,55,1,55,1,55,
+	4,55,580,8,55,11,55,12,55,581,3,55,584,8,55,1,56,1,56,1,56,1,56,3,56,590,
+	8,56,1,57,1,57,1,57,1,58,1,58,1,58,1,58,1,58,4,58,600,8,58,11,58,12,58,
+	601,1,59,1,59,1,59,5,59,607,8,59,10,59,12,59,610,9,59,1,60,1,60,1,61,1,
+	61,1,61,1,61,5,61,618,8,61,10,61,12,61,621,9,61,1,62,1,62,1,62,5,62,626,
+	8,62,10,62,12,62,629,9,62,1,63,1,63,3,63,633,8,63,1,63,1,63,1,63,5,63,638,
+	8,63,10,63,12,63,641,9,63,1,63,1,63,3,63,645,8,63,1,64,1,64,1,64,3,64,650,
+	8,64,1,64,1,64,1,65,1,65,1,65,1,65,1,66,1,66,1,66,3,66,661,8,66,1,67,1,
+	67,1,67,1,68,1,68,1,68,1,68,1,68,1,68,3,68,672,8,68,1,69,1,69,1,69,1,69,
+	1,69,1,69,1,70,1,70,1,70,1,70,1,70,1,70,1,70,1,70,1,70,1,71,1,71,1,71,1,
+	71,1,71,1,72,1,72,1,73,1,73,1,73,1,74,1,74,1,75,1,75,1,75,1,75,3,75,705,
+	8,75,1,76,1,76,1,76,3,76,710,8,76,1,77,1,77,1,78,1,78,1,78,1,78,1,78,1,
+	78,1,78,1,78,1,78,3,78,723,8,78,1,79,1,79,1,79,1,79,1,79,1,79,1,79,1,79,
+	5,79,733,8,79,10,79,12,79,736,9,79,3,79,738,8,79,1,79,1,79,1,80,1,80,1,
+	80,1,80,5,80,746,8,80,10,80,12,80,749,9,80,3,80,751,8,80,1,80,1,80,1,80,
+	0,0,81,0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,42,44,
+	46,48,50,52,54,56,58,60,62,64,66,68,70,72,74,76,78,80,82,84,86,88,90,92,
+	94,96,98,100,102,104,106,108,110,112,114,116,118,120,122,124,126,128,130,
+	132,134,136,138,140,142,144,146,148,150,152,154,156,158,160,0,8,1,0,76,
+	78,1,0,10,11,2,0,12,12,25,25,1,0,86,87,1,0,49,50,2,0,65,66,86,89,1,0,57,
+	59,3,0,1,27,29,36,39,64,779,0,222,1,0,0,0,2,224,1,0,0,0,4,229,1,0,0,0,6,
+	232,1,0,0,0,8,237,1,0,0,0,10,246,1,0,0,0,12,258,1,0,0,0,14,265,1,0,0,0,
+	16,274,1,0,0,0,18,286,1,0,0,0,20,297,1,0,0,0,22,309,1,0,0,0,24,321,1,0,
+	0,0,26,325,1,0,0,0,28,329,1,0,0,0,30,331,1,0,0,0,32,333,1,0,0,0,34,337,
+	1,0,0,0,36,341,1,0,0,0,38,345,1,0,0,0,40,347,1,0,0,0,42,349,1,0,0,0,44,
+	354,1,0,0,0,46,356,1,0,0,0,48,360,1,0,0,0,50,362,1,0,0,0,52,366,1,0,0,0,
+	54,373,1,0,0,0,56,379,1,0,0,0,58,385,1,0,0,0,60,393,1,0,0,0,62,395,1,0,
+	0,0,64,399,1,0,0,0,66,403,1,0,0,0,68,408,1,0,0,0,70,421,1,0,0,0,72,425,
+	1,0,0,0,74,441,1,0,0,0,76,443,1,0,0,0,78,449,1,0,0,0,80,455,1,0,0,0,82,
+	457,1,0,0,0,84,459,1,0,0,0,86,461,1,0,0,0,88,467,1,0,0,0,90,469,1,0,0,0,
+	92,482,1,0,0,0,94,484,1,0,0,0,96,488,1,0,0,0,98,498,1,0,0,0,100,516,1,0,
+	0,0,102,518,1,0,0,0,104,526,1,0,0,0,106,531,1,0,0,0,108,542,1,0,0,0,110,
+	583,1,0,0,0,112,589,1,0,0,0,114,591,1,0,0,0,116,594,1,0,0,0,118,603,1,0,
+	0,0,120,611,1,0,0,0,122,613,1,0,0,0,124,622,1,0,0,0,126,630,1,0,0,0,128,
+	649,1,0,0,0,130,653,1,0,0,0,132,660,1,0,0,0,134,662,1,0,0,0,136,665,1,0,
+	0,0,138,673,1,0,0,0,140,679,1,0,0,0,142,688,1,0,0,0,144,693,1,0,0,0,146,
+	695,1,0,0,0,148,698,1,0,0,0,150,704,1,0,0,0,152,709,1,0,0,0,154,711,1,0,
+	0,0,156,722,1,0,0,0,158,724,1,0,0,0,160,741,1,0,0,0,162,164,3,2,1,0,163,
+	162,1,0,0,0,163,164,1,0,0,0,164,205,1,0,0,0,165,204,3,22,11,0,166,204,3,
+	38,19,0,167,204,3,40,20,0,168,204,3,46,23,0,169,204,3,50,25,0,170,204,3,
+	52,26,0,171,204,3,54,27,0,172,204,3,56,28,0,173,204,3,58,29,0,174,204,3,
+	62,31,0,175,204,3,64,32,0,176,204,3,66,33,0,177,204,3,42,21,0,178,204,3,
+	68,34,0,179,204,3,70,35,0,180,204,3,72,36,0,181,204,3,74,37,0,182,204,3,
+	76,38,0,183,204,3,78,39,0,184,204,3,86,43,0,185,204,3,142,71,0,186,204,
+	3,90,45,0,187,204,3,94,47,0,188,204,3,96,48,0,189,204,3,100,50,0,190,204,
+	3,102,51,0,191,204,3,104,52,0,192,204,3,106,53,0,193,204,3,110,55,0,194,
+	204,3,114,57,0,195,204,3,116,58,0,196,204,3,122,61,0,197,204,3,126,63,0,
+	198,204,3,130,65,0,199,204,3,134,67,0,200,204,3,136,68,0,201,204,3,138,
+	69,0,202,204,3,140,70,0,203,165,1,0,0,0,203,166,1,0,0,0,203,167,1,0,0,0,
+	203,168,1,0,0,0,203,169,1,0,0,0,203,170,1,0,0,0,203,171,1,0,0,0,203,172,
+	1,0,0,0,203,173,1,0,0,0,203,174,1,0,0,0,203,175,1,0,0,0,203,176,1,0,0,0,
+	203,177,1,0,0,0,203,178,1,0,0,0,203,179,1,0,0,0,203,180,1,0,0,0,203,181,
+	1,0,0,0,203,182,1,0,0,0,203,183,1,0,0,0,203,184,1,0,0,0,203,185,1,0,0,0,
+	203,186,1,0,0,0,203,187,1,0,0,0,203,188,1,0,0,0,203,189,1,0,0,0,203,190,
+	1,0,0,0,203,191,1,0,0,0,203,192,1,0,0,0,203,193,1,0,0,0,203,194,1,0,0,0,
+	203,195,1,0,0,0,203,196,1,0,0,0,203,197,1,0,0,0,203,198,1,0,0,0,203,199,
+	1,0,0,0,203,200,1,0,0,0,203,201,1,0,0,0,203,202,1,0,0,0,204,207,1,0,0,0,
+	205,203,1,0,0,0,205,206,1,0,0,0,206,208,1,0,0,0,207,205,1,0,0,0,208,223,
+	5,0,0,1,209,217,3,4,2,0,210,216,3,6,3,0,211,216,3,8,4,0,212,216,3,10,5,
+	0,213,216,3,12,6,0,214,216,3,14,7,0,215,210,1,0,0,0,215,211,1,0,0,0,215,
+	212,1,0,0,0,215,213,1,0,0,0,215,214,1,0,0,0,216,219,1,0,0,0,217,215,1,0,
+	0,0,217,218,1,0,0,0,218,220,1,0,0,0,219,217,1,0,0,0,220,221,5,0,0,1,221,
+	223,1,0,0,0,222,163,1,0,0,0,222,209,1,0,0,0,223,1,1,0,0,0,224,225,5,1,0,
+	0,225,227,3,150,75,0,226,228,5,89,0,0,227,226,1,0,0,0,227,228,1,0,0,0,228,
+	3,1,0,0,0,229,230,5,2,0,0,230,231,3,150,75,0,231,5,1,0,0,0,232,233,5,3,
+	0,0,233,234,5,89,0,0,234,235,5,4,0,0,235,236,5,90,0,0,236,7,1,0,0,0,237,
+	238,5,5,0,0,238,239,5,90,0,0,239,240,5,84,0,0,240,241,3,18,9,0,241,242,
+	5,78,0,0,242,243,5,90,0,0,243,244,5,84,0,0,244,245,3,18,9,0,245,9,1,0,0,
+	0,246,247,5,6,0,0,247,248,5,90,0,0,248,249,5,84,0,0,249,254,3,18,9,0,250,
+	251,5,85,0,0,251,252,5,90,0,0,252,253,5,84,0,0,253,255,3,18,9,0,254,250,
+	1,0,0,0,255,256,1,0,0,0,256,254,1,0,0,0,256,257,1,0,0,0,257,11,1,0,0,0,
+	258,259,5,7,0,0,259,260,5,90,0,0,260,261,5,84,0,0,261,262,3,20,10,0,262,
+	263,5,8,0,0,263,264,5,90,0,0,264,13,1,0,0,0,265,266,5,54,0,0,266,271,3,
+	16,8,0,267,268,5,83,0,0,268,270,3,16,8,0,269,267,1,0,0,0,270,273,1,0,0,
+	0,271,269,1,0,0,0,271,272,1,0,0,0,272,15,1,0,0,0,273,271,1,0,0,0,274,275,
+	5,90,0,0,275,276,5,84,0,0,276,283,3,18,9,0,277,278,5,37,0,0,278,279,5,90,
+	0,0,279,280,5,84,0,0,280,282,3,18,9,0,281,277,1,0,0,0,282,285,1,0,0,0,283,
+	281,1,0,0,0,283,284,1,0,0,0,284,17,1,0,0,0,285,283,1,0,0,0,286,287,5,69,
+	0,0,287,292,3,150,75,0,288,289,5,84,0,0,289,291,3,150,75,0,290,288,1,0,
+	0,0,291,294,1,0,0,0,292,290,1,0,0,0,292,293,1,0,0,0,293,295,1,0,0,0,294,
+	292,1,0,0,0,295,296,5,70,0,0,296,19,1,0,0,0,297,298,5,71,0,0,298,303,3,
+	150,75,0,299,300,5,84,0,0,300,302,3,150,75,0,301,299,1,0,0,0,302,305,1,
+	0,0,0,303,301,1,0,0,0,303,304,1,0,0,0,304,306,1,0,0,0,305,303,1,0,0,0,306,
+	307,5,72,0,0,307,21,1,0,0,0,308,310,3,32,16,0,309,308,1,0,0,0,309,310,1,
+	0,0,0,310,311,1,0,0,0,311,315,3,24,12,0,312,313,3,26,13,0,313,314,3,24,
+	12,0,314,316,1,0,0,0,315,312,1,0,0,0,316,317,1,0,0,0,317,315,1,0,0,0,317,
+	318,1,0,0,0,318,23,1,0,0,0,319,322,3,34,17,0,320,322,3,36,18,0,321,319,
+	1,0,0,0,321,320,1,0,0,0,322,25,1,0,0,0,323,324,5,75,0,0,324,326,3,148,74,
+	0,325,323,1,0,0,0,325,326,1,0,0,0,326,327,1,0,0,0,327,328,3,28,14,0,328,
+	27,1,0,0,0,329,330,7,0,0,0,330,29,1,0,0,0,331,332,3,22,11,0,332,31,1,0,
+	0,0,333,334,5,68,0,0,334,335,3,150,75,0,335,336,5,82,0,0,336,33,1,0,0,0,
+	337,338,5,69,0,0,338,339,3,150,75,0,339,340,5,70,0,0,340,35,1,0,0,0,341,
+	342,5,71,0,0,342,343,3,150,75,0,343,344,5,72,0,0,344,37,1,0,0,0,345,346,
+	3,34,17,0,346,39,1,0,0,0,347,348,3,36,18,0,348,41,1,0,0,0,349,350,3,34,
+	17,0,350,351,5,9,0,0,351,352,3,44,22,0,352,353,3,148,74,0,353,43,1,0,0,
+	0,354,355,7,1,0,0,355,45,1,0,0,0,356,357,3,36,18,0,357,358,5,12,0,0,358,
+	359,5,89,0,0,359,47,1,0,0,0,360,361,3,46,23,0,361,49,1,0,0,0,362,363,3,
+	36,18,0,363,364,5,13,0,0,364,365,5,89,0,0,365,51,1,0,0,0,366,367,3,36,18,
+	0,367,368,5,15,0,0,368,369,5,16,0,0,369,370,3,34,17,0,370,371,5,25,0,0,
+	371,372,5,89,0,0,372,53,1,0,0,0,373,374,3,36,18,0,374,375,5,15,0,0,375,
+	376,5,17,0,0,376,377,3,60,30,0,377,378,3,34,17,0,378,55,1,0,0,0,379,380,
+	3,36,18,0,380,381,5,15,0,0,381,382,5,18,0,0,382,383,5,25,0,0,383,384,5,
+	89,0,0,384,57,1,0,0,0,385,386,3,36,18,0,386,387,5,17,0,0,387,388,3,150,
+	75,0,388,389,3,34,17,0,389,59,1,0,0,0,390,394,5,90,0,0,391,394,5,28,0,0,
+	392,394,3,154,77,0,393,390,1,0,0,0,393,391,1,0,0,0,393,392,1,0,0,0,394,
+	61,1,0,0,0,395,396,3,36,18,0,396,397,5,19,0,0,397,398,3,84,42,0,398,63,
+	1,0,0,0,399,400,3,36,18,0,400,401,5,14,0,0,401,402,3,82,41,0,402,65,1,0,
+	0,0,403,404,5,68,0,0,404,405,3,150,75,0,405,406,5,14,0,0,406,407,3,82,41,
+	0,407,67,1,0,0,0,408,409,3,34,17,0,409,410,5,20,0,0,410,411,5,71,0,0,411,
+	416,3,148,74,0,412,413,5,83,0,0,413,415,3,148,74,0,414,412,1,0,0,0,415,
+	418,1,0,0,0,416,414,1,0,0,0,416,417,1,0,0,0,417,419,1,0,0,0,418,416,1,0,
+	0,0,419,420,5,72,0,0,420,69,1,0,0,0,421,422,3,34,17,0,422,423,5,21,0,0,
+	423,424,3,158,79,0,424,71,1,0,0,0,425,426,5,68,0,0,426,427,3,150,75,0,427,
+	428,5,22,0,0,428,429,3,156,78,0,429,73,1,0,0,0,430,431,5,68,0,0,431,432,
+	3,150,75,0,432,433,5,23,0,0,433,434,5,25,0,0,434,435,5,89,0,0,435,442,1,
+	0,0,0,436,437,5,68,0,0,437,438,3,150,75,0,438,439,5,23,0,0,439,440,3,156,
+	78,0,440,442,1,0,0,0,441,430,1,0,0,0,441,436,1,0,0,0,442,75,1,0,0,0,443,
+	444,5,68,0,0,444,445,3,150,75,0,445,446,5,24,0,0,446,447,3,80,40,0,447,
+	448,5,89,0,0,448,77,1,0,0,0,449,450,5,68,0,0,450,451,3,150,75,0,451,452,
+	5,26,0,0,452,453,5,25,0,0,453,454,5,89,0,0,454,79,1,0,0,0,455,456,7,2,0,
+	0,456,81,1,0,0,0,457,458,5,86,0,0,458,83,1,0,0,0,459,460,7,3,0,0,460,85,
+	1,0,0,0,461,462,5,27,0,0,462,463,5,28,0,0,463,464,3,34,17,0,464,465,5,79,
+	0,0,465,466,3,92,46,0,466,87,1,0,0,0,467,468,3,86,43,0,468,89,1,0,0,0,469,
+	470,5,27,0,0,470,471,3,152,76,0,471,472,3,34,17,0,472,473,5,79,0,0,473,
+	474,3,92,46,0,474,91,1,0,0,0,475,476,3,82,41,0,476,477,5,81,0,0,477,479,
+	1,0,0,0,478,475,1,0,0,0,478,479,1,0,0,0,479,480,1,0,0,0,480,483,3,146,73,
+	0,481,483,3,82,41,0,482,478,1,0,0,0,482,481,1,0,0,0,483,93,1,0,0,0,484,
+	485,3,98,49,0,485,486,5,29,0,0,486,487,5,89,0,0,487,95,1,0,0,0,488,489,
+	3,98,49,0,489,490,5,30,0,0,490,491,3,150,75,0,491,492,3,156,78,0,492,97,
+	1,0,0,0,493,499,5,1,0,0,494,499,3,34,17,0,495,499,3,36,18,0,496,497,5,68,
+	0,0,497,499,3,150,75,0,498,493,1,0,0,0,498,494,1,0,0,0,498,495,1,0,0,0,
+	498,496,1,0,0,0,499,99,1,0,0,0,500,501,5,32,0,0,501,502,3,150,75,0,502,
+	503,5,33,0,0,503,504,3,108,54,0,504,505,5,35,0,0,505,506,3,158,79,0,506,
+	517,1,0,0,0,507,508,5,32,0,0,508,509,3,150,75,0,509,510,5,33,0,0,510,511,
+	3,108,54,0,511,512,5,36,0,0,512,513,3,108,54,0,513,514,5,37,0,0,514,515,
+	3,158,79,0,515,517,1,0,0,0,516,500,1,0,0,0,516,507,1,0,0,0,517,101,1,0,
+	0,0,518,519,5,32,0,0,519,520,3,150,75,0,520,521,5,34,0,0,521,522,5,68,0,
+	0,522,523,3,150,75,0,523,524,5,39,0,0,524,525,3,160,80,0,525,103,1,0,0,
+	0,526,527,5,32,0,0,527,528,3,150,75,0,528,529,5,40,0,0,529,530,3,150,75,
+	0,530,105,1,0,0,0,531,532,5,32,0,0,532,533,3,150,75,0,533,534,5,41,0,0,
+	534,535,3,150,75,0,535,107,1,0,0,0,536,539,3,34,17,0,537,538,5,68,0,0,538,
+	540,3,36,18,0,539,537,1,0,0,0,539,540,1,0,0,0,540,543,1,0,0,0,541,543,3,
+	36,18,0,542,536,1,0,0,0,542,541,1,0,0,0,543,109,1,0,0,0,544,545,5,42,0,
+	0,545,546,3,112,56,0,546,548,5,43,0,0,547,549,5,89,0,0,548,547,1,0,0,0,
+	548,549,1,0,0,0,549,584,1,0,0,0,550,551,5,42,0,0,551,552,3,112,56,0,552,
+	553,5,44,0,0,553,554,5,89,0,0,554,584,1,0,0,0,555,556,5,42,0,0,556,557,
+	3,112,56,0,557,558,5,45,0,0,558,559,5,89,0,0,559,584,1,0,0,0,560,561,5,
+	42,0,0,561,562,3,112,56,0,562,564,5,48,0,0,563,565,7,4,0,0,564,563,1,0,
+	0,0,564,565,1,0,0,0,565,567,1,0,0,0,566,568,5,51,0,0,567,566,1,0,0,0,567,
+	568,1,0,0,0,568,584,1,0,0,0,569,570,5,42,0,0,570,571,5,47,0,0,571,572,3,
+	148,74,0,572,573,5,46,0,0,573,584,1,0,0,0,574,575,5,42,0,0,575,576,5,47,
+	0,0,576,577,3,148,74,0,577,579,5,52,0,0,578,580,5,89,0,0,579,578,1,0,0,
+	0,580,581,1,0,0,0,581,579,1,0,0,0,581,582,1,0,0,0,582,584,1,0,0,0,583,544,
+	1,0,0,0,583,550,1,0,0,0,583,555,1,0,0,0,583,560,1,0,0,0,583,569,1,0,0,0,
+	583,574,1,0,0,0,584,111,1,0,0,0,585,590,3,34,17,0,586,590,3,36,18,0,587,
+	588,5,68,0,0,588,590,3,150,75,0,589,585,1,0,0,0,589,586,1,0,0,0,589,587,
+	1,0,0,0,590,113,1,0,0,0,591,592,5,31,0,0,592,593,3,158,79,0,593,115,1,0,
+	0,0,594,595,5,53,0,0,595,596,3,148,74,0,596,597,5,84,0,0,597,599,3,118,
+	59,0,598,600,3,120,60,0,599,598,1,0,0,0,600,601,1,0,0,0,601,599,1,0,0,0,
+	601,602,1,0,0,0,602,117,1,0,0,0,603,608,3,150,75,0,604,605,5,84,0,0,605,
+	607,3,150,75,0,606,604,1,0,0,0,607,610,1,0,0,0,608,606,1,0,0,0,608,609,
+	1,0,0,0,609,119,1,0,0,0,610,608,1,0,0,0,611,612,7,5,0,0,612,121,1,0,0,0,
+	613,614,5,54,0,0,614,619,3,124,62,0,615,616,5,83,0,0,616,618,3,124,62,0,
+	617,615,1,0,0,0,618,621,1,0,0,0,619,617,1,0,0,0,619,620,1,0,0,0,620,123,
+	1,0,0,0,621,619,1,0,0,0,622,627,3,34,17,0,623,624,5,37,0,0,624,626,3,34,
+	17,0,625,623,1,0,0,0,626,629,1,0,0,0,627,625,1,0,0,0,627,628,1,0,0,0,628,
+	125,1,0,0,0,629,627,1,0,0,0,630,632,5,55,0,0,631,633,5,89,0,0,632,631,1,
+	0,0,0,632,633,1,0,0,0,633,634,1,0,0,0,634,639,3,128,64,0,635,636,5,37,0,
+	0,636,638,3,128,64,0,637,635,1,0,0,0,638,641,1,0,0,0,639,637,1,0,0,0,639,
+	640,1,0,0,0,640,644,1,0,0,0,641,639,1,0,0,0,642,643,5,38,0,0,643,645,3,
+	84,42,0,644,642,1,0,0,0,644,645,1,0,0,0,645,127,1,0,0,0,646,647,3,82,41,
+	0,647,648,5,81,0,0,648,650,1,0,0,0,649,646,1,0,0,0,649,650,1,0,0,0,650,
+	651,1,0,0,0,651,652,3,34,17,0,652,129,1,0,0,0,653,654,3,132,66,0,654,655,
+	5,56,0,0,655,656,3,150,75,0,656,131,1,0,0,0,657,661,5,1,0,0,658,661,3,34,
+	17,0,659,661,3,36,18,0,660,657,1,0,0,0,660,658,1,0,0,0,660,659,1,0,0,0,
+	661,133,1,0,0,0,662,663,7,6,0,0,663,664,3,150,75,0,664,135,1,0,0,0,665,
+	666,3,34,17,0,666,667,5,60,0,0,667,671,5,61,0,0,668,669,5,25,0,0,669,672,
+	5,89,0,0,670,672,3,150,75,0,671,668,1,0,0,0,671,670,1,0,0,0,672,137,1,0,
+	0,0,673,674,3,34,17,0,674,675,5,62,0,0,675,676,5,4,0,0,676,677,5,25,0,0,
+	677,678,5,89,0,0,678,139,1,0,0,0,679,680,3,34,17,0,680,681,5,63,0,0,681,
+	682,5,8,0,0,682,683,3,150,75,0,683,684,5,64,0,0,684,685,5,4,0,0,685,686,
+	5,25,0,0,686,687,5,89,0,0,687,141,1,0,0,0,688,689,3,146,73,0,689,690,5,
+	82,0,0,690,691,3,148,74,0,691,692,3,156,78,0,692,143,1,0,0,0,693,694,3,
+	142,71,0,694,145,1,0,0,0,695,696,5,80,0,0,696,697,3,150,75,0,697,147,1,
+	0,0,0,698,699,3,150,75,0,699,149,1,0,0,0,700,705,5,90,0,0,701,705,5,89,
+	0,0,702,705,5,28,0,0,703,705,3,154,77,0,704,700,1,0,0,0,704,701,1,0,0,0,
+	704,702,1,0,0,0,704,703,1,0,0,0,705,151,1,0,0,0,706,710,5,90,0,0,707,710,
+	5,89,0,0,708,710,3,154,77,0,709,706,1,0,0,0,709,707,1,0,0,0,709,708,1,0,
+	0,0,710,153,1,0,0,0,711,712,7,7,0,0,712,155,1,0,0,0,713,723,3,158,79,0,
+	714,723,3,160,80,0,715,723,5,89,0,0,716,723,5,88,0,0,717,723,5,86,0,0,718,
+	723,5,87,0,0,719,723,5,65,0,0,720,723,5,66,0,0,721,723,5,67,0,0,722,713,
+	1,0,0,0,722,714,1,0,0,0,722,715,1,0,0,0,722,716,1,0,0,0,722,717,1,0,0,0,
+	722,718,1,0,0,0,722,719,1,0,0,0,722,720,1,0,0,0,722,721,1,0,0,0,723,157,
+	1,0,0,0,724,737,5,73,0,0,725,726,5,89,0,0,726,727,5,82,0,0,727,734,3,156,
+	78,0,728,729,5,83,0,0,729,730,5,89,0,0,730,731,5,82,0,0,731,733,3,156,78,
+	0,732,728,1,0,0,0,733,736,1,0,0,0,734,732,1,0,0,0,734,735,1,0,0,0,735,738,
+	1,0,0,0,736,734,1,0,0,0,737,725,1,0,0,0,737,738,1,0,0,0,738,739,1,0,0,0,
+	739,740,5,74,0,0,740,159,1,0,0,0,741,750,5,71,0,0,742,747,3,156,78,0,743,
+	744,5,83,0,0,744,746,3,156,78,0,745,743,1,0,0,0,746,749,1,0,0,0,747,745,
+	1,0,0,0,747,748,1,0,0,0,748,751,1,0,0,0,749,747,1,0,0,0,750,742,1,0,0,0,
+	750,751,1,0,0,0,751,752,1,0,0,0,752,753,5,72,0,0,753,161,1,0,0,0,48,163,
+	203,205,215,217,222,227,256,271,283,292,303,309,317,321,325,393,416,441,
+	478,482,498,516,539,542,548,564,567,581,583,589,601,608,619,627,632,639,
+	644,649,660,671,704,709,722,734,737,747,750];
 
 	private static __ATN: ATN;
 	public static get _ATN(): ATN {
@@ -6272,6 +6289,9 @@ export class DecorationContext extends ParserRuleContext {
 	public BESIDE(): TerminalNode {
 		return this.getToken(VelocitronPetriNetParser.BESIDE, 0);
 	}
+	public UNSHARED(): TerminalNode {
+		return this.getToken(VelocitronPetriNetParser.UNSHARED, 0);
+	}
 	public LEFT(): TerminalNode {
 		return this.getToken(VelocitronPetriNetParser.LEFT, 0);
 	}
@@ -7106,6 +7126,9 @@ export class KeywordContext extends ParserRuleContext {
 	}
 	public RIGHT(): TerminalNode {
 		return this.getToken(VelocitronPetriNetParser.RIGHT, 0);
+	}
+	public UNSHARED(): TerminalNode {
+		return this.getToken(VelocitronPetriNetParser.UNSHARED, 0);
 	}
 	public SHOW(): TerminalNode {
 		return this.getToken(VelocitronPetriNetParser.SHOW, 0);

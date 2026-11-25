@@ -4,6 +4,8 @@
  * `netToDot` draws one net. `applyView` pins authored positions and routes
  * onto that drawing. `fusionLayout` places fusion copies, including one
  * shared copy between two neighbor transitions of one choice.
+ * `beside unshared` keeps one copy per transition and pushes those copies
+ * outside the choice's row.
  *
  * Pass a net the caller already built. This package does not parse
  * documents, compile CEL, or install a console script, and it does not

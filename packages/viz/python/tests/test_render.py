@@ -240,6 +240,165 @@ def test_neighbor_siblings_share_one_fusion_copy() -> None:
     assert three.rows == (("hold", "switch@hold+skip", "skip", "send", "switch@send"),)
 
 
+def test_an_unshared_run_pushes_copies_outside_the_row() -> None:
+    # given: the same choice, with the fusion place opted out of sharing
+    switch = Place("switch", ["job"], annotations={"fusion": True})
+    read = _read_switch
+    pair = _choice([read("hold"), read("skip")], [switch], ["hold", "skip"])
+    trio = _choice(
+        [read("hold"), read("skip"), read("send")],
+        [switch],
+        ["hold", "skip", "send"],
+    )
+    decorations = Decorations(
+        nodes={"place:switch": Decoration(beside=True, beside_share=False)}
+    )
+    # when: the layout places the copies
+    paired = fusion_layout(pair, {"switch"}, decorations)
+    three = fusion_layout(trio, {"switch"}, decorations)
+    # then: a run of two is the copy, the siblings, the copy, and the middle
+    # of a run of three balances to the left
+    assert paired.rows == (("switch@hold", "hold", "skip", "switch@skip"),)
+    assert "hold+skip" not in "".join(paired.copies.values())
+    assert three.rows == (
+        ("switch@hold", "hold", "switch@skip", "skip", "send", "switch@send"),
+    )
+
+
+def _lease_choice() -> Net:
+    # given: commit and expire are one choice on working; acquire is not
+    clock = Place("clock", ["now"], annotations={"fusion": True})
+    return Net(
+        name="lease_choice",
+        places=[
+            Place("idle", ["job"]),
+            Place("lease", ["permit"]),
+            Place("working", ["job"]),
+            Place("done", ["job"]),
+            clock,
+        ],
+        transitions=[
+            Transition("acquire"),
+            Transition("commit"),
+            Transition("expire"),
+        ],
+        arcs=[
+            Arc(
+                from_place="idle",
+                to_transition="acquire",
+                consume=ConsumePattern("job", None, "consume"),
+            ),
+            Arc(
+                from_place="lease",
+                to_transition="acquire",
+                consume=ConsumePattern("permit", None, "consume"),
+            ),
+            Arc(
+                from_transition="acquire",
+                to_place="working",
+                produce=ProduceTemplate("job", "working"),
+            ),
+            Arc(
+                from_place="working",
+                to_transition="commit",
+                consume=ConsumePattern("job", None, "consume"),
+            ),
+            Arc(
+                from_transition="commit",
+                to_place="done",
+                produce=ProduceTemplate("job", "done"),
+            ),
+            Arc(
+                from_transition="commit",
+                to_place="lease",
+                produce=ProduceTemplate("permit", "lease"),
+            ),
+            Arc(
+                from_place="working",
+                to_transition="expire",
+                consume=ConsumePattern("job", None, "consume"),
+            ),
+            Arc(
+                from_transition="expire",
+                to_place="idle",
+                produce=ProduceTemplate("job", "idle"),
+            ),
+            Arc(
+                from_transition="expire",
+                to_place="lease",
+                produce=ProduceTemplate("permit", "lease"),
+            ),
+            Arc(
+                from_place="clock",
+                to_transition="acquire",
+                consume=ConsumePattern("now", None, "read"),
+            ),
+            Arc(
+                from_place="clock",
+                to_transition="commit",
+                consume=ConsumePattern("now", None, "read"),
+            ),
+            Arc(
+                from_place="clock",
+                to_transition="expire",
+                consume=ConsumePattern("now", None, "read"),
+            ),
+        ],
+    )
+
+
+def test_lease_choice_unshared_draws_two_clock_copies_outside_the_row() -> None:
+    # given: the clock is beside unshared
+    net = _lease_choice()
+    decorations = Decorations(
+        nodes={"place:clock": Decoration(beside=True, beside_share=False)}
+    )
+    # when: the layout and the drawing place the copies
+    layout = fusion_layout(net, {"clock"}, decorations)
+    dot = net_to_dot(net, decorations=decorations)
+    # then: commit and expire keep one row, with a clock copy on each outside
+    assert layout.rows == (
+        ("clock@acquire", "acquire"),
+        ("clock@commit", "commit", "expire", "clock@expire"),
+    )
+    assert "clock@commit+expire" not in dot
+    assert dot.count('"clock@commit" [shape=ellipse') == 1
+    assert dot.count('"clock@expire" [shape=ellipse') == 1
+    assert (
+        '    "clock@commit" -> "commit" -> "expire" -> "clock@expire" [style=invis];'
+        in dot
+    )
+
+
+def test_an_unshared_place_with_copy_positions_keeps_one_copy_each() -> None:
+    # given: the clock is beside unshared, and the view pins each choice copy
+    net = _lease_choice()
+    decorations = Decorations(
+        nodes={"place:clock": Decoration(beside=True, beside_share=False)}
+    )
+    model = net_render_model(net, decorations=decorations)
+    # when: those copies have their own positions (ADR 0068)
+    dot = apply_view(
+        model,
+        _lanes(
+            {
+                "transition:commit": {"x": 0, "y": 0},
+                "transition:expire": {"x": 200, "y": 0},
+                "place:clock@transition:commit": {"x": -40, "y": 0},
+                "place:clock@transition:expire": {"x": 240, "y": 0},
+            }
+        ),
+        "lanes",
+    )
+    # then: one node per transition, each on its own point
+    assert (
+        model.copy_lines[("clock", "commit")] != model.copy_lines[("clock", "expire")]
+    )
+    assert "clock@commit+expire" not in dot
+    assert 'pos="-40,0!"' in _node(dot, "clock@commit")
+    assert 'pos="240,0!"' in _node(dot, "clock@expire")
+
+
 def _coord(value: float) -> str:
     number = float(value)
     return str(int(number)) if number.is_integer() else str(number)
@@ -574,9 +733,10 @@ def test_a_copy_position_beats_the_place_which_beats_beside() -> None:
     )
     # then: the copy entry wins, the other copy takes the place, and ready_a
     # sits on the copy's rendered point
-    assert model.copy_lines[("lock", "acquire_a")] != model.copy_lines[
-        ("lock", "release_a")
-    ]
+    assert (
+        model.copy_lines[("lock", "acquire_a")]
+        != model.copy_lines[("lock", "release_a")]
+    )
     assert 'pos="-70,0!"' in _node(dot, "lock@acquire_a")
     assert 'pos="10,20!"' in _node(dot, "lock@release_a")
     assert 'pos="-65,0!"' in _node(dot, "ready_a")

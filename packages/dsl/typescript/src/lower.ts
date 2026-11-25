@@ -1774,8 +1774,11 @@ class LoweringVisitor {
           : (context.RIGHT() as TerminalNode | undefined)
             ? "right"
             : undefined;
+        const besideValue: Record<string, string | boolean> = {};
+        if (side !== undefined) besideValue.side = side;
+        if (context.UNSHARED() as TerminalNode | undefined) besideValue.share = false;
         kind = "decoration.beside";
-        value = side === undefined ? {} : { side };
+        value = besideValue;
       } else {
         if (place) {
           this.#semanticError(

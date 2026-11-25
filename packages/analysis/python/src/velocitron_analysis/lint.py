@@ -70,6 +70,10 @@ RULE_FUSION_PLACE_POSITION = "fusion-place-position"
 # on a copy. It still anchors `relative (P)`.
 RULE_PLACE_POSITION_OVERRIDDEN = "place-position-overridden"
 
+# Stable rule id: ``beside left unshared`` or ``beside right unshared``.
+# A fixed side already never shares a copy (ADR 0035), so ``unshared``
+# changes nothing (ADR 0070). The net is still valid.
+RULE_BESIDE_UNSHARED_REDUNDANT = "beside-unshared-redundant"
 # CEL macros whose first argument binds a loop variable, not a free name.
 _BINDING_MACROS = frozenset({"all", "exists", "exists_one", "map", "filter"})
 
@@ -466,12 +470,46 @@ def _fusion_position_findings(net: Net) -> list[LintFinding]:
     return findings
 
 
+def _beside_unshared_findings(net: Net) -> list[LintFinding]:
+    """``beside <side> unshared``: a fixed side already never shares."""
+    annotations = net.annotations or {}
+    try:
+        decorations = read_decorations({"annotations": annotations})
+    except ViewApplicationError:
+        return []
+    findings: list[LintFinding] = []
+    for place in net.places:
+        decoration = decorations.nodes.get(f"place:{place.name}")
+        if (
+            decoration is None
+            or not decoration.beside
+            or decoration.beside_side is None
+            or decoration.beside_share
+        ):
+            continue
+        if RULE_BESIDE_UNSHARED_REDUNDANT in suppressed_rules(place.annotations):
+            continue
+        findings.append(
+            LintFinding(
+                rule=RULE_BESIDE_UNSHARED_REDUNDANT,
+                transition="",
+                place=place.name,
+                message=(
+                    f"beside {decoration.beside_side} unshared on ({place.name}) "
+                    "is redundant; a fixed side never shares a copy"
+                ),
+            )
+        )
+    return findings
+
+
 def lint_net(net: Net) -> list[LintFinding]:
     """Run all lint rules over a parsed net; return advisory findings.
 
     Findings follow transition declaration order; within a transition the
     transition-level rules come first, then arc findings in arc declaration
-    order. Place findings follow, in view order and then position order.
+    order. Place findings follow, in view order and then position order,
+    and then ``beside-unshared-redundant`` in place declaration order.
     An empty list means the net is clean under every (non-suppressed) rule.
     """
     consuming_transitions: set[str] = set()
@@ -526,10 +564,12 @@ def lint_net(net: Net) -> list[LintFinding]:
                     _correlate_findings(net, transition.name, arc_index, keys)
                 )
     findings.extend(_fusion_position_findings(net))
+    findings.extend(_beside_unshared_findings(net))
     return findings
 
 
 __all__ = [
+    "RULE_BESIDE_UNSHARED_REDUNDANT",
     "RULE_CONSUME_WITHOUT_PRODUCE",
     "RULE_CORRELATE_FREE_NAME",
     "RULE_FUSION_PLACE_POSITION",

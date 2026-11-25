@@ -125,6 +125,9 @@ class Decoration:
     summary: str | None = None
     beside: bool = False
     beside_side: str | None = None
+    # False is ``beside unshared``: one copy per transition (ADR 0070).
+    # Absent ``share`` stays True, so a place with no side still shares.
+    beside_share: bool = True
     failure: bool = False
     faded: bool = False
 
@@ -193,6 +196,11 @@ def read_decorations(raw: Mapping[str, Any]) -> Decorations:
                 cast(Mapping[str, Any], beside).get("side")
                 if isinstance(beside, Mapping)
                 else None
+            ),
+            beside_share=(
+                cast(Mapping[str, Any], beside).get("share") is not False
+                if isinstance(beside, Mapping)
+                else True
             ),
         )
         if kind in ("place", "transition"):

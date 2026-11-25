@@ -22,3 +22,41 @@ describe("compilePetrinetText", () => {
     assert.equal(parsed.name, "coin_deposit");
   });
 });
+
+const unshared = `net copies
+
+(idle) -job-> [go]
+(clock) -now->? [go]
+(clock) annotation fusion true
+decorate (clock) beside unshared
+`;
+
+const sided = `net copies
+
+(idle) -job-> [go]
+(clock) -now->? [go]
+(clock) annotation fusion true
+decorate (clock) beside right unshared
+`;
+
+function besideOf(source) {
+  const compiled = compilePetrinetText(source, "copies.petrinet");
+  const annotations = compiled.document.annotations;
+  return annotations["petrinet.dsl/v1"].decorations["place:clock"].beside;
+}
+
+describe("beside unshared", () => {
+  it("lowers to share false", () => {
+    // given: a fusion place decorated beside unshared
+    // when: the package compiles it
+    // then: the payload opts out of sharing and names no side
+    assert.deepEqual(besideOf(unshared), {share: false});
+  });
+
+  it("keeps a fixed side beside the share flag", () => {
+    // given: beside right unshared
+    // when: the package compiles it
+    // then: both the side and the opt-out are in the payload
+    assert.deepEqual(besideOf(sided), {side: "right", share: false});
+  });
+});

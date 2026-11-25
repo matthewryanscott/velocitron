@@ -548,7 +548,7 @@ view Name detail ( full | summary | structure )
 decorate DecorationTarget highlight [ JsonString ]
 decorate DecorationTarget note JsonString
 decorate ( [Transition] | @Handle ) summary JsonString
-decorate (Place) beside [ left | right ]
+decorate (Place) beside [ left | right ] [ unshared ]
 decorate color Color quiet
 decorate color Color show JsonString ...
 ```
@@ -599,7 +599,17 @@ while lowering. `beside` applies to a fusion place, one annotated
 `fusion true`, which a renderer draws as one local copy per transition that
 uses it: it asks the renderer to draw each copy on the same rank as its
 transition, next to it. `left` and `right` pick the side; without a side the
-renderer picks one. When a view positions nodes, a copy is placed by the
+renderer picks one. `unshared` keeps one copy per transition and never shares
+a copy between neighbors. The side is still chosen as above. A choice whose
+transitions would have shared that copy stays in one row, and the copies are
+pushed outward: the first sibling's copy on the left, the last sibling's on
+the right, and a middle sibling on the side with fewer of its own copies so
+far, left on a tie. A run of two is the copy, the first transition, the
+second transition, the copy. That row is the `beside` side a view uses.
+`beside left unshared` and `beside right
+unshared` parse. A fixed side already never shares, so `velocitron validate`
+warns `beside-unshared-redundant` and the copies stay on that side. When a
+view positions nodes, a copy is placed by the
 first of these that applies (ADR 0072). A `(P)@[T]` entry places that copy.
 A whole-place `(P)` entry places every copy of `P` that has no copy entry.
 `beside` places a copy only when neither entry does, at a horizontal offset
@@ -649,7 +659,8 @@ extensions: JsonObject
 decorations?: { Subject: { highlight?: { label?: String },
                            note?: String,
                            summary?: String,
-                           beside?: { side?: "left" | "right" } }
+                           beside?: { side?: "left" | "right",
+                                      share?: false } }
               | { "color:" Color: { quiet?: true,
                                     show?: [FieldPath, ...] } } }
 ```
@@ -657,7 +668,8 @@ decorations?: { Subject: { highlight?: { label?: String },
 A position `Target` is `place:<name>`, `transition:<name>`, or
 `place:<name>@transition:<name>` for one drawn copy. A decoration `Subject` is `place:<name>`, `transition:<name>`, or
 `arc:<handle>`; a place subject carries no `summary`, and only a place subject
-carries `beside`. A color subject carries at least one of `quiet` and `show`;
+carries `beside`. `share: false` is `unshared`. When `share` is absent, the
+copies may be shared. A color subject carries at least one of `quiet` and `show`;
 `show` keeps the source order of its field paths. The `decorations` member
 is present only when the source has at least one decoration.
 

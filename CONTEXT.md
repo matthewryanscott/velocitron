@@ -60,7 +60,7 @@ A token whose color is the ordinary string `token`, used by convention for class
 _Avoid_: wildcard token, untyped token, any token
 
 **Fusion place**:
-A place tagged `fusion=True` that is a single logical place depicted by the renderer as a local dashed instance at each transition that connects to it (one place, many local copies). Two neighbor transitions of one choice that both use a `beside` fusion place with no side share one copy, drawn between them. Used for shared/environmental places like `git_tree_diff` so the rendered graph reads as per-transition islands rather than a single global hub.
+A place tagged `fusion=True` that is a single logical place depicted by the renderer as a local dashed instance at each transition that connects to it (one place, many local copies). Two neighbor transitions of one choice that both use a `beside` fusion place with no side share one copy, drawn between them, unless that place is `beside unshared`, which keeps one copy per transition and pushes those copies outside the choice's row. Used for shared/environmental places like `git_tree_diff` so the rendered graph reads as per-transition islands rather than a single global hub.
 _Avoid_: hub place, shared node, global place
 
 **Conflict**:
@@ -400,7 +400,7 @@ An authored, named presentation layer on a Net: positions for places, transition
 _Avoid_: overlay, scene, canvas state, layout hint
 
 **Decoration**:
-An authored, inert presentation fact on one place, transition, handled arc, or color: a highlight (with an optional short label), a note, a summary that the `summary` detail level shows in place of an expression, `quiet`, which hides a color's type label on consume and produce arcs, `show`, which names the token fields (dotted paths such as `owner.name`) a renderer shows for a color, or `beside`, which keeps each local copy of a Fusion place next to its transition (with no side, two neighbor transitions of one choice share one copy). Unlike a View, a Decoration belongs to no view and shows in every render. A View that positions nodes places a `beside` copy beside its transition only when the view positions neither that copy nor the place (ADR 0067, ADR 0072). A whole-place position lands on every copy that has no copy entry, and it still anchors a relative position. Stored in the reserved payload (`annotations["petrinet.dsl/v1"].decorations`); never consumed by the parser, engine, or journal.
+An authored, inert presentation fact on one place, transition, handled arc, or color: a highlight (with an optional short label), a note, a summary that the `summary` detail level shows in place of an expression, `quiet`, which hides a color's type label on consume and produce arcs, `show`, which names the token fields (dotted paths such as `owner.name`) a renderer shows for a color, or `beside`, which keeps each local copy of a Fusion place next to its transition (with no side, two neighbor transitions of one choice share one copy, unless the place is `unshared`). Unlike a View, a Decoration belongs to no view and shows in every render. A View that positions nodes places a `beside` copy beside its transition only when the view positions neither that copy nor the place (ADR 0067, ADR 0072). A whole-place position lands on every copy that has no copy entry, and it still anchors a relative position. Stored in the reserved payload (`annotations["petrinet.dsl/v1"].decorations`); never consumed by the parser, engine, or journal.
 _Avoid_: annotation, marker, tag
 
 ### External
