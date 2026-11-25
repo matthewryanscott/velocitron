@@ -7,7 +7,7 @@
  * discover which line belongs to which place.
  */
 
-import {copyKey, type BesidePlacement, type RenderModel} from "./render.js";
+import type {BesidePlacement, RenderModel} from "./render.js";
 
 export const DEFAULT_VIEW = "default";
 // Shared with the Python renderer (ADR 0067). Helvetica's average advance
@@ -196,7 +196,7 @@ export function applyView(model: RenderModel, raw: unknown, viewName: string): s
   for (const [subject, pointValue] of Object.entries(resolved)) {
     const parsed = copyTarget(subject);
     if (parsed === undefined) continue;
-    const lineIndex = model.copyLines.get(copyKey(parsed[0], parsed[1]));
+    const lineIndex = model.copyLines.get(copyLineKey(parsed[0], parsed[1]));
     if (lineIndex === undefined) {
       throw new ViewApplicationError(
         `view ${pyStr(viewName)} positions unknown subject ${pyStr(subject)}`,
@@ -339,6 +339,11 @@ function paint(lines: string[], lineIndex: number, rendered: string): void {
     );
   }
   lines[lineIndex] = posStatementLine(line, rendered);
+}
+
+function copyLineKey(place: string, transition: string): string {
+  // Same key as `copyKey` in render.ts. Kept here so view does not import render.
+  return `${place}\0${transition}`;
 }
 
 function copyTarget(subject: string): readonly [string, string] | undefined {
