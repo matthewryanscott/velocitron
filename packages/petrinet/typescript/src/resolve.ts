@@ -1,4 +1,6 @@
 import {createDefaultCelAdapter} from "@velocitron/cel";
+import type {Net} from "@velocitron/engine";
+import {fusionLayout, type Decorations} from "@velocitron/viz";
 import {
   PETRINET_RESOURCE_LIMITS,
   PetrinetDslError,
@@ -1174,6 +1176,78 @@ function isValidCel(source: string): boolean {
   }
 }
 
+function viewPositionTarget(raw: unknown): readonly [string, string] | undefined {
+  if (!isObject(raw)) return undefined;
+  if (raw.type === "placeCopy") {
+    if (
+      !keysEqual(raw, ["type", "place", "transition"]) ||
+      typeof raw.place !== "string" ||
+      raw.place.length === 0 ||
+      typeof raw.transition !== "string" ||
+      raw.transition.length === 0
+    ) {
+      return undefined;
+    }
+    return ["placeCopy", `place:${raw.place}@transition:${raw.transition}`];
+  }
+  if (
+    (raw.type !== "place" && raw.type !== "transition") ||
+    !keysEqual(raw, ["type", "name"]) ||
+    typeof raw.name !== "string" ||
+    raw.name.length === 0
+  ) {
+    return undefined;
+  }
+  return [raw.type, `${raw.type}:${raw.name}`];
+}
+
+function copyParts(key: string): readonly [string, string] {
+  const body = key.slice("place:".length);
+  const marker = body.indexOf("@transition:");
+  return [body.slice(0, marker), body.slice(marker + "@transition:".length)];
+}
+
+function fusionCopyIds(
+  accepts: ReadonlyMap<string, readonly string[]>,
+  transitionNames: readonly string[],
+  arcs: readonly AnyObject[],
+  annotations: ReadonlyMap<string, ReadonlyMap<string, Fact<JsonValue>>>,
+  decorations: ReadonlyMap<string, ReadonlyMap<string, Fact<JsonValue>>>,
+): ReadonlyMap<string, string> {
+  const nodes: Record<string, {beside: true; besideSide: string | null}> = {};
+  for (const [subject, facts] of decorations) {
+    const beside = facts.get("beside");
+    if (beside === undefined || !subject.startsWith("place:")) continue;
+    const rawBeside: unknown = beside.value;
+    const side = isObject(rawBeside) ? rawBeside.side : undefined;
+    nodes[subject] = {beside: true, besideSide: typeof side === "string" ? side : null};
+  }
+  const places = [...accepts].map(([name, colors]) => {
+    const fusion = annotations.get(JSON.stringify(["place", name]))?.get("fusion");
+    return {
+      name,
+      accepts: colors,
+      ...(fusion?.value === true ? {annotations: {fusion: true}} : {}),
+    };
+  });
+  const net: Net = {
+    name: "place-copies",
+    places,
+    transitions: transitionNames.map((name) => ({name})),
+    arcs: arcs as Net["arcs"],
+  };
+  const layoutDecorations: Decorations = {
+    nodes,
+    arcs: {},
+    quietColors: [],
+    shownFields: {},
+  };
+  const fusion = new Set(
+    places.filter((place) => place.annotations?.fusion === true).map((place) => place.name),
+  );
+  return fusionLayout(net, fusion, layoutDecorations).copies;
+}
+
 /** Resolve closed v1 Contribution IR into canonical net or composition JSON. */
 export function resolveContributionIr(
   ir: ContributionIr | unknown,
@@ -2197,32 +2271,26 @@ export function resolveContributionIr(
 
     if (kind === "view.position") {
       const viewName = target.name;
-      const subject = value.subject;
+      const parsedSubject = viewPositionTarget(value.subject);
       if (
         !keysEqual(target, ["type", "name"]) ||
         target.type !== "view" ||
         typeof viewName !== "string" ||
         viewName.length === 0 ||
         !keysEqual(value, ["subject", "position"]) ||
-        !isObject(subject) ||
-        (subject.type !== "place" && subject.type !== "transition") ||
-        !keysEqual(subject, ["type", "name"]) ||
-        typeof subject.name !== "string" ||
+        parsedSubject === undefined ||
         !isObject(value.position)
       ) {
         throw resolutionError("PN200", "invalid view position contribution", span);
       }
+      const [subjectType, subjectKey] = parsedSubject;
       let position: AnyObject;
       if (keysEqual(value.position, ["from", "delta"])) {
-        const base = value.position.from;
-        if (
-          !isObject(base) ||
-          !keysEqual(base, ["type", "name"]) ||
-          (base.type !== "place" && base.type !== "transition") ||
-          typeof base.name !== "string"
-        ) {
+        const parsedBase = viewPositionTarget(value.position.from);
+        if (parsedBase === undefined) {
           throw resolutionError("PN200", "invalid view position contribution", span);
         }
+        const [baseType, baseKey] = parsedBase;
         let decodedDelta: JsonValue;
         try {
           decodedDelta = untag(value.position.delta);
@@ -2238,8 +2306,13 @@ export function resolveContributionIr(
         ) {
           throw resolutionError("PN200", "invalid view position contribution", span);
         }
-        position = {from: `${base.type}:${base.name}`, delta: {x: decodedDeltaAny.x, y: decodedDeltaAny.y}};
-        relativeBases.push({viewName, baseType: base.type, baseName: base.name, span});
+        position = {from: baseKey, delta: {x: decodedDeltaAny.x, y: decodedDeltaAny.y}};
+        relativeBases.push({
+          viewName,
+          baseType,
+          baseName: baseType === "placeCopy" ? baseKey : baseKey.slice(baseKey.indexOf(":") + 1),
+          span,
+        });
       } else {
         let decodedPosition: JsonValue;
         try {
@@ -2258,8 +2331,7 @@ export function resolveContributionIr(
         }
         position = {x: decodedAny.x, y: decodedAny.y};
       }
-      const subjectKey = `${subject.type}:${subject.name}`;
-      const key = viewSubjectKey(viewName, subject.type);
+      const key = viewSubjectKey(viewName, subjectType);
       let viewPositions = positions.get(key);
       if (viewPositions === undefined) {
         viewPositions = new Map();
@@ -2267,9 +2339,12 @@ export function resolveContributionIr(
       }
       const existing = viewPositions.get(subjectKey);
       if (existing !== undefined && !jsonValuesEqual(existing.value, position)) {
+        const label = subjectType === "placeCopy"
+          ? `place copy (${copyParts(subjectKey)[0]})@[${copyParts(subjectKey)[1]}]`
+          : `${subjectType} ${subjectType === "place" ? `(${subjectKey.slice(subjectKey.indexOf(":") + 1)})` : `[${subjectKey.slice(subjectKey.indexOf(":") + 1)}]`}`;
         throw resolutionError(
           "PN202",
-          `conflicting position facts for ${subject.type} ${subject.type === "place" ? `(${subject.name})` : `[${subject.name}]`} in view ${pythonRepr(viewName)}`,
+          `conflicting position facts for ${label} in view ${pythonRepr(viewName)}`,
           span,
           "remove one declaration or make both positions identical",
           [["first position was declared here", existing.span]],
@@ -2971,8 +3046,69 @@ export function resolveContributionIr(
     validateMetadataTarget(type, name, fact.span, "annotation");
   }
 
+  const needsCopies = [...positions.keys()].some((key) => {
+    const [, subjectType] = JSON.parse(key) as [string, string];
+    return subjectType === "placeCopy";
+  }) || relativeBases.some((base) => base.baseType === "placeCopy");
+  const copyIds = needsCopies
+    ? fusionCopyIds(accepts, transitions, arcs, annotations, decorations)
+    : new Map<string, string>();
+  const rejectCopy = (
+    viewName: string,
+    place: string,
+    transition: string,
+    span: IrSpan,
+    role: string,
+  ): void => {
+    if (!accepts.has(place)) {
+      throw resolutionError(
+        "PN202",
+        `view ${pythonRepr(viewName)} references unknown place ${pythonRepr(place)}; presentation facts cannot declare semantic objects`,
+        span,
+        "declare the place in topology before positioning it",
+      );
+    }
+    if (!transitions.includes(transition)) {
+      throw resolutionError(
+        "PN202",
+        `view ${pythonRepr(viewName)} references unknown transition ${pythonRepr(transition)}; presentation facts cannot declare semantic objects`,
+        span,
+        "declare the transition in topology before positioning it",
+      );
+    }
+    const fusion = annotations.get(metadataKey("place", place))?.get("fusion");
+    if (fusion?.value !== true) {
+      throw resolutionError(
+        "PN202",
+        `view ${pythonRepr(viewName)} ${role} (${place})@[${transition}], but (${place}) is not a fusion place`,
+        span,
+        `annotate (${place}) with \`fusion true\`, or position the place`,
+      );
+    }
+    if (!copyIds.has(`${place}\0${transition}`)) {
+      throw resolutionError(
+        "PN202",
+        `view ${pythonRepr(viewName)} ${role} (${place})@[${transition}], but [${transition}] does not use (${place})`,
+        span,
+        `draw an arc between (${place}) and [${transition}]`,
+      );
+    }
+  };
+  const sharedGroups = new Map<string, {transition: string; position: AnyObject; span: IrSpan}[]>();
   for (const [key, viewPositions] of positions) {
-    const [viewName, subjectType] = JSON.parse(key) as [string, "place" | "transition"];
+    const [viewName, subjectType] = JSON.parse(key) as [string, string];
+    if (subjectType === "placeCopy") {
+      for (const [subjectKey, fact] of viewPositions) {
+        const [place, transition] = copyParts(subjectKey);
+        rejectCopy(viewName, place, transition, fact.span, "positions place copy");
+        const copy = copyIds.get(`${place}\0${transition}`);
+        const groupKey = JSON.stringify([viewName, place, copy]);
+        const group = sharedGroups.get(groupKey) ?? [];
+        group.push({transition, position: fact.value, span: fact.span});
+        sharedGroups.set(groupKey, group);
+      }
+      continue;
+    }
     for (const [subjectKey, fact] of viewPositions) {
       const subjectName = subjectKey.slice(subjectKey.indexOf(":") + 1);
       const known = subjectType === "place" ? accepts.has(subjectName) : transitions.includes(subjectName);
@@ -2996,7 +3132,36 @@ export function resolveContributionIr(
       }
     }
   }
+  for (const [groupKey, entries] of sharedGroups) {
+    if (entries.length < 2) continue;
+    const first = entries[0]!;
+    if (entries.every((entry) => jsonValuesEqual(entry.position, first.position))) continue;
+    const [viewName, place] = JSON.parse(groupKey) as [string, string, string];
+    const labels = entries.map((entry) => `(${place})@[${entry.transition}]`).join(" and ");
+    const last = entries[entries.length - 1]!;
+    throw resolutionError(
+      "PN202",
+      `conflicting position facts for shared place copy ${labels} in view ${pythonRepr(viewName)}`,
+      last.span,
+      "give the shared copy one position",
+      [["first position was declared here", first.span]],
+    );
+  }
   for (const base of relativeBases) {
+    if (base.baseType === "placeCopy") {
+      const [place, transition] = copyParts(base.baseName);
+      rejectCopy(base.viewName, place, transition, base.span, "offsets from place copy");
+      const copies = positions.get(viewSubjectKey(base.viewName, "placeCopy"));
+      if (copies === undefined || !copies.has(base.baseName)) {
+        throw resolutionError(
+          "PN202",
+          `view ${pythonRepr(base.viewName)} relative base (${place})@[${transition}] has no position in that view`,
+          base.span,
+          `position (${place})@[${transition}] in view ${pythonRepr(base.viewName)} before offsetting from it`,
+        );
+      }
+      continue;
+    }
     const baseKnown = base.baseType === "place" ? accepts.has(base.baseName) : transitions.includes(base.baseName);
     if (!baseKnown) {
       const renderedBaseName = TIMER_BIND_IDENTIFIER.test(base.baseName)
@@ -3008,6 +3173,17 @@ export function resolveContributionIr(
         base.span,
         `declare the ${base.baseType} in topology before using it as a relative base`,
       );
+    }
+    if (base.baseType === "place") {
+      const placed = positions.get(viewSubjectKey(base.viewName, "place"));
+      if (placed === undefined || !placed.has(`place:${base.baseName}`)) {
+        throw resolutionError(
+          "PN202",
+          `view ${pythonRepr(base.viewName)} relative base (${base.baseName}) has no place position in that view`,
+          base.span,
+          `position (${base.baseName}) in view ${pythonRepr(base.viewName)}; a bare place base is that place entry's point`,
+        );
+      }
     }
   }
   for (const [key, fact] of routes) {

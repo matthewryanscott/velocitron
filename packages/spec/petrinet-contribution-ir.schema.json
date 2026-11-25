@@ -1549,6 +1549,26 @@
       ],
       "type": "object"
     },
+    "placeCopyTarget": {
+      "additionalProperties": false,
+      "properties": {
+        "place": {
+          "$ref": "#/$defs/name"
+        },
+        "transition": {
+          "$ref": "#/$defs/name"
+        },
+        "type": {
+          "const": "placeCopy"
+        }
+      },
+      "required": [
+        "type",
+        "place",
+        "transition"
+      ],
+      "type": "object"
+    },
     "placePortContribution": {
       "properties": {
         "kind": {
@@ -1748,7 +1768,7 @@
       "type": "object"
     },
     "relativePosition": {
-      "$comment": "Authored relative view position: the rendered subject is offset from 'from' by 'delta'. The resolver resolves relative chains at render time (ADR 0024); it only validates shape and target references here.",
+      "$comment": "Authored relative view position: the rendered subject is offset from 'from' by 'delta'. The resolver checks shape and target references here, requires a place position for a bare place base and a copy position for a place-copy base, and resolves the chain at render time (ADR 0024).",
       "additionalProperties": false,
       "properties": {
         "delta": {
@@ -1758,6 +1778,9 @@
           "oneOf": [
             {
               "$ref": "#/$defs/placeTarget"
+            },
+            {
+              "$ref": "#/$defs/placeCopyTarget"
             },
             {
               "$ref": "#/$defs/transitionTarget"
@@ -2381,6 +2404,9 @@
       "oneOf": [
         {
           "$ref": "#/$defs/placeTarget"
+        },
+        {
+          "$ref": "#/$defs/placeCopyTarget"
         },
         {
           "$ref": "#/$defs/transitionTarget"

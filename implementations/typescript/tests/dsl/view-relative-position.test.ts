@@ -13,6 +13,15 @@ const RELATIVE_NET = [
   "",
 ].join("\n");
 
+const POSITIONED_RELATIVE_NET = [
+  "net laid_out",
+  "(origin)",
+  "(work)",
+  'view board position (origin) at {"x": 0, "y": 0}',
+  'view board position (work) relative (origin) + {"x": 10, "y": 20}',
+  "",
+].join("\n");
+
 const ABSOLUTE_NET = [
   "net laid_out",
   "(origin)",
@@ -73,9 +82,9 @@ describe("view position relative fact", () => {
   });
 
   it("resolves to the from-string payload shape owned by the compiler", () => {
-    // given: the same relative net
+    // given: a relative fact whose bare place base has a place position
     // when: compiling through the full pipeline
-    const compiled = compilePetrinetText(RELATIVE_NET, "board.petrinet");
+    const compiled = compilePetrinetText(POSITIONED_RELATIVE_NET, "board.petrinet");
 
     // then: the canonical payload entry is resolved (from is a kind:name string)
     const payload = (compiled.document.annotations as Record<string, Record<string, any>>)[

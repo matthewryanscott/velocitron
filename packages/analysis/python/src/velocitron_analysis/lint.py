@@ -65,6 +65,11 @@ RULE_READ_ONLY_PRODUCER = "read-only-producer"
 # (ADR 0067).
 RULE_FUSION_PLACE_POSITION = "fusion-place-position"
 
+# Stable rule id: a whole-place position that every drawn copy of the place
+# overrides with its own `(P)@[T]` position. The place entry no longer lands
+# on a copy. It still anchors `relative (P)`.
+RULE_PLACE_POSITION_OVERRIDDEN = "place-position-overridden"
+
 # Stable rule id: a whole-place ``position`` on a fusion place that has
 # ``beside``. The copies are placed beside their transitions, so the
 # position does not land on them. It still anchors ``relative (P)``.
@@ -361,6 +366,17 @@ def _is_fusion_place(annotations: Mapping[str, Any] | None) -> bool:
     return bool(annotations and annotations.get("fusion"))
 
 
+def _copy_target(subject: str) -> tuple[str, str] | None:
+    """The place and transition of a ``place:P@transition:T`` position key."""
+    marker = "@transition:"
+    if not subject.startswith("place:") or marker not in subject:
+        return None
+    place, transition = subject.removeprefix("place:").split(marker, 1)
+    if not place or not transition:
+        return None
+    return place, transition
+
+
 def _fusion_position_findings(net: Net) -> list[LintFinding]:
     """Whole-place positions that pin every copy of a fusion place at once."""
     annotations = net.annotations or {}
@@ -408,10 +424,37 @@ def _fusion_position_findings(net: Net) -> list[LintFinding]:
         if (view_name, name) in reported:
             continue
         reported.add((view_name, name))
+        view = cast("Mapping[str, Any]", views[view_name])
+        view_positions = cast("Mapping[str, Any]", view.get("positions", {}))
+        positioned_copies: set[str] = set()
+        for subject in view_positions:
+            parsed = _copy_target(str(subject))
+            if parsed is None or parsed[0] != name:
+                continue
+            copy = layout.copies.get((name, parsed[1]))
+            if copy is not None:
+                positioned_copies.add(copy)
+        copies = drawn.get(name, set())
+        suppressed = suppressed_rules(fusion[name].annotations)
+        if copies and copies <= positioned_copies:
+            if RULE_PLACE_POSITION_OVERRIDDEN in suppressed:
+                continue
+            findings.append(
+                LintFinding(
+                    rule=RULE_PLACE_POSITION_OVERRIDDEN,
+                    transition="",
+                    place=name,
+                    view=view_name,
+                    message=(
+                        f"view {view_name!r} positions fusion place {name!r}, and "
+                        "every drawn copy overrides that position"
+                    ),
+                )
+            )
+            continue
         decoration = decorations.nodes.get(f"place:{name}")
         has_beside = decoration is not None and decoration.beside
         count = len(drawn.get(name, ()))
-        suppressed = suppressed_rules(fusion[name].annotations)
         if has_beside and count >= 1:
             if RULE_BESIDE_POSITION_SHADOWED in suppressed:
                 continue
@@ -516,6 +559,7 @@ __all__ = [
     "RULE_CONSUME_WITHOUT_PRODUCE",
     "RULE_CORRELATE_FREE_NAME",
     "RULE_FUSION_PLACE_POSITION",
+    "RULE_PLACE_POSITION_OVERRIDDEN",
     "RULE_PREDICATE_NAMES_COLOR_OR_PLACE",
     "RULE_READ_ONLY_PRODUCER",
     "LintFinding",

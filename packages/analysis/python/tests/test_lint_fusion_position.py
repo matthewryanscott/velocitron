@@ -5,6 +5,7 @@ from __future__ import annotations
 from velocitron_analysis import (
     RULE_BESIDE_POSITION_SHADOWED,
     RULE_FUSION_PLACE_POSITION,
+    RULE_PLACE_POSITION_OVERRIDDEN,
     LintFinding,
     lint_net,
 )
@@ -250,6 +251,24 @@ def test_a_shared_beside_copy_is_shadowed_rather_than_stacked() -> None:
     # when/then: one drawn copy is not a stack, and beside still shadows the position
     findings = lint_net(net)
     assert [finding.rule for finding in findings] == [RULE_BESIDE_POSITION_SHADOWED]
+
+
+def test_every_copy_position_overrides_the_place_entry() -> None:
+    # given: a view that positions the place and each drawn copy
+    net = _with_view(
+        _lock(),
+        {
+            "place:lock": {"x": 0, "y": 0},
+            "place:lock@transition:acquire": {"x": 10, "y": 0},
+            "place:lock@transition:release": {"x": 20, "y": 0},
+        },
+    )
+
+    # when/then: the place entry is flagged as overridden, not as a stack
+    findings = lint_net(net)
+    assert [finding.rule for finding in findings] == [RULE_PLACE_POSITION_OVERRIDDEN]
+    assert findings[0].place == "lock"
+    assert "overrides" in findings[0].message
 
 
 def test_invalid_decorations_do_not_raise() -> None:

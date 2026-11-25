@@ -53,7 +53,9 @@ from velocitron_viz import (
 _REPO_ROOT = Path(__file__).parents[3]
 _CORPUS_ROOT = _REPO_ROOT / "packages" / "spec" / "conformance" / "petrinet"
 _MANIFEST_PATH = _CORPUS_ROOT / "manifest.json"
-_IR_SCHEMA_PATH = _REPO_ROOT / "packages" / "spec" / "petrinet-contribution-ir.schema.json"
+_IR_SCHEMA_PATH = (
+    _REPO_ROOT / "packages" / "spec" / "petrinet-contribution-ir.schema.json"
+)
 
 
 def _corpus_document(relative: str) -> dict[str, Any]:
@@ -107,8 +109,8 @@ def test_manifest_pins_format_version_and_case_counts() -> None:
     # when/then: identity and case counts match the conformance contract
     assert _MANIFEST["format"] == "velocitron.petrinet/conformance-corpus"
     assert _MANIFEST["version"] == 1
-    assert len(_VALID_CASES) == 40
-    assert len(_INVALID_CASES) == 111
+    assert len(_VALID_CASES) == 41
+    assert len(_INVALID_CASES) == 116
 
 
 @pytest.mark.parametrize(("case_id", "valid"), _VALID_CASES)
@@ -388,7 +390,9 @@ def test_beside_pinned_views_place_copies_and_keep_the_place_anchor() -> None:
     )
 
     def node(dot: str, name: str) -> str:
-        matches = [line for line in dot.splitlines() if line.startswith(f'    "{name}" [')]
+        matches = [
+            line for line in dot.splitlines() if line.startswith(f'    "{name}" [')
+        ]
         assert len(matches) == 1, (name, matches)
         return matches[0]
 
@@ -2125,7 +2129,8 @@ view window position (out) relative (ghost) + {"x": 1, "y": 0}
         ),
         (
             {"from": "ghost", "delta": {"x": 1, "y": 0}},
-            "must use from: place:<name> or transition:<name>",
+            "must use from: place:<name>, "
+            "place:<name>@transition:<name>, or transition:<name>",
         ),
         (
             {"from": "place:request_in", "delta": {"x": 1}},
@@ -2331,9 +2336,7 @@ def _write_json_composition_tree(tmp_path: Path) -> Path:
     composed = deepcopy(_READING_HOUR_COMPOSITION_DOC)
     for item in composed["nets"]:
         item["ref"] = item["ref"].replace(".petrinet", ".json")
-    (tmp_path / "reading_hour.json").write_text(
-        json.dumps(composed), encoding="utf-8"
-    )
+    (tmp_path / "reading_hour.json").write_text(json.dumps(composed), encoding="utf-8")
     # and: the corpus net documents under their legacy reference names
     for name, art in [
         ("reading_cadence", _CADENCE_NET),

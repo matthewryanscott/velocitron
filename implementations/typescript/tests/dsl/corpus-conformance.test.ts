@@ -200,11 +200,11 @@ describe("SIM-06 conformance manifest coverage", () => {
       format: "velocitron.petrinet/conformance-corpus",
       version: 1,
     });
-    expect(validCases).toHaveLength(40);
-    expect(invalidCases).toHaveLength(111);
-    expect(sourceInvalidCases).toHaveLength(90);
+    expect(validCases).toHaveLength(41);
+    expect(invalidCases).toHaveLength(116);
+    expect(sourceInvalidCases).toHaveLength(95);
     expect(resolvedNetCases).toHaveLength(21);
-    expect(compilerDiagnosticCases).toHaveLength(81);
+    expect(compilerDiagnosticCases).toHaveLength(86);
     expect(compositionLoaderCases).toHaveLength(9);
   });
 

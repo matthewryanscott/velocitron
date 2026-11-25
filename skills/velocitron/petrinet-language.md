@@ -552,17 +552,27 @@ decorate color Color show JsonString ...
 ```
 
 `MetadataTarget` is `net`, `(Place)`, `[Transition]`, or `@Handle`.
-`ViewTarget` is only `(Place)` or `[Transition]`; views cannot position the
-document or an arc. A `relative` position names two targets: the subject it
-positions and the base it offsets from; the delta is added to the base's
-rendered position. The base may be any positionable target of either kind.
-Relative entries never resolve into the stored payload: they lower verbatim
-(positions stay `{"from", "delta"}` facts), and the resolver only checks shape
-and that the base names a declared place or transition. Applying a view
-resolves relative entries at render time against the other positions in the
-same view — chains resolve in dependency order, a base that carries no
-position in that view is rejected, and a relative chain that never becomes
-grounded is rejected. Relative entries are inert at compile time.
+`ViewTarget` is `(Place)`, `(Place)@[Transition]`, or `[Transition]`; views
+cannot position the document or an arc. `(Place)@[Transition]` names one
+drawn copy of a fusion place at that transition (ADR 0068). The place must be annotated
+`fusion true`, and the transition must use it. Two targets that draw the same
+shared copy (ADR 0035: neighbor transitions, `beside` with no side) must carry
+the same position; equal positions are idempotent and different ones conflict.
+The stored key is `place:<place>@transition:<transition>`. The entry is
+stored on the view. A renderer does not yet place the copy from that entry.
+A `relative`
+position names two targets: the subject it positions and the base it offsets
+from; the delta is added to the base's rendered position. The base may be any
+positionable target. Relative entries never resolve into the stored payload:
+they lower verbatim (positions stay `{"from", "delta"}` facts). The resolver
+checks shape and that each target names a declared place or transition. A bare
+`(Place)` base is that place entry's point, so the view must position the
+place. A `(Place)@[Transition]` base must itself be positioned in the view. A
+transition base is only checked as declared; applying the view rejects one
+that carries no position. Applying a view resolves relative entries at render
+time against the other positions in the same view — chains resolve in
+dependency order, a base that carries no position in that view is rejected,
+and a relative chain that never becomes grounded is rejected.
 `splines` picks the Graphviz edge style a renderer uses when it applies the
 view; without it the style is `ortho`. `detail` picks how much behavior the
 labels show when the view applies: `full` shows every expression whole,
@@ -637,7 +647,8 @@ decorations?: { Subject: { highlight?: { label?: String },
                                     show?: [FieldPath, ...] } } }
 ```
 
-A decoration `Subject` is `place:<name>`, `transition:<name>`, or
+A position `Target` is `place:<name>`, `transition:<name>`, or
+`place:<name>@transition:<name>` for one drawn copy. A decoration `Subject` is `place:<name>`, `transition:<name>`, or
 `arc:<handle>`; a place subject carries no `summary`, and only a place subject
 carries `beside`. A color subject carries at least one of `quiet` and `show`;
 `show` keeps the source order of its field paths. The `decorations` member

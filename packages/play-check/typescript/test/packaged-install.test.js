@@ -17,6 +17,7 @@ const siblings = [
   ["@velocitron/dsl", resolve(repoPackages, "dsl/typescript")],
   ["@velocitron/engine", resolve(repoPackages, "engine/typescript")],
   ["@velocitron/merge", resolve(repoPackages, "merge/typescript")],
+  ["@velocitron/viz", resolve(repoPackages, "viz/typescript")],
 ];
 
 const checkSource = `
