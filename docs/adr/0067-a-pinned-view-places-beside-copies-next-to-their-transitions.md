@@ -99,9 +99,9 @@ lands on that one copy.
 - Python and TypeScript `apply_view` / `applyView` move together, per ADR
   0025 Decision 5. The render model records where each `beside` copy sits;
   applying the view writes the point. It does not parse the DOT text.
-- The language accepts a per-copy `(P)@[T]` position. Applying that
-  position in the drawing is a later change; until then a view that names
-  one still places `beside` copies by ADR 0067.
+- ADR 0068 accepts a per-copy `(P)@[T]` position. Applying that position
+  in the drawing is a later change; until then a view that names one still
+  places `beside` copies by this record.
 - The beside conformance source has a pinned view and a `lanes_lock` view
   that also positions the fusion place.
 - `velocitron validate` prints the warnings and still exits 0. For a

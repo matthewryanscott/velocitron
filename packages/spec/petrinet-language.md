@@ -553,8 +553,8 @@ decorate color Color show JsonString ...
 
 `MetadataTarget` is `net`, `(Place)`, `[Transition]`, or `@Handle`.
 `ViewTarget` is `(Place)`, `(Place)@[Transition]`, or `[Transition]`; views
-cannot position the document or an arc. `(Place)@[Transition]` positions one
-drawn copy of a fusion place at that transition. The place must be annotated
+cannot position the document or an arc. `(Place)@[Transition]` names one
+drawn copy of a fusion place at that transition (ADR 0068). The place must be annotated
 `fusion true`, and the transition must use it. Two targets that draw the same
 shared copy (ADR 0035: neighbor transitions, `beside` with no side) must carry
 the same position; equal positions are idempotent and different ones conflict.
