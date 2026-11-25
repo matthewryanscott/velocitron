@@ -17,11 +17,11 @@ provide support, or maintain compatibility. Any response is best-effort.
 For potential vulnerabilities, follow [SECURITY.md](SECURITY.md) rather than
 publishing exploit details.
 
-## Mentions on issues and pull requests
+## Commands on issues and pull requests
 
 `.github/workflows/issue-bot.yml` runs when a comment is created on an issue
 or pull request. It forwards the comment only when the repository owner
-writes it and the body contains `@velocitron`. A comment from anyone else
+writes `/vel <request>` at the start of a line. A comment from anyone else
 does not run the forward. A reply, when one is sent, comes from a GitHub
 App.
 

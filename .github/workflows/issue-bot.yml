@@ -1,10 +1,10 @@
 ---
-# Forwards a new issue or pull request comment that contains @velocitron.
+# Forwards a new issue or pull request comment with /vel at line start.
 # Only the repository owner's comment runs a step. A reply, when one is
 # sent, comes from a GitHub App. Set the repository secrets
 # GROK_BOT_WEBHOOK_URL and GROK_BOT_WEBHOOK_SECRET. Details are in
 # CONTRIBUTING.md.
-name: Forward owner mentions
+name: Forward owner commands
 
 "on":
   issue_comment:
@@ -18,17 +18,31 @@ concurrency:
 
 jobs:
   forward:
-    name: Forward an owner mention
+    name: Forward an owner command
     runs-on: ubuntu-latest
     timeout-minutes: 2
     if: >-
       github.event.comment.user.login == 'matthewryanscott' &&
       github.event.comment.author_association == 'OWNER' &&
       github.event.comment.user.type == 'User' &&
-      contains(github.event.comment.body, '@velocitron') &&
+      contains(github.event.comment.body, '/vel') &&
       github.repository == 'matthewryanscott/velocitron'
     steps:
+      - name: Require /vel at the start of a line
+        id: vel
+        run: |
+          set -euo pipefail
+          umask 077
+          body="$(mktemp)"
+          trap 'rm -f "$body"' EXIT
+          jq -r '.comment.body // empty' "$GITHUB_EVENT_PATH" > "$body"
+          if ! grep -E -q '^/vel([[:space:]]|$)' "$body"; then
+            exit 0
+          fi
+          echo "accept=true" >> "$GITHUB_OUTPUT"
+
       - name: Post the comment to the webhook
+        if: steps.vel.outputs.accept == 'true'
         env:
           GROK_BOT_WEBHOOK_URL: ${{ secrets.GROK_BOT_WEBHOOK_URL }}
           GROK_BOT_WEBHOOK_SECRET: ${{ secrets.GROK_BOT_WEBHOOK_SECRET }}
