@@ -371,7 +371,7 @@ def _coord(value: float) -> str:
 
 
 def test_beside_pinned_views_place_copies_and_keep_the_place_anchor() -> None:
-    """A pinned beside view places copies; lanes_lock keeps (switch) as an anchor."""
+    """A pinned beside view places copies; a place position lands on them."""
     # given: the beside corpus net, with lanes and lanes_lock
     net_doc = _corpus_document("20-decoration-beside/beside.net.json")
     net = parse_net(net_doc)
@@ -409,10 +409,12 @@ def test_beside_pinned_views_place_copies_and_keep_the_place_anchor() -> None:
 
     # when: lanes_lock also positions (switch), and (done) is relative to it
     locked = apply_view(model, net_doc, "lanes_lock")
-    # then: beside still places the copies, and done sits at the place anchor
-    assert f'pos="-{_coord(start)},200!"' in node(locked, "switch@start")
-    assert 'pos="40,0!"' not in node(locked, "switch@start")
+    # then: the place point lands on each switch copy, and done uses that anchor
+    assert 'pos="40,0!"' in node(locked, "switch@start")
+    assert 'pos="40,0!"' in node(locked, "switch@finish")
     assert 'pos="120,0!"' in node(locked, "done")
+    # and: budget has no place position, so beside still places it
+    assert f'pos="{_coord(budget)},200!"' in node(locked, "budget@start")
 
 
 # --- probes distilled from test_batch*_parser_resolver.py ---

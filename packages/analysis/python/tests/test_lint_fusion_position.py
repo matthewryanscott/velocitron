@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from velocitron_analysis import (
-    RULE_BESIDE_POSITION_SHADOWED,
     RULE_FUSION_PLACE_POSITION,
     RULE_PLACE_POSITION_OVERRIDDEN,
     LintFinding,
@@ -171,7 +170,7 @@ def test_the_place_can_silence_the_rule() -> None:
     ] == [RULE_FUSION_PLACE_POSITION]
 
 
-def test_beside_shadows_a_whole_place_position() -> None:
+def test_beside_does_not_keep_a_whole_place_position_off_the_copies() -> None:
     # given: the lock is beside its transitions, and the view positions it
     net = _lock()
     shadowed = Net(
@@ -195,12 +194,11 @@ def test_beside_shadows_a_whole_place_position() -> None:
     # when: linting
     findings = lint_net(shadowed)
 
-    # then: the position is shadowed, and the copies are not described as stacked
-    assert [finding.rule for finding in findings] == [RULE_BESIDE_POSITION_SHADOWED]
+    # then: the two copies still share the place point, so the stack is flagged
+    assert [finding.rule for finding in findings] == [RULE_FUSION_PLACE_POSITION]
     assert findings[0].place == "lock"
     assert findings[0].view == "lanes"
-    assert "shadows" in findings[0].message
-    assert "relative (lock)" in findings[0].message
+    assert "stacks every copy" in findings[0].message
 
 
 def test_a_shared_beside_copy_is_shadowed_rather_than_stacked() -> None:
@@ -248,9 +246,9 @@ def test_a_shared_beside_copy_is_shadowed_rather_than_stacked() -> None:
         },
     )
 
-    # when/then: one drawn copy is not a stack, and beside still shadows the position
+    # when/then: one drawn copy takes the place point, so nothing stacks
     findings = lint_net(net)
-    assert [finding.rule for finding in findings] == [RULE_BESIDE_POSITION_SHADOWED]
+    assert findings == []
 
 
 def test_every_copy_position_overrides_the_place_entry() -> None:

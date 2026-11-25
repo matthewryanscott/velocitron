@@ -45,8 +45,9 @@ every net-schema feature (`spec/net-schema.md`, `spec/composition.md`):
   view: a highlight fills a node or thickens an arc in amber, a note adds an
   italic line, a summary replaces expressions at ``summary`` detail, a
   quiet color loses its arc type labels, and ``beside`` keeps each fusion
-  copy of a place next to its transition (ADR 0029). A view that pins the
-  transition places an unpositioned copy there too (ADR 0067). With no side,
+  copy of a place next to its transition (ADR 0029). A view places a copy
+  from its ``place:<P>@transition:<T>`` entry, else from the whole-place
+  entry, else beside its pinned transition (ADR 0072, ADR 0067). With no side,
   two neighbor transitions of one choice share one copy between them (ADR 0035).
 
 Output is markdown-embeddable on request: :class:`RenderStyle` (CLI
@@ -896,6 +897,10 @@ class BesidePlacement:
     between_count: int = 1
 
 
+def _copy_lines() -> dict[tuple[str, str], int]:
+    return {}
+
+
 @dataclass(frozen=True)
 class RenderModel:
     """Structural index of one rendered standalone net (ADR 0024).
@@ -910,7 +915,10 @@ class RenderModel:
     graph defaults, before the body). ``beside_lines`` are the statements
     that keep ``beside`` fusion copies next to their transitions.
     ``beside_placements`` say where each of those copies sits once a view
-    pins its transition (ADR 0067). Line indexes refer to ``dot``.
+    pins its transition (ADR 0067). ``copy_lines`` maps each drawn fusion
+    copy, ``(place, transition)``, to that copy's node line. A shared copy
+    (ADR 0035) is one line under both transitions (ADR 0072). Line indexes
+    refer to ``dot``.
     """
 
     dot: str
@@ -919,6 +927,7 @@ class RenderModel:
     graph_attr_line: int
     beside_lines: tuple[int, ...] = ()
     beside_placements: tuple[BesidePlacement, ...] = ()
+    copy_lines: Mapping[tuple[str, str], int] = field(default_factory=_copy_lines)
 
 
 class _RenderIndex:
@@ -934,10 +943,15 @@ class _RenderIndex:
         self.arc_lines: list[int] = []
         self.beside_lines: list[int] = []
         self.beside_placements: list[BesidePlacement] = []
+        self.copy_lines: dict[tuple[str, str], int] = {}
         self.offset = offset
 
     def record_node(self, key: str, position: int) -> None:
         self.node_lines.setdefault(key, []).append(self.offset + position)
+
+    def record_copy(self, place: str, transition: str, position: int) -> None:
+        """Index one drawn fusion copy. ``position`` is body-relative."""
+        self.copy_lines[(place, transition)] = self.offset + position
 
     def record_arc(self, position: int) -> None:
         self.arc_lines.append(self.offset + position)
@@ -1426,12 +1440,18 @@ def _net_body(
         transition_by_name = {t.name: t for t in net.transitions}
         for (place_name, transition_name), copy in layout.copies.items():
             if copy in drawn_copies:
+                if recorder is not None:
+                    recorder.record_copy(
+                        place_name, transition_name, drawn_copies[copy][0]
+                    )
                 continue
             place = place_by_name[place_name]
             node = _quote(f"{prefix}{copy}")
+            body_line = len(lines)
             if recorder is not None:
-                recorder.record_node(f"place:{place_name}", len(lines))
-            drawn_copies[copy] = (len(lines), place_name)
+                recorder.record_node(f"place:{place_name}", body_line)
+                recorder.record_copy(place_name, transition_name, body_line)
+            drawn_copies[copy] = (body_line, place_name)
             label = member_label(place_name, transition_by_name.get(transition_name))
             widths[copy] = node_width(
                 _measure_place(label, place, _node_decoration(f"place:{place_name}"))
@@ -1547,6 +1567,7 @@ def net_render_model(
         graph_attr_line=graph_attr_line,
         beside_lines=tuple(recorder.beside_lines),
         beside_placements=tuple(recorder.beside_placements),
+        copy_lines=dict(recorder.copy_lines),
     )
 
 

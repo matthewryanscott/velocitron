@@ -44,6 +44,10 @@ can still be `relative` to `(P)`.
 
 A view with no positions stays on `dot` and keeps the rank clusters.
 
+*Amended by ADR 0072. A copy entry places that copy, and a whole-place
+entry places every copy that has no copy entry. `beside` places a copy
+only when neither entry does.*
+
 **Considered options:**
 
 - Keep dropping `beside` (ADR 0029 Decision 4). Rejected: the copies drift,
@@ -94,14 +98,17 @@ lands on that one copy.
   useful as an anchor, and the other stacks the drawing. A suppression
   should name which one it acknowledges.
 
+*Amended by ADR 0072. `beside-position-shadowed` is retired. A whole-place
+position is no longer shadowed: it lands on every copy that has no copy
+entry, and `fusion-place-position` flags that stack whether or not the
+place has `beside`.*
+
 ## Consequences
 
 - Python and TypeScript `apply_view` / `applyView` move together, per ADR
   0025 Decision 5. The render model records where each `beside` copy sits;
   applying the view writes the point. It does not parse the DOT text.
-- ADR 0068 accepts a per-copy `(P)@[T]` position. Applying that position
-  in the drawing is a later change; until then a view that names one still
-  places `beside` copies by this record.
+- ADR 0068 accepts a per-copy `(P)@[T]` position. ADR 0072 draws it.
 - The beside conformance source has a pinned view and a `lanes_lock` view
   that also positions the fusion place.
 - `velocitron validate` prints the warnings and still exits 0. For a

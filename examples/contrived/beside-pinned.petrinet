@@ -1,8 +1,8 @@
 // Two workers share one lock. (lock) is a fusion place, so each transition
 // that uses it gets its own copy, and beside keeps each copy next to it.
-// lanes pins the two lanes and leaves (lock) to beside. lanes_lock also
-// positions (lock): that point anchors relative (lock), and beside still
-// places the copies.
+// lanes pins the two lanes and leaves (lock) to beside. lanes_lock positions
+// each copy. A copy position wins over beside. (marker) sits on the take_a
+// copy.
 net beside_pinned "Two workers share one lock"
 
 (ready_a) -job-> [take_a]
@@ -43,6 +43,9 @@ view lanes_lock position [take_b] relative [take_a] + {"x": 300, "y": 0}
 view lanes_lock position (busy_b) relative (busy_a) + {"x": 300, "y": 0}
 view lanes_lock position [give_b] relative [give_a] + {"x": 300, "y": 0}
 view lanes_lock position (done_b) relative (done_a) + {"x": 300, "y": 0}
-view lanes_lock position (lock) at {"x": 150, "y": 200}
-view lanes_lock position (marker) relative (lock) + {"x": 0, "y": -40}
+view lanes_lock position (lock)@[take_a] at {"x": -80, "y": 300}
+view lanes_lock position (lock)@[give_a] at {"x": -80, "y": 100}
+view lanes_lock position (lock)@[take_b] at {"x": 220, "y": 300}
+view lanes_lock position (lock)@[give_b] at {"x": 220, "y": 100}
+view lanes_lock position (marker) relative (lock)@[take_a] + {"x": 0, "y": 40}
 (marker)

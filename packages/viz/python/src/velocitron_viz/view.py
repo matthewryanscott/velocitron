@@ -235,13 +235,27 @@ def _point(value: object, context: str) -> tuple[float | int, float | int]:
     return point["x"], point["y"]
 
 
+def _copy_target(subject: str) -> tuple[str, str] | None:
+    """The place and transition of a ``place:<P>@transition:<T>`` key."""
+    marker = "@transition:"
+    if not subject.startswith("place:") or marker not in subject:
+        return None
+    place, transition = subject.removeprefix("place:").split(marker, 1)
+    if not place or not transition:
+        return None
+    return place, transition
+
+
 def _validate_subject(subject: str, view_name: str) -> None:
-    """A subject key is ``"<kind>:<name>"`` for kind place or transition."""
+    """A subject key names a place, a transition, or one fusion copy."""
+    if _copy_target(subject) is not None:
+        return
     kind, _, name = subject.partition(":")
     if not name or kind not in ("place", "transition"):
         raise ViewApplicationError(
             f"view {view_name!r} has invalid view subject {subject!r}"
-            " (expected 'place:<name>' or 'transition:<name>')"
+            " (expected 'place:<name>', 'transition:<name>',"
+            " or 'place:<name>@transition:<name>')"
         )
 
 
@@ -372,15 +386,18 @@ def _pin_beside_copies(
     lines: list[str],
     model: "RenderModel",
     resolved: Mapping[str, tuple[float | int, float | int]],
+    pinned: set[int],
 ) -> None:
-    """Pin each ``beside`` copy next to its pinned transition.
+    """Pin each ``beside`` copy that no position entry already placed.
 
-    A whole-place position is not written onto these lines. It stays in
-    ``resolved``, so a relative position can still use it as a base. A
-    shared copy whose two transitions are both pinned sits on the segment
-    between them.
+    A copy entry or a whole-place entry wins (ADR 0072). This pass places
+    only the copies those entries left alone. A shared copy whose two
+    transitions are both pinned sits on the segment between them. The
+    place entry stays in ``resolved``, so ``relative (P)`` can still use it.
     """
     for placement in model.beside_placements:
+        if placement.line in pinned:
+            continue
         anchor = resolved.get(placement.anchor)
         other = resolved.get(placement.also) if placement.also is not None else None
         if placement.also is not None and anchor is not None and other is not None:
@@ -402,6 +419,7 @@ def _pin_beside_copies(
             continue
         rendered = f"{_format_coord(point[0])},{_format_coord(point[1])}!"
         lines[placement.line] = _pos_statement_line(lines[placement.line], rendered)
+        pinned.add(placement.line)
 
 
 def _pos_statement_line(line: str, rendered: str) -> str:
@@ -428,10 +446,12 @@ def apply_view(
     the view's own ``splines`` style. A
     view that positions any node also selects ``layout=neato`` with
     ``inputscale=72``. The ``beside`` rank clusters are removed, because
-    ``neato`` ignores them. Each ``beside`` copy whose transition is pinned
-    is pinned beside that transition, including when the view also positions
-    the place (ADR 0067). The place position still resolves, so another
-    node can be relative to it.
+    ``neato`` ignores them. A fusion copy is placed by the first fact that
+    names it (ADR 0072): its ``place:<P>@transition:<T>`` entry, else the
+    whole-place entry, else the ``beside`` offset from its pinned transition
+    (ADR 0067). A shared copy uses that one agreed point. ``relative (P)``
+    is the place entry. ``relative (P)@[T]`` is the point where that copy
+    is drawn.
     """
     positions, routes = _view_facts(raw, view_name)
     resolved = resolve_positions(view_name, positions)
@@ -446,10 +466,32 @@ def apply_view(
     route_by_arc = _validate_routes(view_name, routes, handles)
 
     lines = model.dot.splitlines()
-    # Beside wins for the drawn copies. The place position stays in
-    # ``resolved`` and is not painted onto those lines.
-    shadowed = {placement.line for placement in model.beside_placements}
+    # Copy entry, then the whole place, then beside (ADR 0072).
+    pinned: set[int] = set()
+    copy_points: dict[int, tuple[float | int, float | int]] = {}
     for subject, point in resolved.items():
+        parsed = _copy_target(subject)
+        if parsed is None:
+            continue
+        line_index = model.copy_lines.get(parsed)
+        if line_index is None:
+            raise ViewApplicationError(
+                f"view {view_name!r} positions unknown subject {subject!r}"
+            )
+        previous = copy_points.get(line_index)
+        if previous is not None and previous != point:
+            raise ViewApplicationError(
+                f"view {view_name!r} gives the shared copy of place"
+                f" {parsed[0]!r} two positions"
+            )
+        copy_points[line_index] = point
+    for line_index, point in copy_points.items():
+        rendered = f"{point[0]},{point[1]}!"
+        lines[line_index] = _pos_statement_line(lines[line_index], rendered)
+        pinned.add(line_index)
+    for subject, point in resolved.items():
+        if _copy_target(subject) is not None:
+            continue
         _validate_subject(subject, view_name)
         line_index_set = model.node_lines.get(subject)
         if not line_index_set:
@@ -458,9 +500,10 @@ def apply_view(
             )
         rendered = f"{point[0]},{point[1]}!"
         for line_index in line_index_set:
-            if line_index in shadowed:
+            if line_index in pinned:
                 continue
             lines[line_index] = _pos_statement_line(lines[line_index], rendered)
+            pinned.add(line_index)
     for arc_index, (handle, points) in route_by_arc.items():
         if arc_index < 0 or arc_index >= len(model.arc_lines):
             raise ViewApplicationError(
@@ -490,9 +533,9 @@ def apply_view(
             *graph_attrs,
         ]
         # Rank clusters are for ``dot``. ``neato`` ignores them, and the
-        # invisible edges would stay as springs. The offsets below place
-        # the copies whose transitions this view pins.
-        _pin_beside_copies(lines, model, resolved)
+        # invisible edges would stay as springs. Beside places a copy the
+        # view did not position.
+        _pin_beside_copies(lines, model, resolved, pinned)
         for line_index in sorted(model.beside_lines, reverse=True):
             del lines[line_index]
     lines[model.graph_attr_line : model.graph_attr_line] = graph_attrs

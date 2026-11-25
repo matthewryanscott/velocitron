@@ -105,6 +105,12 @@ export interface RenderModel {
   readonly graphAttrLine: number;
   readonly besideLines: readonly number[];
   readonly besidePlacements: readonly BesidePlacement[];
+  /** Drawn fusion copy `(place, transition)` → node line. A shared copy is one line under both transitions. */
+  readonly copyLines: ReadonlyMap<string, number>;
+}
+
+export function copyKey(place: string, transition: string): string {
+  return `${place}\0${transition}`;
 }
 
 export interface FusionLayout {
@@ -162,6 +168,7 @@ export function netRenderModel(net: Net, options: NetRenderOptions = {}): Render
     graphAttrLine: header.length,
     besideLines: recorder.besideLines,
     besidePlacements: recorder.besidePlacements,
+    copyLines: recorder.copyLines,
   };
 }
 
@@ -460,6 +467,7 @@ class RenderIndex {
   readonly arcLines: number[] = [];
   readonly besideLines: number[] = [];
   readonly besidePlacements: BesidePlacement[] = [];
+  readonly copyLines = new Map<string, number>();
 
   constructor(private readonly offset: number) {}
 
@@ -467,6 +475,10 @@ class RenderIndex {
     const found = this.nodeLines.get(key);
     if (found === undefined) this.nodeLines.set(key, [this.offset + position]);
     else found.push(this.offset + position);
+  }
+
+  recordCopy(place: string, transition: string, position: number): void {
+    this.copyLines.set(copyKey(place, transition), this.offset + position);
   }
 
   recordArc(position: number): void {
@@ -532,12 +544,19 @@ function netBody(
     const places = new Map(net.places.map((place) => [place.name, place]));
     const transitions = new Map(net.transitions.map((transition) => [transition.name, transition]));
     for (const [key, copy] of layout.copies) {
-      if (drawn.has(copy)) continue;
       const [placeName, transitionName] = key.split("\0");
-      const place = places.get(placeName!);
-      if (place === undefined || placeName === undefined || transitionName === undefined) continue;
-      args.recorder?.recordNode(`place:${placeName}`, lines.length);
-      drawn.set(copy, {line: lines.length, place: placeName});
+      if (placeName === undefined || transitionName === undefined) continue;
+      const already = drawn.get(copy);
+      if (already !== undefined) {
+        args.recorder?.recordCopy(placeName, transitionName, already.line);
+        continue;
+      }
+      const place = places.get(placeName);
+      if (place === undefined) continue;
+      const bodyLine = lines.length;
+      args.recorder?.recordNode(`place:${placeName}`, bodyLine);
+      args.recorder?.recordCopy(placeName, transitionName, bodyLine);
+      drawn.set(copy, {line: bodyLine, place: placeName});
       const label = memberLabel(placeName, transitions.get(transitionName));
       widths.set(copy, nodeWidth(measurePlace(label, place, nodeDecoration(`place:${placeName}`))));
       const attrs = placeAttrs(place, tokensOf(place), {
@@ -913,7 +932,7 @@ function copyId(place: string, transitions: readonly string[]): string {
 }
 
 function pairKey(place: string, transition: string): string {
-  return `${place}\0${transition}`;
+  return copyKey(place, transition);
 }
 
 function edgeKey(left: string, right: string): string {

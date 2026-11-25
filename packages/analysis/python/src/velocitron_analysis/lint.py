@@ -59,21 +59,16 @@ RULE_CORRELATE_FREE_NAME = "correlate-free-name"
 # declared idiom, out of this rule's scope.
 RULE_READ_ONLY_PRODUCER = "read-only-producer"
 
-# Stable rule id: a whole-place ``position`` on a fusion place that the
-# renderer draws as more than one copy. Every copy is pinned to that one
-# point, so ``overlap=scale`` collapses the drawing and Graphviz can fail
-# (ADR 0067).
+# Stable rule id: a whole-place ``position`` that lands on more than one
+# drawn copy. Those copies share one point, so ``overlap=scale`` collapses
+# the drawing and Graphviz can fail (ADR 0067, ADR 0072). A copy entry
+# keeps that copy off the point. ``beside`` does not.
 RULE_FUSION_PLACE_POSITION = "fusion-place-position"
 
 # Stable rule id: a whole-place position that every drawn copy of the place
 # overrides with its own `(P)@[T]` position. The place entry no longer lands
 # on a copy. It still anchors `relative (P)`.
 RULE_PLACE_POSITION_OVERRIDDEN = "place-position-overridden"
-
-# Stable rule id: a whole-place ``position`` on a fusion place that has
-# ``beside``. The copies are placed beside their transitions, so the
-# position does not land on them. It still anchors ``relative (P)``.
-RULE_BESIDE_POSITION_SHADOWED = "beside-position-shadowed"
 
 # CEL macros whose first argument binds a loop variable, not a free name.
 _BINDING_MACROS = frozenset({"all", "exists", "exists_one", "map", "filter"})
@@ -436,7 +431,8 @@ def _fusion_position_findings(net: Net) -> list[LintFinding]:
                 positioned_copies.add(copy)
         copies = drawn.get(name, set())
         suppressed = suppressed_rules(fusion[name].annotations)
-        if copies and copies <= positioned_copies:
+        receiving = copies - positioned_copies
+        if copies and not receiving:
             if RULE_PLACE_POSITION_OVERRIDDEN in suppressed:
                 continue
             findings.append(
@@ -452,28 +448,7 @@ def _fusion_position_findings(net: Net) -> list[LintFinding]:
                 )
             )
             continue
-        decoration = decorations.nodes.get(f"place:{name}")
-        has_beside = decoration is not None and decoration.beside
-        count = len(drawn.get(name, ()))
-        if has_beside and count >= 1:
-            if RULE_BESIDE_POSITION_SHADOWED in suppressed:
-                continue
-            noun = "copy" if count == 1 else "copies"
-            findings.append(
-                LintFinding(
-                    rule=RULE_BESIDE_POSITION_SHADOWED,
-                    transition="",
-                    place=name,
-                    view=view_name,
-                    message=(
-                        f"view {view_name!r} positions fusion place {name!r}; "
-                        f"beside shadows that position for the {count} drawn "
-                        f"{noun}, and the position still anchors relative ({name})"
-                    ),
-                )
-            )
-            continue
-        if count <= 1 or RULE_FUSION_PLACE_POSITION in suppressed:
+        if len(receiving) <= 1 or RULE_FUSION_PLACE_POSITION in suppressed:
             continue
         findings.append(
             LintFinding(
@@ -483,8 +458,8 @@ def _fusion_position_findings(net: Net) -> list[LintFinding]:
                 view=view_name,
                 message=(
                     f"view {view_name!r} positions fusion place {name!r}, which "
-                    f"draws {count} copies; a whole-place position stacks every "
-                    "copy on one point"
+                    f"draws {len(receiving)} copies; a whole-place position "
+                    "stacks every copy on one point"
                 ),
             )
         )
@@ -555,7 +530,6 @@ def lint_net(net: Net) -> list[LintFinding]:
 
 
 __all__ = [
-    "RULE_BESIDE_POSITION_SHADOWED",
     "RULE_CONSUME_WITHOUT_PRODUCE",
     "RULE_CORRELATE_FREE_NAME",
     "RULE_FUSION_PLACE_POSITION",
