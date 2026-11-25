@@ -263,12 +263,12 @@ _Avoid_: journal (an occurrence sequence holds journal records and more), log, r
 Who does a step, in business words: a transition's `actor` fact (`[flip] actor Operator`), else its net's default (`net actor Platform`); for an injection, the owner of the place (`(switch) actor Operator`). A `person`, a `system` or a `record` (a column a Lived place is drawn on), declared in that order for the lifelines. Stored as the annotation key `actor` (and the net's `actors` list); the engine ignores it, the merge carries it. (ADR 0038.)
 _Avoid_: role, participant (that is the PlantUML word), lane, owner (say the place's owner only for injections)
 
-**Hand-off**:
-A step that consumes or reads a token another actor produced. The producer is the step that made the token (or the owner of an injected place); tokens of the starting marking and clock ticks have none. Drawn as an arrow in a Sequence diagram, labeled with what was handed over (the producer's step title): a consumed token's hand-off is a solid arrow that starts an activation; a read one is a dashed arrow. A token in a Lived place is never a hand-off. (ADR 0038, ADR 0039.)
-_Avoid_: message, call, signal
+**Hand-off place**:
+A place a token crosses actors through: one actor produces the token and a different actor consumes it, somewhere in the checked path. A Sequence diagram draws it as a queue. Making the token is an arrow into the queue, and using it is an arrow out, each in the step that does it. A place one actor uses stays hidden, and so does a clock place. A Lived place is a column, not a queue. The caption is the place's description, or `(place_id)`. The queue sits beside the actor that first produces into it. (ADR 0073.)
+_Avoid_: message, call, signal, lane
 
 **Sequence diagram**:
-The projection of one checked Path onto its Actors: a lifeline per actor and per Lived place column, an arrow per Hand-off and per write into or read from a column, an actor's own titled steps as notes, ticks as delays, `###` headings as groups and other headings as dividers. A reduced view of the occurrence sequence, not a separate model; PlantUML is its rendering. Asked for with `show sequence [only]`. (ADR 0038, ADR 0039.)
+The projection of one checked Path onto its Actors: a lifeline per actor, per Hand-off place and per Lived place column, an arrow where a token moves, an actor's own titled steps that draw no arrow as notes, ticks as delays, `###` headings as groups and other headings as dividers. A step's title appears once, on its first arrow. A reduced view of the occurrence sequence, not a separate model; PlantUML is its rendering. Asked for with `show sequence [only]`. (ADR 0038, ADR 0039, ADR 0073.)
 _Avoid_: swimlane, storyboard, interaction diagram
 
 **Lived place**:

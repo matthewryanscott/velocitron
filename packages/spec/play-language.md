@@ -48,13 +48,16 @@ only where a firing's output data comes from.
 - An **Actor** is who does a step, in business words: a transition's
   `actor`, or for an injection the `actor` (owner) of its place
   ([`petrinet-language.md`](./petrinet-language.md), "Actor facts").
-- A **Hand-off** is a step that uses a token another actor produced.
+- A **Hand-off place** is a place a token crosses actors through: one actor
+  produces the token and a different actor consumes it. The sequence diagram
+  draws it as a queue. A place one actor uses stays hidden.
 - A **Lived place** is a place drawn as a column of its own: a record that
   stays, such as a branch home or a slip on a shelf
   ([`petrinet-language.md`](./petrinet-language.md), "Lived places").
 - A **Sequence diagram** is the projection of one checked path onto its
-  actors and columns: an arrow per hand-off and per write into or read from
-  a column, and a note for an actor's own steps.
+  actors, hand-off places and columns: an arrow into or out of a hand-off
+  place, an arrow per write into or read from a column, and a note for an
+  actor's own steps that draw no arrow.
 
 ## Source text
 
@@ -572,7 +575,7 @@ fence, under `## Sequence` for `beside`.
 A sequence diagram is a reduced view of a checked path. It draws no
 structure of its own: every arrow is a fact of the path's firings, and every
 label comes from the play or the net
-([ADR 0038], [ADR 0039]).
+([ADR 0038], [ADR 0039], [ADR 0073]).
 
 **Actors.** A firing belongs to its transition's `actor`; without one, to
 the net's default actor (`net actor`); without that, to the alias of a
@@ -581,19 +584,21 @@ place's owner (`(p) actor Name`), or to the lifeline `Outside` when the
 place has no owner. A `advance` belongs to no one, but the firings it
 matures belong to their transitions' actors: each draws after the advance's
 delay marker, as its transition's own firing, and its outward messages —
-the writes and the hand-offs into it — are marked `matured` (see `--format
-json` below). A matured firing's label is its transition's label (see
-Labels) with the suffix `(on time)`, so the reader sees the clock did it;
-without an authored label it draws a bare arrow like any unlabeled firing.
-The clock's read arc draws no hand-off (Markers).
+the writes and the arrows into and out of a hand-off place — are marked
+`matured` (see `--format json` below). A matured firing's label is its
+transition's summary, else its description, with the suffix `(on time)`.
+It is not the `advance` step's title. Without that authored label it draws
+a bare arrow like any unlabeled firing. The clock's read arc draws no
+arrow (Markers).
 
 **Lived places.** A place with a `lives` fact is drawn on a column: the
 fixed name, or the string its CEL computes from the token (a failing
 expression falls back to the place's label). A step that writes into a
 lived place (a firing that produces into it, or an `inject` or `update`
 after the path's first firing) draws a solid arrow from its actor into the
-column, labeled with the step's label; several tokens into one column are
-one arrow. A firing without an authored label (see Labels) labels its write
+column, labeled with the step's label when that arrow is the step's first,
+and with the token's colour otherwise (Labels); several tokens into one
+column are one arrow. A firing without an authored label (see Labels) labels its write
 with the written place's description, else draws the arrow with no text;
 never with the transition's name. A step that reads or consumes a token of
 a lived place draws a dashed arrow from the column to its actor, labeled
@@ -605,48 +610,63 @@ without one, only the read (the value it saw). An `inject` or `update`
 before the first firing sets up the starting state and draws nothing; the
 first read shows the value.
 
-**Hand-offs.** Every other token remembers the step that produced it: a
-firing, or an injection by the place's owner. Tokens of the starting
-marking and tokens a `advance` writes have no producer; so do tokens an
-untitled `inject` or `update` into a place with no owner produces, wherever
-the step sits in the path, and tokens of a clock place. An untitled
-injection into an unowned place draws nothing, and a token it produced is
-no hand-off when another step consumes or reads it. An untitled `update` of
-a clock place draws no hand-off either: its delay marker already says the
-clock moved. A titled inject or update keeps its arrow: the author is
-showing an outside event on purpose. A token that a step
-consumed or read from another actor is a hand-off, drawn as an arrow from
-that actor, labeled with what was handed over: the producer's step title,
-else the hand-off place's read label (as above). Hand-offs from one actor
-are one arrow, one line per producing step. A consumed hand-off is a solid
-arrow; a read one is dashed. So an arrow follows causality, not the order
-of the steps.
+**Hand-off places.** A place is a hand-off place when a token crosses
+actors through it: one actor produces the token and a different actor
+consumes it, somewhere in the path. A place a single actor uses stays
+hidden. A clock place stays hidden, and so does a lived place (it is a
+column, above). The diagram draws a hand-off place as a PlantUML `queue`.
+Its caption is the place's description, or `(place_id)` when the place has
+none. The queue sits beside the actor that first produces a token into it.
+
+A produce into a hand-off place draws a solid arrow from the actor into the
+queue, in the step that produces the token. A consume from it draws a solid
+arrow from the queue to the actor, in the step that consumes the token. A
+token the same actor both produces and consumes draws neither arrow. A
+token with no producer — the starting marking, a token a `advance` writes,
+or a token an untitled `inject` or `update` into a place with no owner
+produces — draws no consume arrow. A produce into a hand-off place still
+draws when nothing later consumes the token. An untitled injection into an
+unowned place draws nothing. An untitled `update` of a clock place draws
+nothing either: its delay marker already says the clock moved. A titled
+inject or update keeps its arrow: the author is showing an outside event
+on purpose. Nothing waits for a later step. The arrow is drawn where the
+token moves, and it does not carry an earlier step's title.
 
 **Activations and notes.** A step starts a new activation when a consumed
-hand-off reaches it, or when the activation before it belongs to another
-actor; otherwise it joins that activation. Solid hand-off arrows come
-first, then, step by step, the dashed arrows, the writes, and the notes.
-There are no arrows from an actor to itself. An actor's own titled step
-that writes to no lived place is a line in a note to the right of the
-actor; notes of one actor in a row join into one. A step without a title
-draws nothing of its own: it still runs and is checked, and its reads,
-writes and hand-offs are still drawn. A titled step whose token is later
-handed over shows as that arrow's label, not also as a note. Consecutive
-writes of one activation into one column fold into one arrow, one line per
-step that has text; a read between them keeps them apart. An activation that starts from a consumed hand-off and draws an arrow
-of its own has an activation bar.
+token arrives from a hand-off place, or when the activation before it
+belongs to another actor; otherwise it joins that activation. Solid arrows
+out of a hand-off place come first, then, step by step, the dashed reads,
+the arrows into a hand-off place, the writes, and the notes. There are no
+arrows from an actor to itself. An actor's own titled step that draws no
+arrow is a line in a note to the right of the actor; notes of one actor in
+a row join into one. A step without a title draws nothing of its own: it
+still runs and is checked, and its reads, writes and hand-off arrows are
+still drawn. Consecutive writes of one activation into one lived column
+fold into one arrow, one line per step that has text; a read between them
+keeps them apart. Arrows into or out of a hand-off place do not fold. An
+activation that starts from a consumed hand-off and draws an arrow of its
+own has an activation bar.
 
 **Labels.** A step's label is its title. Without one, a firing uses its
 transition's `summary` decoration, then its `description`; these three are
-its authored label. A firing without an authored label uses its name, with
-underscores as spaces and the first letter upper case, only in a failure
-note. An injection uses its place's `description`, then its place name in
-the same form.
+its authored label. The label appears once, on the step's first arrow, or
+as a note when the step draws no arrow. The step's other arrows carry the
+token's colour, the type string (`lease`, `job`). A lived write that is
+not the first arrow carries the colour too; a lived write with no step
+label keeps the written place's description, or has no text. A firing
+without an authored label uses its name, with underscores as spaces and
+the first letter upper case, only in a failure note. An injection uses its
+place's `description`, then its place name in the same form, on a lived
+write that has no title; a hand-off arrow of an untitled injection carries
+the token's colour.
 
 **Markers.** A `advance` is a delay, `...1 hour 30 minutes later...`, computed
 from the clock's `now` before and after. An `advance` that gives a clock its first
-value draws nothing. Advances with nothing drawn between them are one delay,
-the longest advance. The firings one `advance` matures draw after its delay
+value draws nothing. Advances with nothing drawn between them are one delay.
+Back-to-back moves of one clock show the total time that passed, so
+`advance` 0, then 29, then 30 reads `30 seconds later`. Moves that do not
+continue that clock reading show the longest, so two clocks advanced an
+hour at one moment read `1 hour later` once. The firings one `advance` matures draw after its delay
 marker (Actors); with them drawn, the advance is no longer folded into the
 next one. A `### heading` line in a step's prose opens a group
 (`group First hold`) before the step; it closes at the next heading or
@@ -660,19 +680,22 @@ actor, or across all lifelines for an `expect` or a `advance`. It holds the
 step's label, the diagnostic code and message, and the diagnostic's first
 detail line.
 
-**Lifelines.** One per actor or column that the diagram uses: first the
-play's `person`, `system` and `record` lines, then the net's
-(`annotations.actors`), then the others in order of first appearance. A
-`box` puts its members together at the place of the first one. A person is
-drawn as a PlantUML `actor`, a record as a `database`, and any other
-lifeline as a `participant`.
+**Lifelines.** One per actor, hand-off place or column that the diagram
+uses: first the play's `person`, `system` and `record` lines, then the
+net's (`annotations.actors`), then the others in order of first appearance.
+Each hand-off place is then seated immediately after the actor that first
+produces a token into it. A `box` puts its members together at the place of
+the first one. A person is drawn as a PlantUML `actor`, a record as a
+`database`, a hand-off place as a `queue`, and any other lifeline as a
+`participant`.
 
 **PlantUML.** The output starts with `skinparam backgroundColor #FEFEFE` and
 pins the text, line and box colors of participants, actors, databases,
 notes, boxes, groups, dividers and delays, so that it reads on a dark page
 too. It has the play's title (`title …`) and hides the footbox.
 `--format json` emits the same view: `play`, `title`, `path`, `status`,
-`lifelines` (`name`, `kind`), `boxes` (`title`, `lifelines`) and `events`,
+`lifelines` (`name`, `kind` — `person`, `system`, `record` or `queue`),
+`boxes` (`title`, `lifelines`) and `events`,
 each a `message` (`from`, `to`, `label`, `dashed`, `line`, and `matured: true`
 when the firing that drew it was the clock's), a `note` (`actor`, `lines`,
 `line`), an `activate` or `deactivate` (`actor`), a `group` (`text`) or
@@ -720,5 +743,6 @@ out). [ADR 0060]
 [ADR 0033]: https://github.com/matthewryanscott/velocitron/blob/main/docs/adr/0033-walkthrough-steps-draw-a-scope-as-twin-graphs.md
 [ADR 0038]: https://github.com/matthewryanscott/velocitron/blob/main/docs/adr/0038-sequence-diagrams-project-plays-onto-actors.md
 [ADR 0039]: https://github.com/matthewryanscott/velocitron/blob/main/docs/adr/0039-sequence-diagrams-draw-lived-places-as-columns.md
+[ADR 0073]: https://github.com/matthewryanscott/velocitron/blob/main/docs/adr/0073-hand-off-places-are-sequence-lifelines.md
 [ADR 0059]: https://github.com/matthewryanscott/velocitron/blob/main/docs/adr/0059-velocitron-spells-its-model-words-the-way-the-petri-net-books-do.md
 [ADR 0060]: https://github.com/matthewryanscott/velocitron/blob/main/docs/adr/0060-advance-is-one-seam-and-tick-is-deleted.md
