@@ -26,6 +26,7 @@ from .diagnostics import (
     SourcePosition,
     SourceSpan,
 )
+
 # TODO: this lowerer vendors a second copy of the ANTLR parser that
 # packages/grammar already generates. Layer lint forbids importing
 # velocitron_grammar.generated, and grammar's public parse_petrinet returns
@@ -513,6 +514,7 @@ class _LoweringVisitor(VelocitronPetriNetVisitor):
             VelocitronPetriNetParser.ViewRouteContext,
             VelocitronPetriNetParser.ViewSplinesContext,
             VelocitronPetriNetParser.ViewDetailContext,
+            VelocitronPetriNetParser.ViewFusionContext,
             VelocitronPetriNetParser.DecorationContext,
             VelocitronPetriNetParser.ExtensionsContext,
             VelocitronPetriNetParser.DomainDeclarationContext,
@@ -1153,10 +1155,18 @@ class _LoweringVisitor(VelocitronPetriNetVisitor):
     def _view_target(target: Any) -> dict[str, str]:
         place = target.place()
         if place is not None:
-            return {"type": "place", "name": _decode_name(place.name().getText())}
+            place_name = _decode_name(place.name().getText())
+            copy = target.transition()
+            if copy is not None:
+                return {
+                    "type": "placeCopy",
+                    "place": place_name,
+                    "transition": _decode_name(copy.name().getText()),
+                }
+            return {"type": "place", "name": place_name}
         transition = target.transition()
         if transition is None:
-            raise ValueError("view target must be a place or transition")
+            raise ValueError("view target must be a place, place copy, or transition")
         return {
             "type": "transition",
             "name": _decode_name(transition.name().getText()),
@@ -1213,6 +1223,21 @@ class _LoweringVisitor(VelocitronPetriNetVisitor):
 
     def visitViewDetail(self, ctx: Any) -> None:
         self._view_style(ctx, "detail", VIEW_DETAILS)
+
+    def visitViewFusion(self, ctx: Any) -> None:
+        # Kept apart from view position and style so a later per-copy target
+        # can land in those rules without touching this one.
+        mode = "single" if ctx.SINGLE() is not None else "copies"
+        self._contribution(
+            kind="view.fusion",
+            target={"type": "view", "name": _decode_name(ctx.name().getText())},
+            value={
+                "place": _decode_name(ctx.place().name().getText()),
+                "mode": mode,
+            },
+            start=ctx.start.start,
+            end=ctx.stop.stop + 1,
+        )
 
     def visitDecoration(self, ctx: Any) -> None:
         if ctx.COLOR_KEYWORD() is not None:
@@ -1280,10 +1305,20 @@ class _LoweringVisitor(VelocitronPetriNetVisitor):
                     if ctx.RIGHT() is not None
                     else None
                 )
-                kind, value = (
-                    "decoration.beside",
-                    {} if side is None else {"side": side},
-                )
+                beside_value: dict[str, Any] = {}
+                if side is not None:
+                    beside_value["side"] = side
+                if ctx.UNSHARED() is not None:
+                    beside_value["share"] = False
+                kind, value = "decoration.beside", beside_value
+            elif ctx.SINGLE() is not None:
+                if target["type"] != "place":
+                    self._semantic_error(
+                        "single decorations apply to fusion places; "
+                        f"{target_ctx.getText()} has no fused drawing to collapse",
+                        ctx,
+                    )
+                kind, value = "decoration.single", {}
             else:
                 if target["type"] == "place":
                     self._semantic_error(

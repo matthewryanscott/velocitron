@@ -28,7 +28,15 @@ from dataclasses import dataclass
 from typing import Any, Literal, cast
 
 from velocitron_cel import load_celpy
-from velocitron_engine import Net, Transition
+from velocitron_engine import Net, Place, Transition
+from velocitron_viz import (
+    Decorations,
+    ViewApplicationError,
+    fusion_layout,
+    fusion_modes_of,
+    read_decorations,
+    resolve_fusion_mode,
+)
 
 # Stable rule id: a transition with >=1 consume-mode arc and zero produce
 # arcs. Read- and inhibit-mode arcs are not outputs and do not exempt a
@@ -58,6 +66,25 @@ RULE_CORRELATE_FREE_NAME = "correlate-free-name"
 # declared idiom, out of this rule's scope.
 RULE_READ_ONLY_PRODUCER = "read-only-producer"
 
+# Stable rule id: a whole-place ``position`` that lands on more than one
+# drawn copy. Those copies share one point, so ``overlap=scale`` collapses
+# the drawing and Graphviz can fail (ADR 0067, ADR 0072). A copy entry
+# keeps that copy off the point. ``beside`` does not.
+RULE_FUSION_PLACE_POSITION = "fusion-place-position"
+
+# A `(P)@[T]` position on a fusion place drawn as one node. The place has
+# one position, so the copy fact does not apply (ADR 0071, ADR 0072).
+RULE_SINGLE_COPY_POSITION = "single-copy-position"
+
+# Stable rule id: a whole-place position that every drawn copy of the place
+# overrides with its own `(P)@[T]` position. The place entry no longer lands
+# on a copy. It still anchors `relative (P)`.
+RULE_PLACE_POSITION_OVERRIDDEN = "place-position-overridden"
+
+# Stable rule id: ``beside left unshared`` or ``beside right unshared``.
+# A fixed side already never shares a copy (ADR 0035), so ``unshared``
+# changes nothing (ADR 0070). The net is still valid.
+RULE_BESIDE_UNSHARED_REDUNDANT = "beside-unshared-redundant"
 # CEL macros whose first argument binds a loop variable, not a free name.
 _BINDING_MACROS = frozenset({"all", "exists", "exists_one", "map", "filter"})
 
@@ -67,16 +94,23 @@ _CEL_TYPE_NAMES = frozenset(
     | {"string", "type", "uint"}
 )
 
+
 @dataclass(frozen=True)
 class LintFinding:
     """A single advisory lint finding: a stable rule id, the flagged
-    transition's name, and a human-readable message."""
+    transition's name, and a human-readable message.
+
+    A place rule leaves ``transition`` empty and sets ``place`` and
+    ``view`` instead.
+    """
 
     rule: str
     transition: str
     message: str
     arc: int | None = None  # index in net.arcs of the flagged arc, if any
     inscription: Literal["predicate", "correlate"] | None = None  # flagged CEL
+    place: str | None = None  # fusion place a view positions as one point
+    view: str | None = None  # the view that carries that position
 
 
 def suppressed_rules(annotations: Mapping[str, Any] | None) -> list[str]:
@@ -338,13 +372,224 @@ def _read_only_producer_finding(net: Net, transition: str) -> LintFinding | None
     )
 
 
+def _is_fusion_place(annotations: Mapping[str, Any] | None) -> bool:
+    return bool(annotations and annotations.get("fusion"))
+
+
+def _copy_target(subject: str) -> tuple[str, str] | None:
+    """The place and transition of a ``place:P@transition:T`` position key."""
+    marker = "@transition:"
+    if not subject.startswith("place:") or marker not in subject:
+        return None
+    place, transition = subject.removeprefix("place:").split(marker, 1)
+    if not place or not transition:
+        return None
+    return place, transition
+
+
+def _single_copy_position_findings(
+    views: Mapping[str, Any],
+    fusion: Mapping[str, Place],
+    decorations: Decorations,
+) -> list[LintFinding]:
+    """Copy positions on a fusion place that this view draws as one node.
+
+    The place has one position, so ``(P)@[T]`` does not apply (ADR 0071,
+    ADR 0072). One finding per view and place.
+    """
+    findings: list[LintFinding] = []
+    for view_name, view_raw in views.items():
+        if not isinstance(view_raw, Mapping):
+            continue
+        view = cast("Mapping[str, Any]", view_raw)
+        modes = fusion_modes_of(view)
+        positions_raw = view.get("positions")
+        if not isinstance(positions_raw, Mapping):
+            continue
+        positions = cast("Mapping[str, Any]", positions_raw)
+        warned: set[str] = set()
+        for subject in positions:
+            parsed = _copy_target(subject)
+            if parsed is None or parsed[0] not in fusion or parsed[0] in warned:
+                continue
+            if resolve_fusion_mode(parsed[0], decorations, modes) != "single":
+                continue
+            warned.add(parsed[0])
+            if RULE_SINGLE_COPY_POSITION in suppressed_rules(
+                fusion[parsed[0]].annotations
+            ):
+                continue
+            findings.append(
+                LintFinding(
+                    rule=RULE_SINGLE_COPY_POSITION,
+                    transition="",
+                    place=parsed[0],
+                    view=view_name,
+                    message=(
+                        f"view {view_name!r} positions a copy of fusion place "
+                        f"{parsed[0]!r}, which is drawn as one node; the copy "
+                        "position does not apply"
+                    ),
+                )
+            )
+    return findings
+
+
+def _fusion_position_findings(net: Net) -> list[LintFinding]:
+    """Whole-place positions that pin every copy of a fusion place at once."""
+    annotations = net.annotations or {}
+    payload_raw = annotations.get("petrinet.dsl/v1")
+    if not isinstance(payload_raw, Mapping):
+        return []
+    payload = cast("Mapping[str, Any]", payload_raw)
+    views_raw = payload.get("views")
+    if not isinstance(views_raw, Mapping):
+        return []
+    views = cast("Mapping[str, Any]", views_raw)
+    fusion = {
+        place.name: place for place in net.places if _is_fusion_place(place.annotations)
+    }
+    if not fusion:
+        return []
+    try:
+        decorations = read_decorations({"annotations": annotations})
+    except ViewApplicationError:
+        return []
+    try:
+        findings = _single_copy_position_findings(views, fusion, decorations)
+    except ViewApplicationError:
+        return []
+    candidates: list[tuple[str, str]] = []
+    for view_name, view_raw in views.items():
+        if not isinstance(view_raw, Mapping):
+            continue
+        view = cast("Mapping[str, Any]", view_raw)
+        positions_raw = view.get("positions")
+        if not isinstance(positions_raw, Mapping):
+            continue
+        positions = cast("Mapping[str, Any]", positions_raw)
+        for subject in positions:
+            if not subject.startswith("place:"):
+                continue
+            name = subject.removeprefix("place:")
+            if name in fusion:
+                candidates.append((view_name, name))
+    if not candidates:
+        return findings
+    reported: set[tuple[str, str]] = set()
+    drawn_by_view: dict[str, dict[str, set[str]]] = {}
+    layouts: dict[str, Any] = {}
+    for view_name, name in candidates:
+        if view_name not in drawn_by_view:
+            view = cast("Mapping[str, Any]", views[view_name])
+            try:
+                modes = fusion_modes_of(view)
+            except ViewApplicationError:
+                return []
+            copy_places = {
+                place_name
+                for place_name in fusion
+                if resolve_fusion_mode(place_name, decorations, modes) == "copies"
+            }
+            layout = fusion_layout(net, copy_places, decorations)
+            drawn: dict[str, set[str]] = {}
+            for (place_name, _transition), copy in layout.copies.items():
+                drawn.setdefault(place_name, set()).add(copy)
+            drawn_by_view[view_name] = drawn
+            layouts[view_name] = layout
+        if (view_name, name) in reported:
+            continue
+        reported.add((view_name, name))
+        view = cast("Mapping[str, Any]", views[view_name])
+        view_positions = cast("Mapping[str, Any]", view.get("positions", {}))
+        layout = layouts[view_name]
+        drawn = drawn_by_view[view_name]
+        positioned_copies: set[str] = set()
+        for subject in view_positions:
+            parsed = _copy_target(str(subject))
+            if parsed is None or parsed[0] != name:
+                continue
+            copy = layout.copies.get((name, parsed[1]))
+            if copy is not None:
+                positioned_copies.add(copy)
+        copies = drawn.get(name, set())
+        suppressed = suppressed_rules(fusion[name].annotations)
+        receiving = copies - positioned_copies
+        if copies and not receiving:
+            if RULE_PLACE_POSITION_OVERRIDDEN in suppressed:
+                continue
+            findings.append(
+                LintFinding(
+                    rule=RULE_PLACE_POSITION_OVERRIDDEN,
+                    transition="",
+                    place=name,
+                    view=view_name,
+                    message=(
+                        f"view {view_name!r} positions fusion place {name!r}, and "
+                        "every drawn copy overrides that position"
+                    ),
+                )
+            )
+            continue
+        if len(receiving) <= 1 or RULE_FUSION_PLACE_POSITION in suppressed:
+            continue
+        findings.append(
+            LintFinding(
+                rule=RULE_FUSION_PLACE_POSITION,
+                transition="",
+                place=name,
+                view=view_name,
+                message=(
+                    f"view {view_name!r} positions fusion place {name!r}, which "
+                    f"draws {len(receiving)} copies; a whole-place position "
+                    "stacks every copy on one point"
+                ),
+            )
+        )
+    return findings
+
+
+def _beside_unshared_findings(net: Net) -> list[LintFinding]:
+    """``beside <side> unshared``: a fixed side already never shares."""
+    annotations = net.annotations or {}
+    try:
+        decorations = read_decorations({"annotations": annotations})
+    except ViewApplicationError:
+        return []
+    findings: list[LintFinding] = []
+    for place in net.places:
+        decoration = decorations.nodes.get(f"place:{place.name}")
+        if (
+            decoration is None
+            or not decoration.beside
+            or decoration.beside_side is None
+            or decoration.beside_share
+        ):
+            continue
+        if RULE_BESIDE_UNSHARED_REDUNDANT in suppressed_rules(place.annotations):
+            continue
+        findings.append(
+            LintFinding(
+                rule=RULE_BESIDE_UNSHARED_REDUNDANT,
+                transition="",
+                place=place.name,
+                message=(
+                    f"beside {decoration.beside_side} unshared on ({place.name}) "
+                    "is redundant; a fixed side never shares a copy"
+                ),
+            )
+        )
+    return findings
+
+
 def lint_net(net: Net) -> list[LintFinding]:
     """Run all lint rules over a parsed net; return advisory findings.
 
     Findings follow transition declaration order; within a transition the
     transition-level rules come first, then arc findings in arc declaration
-    order. An empty list means the net is clean under every (non-suppressed)
-    rule.
+    order. Place findings follow, in view order and then position order,
+    and then ``beside-unshared-redundant`` in place declaration order.
+    An empty list means the net is clean under every (non-suppressed) rule.
     """
     consuming_transitions: set[str] = set()
     producing_transitions: set[str] = set()
@@ -397,12 +642,18 @@ def lint_net(net: Net) -> list[LintFinding]:
                 findings.extend(
                     _correlate_findings(net, transition.name, arc_index, keys)
                 )
+    findings.extend(_fusion_position_findings(net))
+    findings.extend(_beside_unshared_findings(net))
     return findings
 
 
 __all__ = [
+    "RULE_BESIDE_UNSHARED_REDUNDANT",
     "RULE_CONSUME_WITHOUT_PRODUCE",
     "RULE_CORRELATE_FREE_NAME",
+    "RULE_FUSION_PLACE_POSITION",
+    "RULE_PLACE_POSITION_OVERRIDDEN",
+    "RULE_SINGLE_COPY_POSITION",
     "RULE_PREDICATE_NAMES_COLOR_OR_PLACE",
     "RULE_READ_ONLY_PRODUCER",
     "LintFinding",

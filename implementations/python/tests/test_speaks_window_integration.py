@@ -12,6 +12,7 @@ import pytest
 
 from velocitron_petrinet import compile_petrinet_text
 from velocitron_dsl import emit_petrinet
+from velocitron_analysis import RULE_FUSION_PLACE_POSITION
 from velocitron_cli import main as dsl_main
 from velocitron_runtime import Engine
 from velocitron_journal import JsonlJournal
@@ -197,7 +198,14 @@ def test_default_cli_preserves_full_document_and_semantic_only_is_explicit(
     assert dsl_main(["to-json", str(_DSL_PATH), "--semantic-only"]) == 0
     semantic = capsys.readouterr()
 
-    assert validated.out == "net\n" and validated.err == ""
+    assert validated.out == "net\n"
+    (warning,) = validated.err.splitlines()
+    assert warning.startswith(f"{_DSL_PATH}:")
+    assert f"warning[{RULE_FUSION_PLACE_POSITION}]:" in warning
+    assert (
+        "view 'window' positions fusion place 'in_flight', which draws 2 copies"
+        in warning
+    )
     assert json.loads(full.out) == expected and full.err == ""
     assert json.loads(semantic.out) == _semantic_only(expected) and semantic.err == ""
     assert _RESERVED in json.loads(full.out)["annotations"]

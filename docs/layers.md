@@ -30,10 +30,11 @@ There is no umbrella layer. A package imports another package only when
 `journal` may import `engine` because a stored record and a replayed marking
 use the engine's record and net types. `merge` and `viz` may import `engine`
 because a merged or drawn net is the engine's net type in Python. `petrinet`
-may import `spec`, `ir`, `grammar`, `cel`, `dsl`, `engine`, and `merge`: compiling a `.petrinet` document lowers
+may import `spec`, `ir`, `grammar`, `cel`, `dsl`, `engine`, `merge`, and `viz`: compiling a `.petrinet` document lowers
 through `dsl`, resolves contribution IR, compiles CEL, and closes through
 the JSON parser, which builds the engine net and calls `merge` for
-composition ports. `dsl` may import `viz` because canonical emission renders JSON through it. The lowerer still vendors its parser. The engine takes a
+composition ports. Resolution asks `viz` which fusion copies a `(P)@[T]`
+position names, the same layout the renderer draws. `dsl` may import `viz` because canonical emission renders JSON through it. The lowerer still vendors its parser. The engine takes a
 CEL adapter instead of importing `velocitron_cel`. Nothing `petrinet`
 depends on imports `petrinet`. `play-check` may import `analysis`, `cel`, `dsl`, `play`,
 `engine`, `merge`, `petrinet`, and `viz`: it loads a play, compiles the net
@@ -44,10 +45,11 @@ depends on imports `journal`. `runtime` may import `cel`, `engine`, and
 through the engine. A journal is injected. Record shapes live on the
 engine, so the package does not import `journal` today. Nothing `runtime`
 depends on imports `runtime`. `analysis` may import `cel`, `engine`,
-`kernel`, `petrinet`, `merge`, and `runtime`: prove explores through the
+`kernel`, `petrinet`, `merge`, `runtime`, and `viz`: prove explores through the
 engine, compiles CEL, loads a `.petrinet` document, merges a composition,
 reads intended waits, and on the fast path hands the tables it fills to the
-kernel. Nothing `analysis` depends on imports `analysis`. The TypeScript package reads a proof
+kernel. The fusion-place position lint asks `viz` how many copies a place
+draws. Nothing `analysis` depends on imports `analysis`. The TypeScript package reads a proof
 report and does not explore a net. `kernel` imports no other Velocitron
 layer: it is a compiled module that explores a net from the tables
 `analysis` passes it, and knows nothing of nets, CEL or handlers. There is

@@ -60,16 +60,31 @@ If the output shows `velocitron CLI NOT INSTALLED` (or `velocitron-viz CLI NOT I
    consume and produce arcs, and `decorate color C show "f" "g.h"` shows
    only those fields (dotted paths reach into nested objects) in `C`'s
    marking rows. An arc decoration needs a handle that covers
-   exactly one arc. `decorate (p) beside [left|right]` draws each local copy
+   exactly one arc. `decorate (p) beside [left|right] [unshared]` draws each local copy
    of a fusion place (`(p) annotation fusion true`) on its transition's rank,
    next to it; with no side the copies are balanced, first one left. Use it
    when a copy lands far away and its read arc crosses the net; a copy the
    transition writes keeps its side too. With no
    side, two transitions that are neighbors in a choice (same one input
-   place, next to each other in arc order) and both use `p` share one copy,
-   drawn between them; order the choice's arcs to pick the pairs. The sides
-   are for `tb`/`bt`; `lr`/`rl` put left below. A view with positions
-   ignores it.
+   place, next to each other in the drawing's structural order) and both use
+   `p` share one copy, drawn between them. That order is the distance from
+   the initial marking, then the name, so rearranging the source does not
+   pick different pairs. `unshared`
+   keeps one copy per transition instead, and pushes those copies outside
+   the choice's row (`P A B P`). `beside left unshared` parses and warns:
+   a fixed side already never shares. The sides
+   are for `tb`/`bt`; `lr`/`rl` put left below. A view places a copy from
+   its `(P)@[T]` position, else from a whole-place `(P)` position, else
+   beside a pinned transition, on the side that row chose. A whole-place
+   position still anchors `relative (P)`.
+   `relative (P)@[T]` uses the point where that copy is drawn.
+   `decorate (p) single` draws that fusion place as one dashed node in every
+   render, including `--no-view` and a Markdown fence; its arcs take part in
+   ranking. `view V fusion (p) single` or `copies` overrides that choice for
+   one view. A view that resolves a place to `single` drops that place's
+   `beside` rows. A `(P)@[T]` position does not apply to a place drawn as
+   one node. `--no-fusion` is deprecated: it still forces every fusion
+   place to one ordinary node, and it still wins over both facts.
    The render-inspect loop for authoring: render the DOT to an image, LOOK at
    it, then re-edit the source. Any DOT renderer composes —
    `velocitron-viz net.petrinet --view wired | dot -Tpng -o /tmp/net.png` with a

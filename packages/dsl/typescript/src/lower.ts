@@ -89,6 +89,7 @@ import type {
   ViewRouteContext,
   ViewSplinesContext,
   ViewDetailContext,
+  ViewFusionContext,
   ViewTargetContext,
   DecorationContext,
   DomainDeclarationContext,
@@ -636,6 +637,7 @@ function statementRule(ruleIndex: number): boolean {
     case VelocitronPetriNetParser.RULE_viewRoute:
     case VelocitronPetriNetParser.RULE_viewSplines:
     case VelocitronPetriNetParser.RULE_viewDetail:
+    case VelocitronPetriNetParser.RULE_viewFusion:
     case VelocitronPetriNetParser.RULE_decoration:
     case VelocitronPetriNetParser.RULE_extensions:
     case VelocitronPetriNetParser.RULE_domainDeclaration:
@@ -730,6 +732,7 @@ class LoweringVisitor {
       this.#viewStyle(context, "splines", VIEW_SPLINES);
     this.visitor.visitViewDetail = (context) =>
       this.#viewStyle(context, "detail", VIEW_DETAILS);
+    this.visitor.visitViewFusion = (context) => this.visitViewFusion(context);
     this.visitor.visitDecoration = (context) => this.visitDecoration(context);
     this.visitor.visitExtensions = (context) => this.visitExtensions(context);
     this.visitor.visitDomainDeclaration = (context) =>
@@ -1651,11 +1654,20 @@ class LoweringVisitor {
   #viewTarget(target: ViewTargetContext): ReadonlyJsonObject {
     const place = target.place() as PlaceContext | undefined;
     if (place) {
-      return { type: "place", name: decodeName(place.name().getText()) };
+      const placeName = decodeName(place.name().getText());
+      const copy = target.transition() as TransitionContext | undefined;
+      if (copy) {
+        return {
+          type: "placeCopy",
+          place: placeName,
+          transition: decodeName(copy.name().getText()),
+        };
+      }
+      return { type: "place", name: placeName };
     }
     const transition = target.transition() as TransitionContext | undefined;
     if (!transition) {
-      throw new Error("view target must be a place or transition");
+      throw new Error("view target must be a place, place copy, or transition");
     }
     return { type: "transition", name: decodeName(transition.name().getText()) };
   }
@@ -1698,6 +1710,19 @@ class LoweringVisitor {
       kind: `view.${member}`,
       target: { type: "view", name: viewName },
       value: { [member]: rawValue },
+      start: this.#contextStart(context),
+      end: this.#contextEnd(context),
+    });
+  }
+
+  visitViewFusion(context: ViewFusionContext): void {
+    // Kept apart from view position and style so a later per-copy target
+    // can land in those rules without touching this one.
+    const mode = (context.SINGLE() as TerminalNode | undefined) ? "single" : "copies";
+    this.#contribution({
+      kind: "view.fusion",
+      target: { type: "view", name: decodeName(context.name().getText()) },
+      value: { place: decodeName(context.place().name().getText()), mode },
       start: this.#contextStart(context),
       end: this.#contextEnd(context),
     });
@@ -1765,8 +1790,20 @@ class LoweringVisitor {
           : (context.RIGHT() as TerminalNode | undefined)
             ? "right"
             : undefined;
+        const besideValue: Record<string, string | boolean> = {};
+        if (side !== undefined) besideValue.side = side;
+        if (context.UNSHARED() as TerminalNode | undefined) besideValue.share = false;
         kind = "decoration.beside";
-        value = side === undefined ? {} : { side };
+        value = besideValue;
+      } else if (context.SINGLE() as TerminalNode | undefined) {
+        if (!place) {
+          this.#semanticError(
+            `single decorations apply to fusion places; ${targetContext.getText()} has no fused drawing to collapse`,
+            context,
+          );
+        }
+        kind = "decoration.single";
+        value = {};
       } else {
         if (place) {
           this.#semanticError(

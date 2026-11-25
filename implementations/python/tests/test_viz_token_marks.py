@@ -10,7 +10,6 @@ References: ADR 0024; ADR 0028; ADR 0031; ADR 0033.
 
 from __future__ import annotations
 
-import json
 import re
 import shutil
 import subprocess
@@ -189,14 +188,17 @@ def test_twin_graphs_get_one_layout_from_dot() -> None:
 
     # when
     def layout(dot: str) -> dict[str, tuple[str, str, str]]:
+        # plain text: Graphviz 2.42's -Tjson can embed raw image bytes.
         out = subprocess.run(
-            ["dot", "-Tjson"], input=dot, capture_output=True, text=True, check=True
+            ["dot", "-Tplain"], input=dot, capture_output=True, text=True, check=True
         ).stdout
-        return {
-            o["name"]: (o["pos"], o["width"], o["height"])
-            for o in json.loads(out)["objects"]
-            if "pos" in o
-        }
+        found: dict[str, tuple[str, str, str]] = {}
+        for line in out.splitlines():
+            parts = line.split()
+            if parts and parts[0] == "node":
+                name = parts[1].strip('"')
+                found[name] = (f"{parts[2]},{parts[3]}", parts[4], parts[5])
+        return found
 
     # then
     assert layout(before) == layout(after)

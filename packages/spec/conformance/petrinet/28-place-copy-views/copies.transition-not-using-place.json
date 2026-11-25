@@ -1,0 +1,27 @@
+{
+  "diagnostic": {
+    "code": "PN202",
+    "column": 1,
+    "file": "copies.transition-not-using-place.petrinet",
+    "line": 9,
+    "message": "view 'lanes' positions place copy (lock)@[other], but [other] does not use (lock)",
+    "span": {
+      "source": "copies.transition-not-using-place.petrinet",
+      "start": {
+        "byteOffset": 208,
+        "line": 9,
+        "column": 1
+      },
+      "end": {
+        "byteOffset": 262,
+        "line": 9,
+        "column": 55
+      }
+    },
+    "help": "draw an arc between (lock) and [other]"
+  },
+  "source": {
+    "sourceId": "copies.transition-not-using-place.petrinet",
+    "text": "net place_copies\n\n(seed) -pulse-> [other] -pulse-> (out)\n(lock) -pulse-> [acquire] -pulse-> (done)\n(lock) annotation fusion true\n[acquire] handler \"acquire@place_copies\"\n[other] handler \"other@place_copies\"\n\nview lanes position (lock)@[other] at {\"x\": 1, \"y\": 0}\n"
+  }
+}

@@ -119,6 +119,9 @@ def test_the_diagram_pins_colors_for_dark_pages() -> None:
         "DatabaseBorderColor",
         "DatabaseBackgroundColor",
         "DatabaseFontColor",
+        "QueueBorderColor",
+        "QueueBackgroundColor",
+        "QueueFontColor",
         "NoteBorderColor",
         "NoteBackgroundColor",
         "NoteFontColor",
@@ -148,6 +151,7 @@ def test_lifelines_follow_the_declared_order_kinds_and_boxes() -> None:
         ("Clerk", "person"),
         ("Runner", "system"),
         ("Desk", "system"),
+        ("(request)", "queue"),
         ("Desk sign", "record"),
         ("annex", "system"),
     ]
@@ -167,9 +171,12 @@ def test_writing_into_a_lived_place_is_an_arrow_into_its_column() -> None:
     # when
     messages = _messages(sequence_view(_trace()).events)
 
-    # then: the clerk writes the sign; the runner writes the hold on its branch
+    # then: the clerk writes the sign; the runner writes the hold on its branch.
+    # The runner's title is on the hand-off into the runner, so the column
+    # arrow carries the token's colour.
     assert ("Clerk", "Desk sign", "Close the desk", False) in messages
-    assert ("Runner", "annex", "Take the hold", False) in messages
+    assert ("(request)", "Runner", "Take the hold", False) in messages
+    assert ("Runner", "annex", "hold", False) in messages
 
 
 def test_reading_a_lived_place_is_a_dashed_arrow_with_the_value_read() -> None:
@@ -316,16 +323,17 @@ def test_a_cel_lifeline_name_comes_from_the_token(tmp_path: Path) -> None:
     ]
 
 
-def test_a_hand_off_is_labeled_with_what_was_handed_over() -> None:
+def test_a_hand_off_place_is_a_queue_beside_its_producer() -> None:
     # when
     events = sequence_view(_trace()).events
 
-    # then: the desk's hold, by the injection's title, starts the activation
-    assert ("Desk", "Runner", "Hold filed", False) in _messages(events)
-    # and: the receiver is activated while it draws an arrow of its own
+    # then: the desk files the hold into the queue, at the injection
+    assert ("Desk", "(request)", "Hold filed", False) in _messages(events)
+    # and: the runner takes it from the queue, and is activated while it
+    # draws an arrow of its own
     start = events.index(Activate("Runner"))
     assert events[start - 1] == Message(
-        "Desk", "Runner", "Hold filed", False, 14
+        "(request)", "Runner", "Take the hold", False, 14
     )
     assert Deactivate("Runner") in events[start:]
 
@@ -363,7 +371,7 @@ def test_notes_of_one_actor_fold_into_one(tmp_path: Path) -> None:
     assert "note right of shop\nPack\nLabel\nend note" in render_plantuml(view)
 
 
-def test_a_handed_over_step_is_its_arrow_not_a_note(tmp_path: Path) -> None:
+def test_a_hand_off_is_two_arrows_each_at_its_own_step(tmp_path: Path) -> None:
     # given: the clerk's titled step makes the token the shop consumes
     trace = _played(
         tmp_path,
@@ -376,11 +384,20 @@ def test_a_handed_over_step_is_its_arrow_not_a_note(tmp_path: Path) -> None:
     )
 
     # when
-    events = sequence_view(trace).events
+    view = sequence_view(trace)
 
-    # then
-    assert _messages(events) == [("Clerk", "Shop", "Order accepted", False)]
-    assert _notes(events) == [("Shop", ("Ship",))]
+    # then: the produce and the consume are each drawn where they happen,
+    # and each step's title is on its own arrow
+    assert [lifeline.name for lifeline in view.lifelines] == [
+        "Clerk",
+        "(b)",
+        "Shop",
+    ]
+    assert _messages(view.events) == [
+        ("Clerk", "(b)", "Order accepted", False),
+        ("(b)", "Shop", "Ship", False),
+    ]
+    assert _notes(view.events) == []
 
 
 def test_setup_injections_into_a_lived_place_draw_nothing(tmp_path: Path) -> None:
@@ -462,6 +479,27 @@ def test_an_advance_draws_the_firings_it_matured(tmp_path: Path) -> None:
     ]
     message = next(e for e in view.events if isinstance(e, Message))
     assert message.matured
+
+
+def test_a_matured_firing_is_not_labelled_with_the_advance_title(
+    tmp_path: Path,
+) -> None:
+    # given: the advance has its own title; the timed transition has a description
+    trace = _played(
+        tmp_path,
+        {"poll.petrinet": _MATURING},
+        'play s\nnet "poll.petrinet"\nmarking none\n'
+        'inject (queue) <- {"n": 1}\n'
+        'inject (clock) <- {"now": 0}\n'
+        'advance +2m "the clock jumps"\n',
+    )
+
+    # when
+    plantuml = render_plantuml(sequence_view(trace))
+
+    # then: the matured firing says the transition's label, plus on time
+    assert "Take the hold (on time)" in plantuml
+    assert "the clock jumps" not in plantuml
 
 
 def test_sequence_json_carries_the_matured_mark(tmp_path: Path) -> None:
@@ -557,8 +595,170 @@ def test_advances_with_nothing_drawn_between_them_are_one_delay(tmp_path: Path) 
     # when
     events = sequence_view(trace).events
 
-    # then: one delay, the longest advance
+    # then: one delay, the longest of the two clocks
     assert list(events) == [Delay("2 hours later")]
+
+
+def test_back_to_back_ticks_of_one_clock_show_the_total(tmp_path: Path) -> None:
+    # given: the clock moves 0 → 29 → 30, and nothing is drawn between the ticks
+    trace = _played(
+        tmp_path,
+        {
+            "n.petrinet": "(a) -> [go] -> (b)\n(clock) -advance->? [go]\n"
+            '[go] timer clock (clock) cel "clock.now >= 3600"\n'
+        },
+        'play s\nnet "n.petrinet"\nadvance 0\nadvance 29\nadvance 30\n',
+    )
+
+    # when
+    events = sequence_view(trace).events
+
+    # then: the merged delay is the total time that passed, not the longer tick
+    assert list(events) == [Delay("30 seconds later")]
+
+
+_HANDOFF = """\
+net handoff "A hands B an item; C does something in between"
+system "A"
+system "B"
+system "C"
+(raw) -item-> [make]
+[make] -item-> (tray)
+(tray) -item-> [use]
+[use] -item-> (done)
+(idle) -call-> [ring]
+[ring] -call-> (rung)
+[make] actor "A"
+[use]  actor "B"
+[ring] actor "C"
+marking initial (raw) <- $p
+marking initial (idle) <- $c
+$p: item {}
+$c: call {}
+"""
+
+_LATE = """\
+play late "A makes an item, C rings, then B uses the item"
+net "handoff.petrinet"
+fire [make] "1. A makes the item"
+fire [ring] "2. C rings the bell"
+fire [use]  "3. B uses the item"
+"""
+
+
+def test_a_late_hand_off_is_drawn_in_step_order(tmp_path: Path) -> None:
+    # given: A makes an item, C rings, then B uses the item
+    trace = _played(
+        tmp_path,
+        {"handoff.petrinet": _HANDOFF},
+        _LATE,
+    )
+
+    # when
+    view = sequence_view(trace)
+    plantuml = render_plantuml(view)
+
+    # then: the queue sits beside A, who produces into it, and the steps
+    # read 1, then 2, then 3
+    assert [(lifeline.name, lifeline.kind) for lifeline in view.lifelines] == [
+        ("A", "system"),
+        ("(tray)", "queue"),
+        ("B", "system"),
+        ("C", "system"),
+    ]
+    assert _messages(view.events) == [
+        ("A", "(tray)", "1. A makes the item", False),
+        ("(tray)", "B", "3. B uses the item", False),
+    ]
+    assert _notes(view.events) == [("C", ("2. C rings the bell",))]
+    body = plantuml.split("@enduml")[0]
+    assert body.index("1. A makes the item") < body.index("2. C rings the bell")
+    assert body.index("2. C rings the bell") < body.index("3. B uses the item")
+    assert 'queue "(tray)" as tray' in plantuml
+
+
+def test_a_queue_caption_is_the_place_description(tmp_path: Path) -> None:
+    # given: the hand-off place has a description
+    trace = _played(
+        tmp_path,
+        {"handoff.petrinet": _HANDOFF + '(tray) description "the tray"\n'},
+        _LATE,
+    )
+
+    # when
+    plantuml = render_plantuml(sequence_view(trace))
+
+    # then: the caption is the description, not the parenthesized id
+    assert 'queue "the tray" as the_tray' in plantuml
+    assert 'queue "(tray)"' not in plantuml
+
+
+def test_a_same_actor_token_in_a_hand_off_place_draws_no_arrow(
+    tmp_path: Path,
+) -> None:
+    # given: (bin) is a queue because B takes one item, and A also makes an
+    # item that only A uses
+    trace = _played(
+        tmp_path,
+        {
+            "n.petrinet": 'system "A"\nsystem "B"\n'
+            "(raw) -item-> [hand]\n[hand] -item-> (bin)\n"
+            "(raw) -item-> [keep]\n[keep] -item-> (bin)\n"
+            "(bin) -item-> [take]\n(bin) -item-> [use]\n"
+            '[hand] actor "A"\n[keep] actor "A"\n'
+            '[take] actor "B"\n[use] actor "A"\n'
+            "marking initial (raw) <- $cross\nmarking initial (raw) <- $own\n"
+            '$cross: item {"id": "cross"}\n$own: item {"id": "own"}\n'
+        },
+        'play s\nnet "n.petrinet"\n'
+        'fire [hand] with (raw) {"id": "cross"} "A hands one over"\n'
+        'fire [keep] with (raw) {"id": "own"} "A sets one aside"\n'
+        'fire [use] with (bin) {"id": "own"} "A uses its own"\n'
+        'fire [take] with (bin) {"id": "cross"} "B takes the other"\n',
+    )
+
+    # when
+    view = sequence_view(trace)
+
+    # then: only the token that crosses draws arrows; A's own item is notes
+    assert _messages(view.events) == [
+        ("A", "(bin)", "A hands one over", False),
+        ("(bin)", "B", "B takes the other", False),
+    ]
+    assert _notes(view.events) == [("A", ("A sets one aside", "A uses its own"))]
+
+
+def test_an_unconsumed_token_in_a_hand_off_place_is_still_drawn(
+    tmp_path: Path,
+) -> None:
+    # given: A returns an item to a place B has taken from, and nobody takes
+    # this one
+    trace = _played(
+        tmp_path,
+        {
+            "n.petrinet": 'system "A"\nsystem "B"\n'
+            "(raw) -item-> [hand] -item-> (bin)\n"
+            "(raw) -item-> [leave] -item-> (bin)\n"
+            "(bin) -item-> [take]\n"
+            '[hand] actor "A"\n[take] actor "B"\n[leave] actor "A"\n'
+            "marking initial (raw) <- $a\nmarking initial (raw) <- $b\n"
+            "$a: item {}\n$b: item {}\n"
+        },
+        'play s\nnet "n.petrinet"\n'
+        'fire [hand] "A hands one over"\n'
+        'fire [take] "B takes it"\n'
+        'fire [leave] "A leaves one behind"\n',
+    )
+
+    # when
+    events = sequence_view(trace).events
+
+    # then: the return is drawn even though nothing consumes it
+    assert _messages(events) == [
+        ("A", "(bin)", "A hands one over", False),
+        ("(bin)", "B", "B takes it", False),
+        ("A", "(bin)", "A leaves one behind", False),
+    ]
 
 
 def test_headings_are_dividers_and_level_three_opens_a_group() -> None:
@@ -653,10 +853,17 @@ def test_injections_into_a_place_without_owner_come_from_outside(
     view = sequence_view(trace)
 
     # then: the net default actor does the firing; a titled injection into
-    # an unowned place still hands over by its title (an outside event on
-    # purpose); an untitled one would draw nothing (see the setup tests)
-    assert [lifeline.name for lifeline in view.lifelines] == [OUTSIDE, "Shop"]
-    assert _messages(view.events) == [(OUTSIDE, "Shop", "Nudge", False)]
+    # an unowned place is an outside event, drawn into the hand-off queue
+    # at the injection, and the firing takes it from there
+    assert [lifeline.name for lifeline in view.lifelines] == [
+        OUTSIDE,
+        "(a)",
+        "Shop",
+    ]
+    assert _messages(view.events) == [
+        (OUTSIDE, "(a)", "Nudge", False),
+        ("(a)", "Shop", "Go", False),
+    ]
 
 
 def test_an_untitled_setup_injection_hands_over_nothing(tmp_path: Path) -> None:
@@ -778,9 +985,17 @@ def test_a_titled_injection_into_an_unowned_place_still_hands_over(
     # when
     view = sequence_view(trace)
 
-    # then: the arrow stays, from Outside into the place's column
-    assert [lifeline.name for lifeline in view.lifelines] == [OUTSIDE, "Shop"]
-    assert _messages(view.events) == [(OUTSIDE, "Shop", "Kick off", False)]
+    # then: the arrow stays, from Outside into the hand-off queue, and the
+    # firing takes the token out of it
+    assert [lifeline.name for lifeline in view.lifelines] == [
+        OUTSIDE,
+        "(a)",
+        "Shop",
+    ]
+    assert _messages(view.events) == [
+        (OUTSIDE, "(a)", "Kick off", False),
+        ("(a)", "Shop", "Go", False),
+    ]
 
 
 def test_a_net_without_actors_is_one_lifeline_named_after_it(tmp_path: Path) -> None:
@@ -837,17 +1052,24 @@ def test_actors_survive_composition(tmp_path: Path) -> None:
     # when
     view = sequence_view(trace)
 
-    # then: the play's declaration comes first, then the net's
+    # then: the play's declaration comes first, then the net's, and each
+    # hand-off place sits beside the actor that produces into it
     assert [(lifeline.name, lifeline.kind) for lifeline in view.lifelines] == [
         ("Customer", "system"),
+        ("(orders.new_order)", "queue"),
         ("Clerk", "person"),
+        ("(orders.accepted)", "queue"),
         ("Order desk", "system"),
+        ("(orders.outbox)", "queue"),
         ("shipping", "system"),
     ]
     assert _messages(view.events) == [
-        ("Customer", "Clerk", "Order placed", False),
-        ("Clerk", "Order desk", "Order accepted", False),
-        ("Order desk", "shipping", "Handed over", False),
+        ("Customer", "(orders.new_order)", "Order placed", False),
+        ("(orders.new_order)", "Clerk", "Order accepted", False),
+        ("Clerk", "(orders.accepted)", "token", False),
+        ("(orders.accepted)", "Order desk", "Handed over", False),
+        ("Order desk", "(orders.outbox)", "token", False),
+        ("(orders.outbox)", "shipping", "token", False),
     ]
 
 
@@ -1011,7 +1233,7 @@ def test_play_sequence_prints_plantuml_or_json(
     }
     assert {
         "from": "Desk",
-        "to": "Runner",
+        "to": "(request)",
         "label": "Hold filed",
     }.items() <= (
         next(

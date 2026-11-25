@@ -15,6 +15,7 @@ from typing import Any
 import pytest
 
 from velocitron_petrinet import (
+    compile_petrinet_text,
     parse_composition,
     parse_net,
 )
@@ -25,6 +26,7 @@ from velocitron_viz import (
     composition_to_dot,
     legend_dot,
     net_to_dot,
+    read_decorations,
 )
 
 # A single net exercising every place/transition/arc feature the renderer
@@ -897,11 +899,13 @@ class TestCli:
         # when: the CLI renders it with --no-fusion
         exit_code = main([str(path), "--no-fusion"])
 
-        # then: the place renders as a single hub node
+        # then: the place renders as a single hub node, and the flag warns
         assert exit_code == 0
-        out = capsys.readouterr().out
-        assert '"window" [' in out
-        assert "window@" not in out
+        captured = capsys.readouterr()
+        assert '"window" [' in captured.out
+        assert "window@" not in captured.out
+        assert "decorate (P) single" in captured.err
+        assert "view V fusion (P) single" in captured.err
 
     def test_merged_composition_keeps_fusion_rendering(
         self, tmp_path: Path, capsys: pytest.CaptureFixture[str]
@@ -1242,3 +1246,65 @@ class TestMarkedPlaceGrammar:
 
         # then: `dot` accepts the label and exits cleanly
         assert result.returncode == 0, result.stderr
+
+
+# Two workers share a lock and read one clock. Each worker's ready place is
+# produced again when the work finishes, which is the cycle that used to make
+# Graphviz rank ready_b from the order of the source lines (ADR 0069).
+_LEASE_A = """
+(ready_a) -job-> [start_a] -job-> (busy_a) -job-> [finish_a] -job-> (done_a)
+(done_a) -job-> [restock_a] -job-> (ready_a)
+(lock) -permit-> [start_a]
+[finish_a] -permit-> (lock)
+"""
+_LEASE_B = """
+(ready_b) -job-> [start_b] -job-> (busy_b) -job-> [finish_b] -job-> (done_b)
+(done_b) -job-> [restock_b] -job-> (ready_b)
+(lock) -permit-> [start_b]
+[finish_b] -permit-> (lock)
+"""
+_LEASE_CLOCK = """
+(clock) -tick->? [start_a]
+(clock) -tick->? [finish_a]
+(clock) -tick->? [restock_a]
+(clock) -tick->? [start_b]
+(clock) -tick->? [finish_b]
+(clock) -tick->? [restock_b]
+"""
+_LEASE_TAIL = """
+(lock) annotation fusion true
+decorate (lock) beside left
+marking initial (ready_a) <- $job
+marking initial (ready_b) <- $job
+marking initial (lock) <- $permit
+$job: job {}
+$permit: permit {}
+"""
+
+
+def _lease_dot(body: str) -> str:
+    text = f'net lease_lock "Two workers share a lock and a clock"\n{body}'
+    document = compile_petrinet_text(text, "lease_lock.petrinet")
+    return net_to_dot(
+        parse_net(document),
+        decorations=read_decorations(document),
+        style=RenderStyle(html_labels=False, tooltips=False),
+    )
+
+
+def test_reordering_declarations_does_not_change_the_drawing() -> None:
+    # given: the clock reads inside worker A's section, and the same net
+    # with those reads after both lanes
+    inside_a = _LEASE_A + _LEASE_CLOCK + _LEASE_B + _LEASE_TAIL
+    after_lanes = _LEASE_A + _LEASE_B + _LEASE_CLOCK + _LEASE_TAIL
+    # when: both sources are drawn
+    drawn_inside = _lease_dot(inside_a)
+    drawn_after = _lease_dot(after_lanes)
+    # then: the drawing does not depend on where the reads were declared
+    assert drawn_inside == drawn_after
+    place_at = {
+        line.split('"')[1]: index
+        for index, line in enumerate(drawn_inside.splitlines())
+        if line.startswith('    "') and "->" not in line
+    }
+    assert place_at["ready_a"] < place_at["busy_a"] < place_at["done_a"]

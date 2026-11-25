@@ -1,0 +1,45 @@
+{
+  "diagnostic": {
+    "code": "PN202",
+    "column": 1,
+    "file": "single.single-beside-conflict.petrinet",
+    "help": "a single node has no copies to place; remove one declaration",
+    "line": 8,
+    "message": "conflicting single and beside decorations for (switch)",
+    "related": [
+      {
+        "message": "first single decoration was declared here",
+        "span": {
+          "end": {
+            "byteOffset": 136,
+            "column": 25,
+            "line": 7
+          },
+          "source": "single.single-beside-conflict.petrinet",
+          "start": {
+            "byteOffset": 112,
+            "column": 1,
+            "line": 7
+          }
+        }
+      }
+    ],
+    "span": {
+      "end": {
+        "byteOffset": 161,
+        "column": 25,
+        "line": 8
+      },
+      "source": "single.single-beside-conflict.petrinet",
+      "start": {
+        "byteOffset": 137,
+        "column": 1,
+        "line": 8
+      }
+    }
+  },
+  "source": {
+    "sourceId": "single.single-beside-conflict.petrinet",
+    "text": "net single\n\n(queued) -job-> [start] -job-> (running)\n(switch) -flag->? [start]\n(switch) annotation fusion true\n\ndecorate (switch) single\ndecorate (switch) beside\n"
+  }
+}

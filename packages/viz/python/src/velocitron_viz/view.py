@@ -20,24 +20,39 @@ lands.
 from __future__ import annotations
 
 import math
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Final, cast
 
 VIEW_SPLINES: Final[tuple[str, ...]] = ("ortho", "spline", "curved", "polyline", "line")
+# Shared with the TypeScript renderer (ADR 0067). Helvetica's average
+# advance is half the point size. Names are 14pt; color and behavior
+# lines are 9pt. ``NODE_PAD`` is the horizontal chrome around the longest
+# line. ``BESIDE_MARGIN`` is the clear space between the facing edges.
+NAME_POINT: Final[int] = 14
+SMALL_POINT: Final[int] = 9
+NODE_PAD: Final[int] = 20
+BESIDE_MARGIN: Final[int] = 24
 
 if TYPE_CHECKING:
     from .render import RenderModel
 
 __all__ = [
+    "BESIDE_MARGIN",
     "DEFAULT_VIEW",
+    "NAME_POINT",
+    "NODE_PAD",
+    "SMALL_POINT",
     "Decoration",
     "Decorations",
     "ViewApplicationError",
     "apply_view",
+    "beside_gap",
     "has_view",
+    "node_width",
     "read_decorations",
     "resolve_positions",
+    "text_width",
     "view_setting",
 ]
 
@@ -110,6 +125,10 @@ class Decoration:
     summary: str | None = None
     beside: bool = False
     beside_side: str | None = None
+    # False is ``beside unshared``: one copy per transition (ADR 0070).
+    # Absent ``share`` stays True, so a place with no side still shares.
+    beside_share: bool = True
+    single: bool = False
     failure: bool = False
     faded: bool = False
 
@@ -179,6 +198,12 @@ def read_decorations(raw: Mapping[str, Any]) -> Decorations:
                 if isinstance(beside, Mapping)
                 else None
             ),
+            beside_share=(
+                cast(Mapping[str, Any], beside).get("share") is not False
+                if isinstance(beside, Mapping)
+                else True
+            ),
+            single=entry.get("single") is True,
         )
         if kind in ("place", "transition"):
             nodes[subject] = decoration
@@ -220,13 +245,27 @@ def _point(value: object, context: str) -> tuple[float | int, float | int]:
     return point["x"], point["y"]
 
 
+def _copy_target(subject: str) -> tuple[str, str] | None:
+    """The place and transition of a ``place:<P>@transition:<T>`` key."""
+    marker = "@transition:"
+    if not subject.startswith("place:") or marker not in subject:
+        return None
+    place, transition = subject.removeprefix("place:").split(marker, 1)
+    if not place or not transition:
+        return None
+    return place, transition
+
+
 def _validate_subject(subject: str, view_name: str) -> None:
-    """A subject key is ``"<kind>:<name>"`` for kind place or transition."""
+    """A subject key names a place, a transition, or one fusion copy."""
+    if _copy_target(subject) is not None:
+        return
     kind, _, name = subject.partition(":")
     if not name or kind not in ("place", "transition"):
         raise ViewApplicationError(
             f"view {view_name!r} has invalid view subject {subject!r}"
-            " (expected 'place:<name>' or 'transition:<name>')"
+            " (expected 'place:<name>', 'transition:<name>',"
+            " or 'place:<name>@transition:<name>')"
         )
 
 
@@ -320,6 +359,133 @@ def _validate_routes(
     return route_by_arc
 
 
+def fusion_modes_of(view: Mapping[str, Any]) -> dict[str, str]:
+    """``place name → "single" | "copies"`` from one view's ``fusion`` map."""
+    raw = view.get("fusion", {})
+    if raw in ({}, None):
+        return {}
+    if not isinstance(raw, Mapping):
+        raise ViewApplicationError("invalid view fusion")
+    modes: dict[str, str] = {}
+    for subject, mode in cast(Mapping[str, Any], raw).items():
+        place = subject.removeprefix("place:")
+        if (
+            not subject.startswith("place:")
+            or not place
+            or not isinstance(mode, str)
+            or mode not in ("single", "copies")
+        ):
+            raise ViewApplicationError(f"invalid view fusion {subject!r}")
+        modes[place] = mode
+    return modes
+
+
+def read_fusion_modes(raw: Mapping[str, Any], view_name: str) -> dict[str, str]:
+    """The named view's fusion choices, or none when that view is absent."""
+    try:
+        annotations = cast(Mapping[str, Any], raw["annotations"])
+        payload = cast(Mapping[str, Any], annotations["petrinet.dsl/v1"])
+        views = cast(Mapping[str, Any], payload["views"])
+        view = views[view_name]
+    except (KeyError, TypeError):
+        return {}
+    if not isinstance(view, Mapping):
+        raise ViewApplicationError("invalid view fusion")
+    return fusion_modes_of(cast(Mapping[str, Any], view))
+
+
+def resolve_fusion_mode(
+    place: str,
+    decorations: Decorations,
+    fusion_modes: Mapping[str, str],
+) -> str:
+    """How one fusion place is drawn: view, then decoration, then copies.
+
+    ``--no-fusion`` is decided by the caller, before this. A view value of
+    ``single`` or ``copies`` wins over ``decorate (place) single``.
+    """
+    mode = fusion_modes.get(place)
+    if mode in ("single", "copies"):
+        return cast(str, mode)
+    decoration = decorations.nodes.get(f"place:{place}")
+    if decoration is not None and decoration.single:
+        return "single"
+    return "copies"
+
+
+def text_width(text: str, point_size: int) -> float:
+    """Width of ``text`` at ``point_size``, in points.
+
+    One character advances half the point size. Both renderers use this
+    estimate, so a label of the same length produces the same gap.
+    """
+    return len(text) * point_size / 2
+
+
+def node_width(lines: Sequence[tuple[str, int]]) -> float:
+    """Width of a node whose lines are ``(text, point size)`` pairs."""
+    widest = max((text_width(text, size) for text, size in lines), default=0.0)
+    return widest + NODE_PAD
+
+
+def beside_gap(transition_width: float, copy_width: float) -> float:
+    """Center-to-center distance from a transition to the nearest copy.
+
+    Half of each width, plus :data:`BESIDE_MARGIN` between the facing edges.
+    The k-th copy on a side sits at ``k`` times the gap of that side, and
+    the side's gap uses the wider copy.
+    """
+    return (transition_width + copy_width) / 2 + BESIDE_MARGIN
+
+
+def _format_coord(value: float | int) -> str:
+    """A coordinate the way both renderers spell an integral value."""
+    number = float(value)
+    if number.is_integer():
+        return str(int(number))
+    return str(number)
+
+
+def _pin_beside_copies(
+    lines: list[str],
+    model: "RenderModel",
+    resolved: Mapping[str, tuple[float | int, float | int]],
+    pinned: set[int],
+) -> None:
+    """Pin each ``beside`` copy that no position entry already placed.
+
+    A copy entry or a whole-place entry wins (ADR 0072). This pass places
+    only the copies those entries left alone. A shared copy whose two
+    transitions are both pinned sits on the segment between them. The
+    place entry stays in ``resolved``, so ``relative (P)`` can still use it.
+    """
+    for placement in model.beside_placements:
+        if placement.line in pinned:
+            continue
+        anchor = resolved.get(placement.anchor)
+        other = resolved.get(placement.also) if placement.also is not None else None
+        if placement.also is not None and anchor is not None and other is not None:
+            span = placement.between_count + 1
+            fraction = (placement.between_index + 1) / span
+            point = (
+                anchor[0] + fraction * (other[0] - anchor[0]),
+                anchor[1] + fraction * (other[1] - anchor[1]),
+            )
+        elif anchor is not None:
+            point = (anchor[0] + placement.slots * placement.gap, anchor[1])
+        elif (
+            other is not None
+            and placement.also_slots is not None
+            and placement.also_gap is not None
+        ):
+            point = (other[0] + placement.also_slots * placement.also_gap, other[1])
+        else:
+            continue
+        rendered = f"{_format_coord(point[0])},{_format_coord(point[1])}!"
+        lines[placement.line] = _pos_statement_line(lines[placement.line], rendered)
+        pinned.add(placement.line)
+
+
 def _pos_statement_line(line: str, rendered: str) -> str:
     """Rewrite one statement line to carry a ``pos`` attribute."""
     if line.endswith("];"):
@@ -329,6 +495,13 @@ def _pos_statement_line(line: str, rendered: str) -> str:
     raise ViewApplicationError(
         f"render model statement line does not end a statement: {line!r}"
     )
+
+
+def _drawn_once(model: "RenderModel", place: str) -> bool:
+    """Whether ``place`` is one node, not a set of fusion copies."""
+    if any(drawn == place for drawn, _transition in model.copy_lines):
+        return False
+    return bool(model.node_lines.get(f"place:{place}"))
 
 
 def apply_view(
@@ -343,8 +516,13 @@ def apply_view(
     semantically (``model.graph_attr_line``) after any view is applied, or
     the view's own ``splines`` style. A
     view that positions any node also selects ``layout=neato`` with
-    ``inputscale=72`` and drops the ``beside`` statements, which only
-    ``dot`` reads.
+    ``inputscale=72``. The ``beside`` rank clusters are removed, because
+    ``neato`` ignores them. A fusion copy is placed by the first fact that
+    names it (ADR 0072): its ``place:<P>@transition:<T>`` entry, else the
+    whole-place entry, else the ``beside`` offset from its pinned transition
+    (ADR 0067). A shared copy uses that one agreed point. ``relative (P)``
+    is the place entry. ``relative (P)@[T]`` is the point where that copy
+    is drawn.
     """
     positions, routes = _view_facts(raw, view_name)
     resolved = resolve_positions(view_name, positions)
@@ -359,7 +537,36 @@ def apply_view(
     route_by_arc = _validate_routes(view_name, routes, handles)
 
     lines = model.dot.splitlines()
+    # Copy entry, then the whole place, then beside (ADR 0072).
+    pinned: set[int] = set()
+    copy_points: dict[int, tuple[float | int, float | int]] = {}
     for subject, point in resolved.items():
+        parsed = _copy_target(subject)
+        if parsed is None:
+            continue
+        line_index = model.copy_lines.get(parsed)
+        if line_index is None:
+            # A place drawn as one node has no copies. The copy fact does
+            # not apply; lint reports it (ADR 0071, ADR 0072).
+            if _drawn_once(model, parsed[0]):
+                continue
+            raise ViewApplicationError(
+                f"view {view_name!r} positions unknown subject {subject!r}"
+            )
+        previous = copy_points.get(line_index)
+        if previous is not None and previous != point:
+            raise ViewApplicationError(
+                f"view {view_name!r} gives the shared copy of place"
+                f" {parsed[0]!r} two positions"
+            )
+        copy_points[line_index] = point
+    for line_index, point in copy_points.items():
+        rendered = f"{point[0]},{point[1]}!"
+        lines[line_index] = _pos_statement_line(lines[line_index], rendered)
+        pinned.add(line_index)
+    for subject, point in resolved.items():
+        if _copy_target(subject) is not None:
+            continue
         _validate_subject(subject, view_name)
         line_index_set = model.node_lines.get(subject)
         if not line_index_set:
@@ -368,7 +575,10 @@ def apply_view(
             )
         rendered = f"{point[0]},{point[1]}!"
         for line_index in line_index_set:
+            if line_index in pinned:
+                continue
             lines[line_index] = _pos_statement_line(lines[line_index], rendered)
+            pinned.add(line_index)
     for arc_index, (handle, points) in route_by_arc.items():
         if arc_index < 0 or arc_index >= len(model.arc_lines):
             raise ViewApplicationError(
@@ -397,8 +607,10 @@ def apply_view(
             "    overlap=scale;",
             *graph_attrs,
         ]
-        # The beside statements are rank constraints, which neato ignores;
-        # only their invisible ordering edges would stay, as extra springs.
+        # Rank clusters are for ``dot``. ``neato`` ignores them, and the
+        # invisible edges would stay as springs. Beside places a copy the
+        # view did not position.
+        _pin_beside_copies(lines, model, resolved, pinned)
         for line_index in sorted(model.beside_lines, reverse=True):
             del lines[line_index]
     lines[model.graph_attr_line : model.graph_attr_line] = graph_attrs

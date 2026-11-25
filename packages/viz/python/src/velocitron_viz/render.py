@@ -33,8 +33,11 @@ every net-schema feature (`spec/net-schema.md`, `spec/composition.md`):
   box named by its description, with the places between the nets.
 - **Fusion places** (``annotations: {"fusion": true}`` — CONTEXT.md "Fusion
   place") render as a local dashed gray instance at each connected transition
-  instead of one hub node with arcs radiating everywhere; ``render_fusion=
-  False`` (CLI ``--no-fusion``) restores the single-node view.
+  instead of one hub node with arcs radiating everywhere. ``decorate (P)
+  single`` draws that place as one dashed node whose arcs take part in
+  ranking, and a view's ``fusion`` fact can choose ``single`` or ``copies``
+  for one render. ``render_fusion=False`` (CLI ``--no-fusion``, deprecated)
+  still draws every fusion place as one ordinary node and wins over both.
 - ``description`` fields become SVG tooltips on nodes and edges.
 - **Views** (``--view <name>``, payload ``views[<name>]``: authored positions
   and handled-arc routes) are applied over a :class:`RenderModel`
@@ -44,10 +47,14 @@ every net-schema feature (`spec/net-schema.md`, `spec/composition.md`):
 - **Decorations** (payload ``decorations``, ADR 0028) apply with or without a
   view: a highlight fills a node or thickens an arc in amber, a note adds an
   italic line, a summary replaces expressions at ``summary`` detail, a
-  quiet color loses its arc type labels, and ``beside`` keeps each fusion
-  copy of a place on its transition's rank, next to it (``dot`` only; a
-  view with positions drops it, ADR 0029). With no side, two neighbor
-  transitions of one choice share one copy between them (ADR 0035).
+  quiet color loses its arc type labels, ``beside`` keeps each fusion
+  copy of a place next to its transition (ADR 0029), and ``single`` draws
+  that fusion place as one dashed node (ADR 0071). A view places a copy
+  from its ``place:<P>@transition:<T>`` entry, else from the whole-place
+  entry, else beside its pinned transition (ADR 0072, ADR 0067). A place
+  drawn as one node has that one position. With no side,
+  two neighbor transitions of one choice share one copy between them (ADR 0035),
+  unless the place is ``beside unshared`` (ADR 0070).
 
 Output is markdown-embeddable on request: :class:`RenderStyle` (CLI
 ``--plain-labels`` / ``--no-tooltips``, or the ``--doc`` preset) swaps the
@@ -65,6 +72,7 @@ from __future__ import annotations
 import itertools
 import json
 import textwrap
+from collections import deque
 from collections.abc import Callable, Mapping, Sequence
 from collections.abc import Set as AbstractSet
 from dataclasses import dataclass, field, replace
@@ -85,8 +93,13 @@ from .schema import (
     Transition,
 )
 from .view import (
+    NAME_POINT,
+    SMALL_POINT,
     Decoration,
     Decorations,
+    beside_gap,
+    node_width,
+    resolve_fusion_mode,
 )
 
 
@@ -592,6 +605,46 @@ def _is_fusion(place: Place) -> bool:
     return bool(place.annotations and place.annotations.get("fusion"))
 
 
+def _measure_place(name: str, place: Place, decoration: Decoration) -> list[tuple[str, int]]:
+    """Plain lines that set a place node's width. Markings are left out."""
+    lines = [(name, NAME_POINT)]
+    colors = [type_ for type_ in place.accepts if type_ != _GENERIC_TOKEN_TYPE]
+    if colors:
+        lines.append((f"⟨{', '.join(colors)}⟩", SMALL_POINT))
+    if decoration.highlight_label:
+        lines.append((decoration.highlight_label, SMALL_POINT))
+    if decoration.note:
+        lines.append((decoration.note, SMALL_POINT))
+    return lines
+
+
+def _measure_transition(
+    transition: Transition, decoration: Decoration, style: RenderStyle
+) -> list[tuple[str, int]]:
+    """Plain lines that set a transition node's width. Markings are left out."""
+    lines = [(transition.name, NAME_POINT)]
+    if decoration.faded:
+        return lines
+    summary = decoration.summary if style.detail == "summary" else None
+    if style.detail != "structure":
+        if transition.handler is not None:
+            lines.append((f"{transition.handler}()", SMALL_POINT))
+        if summary is not None:
+            lines.append((summary, SMALL_POINT))
+        elif transition.guard is not None:
+            lines.append((f"guard: {transition.guard}?", SMALL_POINT))
+        if summary is None:
+            if transition.timer is not None:
+                lines.append((f"timer: {transition.timer.cel}", SMALL_POINT))
+            if transition.priority is not None:
+                lines.append((f"priority {transition.priority}", SMALL_POINT))
+    if decoration.highlight_label:
+        lines.append((decoration.highlight_label, SMALL_POINT))
+    if decoration.note:
+        lines.append((decoration.note, SMALL_POINT))
+    return lines
+
+
 def _place_attrs(
     place: Place,
     tokens: Sequence[Token] = (),
@@ -826,6 +879,37 @@ _GRAPH_DEFAULTS = [
 
 
 @dataclass(frozen=True)
+class BesidePlacement:
+    """One ``beside`` copy a pinned view can place (ADR 0067).
+
+    ``line`` is the copy's node statement in ``dot``. ``place`` and
+    ``anchor`` are subject keys (``place:<name>``, ``transition:<name>``).
+    ``slots`` is the signed count from ``anchor``: negative is left,
+    positive is right, and ``1`` is the copy nearest the transition.
+    ``gap`` is that side's center-to-center distance for one count.
+    ``also`` is the other transition of a shared copy (ADR 0035), and
+    ``also_slots`` / ``also_gap`` measure from that transition. When both
+    transitions are pinned, ``between_index`` / ``between_count`` space the
+    shared copies evenly along the segment that joins them.
+    """
+
+    line: int
+    place: str
+    anchor: str
+    slots: int
+    gap: float
+    also: str | None = None
+    also_slots: int | None = None
+    also_gap: float | None = None
+    between_index: int = 0
+    between_count: int = 1
+
+
+def _copy_lines() -> dict[tuple[str, str], int]:
+    return {}
+
+
+@dataclass(frozen=True)
 class RenderModel:
     """Structural index of one rendered standalone net (ADR 0024).
 
@@ -837,8 +921,12 @@ class RenderModel:
     statement line, and ``graph_attr_line`` is the semantically valid line for
     inserting graph-level attributes (e.g. ``splines=ortho`` — after the
     graph defaults, before the body). ``beside_lines`` are the statements
-    that keep ``beside`` fusion copies next to their transitions. Line
-    indexes refer to ``dot``.
+    that keep ``beside`` fusion copies next to their transitions.
+    ``beside_placements`` say where each of those copies sits once a view
+    pins its transition (ADR 0067). ``copy_lines`` maps each drawn fusion
+    copy, ``(place, transition)``, to that copy's node line. A shared copy
+    (ADR 0035) is one line under both transitions (ADR 0072). Line indexes
+    refer to ``dot``.
     """
 
     dot: str
@@ -846,6 +934,8 @@ class RenderModel:
     arc_lines: tuple[int, ...]
     graph_attr_line: int
     beside_lines: tuple[int, ...] = ()
+    beside_placements: tuple[BesidePlacement, ...] = ()
+    copy_lines: Mapping[tuple[str, str], int] = field(default_factory=_copy_lines)
 
 
 class _RenderIndex:
@@ -860,16 +950,30 @@ class _RenderIndex:
         self.node_lines: dict[str, list[int]] = {}
         self.arc_lines: list[int] = []
         self.beside_lines: list[int] = []
+        self.beside_placements: list[BesidePlacement] = []
+        self.copy_lines: dict[tuple[str, str], int] = {}
         self.offset = offset
 
     def record_node(self, key: str, position: int) -> None:
         self.node_lines.setdefault(key, []).append(self.offset + position)
 
-    def record_arc(self, position: int) -> None:
-        self.arc_lines.append(self.offset + position)
+    def record_copy(self, place: str, transition: str, position: int) -> None:
+        """Index one drawn fusion copy. ``position`` is body-relative."""
+        self.copy_lines[(place, transition)] = self.offset + position
+
+    def record_arc(self, index: int, position: int) -> None:
+        """Record ``net.arcs[index]``'s edge line. Emission order is not index order."""
+        if len(self.arc_lines) <= index:
+            self.arc_lines.extend([-1] * (index + 1 - len(self.arc_lines)))
+        self.arc_lines[index] = self.offset + position
 
     def record_beside(self, position: int) -> None:
         self.beside_lines.append(self.offset + position)
+
+    def record_beside_placement(self, placement: BesidePlacement) -> None:
+        self.beside_placements.append(
+            replace(placement, line=self.offset + placement.line)
+        )
 
 
 def _arc_edge(
@@ -942,10 +1046,160 @@ def member_label(place: str, transition: Transition | None = None) -> str:
     return members[0]
 
 
-def _fusion_instances(net: Net, fusion: set[str]) -> list[tuple[str, str]]:
-    """(place, transition) pairs needing a local fusion instance, in arc
-    order, deduplicated (a transition touching the place via several arcs —
-    e.g. inhibit + produce — shares one instance)."""
+def _flow_ranks(net: Net) -> dict[tuple[str, str], int]:
+    """Distance of each place and transition from the initial marking.
+
+    Rank 0 is a place that holds a token in the initial marking, a place
+    nothing produces, or a transition with no input. Every other node is one
+    step farther than the nearest of those, along consume, read, inhibit, and
+    produce arcs. A component that has none of those starts is walked from
+    its alphabetically first node and ranked after everything already
+    reached. The same names always get the same ranks: declaration order is
+    not an input (ADR 0069).
+    """
+    place_names = [place.name for place in net.places]
+    transition_names = [transition.name for transition in net.transitions]
+    places = set(place_names)
+    transitions = set(transition_names)
+    place_out: dict[str, set[str]] = {name: set() for name in place_names}
+    transition_out: dict[str, set[str]] = {name: set() for name in transition_names}
+    place_in = {name: 0 for name in place_names}
+    transition_in = {name: 0 for name in transition_names}
+    for arc in net.arcs:
+        if (
+            arc.consume is not None
+            and arc.from_place in places
+            and arc.to_transition in transitions
+        ):
+            place_out[arc.from_place].add(arc.to_transition)
+            transition_in[arc.to_transition] += 1
+        elif (
+            arc.produce is not None
+            and arc.from_transition in transitions
+            and arc.to_place in places
+        ):
+            transition_out[arc.from_transition].add(arc.to_place)
+            place_in[arc.to_place] += 1
+
+    ranks: dict[tuple[str, str], int] = {}
+    queue: deque[tuple[str, str]] = deque()
+
+    def seed(kind: str, name: str, rank: int) -> None:
+        key = (kind, name)
+        if key in ranks:
+            return
+        ranks[key] = rank
+        queue.append(key)
+
+    def expand() -> None:
+        while queue:
+            kind, name = queue.popleft()
+            rank = ranks[(kind, name)]
+            if kind == "place":
+                nxt_kind, nxts = "transition", sorted(place_out[name])
+            else:
+                nxt_kind, nxts = "place", sorted(transition_out[name])
+            for nxt in nxts:
+                key = (nxt_kind, nxt)
+                if key not in ranks:
+                    ranks[key] = rank + 1
+                    queue.append(key)
+
+    marked: set[str] = set()
+    if net.initial_marking:
+        for name, tokens in net.initial_marking.items():
+            if tokens and name in places:
+                marked.add(name)
+    for name in sorted(marked | {name for name in place_names if place_in[name] == 0}):
+        seed("place", name, 0)
+    for name in sorted(name for name in transition_names if transition_in[name] == 0):
+        seed("transition", name, 0)
+    expand()
+    while True:
+        missing = [
+            ("place", name) for name in place_names if ("place", name) not in ranks
+        ] + [
+            ("transition", name)
+            for name in transition_names
+            if ("transition", name) not in ranks
+        ]
+        if not missing:
+            return ranks
+        missing.sort(key=lambda item: (item[1], item[0]))
+        base = max(ranks.values()) + 1 if ranks else 0
+        seed(missing[0][0], missing[0][1], base)
+        expand()
+
+
+def _node_order(kind: str, name: str, ranks: Mapping[tuple[str, str], int]) -> tuple[int, str]:
+    return (ranks[(kind, name)], name)
+
+
+def _decoration_order_key(decoration: Decoration) -> tuple[bool, bool, bool, str, str, str]:
+    return (
+        decoration.faded,
+        decoration.failure,
+        decoration.highlight,
+        decoration.highlight_label or "",
+        decoration.note or "",
+        decoration.summary or "",
+    )
+
+
+def _arc_order_key(
+    arc: Arc, ranks: Mapping[tuple[str, str], int], decoration: Decoration
+) -> tuple[object, ...]:
+    """Structural sort key for one edge statement. Ties render the same line."""
+    if arc.consume is not None:
+        source = ("place", arc.from_place or "")
+        target = ("transition", arc.to_transition or "")
+        predicate = arc.consume.predicate
+        detail: tuple[object, ...] = (
+            "consume",
+            arc.consume.mode,
+            arc.consume.type,
+            arc.consume.weight,
+            "" if predicate is None else (predicate.cel or ""),
+            "" if predicate is None else (predicate.handler or ""),
+            arc.consume.correlate or "",
+            "",
+            "",
+        )
+    else:
+        source = ("transition", arc.from_transition or "")
+        target = ("place", arc.to_place or "")
+        template = arc.produce
+        assert template is not None
+        data = (
+            ""
+            if template.data is None
+            else json.dumps(template.data, ensure_ascii=False)
+        )
+        detail = ("produce", "produce", template.type, 0, "", "", "", data, template.cel or "")
+
+    def endpoint(kind_name: tuple[str, str]) -> tuple[int, str]:
+        if kind_name in ranks:
+            return _node_order(kind_name[0], kind_name[1], ranks)
+        return (10**9, kind_name[1])
+
+    return (
+        *endpoint(source),
+        *endpoint(target),
+        *detail,
+        arc.description or "",
+        _decoration_order_key(decoration),
+    )
+
+
+def _fusion_instances(
+    net: Net, fusion: set[str], ranks: Mapping[tuple[str, str], int]
+) -> list[tuple[str, str]]:
+    """(place, transition) pairs needing a local fusion instance.
+
+    A transition that touches the place via several arcs (inhibit and
+    produce, for example) shares one instance. The pairs come back in
+    structural order, not arc order.
+    """
     pairs: list[tuple[str, str]] = []
     seen: set[tuple[str, str]] = set()
     for arc in net.arcs:
@@ -960,6 +1214,12 @@ def _fusion_instances(net: Net, fusion: set[str]) -> list[tuple[str, str]]:
         if pair not in seen:
             seen.add(pair)
             pairs.append(pair)
+    pairs.sort(
+        key=lambda pair: (
+            *_node_order("place", pair[0], ranks),
+            *_node_order("transition", pair[1], ranks),
+        )
+    )
     return pairs
 
 
@@ -967,25 +1227,32 @@ def sibling_groups(net: Net, fusion: AbstractSet[str]) -> list[tuple[str, ...]]:
     """Choices: transitions whose one drawn input place is the same place.
 
     Fusion places do not count as inputs, since each copy sits beside its
-    own transition. A group lists its transitions in the order of their
-    first arc from the shared place; groups follow the order of their
-    place's first such arc. Only groups of two or more are returned.
+    own transition. A group lists its transitions in structural order
+    (:func:`_flow_ranks`, then name); groups follow their place's structural
+    order. Only groups of two or more are returned.
     """
+    ranks = _flow_ranks(net)
     inputs: dict[str, set[str]] = {}
-    first_arcs: list[tuple[str, str]] = []
     for arc in net.arcs:
         place, transition = arc.from_place, arc.to_transition
         if place is None or transition is None or place in fusion:
             continue
-        places = inputs.setdefault(transition, set())
-        if place not in places:
-            places.add(place)
-            first_arcs.append((place, transition))
+        inputs.setdefault(transition, set()).add(place)
     groups: dict[str, list[str]] = {}
-    for place, transition in first_arcs:
-        if inputs[transition] == {place}:
+    for transition, places in inputs.items():
+        if len(places) == 1:
+            place = next(iter(places))
             groups.setdefault(place, []).append(transition)
-    return [tuple(group) for group in groups.values() if len(group) > 1]
+    ordered = [
+        (
+            place,
+            tuple(sorted(names, key=lambda name: _node_order("transition", name, ranks))),
+        )
+        for place, names in groups.items()
+        if len(names) > 1
+    ]
+    ordered.sort(key=lambda item: _node_order("place", item[0], ranks))
+    return [names for _, names in ordered]
 
 
 @dataclass(frozen=True)
@@ -1011,19 +1278,30 @@ def fusion_layout(
     """The fusion copies of ``net`` and the ``beside`` rows that place them.
 
     Each transition with ``beside`` copies gets a row: ``left`` copies
-    before it, ``right`` copies after it, the first copy nearest; a copy
-    with no side goes to the side that has fewer copies so far, ``left`` on
-    a tie (ADR 0029).
+    before it, ``right`` copies after it, the first copy in structural
+    order nearest; a copy with no side goes to the side that has fewer
+    copies so far, ``left`` on a tie (ADR 0029, ADR 0069).
 
     Two transitions that are neighbors in a sibling group (see
     :func:`sibling_groups`) and both have a copy of the same ``beside``
-    place with no side share one copy, drawn between them (ADR 0035). A run
+    place with no side share one copy, drawn between them (ADR 0035), unless
+    that place is ``unshared`` (``beside_share`` is false, ADR 0070). A run
     of more such neighbors pairs from the left; when the run is odd, the
     last one keeps its own copy, on its right. The transitions a run links
     share one row, in group order, so the shared copy is always between
     its two transitions.
+
+    An unshared place does not share. A run that would have shared stays one
+    row, and each copy is pushed outward: the first sibling's copy on the
+    left, the last sibling's on the right, and a middle sibling on the side
+    with fewer of its own copies so far, left on a tie (ADR 0029 Decision 3).
+    A run of two is the copy, the first transition, the second, the copy.
+    A transition outside such a run is placed as it is today. That row is
+    the ``beside`` order a view reads (ADR 0072): a copy entry, else the
+    whole-place entry, else the offset of this row.
     """
-    instances = _fusion_instances(net, set(fusion))
+    ranks = _flow_ranks(net)
+    instances = _fusion_instances(net, set(fusion), ranks)
 
     def beside(place: str) -> Decoration | None:
         decoration = decorations.nodes.get(f"place:{place}", _NO_DECORATION)
@@ -1037,13 +1315,20 @@ def fusion_layout(
     shared: dict[tuple[str, str], str] = {}
     gaps: dict[tuple[str, str], list[str]] = {}
     outer_right: set[tuple[str, str]] = set()
+    outward_left: set[tuple[str, str]] = set()
+    outward_right: set[tuple[str, str]] = set()
     segments: list[tuple[str, ...]] = []
     for group in sibling_groups(net, fusion):
         linked = [False] * (len(group) - 1)
-        places = [
-            place for transition in group for place in beside_places.get(transition, ())
-        ]
-        for place in dict.fromkeys(places):
+        places = sorted(
+            {
+                place
+                for transition in group
+                for place in beside_places.get(transition, ())
+            },
+            key=lambda place: _node_order("place", place, ranks),
+        )
+        for place in places:
             decoration = beside(place)
             if decoration is None or decoration.beside_side is not None:
                 continue
@@ -1053,15 +1338,21 @@ def fusion_layout(
                 while end < len(group) and place in beside_places.get(group[end], ()):
                     end += 1
                 run = group[start:end]
-                for i in range(0, len(run) - 1, 2):
-                    pair = run[i], run[i + 1]
-                    copy = _copy_id(place, pair)
-                    shared[(place, pair[0])] = shared[(place, pair[1])] = copy
-                    gaps.setdefault(pair, []).append(place)
-                if len(run) > 1:
+                if len(run) > 1 and not decoration.beside_share:
+                    # One row, copies outside it: first left, last right.
                     linked[start : end - 1] = [True] * (len(run) - 1)
-                    if len(run) % 2:
-                        outer_right.add((place, run[-1]))
+                    outward_left.add((place, run[0]))
+                    outward_right.add((place, run[-1]))
+                else:
+                    for i in range(0, len(run) - 1, 2):
+                        pair = run[i], run[i + 1]
+                        copy = _copy_id(place, pair)
+                        shared[(place, pair[0])] = shared[(place, pair[1])] = copy
+                        gaps.setdefault(pair, []).append(place)
+                    if len(run) > 1:
+                        linked[start : end - 1] = [True] * (len(run) - 1)
+                        if len(run) % 2:
+                            outer_right.add((place, run[-1]))
                 start = end + 1 if end == start else end
         first = 0
         for i in range(len(group)):
@@ -1087,13 +1378,19 @@ def fusion_layout(
                     continue
                 decoration = beside(place)
                 assert decoration is not None
-                side = decoration.beside_side or (
-                    "right"
-                    if (place, transition) in outer_right
-                    else "left"
-                    if len(left) + shared_left <= len(right) + shared_right
-                    else "right"
-                )
+                if decoration.beside_side is not None:
+                    side = decoration.beside_side
+                elif (place, transition) in outward_left:
+                    side = "left"
+                elif (place, transition) in outward_right or (
+                    place,
+                    transition,
+                ) in outer_right:
+                    side = "right"
+                elif len(left) + shared_left <= len(right) + shared_right:
+                    side = "left"
+                else:
+                    side = "right"
                 (left if side == "left" else right).append(
                     _copy_id(place, [transition])
                 )
@@ -1105,6 +1402,19 @@ def fusion_layout(
                 )
         return tuple(order)
 
+    for transition, places_beside in beside_places.items():
+        # An authored side is placed before an unsided copy, so a later name
+        # cannot take the side the author already chose. Within each group
+        # the structural order still decides which copy sits nearest.
+        places_beside.sort(
+            key=lambda place: (
+                0
+                if (decoration := beside(place)) is not None
+                and decoration.beside_side is not None
+                else 1,
+                *_node_order("place", place, ranks),
+            )
+        )
     rows: dict[str | int, tuple[str, ...]] = {}
     for transition in beside_places:
         key = segment_of.get(transition, transition)
@@ -1114,13 +1424,116 @@ def fusion_layout(
                 if transition in segment_of
                 else (transition,)
             )
+    transition_names = {transition.name for transition in net.transitions}
+
+    def _row_key(nodes: tuple[str, ...]) -> tuple[int, str]:
+        for node in nodes:
+            if node in transition_names:
+                return _node_order("transition", node, ranks)
+        return (10**9, "")
+
     copies = {
         (place, transition): shared.get(
             (place, transition), _copy_id(place, [transition])
         )
         for place, transition in instances
     }
-    return FusionLayout(copies=copies, rows=tuple(rows.values()))
+    return FusionLayout(copies=copies, rows=tuple(sorted(rows.values(), key=_row_key)))
+
+
+def _beside_placements(
+    layout: FusionLayout,
+    drawn: Mapping[str, tuple[int, str]],
+    widths: Mapping[str, float],
+) -> list[BesidePlacement]:
+    """Where each ``beside`` copy sits relative to the transitions in its row.
+
+    ``drawn`` maps a copy's node id to its body-relative statement line and
+    place name. ``widths`` maps a copy id or a transition name to its node
+    width. A copy on one transition takes a signed slot from that
+    transition (nearest is ``1``). The side's gap uses the wider copy, and
+    the k-th copy sits at ``k`` times that gap. A shared copy records both
+    transitions; the view places it on the segment between them when both
+    are pinned. Keep this in step with ``besidePlacements`` in the
+    TypeScript renderer.
+    """
+    users: dict[str, set[str]] = {}
+    for (_place, transition), copy in layout.copies.items():
+        users.setdefault(copy, set()).add(transition)
+    placements: list[BesidePlacement] = []
+
+    def side_gap(anchor: str, nodes: Sequence[str]) -> float:
+        return beside_gap(widths[anchor], max(widths[node] for node in nodes))
+
+    def own(node: str, anchor: str, slots: int, gap: float) -> None:
+        line, place = drawn[node]
+        placements.append(
+            BesidePlacement(
+                line, f"place:{place}", f"transition:{anchor}", slots, gap
+            )
+        )
+
+    for row in layout.rows:
+        trans_at = [index for index, node in enumerate(row) if node not in drawn]
+        if not trans_at:
+            continue
+        first = trans_at[0]
+        left_nodes = list(reversed(row[:first]))
+        if left_nodes:
+            gap = side_gap(row[first], left_nodes)
+            for slot, node in enumerate(left_nodes, start=1):
+                own(node, row[first], -slot, gap)
+        last = trans_at[-1]
+        right_nodes = list(row[last + 1 :])
+        if right_nodes:
+            gap = side_gap(row[last], right_nodes)
+            for slot, node in enumerate(right_nodes, start=1):
+                own(node, row[last], slot, gap)
+        for left_i, right_i in itertools.pairwise(trans_at):
+            left_name, right_name = row[left_i], row[right_i]
+            own_right: list[str] = []
+            own_left: list[str] = []
+            shared: list[str] = []
+            for node in row[left_i + 1 : right_i]:
+                used = users.get(node, set())
+                if left_name in used and right_name in used:
+                    shared.append(node)
+                elif right_name in used and left_name not in used:
+                    own_left.append(node)
+                else:
+                    own_right.append(node)
+            gap_right = (
+                side_gap(left_name, [*own_right, *shared])
+                if own_right or shared
+                else 0.0
+            )
+            gap_left = (
+                side_gap(right_name, [*own_left, *shared])
+                if own_left or shared
+                else 0.0
+            )
+            for slot, node in enumerate(own_right, start=1):
+                own(node, left_name, slot, gap_right)
+            for slot, node in enumerate(reversed(own_left), start=1):
+                own(node, right_name, -slot, gap_left)
+            count = len(shared)
+            for index, node in enumerate(shared):
+                line, place = drawn[node]
+                placements.append(
+                    BesidePlacement(
+                        line,
+                        f"place:{place}",
+                        f"transition:{left_name}",
+                        len(own_right) + index + 1,
+                        gap_right,
+                        also=f"transition:{right_name}",
+                        also_slots=-(len(own_left) + (count - index)),
+                        also_gap=gap_left,
+                        between_index=index,
+                        between_count=count,
+                    )
+                )
+    return placements
 
 
 def _beside_statements(layout: FusionLayout, *, indent: str, prefix: str) -> list[str]:
@@ -1164,6 +1577,7 @@ def _net_body(
     token_changes: TokenChanges | None = None,
     marking_rows: Mapping[str, Sequence[tuple[MarkingRow, bool]]] | None = None,
     twin_labels: Mapping[str, str | None] | None = None,
+    fusion_modes: Mapping[str, str] = {},
 ) -> list[str]:
     """Node and edge statements for one net, optionally name-prefixed.
 
@@ -1199,9 +1613,19 @@ def _net_body(
         if include_marking
         else None
     )
-    fusion: set[str] = (
-        {p.name for p in net.places if _is_fusion(p)} if render_fusion else set()
-    )
+    # --no-fusion draws every fusion place as an ordinary node. Otherwise a
+    # view mode wins over decorate single, which wins over per-transition copies.
+    copy_places: set[str] = set()
+    single_places: set[str] = set()
+    if render_fusion:
+        for place in net.places:
+            if not _is_fusion(place):
+                continue
+            if resolve_fusion_mode(place.name, decorations, fusion_modes) == "single":
+                single_places.add(place.name)
+            else:
+                copy_places.add(place.name)
+    fusion = copy_places
 
     def _tokens(place: Place) -> Sequence[Token]:
         if selected_marking is not None and place.name in selected_marking:
@@ -1209,7 +1633,9 @@ def _net_body(
         return ()
 
     lines: list[str] = []
-    for place in net.places:
+    ranks = _flow_ranks(net)
+    widths: dict[str, float] = {}
+    for place in sorted(net.places, key=lambda place: _node_order("place", place.name, ranks)):
         if place.name in fusion:
             continue  # rendered as local instances below
         node = _quote(f"{prefix}{place.name}")
@@ -1220,6 +1646,7 @@ def _net_body(
             _tokens(place),
             label=member_label(place.name),
             style=style,
+            fusion=place.name in single_places,
             decoration=_node_decoration(f"place:{place.name}"),
             marks=_marks(place),
             changes=_changes(place),
@@ -1228,35 +1655,58 @@ def _net_body(
         )
         lines.append(f"{indent}{node} [{attrs}];")
     lines.append("")
-    for transition in net.transitions:
+    for transition in sorted(
+        net.transitions, key=lambda transition: _node_order("transition", transition.name, ranks)
+    ):
         node = _quote(f"{prefix}{transition.name}")
         if recorder is not None:
             recorder.record_node(f"transition:{transition.name}", len(lines))
+        decoration = _node_decoration(f"transition:{transition.name}")
+        widths[transition.name] = node_width(
+            _measure_transition(transition, decoration, style)
+        )
         attrs = _transition_attrs(
             transition,
             style=style,
-            decoration=_node_decoration(f"transition:{transition.name}"),
+            decoration=decoration,
             twin_label=_twin(f"transition:{transition.name}"),
         )
         lines.append(f"{indent}{node} [{attrs}];")
     lines.append("")
     layout = fusion_layout(net, fusion, decorations)
+    drawn_copies: dict[str, tuple[int, str]] = {}
     if fusion:
         place_by_name = {p.name: p for p in net.places}
-        drawn: set[str] = set()
         transition_by_name = {t.name: t for t in net.transitions}
-        for (place_name, transition_name), copy in layout.copies.items():
-            if copy in drawn:
+        copy_order = sorted(
+            layout.copies.items(),
+            key=lambda item: (
+                *_node_order("place", item[0][0], ranks),
+                *_node_order("transition", item[0][1], ranks),
+            ),
+        )
+        for (place_name, transition_name), copy in copy_order:
+            if copy in drawn_copies:
+                if recorder is not None:
+                    recorder.record_copy(
+                        place_name, transition_name, drawn_copies[copy][0]
+                    )
                 continue
-            drawn.add(copy)
             place = place_by_name[place_name]
             node = _quote(f"{prefix}{copy}")
+            body_line = len(lines)
             if recorder is not None:
-                recorder.record_node(f"place:{place_name}", len(lines))
+                recorder.record_node(f"place:{place_name}", body_line)
+                recorder.record_copy(place_name, transition_name, body_line)
+            drawn_copies[copy] = (body_line, place_name)
+            label = member_label(place_name, transition_by_name.get(transition_name))
+            widths[copy] = node_width(
+                _measure_place(label, place, _node_decoration(f"place:{place_name}"))
+            )
             attrs = _place_attrs(
                 place,
                 _tokens(place),
-                label=member_label(place_name, transition_by_name.get(transition_name)),
+                label=label,
                 style=style,
                 fusion=True,
                 decoration=_node_decoration(f"place:{place_name}"),
@@ -1267,10 +1717,20 @@ def _net_body(
             )
             lines.append(f"{indent}{node} [{attrs}];")
         lines.append("")
+    if recorder is not None:
+        for placement in _beside_placements(layout, drawn_copies, widths):
+            recorder.record_beside_placement(placement)
     beside_copies = set(itertools.chain.from_iterable(layout.rows)) - {
         transition.name for transition in net.transitions
     }
-    for index, arc in enumerate(net.arcs):
+    arc_order = sorted(
+        range(len(net.arcs)),
+        key=lambda index: _arc_order_key(
+            net.arcs[index], ranks, decorations.arcs.get(index, _NO_DECORATION)
+        ),
+    )
+    for index in arc_order:
+        arc = net.arcs[index]
         lines.append(
             _arc_edge(
                 arc,
@@ -1283,7 +1743,7 @@ def _net_body(
             )
         )
         if recorder is not None:
-            recorder.record_arc(len(lines) - 1)
+            recorder.record_arc(index, len(lines) - 1)
     beside_lines = _beside_statements(layout, indent=indent, prefix=prefix)
     for statement in beside_lines:
         if recorder is not None:
@@ -1303,6 +1763,7 @@ def net_render_model(
     decorations: Decorations = Decorations(),
     token_marks: TokenMarks | None = None,
     token_changes: TokenChanges | None = None,
+    fusion_modes: Mapping[str, str] | None = None,
 ) -> RenderModel:
     """Render a standalone net and return it with its structural index (ADR 0024).
 
@@ -1346,6 +1807,7 @@ def net_render_model(
                     decorations=decorations,
                     token_marks=token_marks,
                     token_changes=token_changes,
+                    fusion_modes=fusion_modes or {},
                 ),
                 "}",
             ]
@@ -1360,6 +1822,8 @@ def net_render_model(
         arc_lines=tuple(recorder.arc_lines),
         graph_attr_line=graph_attr_line,
         beside_lines=tuple(recorder.beside_lines),
+        beside_placements=tuple(recorder.beside_placements),
+        copy_lines=dict(recorder.copy_lines),
     )
 
 
@@ -1374,6 +1838,7 @@ def net_to_dot(
     decorations: Decorations = Decorations(),
     token_marks: TokenMarks | None = None,
     token_changes: TokenChanges | None = None,
+    fusion_modes: Mapping[str, str] | None = None,
 ) -> str:
     """Render a standalone net, optionally replacing its default marking."""
     return net_render_model(
@@ -1386,6 +1851,7 @@ def net_to_dot(
         decorations=decorations,
         token_marks=token_marks,
         token_changes=token_changes,
+        fusion_modes=fusion_modes,
     ).dot
 
 
@@ -1445,6 +1911,7 @@ def net_twin_dots(
     style: RenderStyle = _DEFAULT_STYLE,
     render_fusion: bool = True,
     splines: str | None = None,
+    fusion_modes: Mapping[str, str] | None = None,
 ) -> tuple[str, str]:
     """Draw ``net`` twice, as two graphs that get one layout.
 
@@ -1502,6 +1969,7 @@ def net_twin_dots(
                 token_changes=side.token_changes,
                 marking_rows=rows,
                 twin_labels={key: label_of(twin, key) for key in keys},
+                fusion_modes=fusion_modes or {},
             )
         )
         lines.append("}")
@@ -1622,7 +2090,8 @@ def composition_ports_dot(
 
     def leaf(alias: str, net: Net, indent: str) -> list[str]:
         body = _cluster_head(alias, net, [], indent, style)
-        for place in net.places:
+        ranks = _flow_ranks(net)
+        for place in sorted(net.places, key=lambda place: _node_order("place", place.name, ranks)):
             if place.port is None and f"{alias}.{place.name}" not in shared:
                 continue
             node = _quote(f"{alias}.{place.name}")
@@ -1832,6 +2301,8 @@ def composition_overview_dot(
         place_lines.setdefault(scope([a for a, _ in entry.members]), []).append(
             f"{place_node(root)} [{attrs_by_kind[entry.kind]}, {label}];"
         )
+    for body in place_lines.values():
+        body.sort()
 
     refining = {r.by: r for r in composition.refinements}
     counter = itertools.count()
@@ -1903,6 +2374,7 @@ def composition_overview_dot(
     emit((), "    ")
     lines.append("")
 
+    edge_lines: list[str] = []
     for root, entry in drawn.items():
         node = place_node(root)
         taken = any("takes" in uses for uses in entry.uses.values())
@@ -1914,11 +2386,11 @@ def composition_overview_dot(
                 # drawn as the place's producer only when no other net fills it.
                 looped = {"writes", "takes"} <= uses
                 if "writes" in uses and not (looped and writers - {alias}):
-                    lines.append(f"    {part_node(alias)} -> {node} [{flow}];")
+                    edge_lines.append(f"    {part_node(alias)} -> {node} [{flow}];")
                 if "takes" in uses and not (looped and not writers - {alias}):
-                    lines.append(f"    {node} -> {part_node(alias)} [{flow}];")
+                    edge_lines.append(f"    {node} -> {part_node(alias)} [{flow}];")
                 elif "reads" in uses:
-                    lines.append(
+                    edge_lines.append(
                         f'    {node} -> {part_node(alias)} [{_RECORD_EDGE_ATTRS}, dir=forward, label="reads"];'
                     )
                 continue
@@ -1934,14 +2406,15 @@ def composition_overview_dot(
             # A record nothing takes or reads is a signal: its lines need no label.
             silent = not taken and not any("reads" in u for u in entry.uses.values())
             label = "" if silent else f', label="{", ".join(words)}"'
-            lines.append(
+            edge_lines.append(
                 f"    {part_node(alias)} -> {node} [{_RECORD_EDGE_ATTRS}{label}];"
             )
     for refinement in composition.refinements:
-        lines.append(
+        edge_lines.append(
             f"    {part_node(refinement.net)} -> {part_node(refinement.by)} "
             f"[{_REFINES_EDGE_ATTRS}];"
         )
+    lines.extend(sorted(edge_lines))
     lines.append("}")
     return "\n".join(lines) + "\n"
 
@@ -2029,7 +2502,7 @@ def _composition_edges(
         names = [node(net, place) for net, place in share.members]
         for first, second in zip(names, names[1:]):
             lines.append(f"    {first} -> {second} [{_SHARE_ATTRS}];")
-    return lines
+    return sorted(lines)
 
 
 # ── Legend ───────────────────────────────────────────────────────────────

@@ -1,0 +1,45 @@
+{
+  "diagnostic": {
+    "code": "PN202",
+    "column": 1,
+    "file": "copies.shared-conflict.petrinet",
+    "line": 15,
+    "message": "conflicting position facts for shared place copy (badge)@[lend] and (badge)@[recall] in view 'lanes'",
+    "span": {
+      "source": "copies.shared-conflict.petrinet",
+      "start": {
+        "byteOffset": 349,
+        "line": 15,
+        "column": 1
+      },
+      "end": {
+        "byteOffset": 405,
+        "line": 15,
+        "column": 57
+      }
+    },
+    "help": "give the shared copy one position",
+    "related": [
+      {
+        "message": "first position was declared here",
+        "span": {
+          "source": "copies.shared-conflict.petrinet",
+          "start": {
+            "byteOffset": 294,
+            "line": 14,
+            "column": 1
+          },
+          "end": {
+            "byteOffset": 348,
+            "line": 14,
+            "column": 55
+          }
+        }
+      }
+    ]
+  },
+  "source": {
+    "sourceId": "copies.shared-conflict.petrinet",
+    "text": "net place_copies\n\n(seed) -pulse-> [lend]\n(seed) -pulse-> [recall]\n(badge) -pulse-> [lend]\n(badge) -pulse-> [recall]\n[lend] -pulse-> (done)\n[recall] -pulse-> (done)\n(badge) annotation fusion true\ndecorate (badge) beside\n[lend] handler \"lend@place_copies\"\n[recall] handler \"recall@place_copies\"\n\nview lanes position (badge)@[lend] at {\"x\": 1, \"y\": 0}\nview lanes position (badge)@[recall] at {\"x\": 2, \"y\": 0}\n"
+  }
+}

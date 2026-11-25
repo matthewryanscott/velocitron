@@ -7,24 +7,29 @@ fills, the place's owner. A place that ``lives`` on a column (a record such
 as a branch home, or a slip on a shelf) is drawn as that column: a step
 that writes into it draws an arrow into the column, and a step that reads
 or consumes from it draws a dashed arrow out of it, labeled with the value
-read. Every other token remembers the step that produced it; a token of
-another actor is a hand-off, drawn as an arrow labeled with what was handed
-over. Tokens of the starting marking, of a clock place, and of an untitled
-injection into a place with no owner have no producer: they draw no
-hand-off when consumed or read. A consumed hand-off starts a new activation; the actor's own titled
-steps that write to no column are a note beside it.
+read. A place a token crosses actors through — one actor produces it and
+another consumes it — is a queue lifeline. Making the token draws an arrow
+into the queue, and using it draws an arrow out, each in the step that does
+it. A place one actor uses stays hidden. A step's title is on its first
+arrow, or a note when the step draws none; its other arrows carry the
+token's colour. Tokens of the starting marking, of a clock place, and of an
+untitled injection into a place with no owner have no producer: they draw
+no arrow when consumed. A consumed hand-off starts a new activation; the
+actor's own titled steps that draw no arrow are a note beside it.
 
-A ``advance`` is a delay (a clock's first advance draws nothing, and ticks with no
-step between them draw one), the firings it matures draw after that delay,
-under their transitions' actors and marked ``(on time)``, a ``### heading`` in a
-step's prose opens a group, any other heading is a divider, and an ``expect``
-shows only when it fails.
+A ``advance`` is a delay (a clock's first advance draws nothing, and ticks
+with nothing drawn between them are one delay: the total time one clock
+moved, or the longest when the ticks do not continue one another). The
+firings it matures draw after that delay, under their transitions' actors,
+labelled with the transition's own label plus ``(on time)``. A ``### heading``
+in a step's prose opens a group, any other heading is a divider, and an
+``expect`` shows only when it fails.
 
 :func:`sequence_view` builds the projection; :func:`render_plantuml` draws
 it. PlantUML is one rendering of the view, chosen because GitHub and the
 Obsidian plugin both draw it.
 
-References: spec/play-language.md; ADR 0038.
+References: spec/play-language.md; ADR 0038; ADR 0039; ADR 0073.
 """
 
 from __future__ import annotations
@@ -48,10 +53,13 @@ author shows on purpose. An untitled injection there draws nothing."""
 SequenceFormat = Literal["plantuml", "json"]
 
 
+LifelineKind = Literal["person", "system", "record", "queue"]
+
+
 @dataclass(frozen=True)
 class Lifeline:
     name: str
-    kind: ActorKind
+    kind: LifelineKind
 
 
 @dataclass(frozen=True)
@@ -409,13 +417,26 @@ def _tokens(value: Any) -> list[Token]:
     return [t if isinstance(t, Token) else Token(t["type"], t["data"]) for t in value]
 
 
-@dataclass(frozen=True)
-class _Source:
-    """The step that made a token: its actor, and what it handed over."""
+def _colour_text(names: Sequence[str]) -> str:
+    """The token colours an arrow carries, once each, in the order seen."""
+    seen: list[str] = []
+    for name in names:
+        if name not in seen:
+            seen.append(name)
+    return "\n".join(seen)
 
-    actor: str
-    index: int
-    label: str
+
+@dataclass
+class _Slot:
+    """One token in the path: who made it, and who took it, if anyone."""
+
+    token: Token
+    producer: str | None
+    place: str
+    consumer: str | None = None
+    firing: bool = False
+    draw_produce: bool = False
+    draw_consume: bool = False
 
 
 @dataclass
@@ -433,22 +454,30 @@ class _Builder:
         self.open: _Activation | None = None
         self.group_open = False
         self.fired = False
-        # Steps whose title labels a hand-off: the arrow says it, not a note.
-        self.handed: set[int] = set()
-        # The delay the last advance drew, while nothing has been drawn after it.
-        self.delay: tuple[int, float] | None = None
-        self.drawn_matured = False
+        # The delay the last advance drew, while nothing has been drawn after
+        # it: its index, the seconds it shows, and the clock reading it ended on.
+        self.delay: tuple[int, float, float] | None = None
         # The net's timer clocks: a token of a clock place has no producer,
-        # so reading or consuming one never draws a hand-off; the advance
+        # so reading or consuming one never draws an arrow; the advance
         # that moved the clock drew its delay instead.
         self.clocks = {
             tr.timer.clock
             for tr in trace.subject.net.transitions
             if tr.timer is not None
         }
-        self.tokens: dict[str, list[tuple[Token, _Source | None]]] = {}
+        self.holding: dict[str, list[_Slot]] = {}
         for place, tokens in trace.initial.items():
-            self.tokens[place] = [(token, None) for token in tokens]
+            self.holding[place] = [_Slot(token, None, place) for token in tokens]
+        self._initial = {
+            place: list(slots) for place, slots in self.holding.items()
+        }
+        self._planned: list[list[tuple[str, list[_Slot]]]] = []
+        self._plan_i = 0
+        self._phase = "record"
+        self.queue_caption: dict[str, str] = {}
+        self.queue_producer: dict[str, str] = {}
+        self.queue_order: list[str] = []
+        self.captions: set[str] = set()
 
     # Events
 
@@ -524,8 +553,11 @@ class _Builder:
                 and not event.dashed
                 and not last.dashed
                 and (event.source, event.target) == (last.source, last.target)
+                and event.source not in self.captions
+                and event.target not in self.captions
             ):
-                # One actor's writes into one column in a row fold into one arrow.
+                # One actor's writes into one lived column in a row fold into one arrow.
+                # A queue arrow is one step; folding it would hide the next step.
                 self.open.events[-1] = Message(
                     last.source,
                     last.target,
@@ -538,50 +570,224 @@ class _Builder:
 
     # Tokens
 
-    def take(self, place: str, token: Token, *, remove: bool) -> _Source | None:
-        held = self.tokens.get(place, [])
-        for index, (candidate, source) in enumerate(held):
-            if candidate == token:
+    def project(self) -> None:
+        """Classify hand-off places, then draw each step where it happens."""
+        self._phase = "record"
+        self._walk()
+        self._mark_queues()
+        self.holding = {
+            place: list(slots) for place, slots in self._initial.items()
+        }
+        self._plan_i = 0
+        self._phase = "replay"
+        self.events = []
+        self.open = None
+        self.group_open = False
+        self.fired = False
+        self.delay = None
+        self._walk()
+        if self.trace.failure is not None:
+            self.failed(self.trace.failure)
+        self.close()
+        self.close_group()
+
+    def _walk(self) -> None:
+        path = self.trace.path
+        for result in self.trace.steps:
+            if (
+                self._phase == "replay"
+                and result.index == self.trace.inherited
+                and self.trace.inherited
+                and path.from_label is not None
+            ):
+                self.divider(path.title or path.name)
+            self.played(result)
+
+    def _take(
+        self,
+        place: str,
+        token: Token,
+        *,
+        remove: bool,
+        consumer: str | None,
+        firing: bool,
+    ) -> _Slot | None:
+        held = self.holding.get(place, [])
+        for index, slot in enumerate(held):
+            if slot.token == token:
+                if (
+                    self._phase == "record"
+                    and consumer is not None
+                    and slot.consumer is None
+                ):
+                    slot.consumer = consumer
+                    slot.firing = firing
                 if remove:
                     del held[index]
-                return source
+                return slot
         return None
 
-    def take_all(self, tokens: Mapping[str, Sequence[Token]]) -> None:
-        for place, place_tokens in tokens.items():
-            for token in place_tokens:
-                self.take(place, token, remove=True)
-
-    def put(
-        self, tokens: Mapping[str, Sequence[Token]], source: _Source | None
+    def _take_all(
+        self,
+        tokens: Mapping[str, Sequence[Token]],
+        *,
+        consumer: str | None,
+        firing: bool,
     ) -> None:
         for place, place_tokens in tokens.items():
-            self.tokens.setdefault(place, []).extend((t, source) for t in place_tokens)
+            for token in place_tokens:
+                self._take(
+                    place, token, remove=True, consumer=consumer, firing=firing
+                )
+
+    def _put(
+        self, tokens: Mapping[str, Sequence[Token]], producer: str | None
+    ) -> list[tuple[str, list[_Slot]]]:
+        if self._phase == "record":
+            batch: list[tuple[str, list[_Slot]]] = []
+            for place, place_tokens in tokens.items():
+                slots = [_Slot(token, producer, place) for token in place_tokens]
+                self.holding.setdefault(place, []).extend(slots)
+                batch.append((place, slots))
+            self._planned.append(batch)
+            return batch
+        batch = self._planned[self._plan_i]
+        self._plan_i += 1
+        got = list(tokens.items())
+        if len(batch) != len(got):
+            raise RuntimeError("sequence projection diverged")
+        for (place, slots), (got_place, got_tokens) in zip(batch, got, strict=True):
+            if place != got_place or [slot.token for slot in slots] != list(got_tokens):
+                raise RuntimeError(f"sequence projection diverged at ({place})")
+            self.holding.setdefault(place, []).extend(slots)
+        return batch
+
+    def _mark_queues(self) -> None:
+        """A place is a queue when some token crosses actors through it."""
+        slots = [slot for group in self._initial.values() for slot in group]
+        for batch in self._planned:
+            for _, place_slots in batch:
+                slots.extend(place_slots)
+        crossing: list[str] = []
+        first_producer: dict[str, str] = {}
+        for slot in slots:
+            if self.actors.lives(slot.place) or slot.place in self.clocks:
+                continue
+            if slot.producer and slot.place not in first_producer:
+                first_producer[slot.place] = slot.producer
+            crosses = bool(
+                slot.firing
+                and slot.producer
+                and slot.consumer
+                and slot.producer != slot.consumer
+            )
+            if crosses and slot.place not in crossing:
+                crossing.append(slot.place)
+        used = set(self.actors.declared)
+        used.add(OUTSIDE)
+        if self.actors.default:
+            used.add(self.actors.default)
+        used.add(self.actors.net.name)
+        order: list[str] = []
+        for slot in slots:
+            if (
+                slot.place in crossing
+                and slot.place not in order
+                and slot.producer
+            ):
+                order.append(slot.place)
+        self.queue_order = order
+        for place in order:
+            caption = self._caption(place, used)
+            self.queue_caption[place] = caption
+            self.queue_producer[place] = first_producer[place]
+            self.captions.add(caption)
+        for slot in slots:
+            if slot.place not in self.queue_caption:
+                continue
+            slot.draw_consume = bool(
+                slot.firing
+                and slot.producer
+                and slot.consumer
+                and slot.producer != slot.consumer
+            )
+            slot.draw_produce = bool(
+                slot.producer
+                and (
+                    slot.consumer is None
+                    or (slot.firing and slot.consumer != slot.producer)
+                )
+            )
+
+    def _caption(self, place: str, used: set[str]) -> str:
+        """The queue's caption: the place's description, else ``(place_id)``."""
+        found = self.actors.place(place)
+        if found is not None and found.description and found.description not in used:
+            used.add(found.description)
+            return found.description
+        base = f"({place})"
+        candidate = base
+        number = 2
+        while candidate in used:
+            candidate = f"{base} {number}"
+            number += 1
+        used.add(candidate)
+        return candidate
 
     def writes(
         self,
         actor: str,
         produced: Mapping[str, Sequence[Token]],
-        label: str | None,
         line: int,
-    ) -> list[Message]:
-        """One arrow from ``actor`` into each column it writes to.
+    ) -> list[tuple[Message, str]]:
+        """One arrow from ``actor`` into each lived column it writes to.
 
-        Without a ``label``, an arrow says the description of the first place it writes, or nothing.
+        The message's label is the first written place's description, or
+        nothing. The paired string is the token colour, for an arrow that
+        is not the step's first.
         """
-        columns: dict[str, str] = {}
+        columns: dict[str, list[str]] = {}
+        descriptions: dict[str, str] = {}
         for place, place_tokens in produced.items():
             if not self.actors.lives(place):
                 continue
             found = self.actors.place(place)
+            text = (found.description if found is not None else None) or ""
             for token in place_tokens:
                 column = self.actors.column(place, token)
-                if column != actor and column not in columns:
-                    columns[column] = (found.description if found else None) or ""
+                if column == actor:
+                    continue
+                descriptions.setdefault(column, text)
+                columns.setdefault(column, []).append(token.type)
         return [
-            Message(actor, column, label if label is not None else text, False, line)
-            for column, text in columns.items()
+            (
+                Message(actor, column, descriptions[column], False, line),
+                _colour_text(colours),
+            )
+            for column, colours in columns.items()
         ]
+
+    def _with_step_label(
+        self,
+        label: str | None,
+        arrows: list[tuple[Message, str, bool]],
+    ) -> list[Message]:
+        """The step's label on its first arrow; other arrows carry the colour.
+
+        ``arrows`` is ``(message, colour, is_queue)`` in the order the
+        diagram draws the step's own arrows. A lived write with no step
+        label keeps the place description it was given.
+        """
+        labelled: list[Message] = []
+        for index, (message, colour, is_queue) in enumerate(arrows):
+            if label and index == 0:
+                text = label
+            elif is_queue or label:
+                text = colour
+            else:
+                text = message.label
+            labelled.append(replace(message, label=text))
+        return labelled
 
     # Steps
 
@@ -632,64 +838,109 @@ class _Builder:
                 consumed=consumed,
                 read=read,
             )
-            self.drawn_matured = True
             self.fire(synthetic, transition, matured=True)
-        if self.drawn_matured:
-            self.fired = True
-            self.drawn_matured = False
 
     def advance(self, result: StepResult) -> None:
-        self.take_all(result.replaced)
-        self.put(result.produced, None)
-        after, before = _now(result.produced), _now(result.replaced)
-        if after is None:
-            self.emit(Delay("the clock moves"))
-            return
-        if before is None:
-            # A clock's first value: no time passes before it.
-            return
-        if after < before:
-            self.emit(Delay(f"the clock reads {after}"))
-            return
-        seconds = after - before
+        self._take_all(result.replaced, consumer=None, firing=False)
+        self._put(result.produced, None)
+        if self._clock_moved(result):
+            self.matured_records(result)
+
+    def _clock_moved(self, result: StepResult) -> bool:
+        """Draw the delay when replaying. Return whether firings matured.
+
+        Back-to-back moves of one clock add up, so ``advance`` 0 then 29
+        then 30 says 30 seconds. Moves that do not continue that reading
+        keep the longer one, so two clocks advanced together say the
+        longest once.
+        """
+        after = _now(result.produced)
+        before = _now(result.replaced)
         records = [
             record
             for record in result.records
             if "firingId" in record and record.get("status") == "completed"
         ]
+        if after is None:
+            if self._phase == "replay":
+                self.emit(Delay("the clock moves"))
+            return False
+        if before is None:
+            # A clock's first value: no time passes before it.
+            return False
+        if after < before:
+            if self._phase == "replay":
+                self.emit(Delay(f"the clock reads {after}"))
+            return False
+        if self._phase != "replay":
+            return bool(records)
+        return self._draw_delay(after - before, before, after, bool(records))
+
+    def _draw_delay(
+        self, seconds: float, before: float, after: float, has_records: bool
+    ) -> bool:
         self.close()
         if self.delay is not None and self.delay[0] == len(self.events) - 1:
-            # Ticks with nothing drawn between them are one delay: the longest.
-            index, drawn = self.delay
-            if seconds > drawn:
-                self.events[index] = Delay(f"{_duration(seconds)} later")
-                self.delay = (index, seconds)
-            if not records:
-                return
+            index, drawn, last_after = self.delay
+            if before == last_after:
+                total = drawn + seconds
+                end = after
+            elif seconds > drawn:
+                total = seconds
+                end = after
+            else:
+                total = drawn
+                end = last_after
+            if total != drawn:
+                self.events[index] = Delay(f"{_duration(total)} later")
+            self.delay = (index, total, end)
+            if not has_records:
+                return False
         else:
             self.emit(Delay(f"{_duration(seconds)} later"))
-            self.delay = (len(self.events) - 1, seconds)
-            if not records:
-                return
-        # The delay drew; now the firings the new time matured.
+            self.delay = (len(self.events) - 1, seconds, after)
+            if not has_records:
+                return False
         self.delay = None
-        self.matured_records(result)
+        return True
+
+    def _firing_label(
+        self, step: Step, transition: str, *, matured: bool
+    ) -> str | None:
+        """A firing's label. A matured firing uses its transition, not the advance."""
+        source = replace(step, title=None) if matured else step
+        label = _authored_label(source, self.trace, transition)
+        if matured and label is not None:
+            return f"{label} (on time)"
+        return label
 
     def fire(self, result: StepResult, transition: str, *, matured: bool = False) -> None:
         step = result.step
         line = step.position.line
         actor = self.actors.of_transition(transition)
-        label = _authored_label(step, self.trace, transition)
-        if matured and label is not None:
-            label = f"{label} (on time)"
-        writes = self.writes(actor, result.produced, label, line)
-        written = {message.target for message in writes}
+        replaying = self._phase == "replay"
+        label = (
+            self._firing_label(step, transition, matured=matured)
+            if replaying
+            else None
+        )
+        write_pairs = self.writes(actor, result.produced, line) if replaying else []
+        written = {message.target for message, _colour in write_pairs}
         reads: list[Message] = []
-        by_source: dict[str, tuple[bool, list[str]]] = {}
-        for consumed, tokens in ((True, result.consumed), (False, result.read)):
-            for place, place_tokens in tokens.items():
+        consumes: list[tuple[str, list[str]]] = []
+        for consuming, groups in ((True, result.consumed), (False, result.read)):
+            for place, place_tokens in groups.items():
+                colours: list[str] = []
                 for token in place_tokens:
-                    source = self.take(place, token, remove=consumed)
+                    slot = self._take(
+                        place,
+                        token,
+                        remove=consuming,
+                        consumer=actor if consuming else None,
+                        firing=consuming,
+                    )
+                    if not replaying:
+                        continue
                     if self.actors.lives(place):
                         column = self.actors.column(place, token)
                         # A labeled step that writes back into the column it
@@ -701,89 +952,106 @@ class _Builder:
                         if message not in reads:
                             reads.append(message)
                         continue
-                    if source is None or source.actor == actor:
-                        continue
-                    if place in self.clocks:
-                        # A clock token a `update` placed has no producer:
-                        # the advance that moved the clock drew its delay.
-                        continue
-                    self.handed.add(source.index)
-                    solid, labels = by_source.get(source.actor, (False, []))
-                    if source.label not in labels:
-                        labels.append(source.label)
-                    by_source[source.actor] = (solid or consumed, labels)
-        hand_offs = [
-            Message(
-                source_actor,
-                actor,
-                "\n".join(
-                    label if label.endswith(" (on time)") else label + " (on time)"
-                    for label in labels
-                )
-                if matured
-                else "\n".join(labels),
-                not solid,
-                line,
-            )
-            for source_actor, (solid, labels) in by_source.items()
-        ]
+                    if consuming and slot is not None and slot.draw_consume:
+                        colours.append(token.type)
+                if colours:
+                    consumes.append((self.queue_caption[place], colours))
+        batch = self._put(result.produced, actor)
+        if not replaying:
+            return
         if label is None:
             # An unlabeled step that writes back into the column it reads
             # draws only the read: the value it saw is the story.
             read_from = {message.source for message in reads}
-            writes = [message for message in writes if message.target not in read_from]
-        if matured:
-            writes = [replace(message, matured=True) for message in writes]
-            hand_offs = [replace(message, matured=True) for message in hand_offs]
-        drawn: list[SequenceEvent] = [*reads, *writes]
-        if not writes and step.title:
-            drawn.append(Note(actor, (step.title,), line, (result.index,)))
-        self.act(actor, hand_offs, drawn)
-        handed = step.title or None
-        for place, place_tokens in result.produced.items():
-            self.put(
-                {place: place_tokens},
-                _Source(
-                    actor,
-                    result.index,
-                    handed or self.actors.read_label(place, place_tokens[0]),
-                ),
+            write_pairs = [
+                pair for pair in write_pairs if pair[0].target not in read_from
+            ]
+        produces: list[tuple[str, list[str]]] = []
+        for place, slots in batch:
+            colours = [slot.token.type for slot in slots if slot.draw_produce]
+            if colours:
+                produces.append((self.queue_caption[place], colours))
+        bearing: list[tuple[Message, str, bool]] = []
+        for caption, colours in consumes:
+            bearing.append(
+                (
+                    Message(caption, actor, "", False, line, matured),
+                    _colour_text(colours),
+                    True,
+                )
             )
+        for caption, colours in produces:
+            bearing.append(
+                (
+                    Message(actor, caption, "", False, line, matured),
+                    _colour_text(colours),
+                    True,
+                )
+            )
+        for message, colour in write_pairs:
+            flagged = replace(message, matured=True) if matured else message
+            bearing.append((flagged, colour, False))
+        labelled = self._with_step_label(label, bearing)
+        n_consume = len(consumes)
+        n_produce = len(produces)
+        drawn: list[SequenceEvent] = [
+            *labelled[n_consume : n_consume + n_produce],
+            *labelled[n_consume + n_produce :],
+        ]
+        if not bearing:
+            if matured and label:
+                drawn.append(Note(actor, (label,), line, (result.index,)))
+            elif not matured and step.title:
+                drawn.append(Note(actor, (step.title,), line, (result.index,)))
+        self.act(actor, [*labelled[:n_consume], *reads], drawn)
         self.fired = True
 
     def inject(self, result: StepResult) -> None:
         step = result.step
         assert isinstance(step.body, InjectBody | UpdateBody)
-        place = step.body.place.name
-        actor = self.actors.owner(place)
+        actor = self.actors.owner(step.body.place.name)
         # An untitled inject/update into a place with no owner (Outside)
         # sets up state on nobody's behalf: it draws nothing, and its
-        # tokens carry no producer, so a later step that consumes or reads
-        # them draws no hand-off. A titled one keeps its arrow: the author
-        # shows an outside event on purpose.
+        # tokens carry no producer, so a later step that consumes them
+        # draws no arrow. A titled one keeps its arrow: the author shows
+        # an outside event on purpose.
         silent = actor == OUTSIDE and not step.title
-        self.take_all(result.replaced)
-        if self.fired and not silent:
-            label = _step_label(step, self.trace, None)
-            writes = self.writes(actor, result.produced, label, step.position.line)
-            if writes:
-                self.act(actor, [], writes)
-        for produced_place, place_tokens in result.produced.items():
-            producer = (
-                None
-                if silent
-                else _Source(
-                    actor,
-                    result.index,
-                    step.title
-                    or self.actors.read_label(produced_place, place_tokens[0]),
-                )
-            )
-            self.put({produced_place: place_tokens}, producer)
+        self._take_all(
+            result.replaced,
+            consumer=None if silent else actor,
+            firing=False,
+        )
+        batch = self._put(result.produced, None if silent else actor)
+        if self._phase != "replay" or silent:
+            return
+        line = step.position.line
+        produces: list[tuple[str, list[str]]] = []
+        for place, slots in batch:
+            colours = [slot.token.type for slot in slots if slot.draw_produce]
+            if colours:
+                produces.append((self.queue_caption[place], colours))
+        lived: list[tuple[Message, str]] = []
+        if self.fired:
+            lived = self.writes(actor, result.produced, line)
+            if not step.title:
+                fallback = _step_label(step, self.trace, None)
+                lived = [
+                    (replace(message, label=fallback), colour)
+                    for message, colour in lived
+                ]
+        bearing: list[tuple[Message, str, bool]] = [
+            (Message(actor, caption, "", False, line), _colour_text(colours), True)
+            for caption, colours in produces
+        ]
+        bearing.extend((message, colour, False) for message, colour in lived)
+        if not bearing:
+            return
+        self.act(actor, [], self._with_step_label(step.title, bearing))
 
     def played(self, result: StepResult) -> None:
         step = result.step
-        self.headings(step)
+        if self._phase == "replay":
+            self.headings(step)
         if step.kind in ("expect", "assume"):
             return
         if step.kind == "advance":
@@ -818,29 +1086,6 @@ class _Builder:
                 failure.diagnostic.details[0] if failure.diagnostic.details else None,
             )
         )
-
-
-def _without_handed_notes(
-    events: Sequence[SequenceEvent], handed: set[int]
-) -> list[SequenceEvent]:
-    kept: list[SequenceEvent] = []
-    for event in events:
-        if isinstance(event, Note) and handed & set(event.steps):
-            pairs = [
-                (text, index)
-                for text, index in zip(event.lines, event.steps, strict=True)
-                if index not in handed
-            ]
-            if not pairs:
-                continue
-            event = Note(
-                event.actor,
-                tuple(text for text, _ in pairs),
-                event.line,
-                tuple(index for _, index in pairs),
-            )
-        kept.append(event)
-    return kept
 
 
 def _appearing(events: Sequence[SequenceEvent]) -> list[str]:
@@ -881,27 +1126,51 @@ def _boxed(
     return tuple(ordered), tuple(placed)
 
 
+def _seat_queues(
+    lifelines: tuple[Lifeline, ...], queues: list[tuple[str, str]]
+) -> tuple[Lifeline, ...]:
+    """Each hand-off place sits immediately after the actor that produces into it.
+
+    ``queues`` is ``(caption, producer)`` in the order those places are first
+    produced into.
+    """
+    by_producer: dict[str, list[Lifeline]] = {}
+    for caption, producer in queues:
+        by_producer.setdefault(producer, []).append(Lifeline(caption, "queue"))
+    seated: list[Lifeline] = []
+    placed: set[str] = set()
+    for lifeline in lifelines:
+        seated.append(lifeline)
+        for queue in by_producer.get(lifeline.name, []):
+            seated.append(queue)
+            placed.add(queue.name)
+    for caption, producer in queues:
+        if caption in placed:
+            continue
+        if not any(item.name == producer for item in seated):
+            seated.append(Lifeline(producer, "system"))
+        index = next(i for i, item in enumerate(seated) if item.name == producer)
+        seated.insert(index + 1, Lifeline(caption, "queue"))
+        placed.add(caption)
+    return tuple(seated)
+
+
 def sequence_view(trace: PlayTrace) -> SequenceView:
     """The sequence projection of one checked path."""
     builder = _Builder(trace)
-    path = trace.path
-    for result in trace.steps:
-        if (
-            result.index == trace.inherited
-            and trace.inherited
-            and path.from_label is not None
-        ):
-            builder.divider(path.title or path.name)
-        builder.played(result)
-    if trace.failure is not None:
-        builder.failed(trace.failure)
-    builder.close()
-    builder.close_group()
-    events = tuple(_without_handed_notes(builder.events, builder.handed))
-    lifelines, boxes = _boxed(builder.actors.lifelines(_appearing(events)), trace)
+    builder.project()
+    events = tuple(builder.events)
+    queues = [
+        (builder.queue_caption[place], builder.queue_producer[place])
+        for place in builder.queue_order
+    ]
+    queue_names = {caption for caption, _producer in queues}
+    appearing = [name for name in _appearing(events) if name not in queue_names]
+    lifelines, boxes = _boxed(builder.actors.lifelines(appearing), trace)
+    lifelines = _seat_queues(lifelines, queues)
     return SequenceView(
         play=trace.play.name,
-        path=path.name,
+        path=trace.path.name,
         status="passed" if trace.failure is None else "failed",
         lifelines=lifelines,
         events=events,
@@ -930,6 +1199,9 @@ skinparam ActorFontColor #222222
 skinparam DatabaseBorderColor #B08A2E
 skinparam DatabaseBackgroundColor #FFF6E0
 skinparam DatabaseFontColor #222222
+skinparam QueueBorderColor #3E7A5A
+skinparam QueueBackgroundColor #F2F8F4
+skinparam QueueFontColor #222222
 skinparam NoteBorderColor #C9B458
 skinparam NoteBackgroundColor #FFFBEA
 skinparam NoteFontColor #222222
@@ -953,6 +1225,7 @@ _KEYWORDS: Mapping[str, str] = {
     "person": "actor",
     "record": "database",
     "system": "participant",
+    "queue": "queue",
 }
 
 

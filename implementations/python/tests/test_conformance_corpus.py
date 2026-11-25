@@ -40,13 +40,22 @@ from velocitron_engine import (
     Arc,
     Net,
 )
-from velocitron_viz import net_render_model
-from velocitron_viz import apply_view
+from velocitron_viz import (
+    NAME_POINT,
+    SMALL_POINT,
+    apply_view,
+    beside_gap,
+    net_render_model,
+    node_width,
+    read_decorations,
+)
 
 _REPO_ROOT = Path(__file__).parents[3]
 _CORPUS_ROOT = _REPO_ROOT / "packages" / "spec" / "conformance" / "petrinet"
 _MANIFEST_PATH = _CORPUS_ROOT / "manifest.json"
-_IR_SCHEMA_PATH = _REPO_ROOT / "packages" / "spec" / "petrinet-contribution-ir.schema.json"
+_IR_SCHEMA_PATH = (
+    _REPO_ROOT / "packages" / "spec" / "petrinet-contribution-ir.schema.json"
+)
 
 
 def _corpus_document(relative: str) -> dict[str, Any]:
@@ -100,8 +109,8 @@ def test_manifest_pins_format_version_and_case_counts() -> None:
     # when/then: identity and case counts match the conformance contract
     assert _MANIFEST["format"] == "velocitron.petrinet/conformance-corpus"
     assert _MANIFEST["version"] == 1
-    assert len(_VALID_CASES) == 40
-    assert len(_INVALID_CASES) == 111
+    assert len(_VALID_CASES) == 42
+    assert len(_INVALID_CASES) == 119
 
 
 @pytest.mark.parametrize(("case_id", "valid"), _VALID_CASES)
@@ -354,6 +363,58 @@ def test_relative_view_positions_render_at_expected_coordinates() -> None:
     assert 'pos="3,4!"' in dot
     assert 'pos="13,9!"' in dot
     assert 'pos="18,14!"' in dot
+
+
+def _coord(value: float) -> str:
+    number = float(value)
+    return str(int(number)) if number.is_integer() else str(number)
+
+
+def test_beside_pinned_views_place_copies_and_keep_the_place_anchor() -> None:
+    """A pinned beside view places copies; a place position lands on them."""
+    # given: the beside corpus net, with lanes and lanes_lock
+    net_doc = _corpus_document("20-decoration-beside/beside.net.json")
+    net = parse_net(net_doc)
+    model = net_render_model(net, decorations=read_decorations(net_doc))
+    start = beside_gap(
+        node_width([("start", NAME_POINT)]),
+        node_width([("switch", NAME_POINT), ("⟨flag⟩", SMALL_POINT)]),
+    )
+    finish = beside_gap(
+        node_width([("finish", NAME_POINT)]),
+        node_width([("switch", NAME_POINT), ("⟨flag⟩", SMALL_POINT)]),
+    )
+    budget = beside_gap(
+        node_width([("start", NAME_POINT)]),
+        node_width([("budget", NAME_POINT), ("⟨credit⟩", SMALL_POINT)]),
+    )
+
+    def node(dot: str, name: str) -> str:
+        matches = [
+            line for line in dot.splitlines() if line.startswith(f'    "{name}" [')
+        ]
+        assert len(matches) == 1, (name, matches)
+        return matches[0]
+
+    # when: lanes pins the transitions and not the fusion places
+    lanes = apply_view(model, net_doc, "lanes")
+    # then: switch is left of each transition, and budget is right of start
+    assert f'pos="-{_coord(start)},200!"' in node(lanes, "switch@start")
+    assert f'pos="-{_coord(finish)},0!"' in node(lanes, "switch@finish")
+    assert f'pos="{_coord(budget)},200!"' in node(lanes, "budget@start")
+    assert any(
+        "constraint=false" in line and "switch@start" in line
+        for line in lanes.splitlines()
+    )
+
+    # when: lanes_lock also positions (switch), and (done) is relative to it
+    locked = apply_view(model, net_doc, "lanes_lock")
+    # then: the place point lands on each switch copy, and done uses that anchor
+    assert 'pos="40,0!"' in node(locked, "switch@start")
+    assert 'pos="40,0!"' in node(locked, "switch@finish")
+    assert 'pos="120,0!"' in node(locked, "done")
+    # and: budget has no place position, so beside still places it
+    assert f'pos="{_coord(budget)},200!"' in node(locked, "budget@start")
 
 
 # --- probes distilled from test_batch*_parser_resolver.py ---
@@ -2070,7 +2131,8 @@ view window position (out) relative (ghost) + {"x": 1, "y": 0}
         ),
         (
             {"from": "ghost", "delta": {"x": 1, "y": 0}},
-            "must use from: place:<name> or transition:<name>",
+            "must use from: place:<name>, "
+            "place:<name>@transition:<name>, or transition:<name>",
         ),
         (
             {"from": "place:request_in", "delta": {"x": 1}},
@@ -2276,9 +2338,7 @@ def _write_json_composition_tree(tmp_path: Path) -> Path:
     composed = deepcopy(_READING_HOUR_COMPOSITION_DOC)
     for item in composed["nets"]:
         item["ref"] = item["ref"].replace(".petrinet", ".json")
-    (tmp_path / "reading_hour.json").write_text(
-        json.dumps(composed), encoding="utf-8"
-    )
+    (tmp_path / "reading_hour.json").write_text(json.dumps(composed), encoding="utf-8")
     # and: the corpus net documents under their legacy reference names
     for name, art in [
         ("reading_cadence", _CADENCE_NET),

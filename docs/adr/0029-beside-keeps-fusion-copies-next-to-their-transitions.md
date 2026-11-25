@@ -1,6 +1,7 @@
 # `beside` keeps fusion copies next to their transitions
 
-**Status:** Accepted.
+**Status:** Accepted. Amended 2026-11-25 (Decision 4, by ADR 0067; the
+`unshared` modifier, by ADR 0070; the nearest copy, by ADR 0069).
 
 A fusion place renders as one local copy per transition that uses it
 (CONTEXT.md "Fusion place"). With the default `dot` layout, crossing
@@ -12,13 +13,13 @@ keeps the copies beside their transitions, and settles how `dot` draws it.
 ## Decision 1: a `beside` decoration on the fusion place
 
 ```text
-decorate (Place) beside [ left | right ]
+decorate (Place) beside [ left | right ] [ unshared ]
 ```
 
 It lowers to the closed IR kind `decoration.beside` and resolves into the
 ADR 0028 payload as `decorations["place:P"].beside`, an object with an
 optional `side`. It is one fact per place, and it applies to every copy of
-that place.
+that place. `unshared` is ADR 0070.
 
 **Considered options:**
 
@@ -65,7 +66,7 @@ subgraph "cluster_beside_0" { label=""; peripheries=0; margin=0;
 ## Decision 3: sides, defaults and directions
 
 - `left` copies go before the transition and `right` copies after it. The
-  first copy, in arc order, sits nearest.
+  first copy, in the structural emission order (ADR 0069), sits nearest.
 - A copy with no side goes to the side that has fewer copies so far, `left` on
   a tie. Two copies then sit one on each side. Each read arc is a short
   straight edge, and no arc arches over another copy.
@@ -84,6 +85,10 @@ records the beside statements, and applying such a view removes them. Views
 with style facts only stay on `dot` and keep `beside`. The author of a
 positioned view sets the geometry by hand.
 
+*Amended by ADR 0067 and ADR 0072. A view that positions nodes places a
+`beside` copy relative to its transition when the view positions neither
+that copy nor its place.*
+
 ## Consequences
 
 - Both implementations, the IR schema, the payload validator, emission, and a
@@ -91,4 +96,6 @@ positioned view sets the geometry by hand.
   Decision 5.
 - `beside` is inert like every decoration: no engine, property, or
   composition code reads it. `--no-fusion` and composition renders draw no
-  copies, so they draw nothing for it.
+  copies, so they draw nothing for it. `--no-fusion` is deprecated (ADR 0071):
+  it still wins over a `single` decoration and a view `fusion` fact, and it
+  still draws every fusion place as one ordinary node.

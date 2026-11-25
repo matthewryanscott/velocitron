@@ -1,8 +1,16 @@
 import assert from "node:assert/strict";
+import {execFileSync} from "node:child_process";
+import {readFileSync} from "node:fs";
+import {dirname, join} from "node:path";
 import {describe, it} from "node:test";
+import {fileURLToPath} from "node:url";
 import {
+  NAME_POINT,
+  SMALL_POINT,
   ViewApplicationError,
   applyView,
+  besideGap,
+  nodeWidth,
   fusionCopy,
   fusionLayout,
   netRenderModel,
@@ -83,6 +91,12 @@ function choice(names, reads) {
 }
 
 const beside = {nodes: {"place:switch": {beside: true}}, arcs: {}, quietColors: [], shownFields: {}};
+const unshared = {
+  nodes: {"place:switch": {beside: true, besideShare: false}},
+  arcs: {},
+  quietColors: [],
+  shownFields: {},
+};
 
 describe("net rendering", () => {
   it("draws ports, marks, guards, and arc modes", () => {
@@ -155,6 +169,107 @@ describe("net rendering", () => {
     assert.equal(flat.includes("window@"), false);
   });
 
+  it("draws a single fusion place as one dashed node and lets a view override it", () => {
+    // given: switch asks to be one node, and budget stays a beside copy
+    const net = {
+      name: "single",
+      places: [
+        {name: "queued", accepts: ["job"]},
+        {name: "running", accepts: ["job"]},
+        {name: "switch", accepts: ["flag"], annotations: {fusion: true}},
+        {name: "budget", accepts: ["credit"], annotations: {fusion: true}},
+      ],
+      transitions: [{name: "start"}, {name: "finish"}],
+      arcs: [
+        {from: {place: "queued"}, to: {transition: "start"}, consume: {type: "job", mode: "consume", weight: 1}},
+        {from: {transition: "start"}, to: {place: "running"}, produce: {type: "job", destination: "running"}},
+        {from: {place: "switch"}, to: {transition: "start"}, consume: {type: "flag", mode: "read", weight: 1}},
+        {from: {place: "switch"}, to: {transition: "finish"}, consume: {type: "flag", mode: "read", weight: 1}},
+        {from: {place: "budget"}, to: {transition: "start"}, consume: {type: "credit", mode: "read", weight: 1}},
+      ],
+    };
+    const decorations = {
+      nodes: {
+        "place:switch": {single: true},
+        "place:budget": {beside: true},
+      },
+      arcs: {},
+      quietColors: [],
+      shownFields: {},
+    };
+    const plain = {htmlLabels: false, tooltips: false};
+    const edge = (dot, source, target) => dot.split("\n").find((line) => line.includes(`"${source}" -> "${target}"`));
+    // when: rendered from the decoration, from each view override, and without fusion copies
+    const dot = netToDot(net, {decorations, style: plain});
+    const copies = netToDot(net, {decorations, fusionModes: {switch: "copies"}, style: plain});
+    const collapsed = netToDot(net, {decorations, fusionModes: {budget: "single"}, style: plain});
+    const flat = netToDot(net, {decorations, renderFusion: false, style: plain});
+    // then: switch is one dashed node whose arcs take part in ranking
+    assert.equal(dot.includes('"switch@'), false);
+    assert.ok(dot.includes('class="fusion", style=dashed, color="gray40"'));
+    assert.equal(edge(dot, "switch", "start").includes("constraint=false"), false);
+    assert.equal(edge(dot, "switch", "finish").includes("constraint=false"), false);
+    assert.ok(dot.includes('"budget@start"'));
+    assert.ok(edge(dot, "budget@start", "start").includes("constraint=false"));
+    assert.ok(copies.includes('"switch@start"'));
+    assert.ok(copies.includes('"switch@finish"'));
+    assert.ok(collapsed.includes('"budget" ['));
+    assert.equal(collapsed.includes('"budget@'), false);
+    assert.equal(collapsed.includes("cluster_beside"), false);
+    assert.ok(flat.includes('"switch" ['));
+    assert.equal(flat.includes("class=\"fusion\""), false);
+  });
+
+  it("does not apply a copy position to a fusion place drawn as one node", () => {
+    // given: switch is one node, and the view also positions one of its copies
+    const net = {
+      name: "single",
+      places: [
+        {name: "queued", accepts: ["job"]},
+        {name: "switch", accepts: ["flag"], annotations: {fusion: true}},
+      ],
+      transitions: [{name: "start"}, {name: "finish"}],
+      arcs: [
+        {from: {place: "queued"}, to: {transition: "start"}, consume: {type: "job", mode: "consume", weight: 1}},
+        {from: {place: "switch"}, to: {transition: "start"}, consume: {type: "flag", mode: "read", weight: 1}},
+        {from: {place: "switch"}, to: {transition: "finish"}, consume: {type: "flag", mode: "read", weight: 1}},
+      ],
+    };
+    const decorations = {
+      nodes: {"place:switch": {single: true}},
+      arcs: {},
+      quietColors: [],
+      shownFields: {},
+    };
+    const raw = {
+      annotations: {
+        "petrinet.dsl/v1": {
+          arcHandles: {},
+          views: {
+            lanes: {
+              positions: {
+                "place:switch": {x: 4, y: 8},
+                "place:switch@transition:start": {x: 40, y: 80},
+                "transition:start": {x: 1, y: 2},
+              },
+              routes: {},
+            },
+          },
+        },
+      },
+    };
+    // when: the view is applied
+    const dot = applyView(
+      netRenderModel(net, {decorations, style: {htmlLabels: false, tooltips: false}}),
+      raw,
+      "lanes",
+    );
+    // then: the one node takes the place point, and the copy point is unused
+    assert.equal(dot.includes('"switch@'), false);
+    assert.ok(dot.split("\n").find((line) => line.includes('"switch" [')).includes('pos="4,8!"'));
+    assert.equal(dot.includes("40,80"), false);
+  });
+
   it("shares one fusion copy between neighbor siblings", () => {
     // given: a choice whose transitions also read one beside fusion place
     const pair = choice(["hold", "skip"], ["hold", "skip"]);
@@ -164,13 +279,157 @@ describe("net rendering", () => {
     const paired = fusionLayout(pair, fusion, beside);
     const three = fusionLayout(trio, fusion, beside);
     // then: two neighbors share the copy, and a run of three pairs from the left
-    assert.deepEqual(siblingGroups(trio, fusion), [["hold", "skip", "send"]]);
+    // of the structural order (rank, then name)
+    assert.deepEqual(siblingGroups(trio, fusion), [["hold", "send", "skip"]]);
     assert.equal(fusionCopy(paired, "switch", "hold"), "switch@hold+skip");
     assert.equal(fusionCopy(paired, "switch", "skip"), "switch@hold+skip");
     assert.deepEqual(paired.rows, [["hold", "switch@hold+skip", "skip"]]);
-    assert.deepEqual(three.rows, [["hold", "switch@hold+skip", "skip", "send", "switch@send"]]);
+    assert.deepEqual(three.rows, [["hold", "switch@hold+send", "send", "skip", "switch@skip"]]);
     const dot = netToDot(pair, {decorations: beside});
     assert.ok(dot.includes('    "hold" -> "switch@hold+skip" -> "skip" [style=invis];'));
+  });
+
+  it("draws the same graph when declarations are reversed", () => {
+    // given: a net and the same net with every declaration reversed
+    const net = featureNet();
+    const reversed = {
+      ...net,
+      places: [...net.places].reverse(),
+      transitions: [...net.transitions].reverse(),
+      arcs: [...net.arcs].reverse(),
+    };
+    const forward = choice(["hold", "skip", "send"], ["hold", "skip", "send"]);
+    const backward = {
+      ...forward,
+      places: [...forward.places].reverse(),
+      transitions: [...forward.transitions].reverse(),
+      arcs: [...forward.arcs].reverse(),
+    };
+    // when: each pair is drawn
+    const drawn = netToDot(net);
+    const choiceDot = netToDot(forward, {decorations: beside});
+    // then: the bytes match, and the initially marked place leads the places
+    assert.equal(drawn, netToDot(reversed));
+    assert.equal(choiceDot, netToDot(backward, {decorations: beside}));
+    assert.deepEqual(siblingGroups(forward, new Set(["switch"])), siblingGroups(backward, new Set(["switch"])));
+    const placeNames = drawn.split("\n").filter((line) => line.startsWith('    "') && !line.includes("->") && line.endsWith("];"))
+      .map((line) => line.split('"')[1]);
+    assert.ok(placeNames.indexOf("buffer") < placeNames.indexOf("in_port"));
+    assert.ok(placeNames.indexOf("buffer") < placeNames.indexOf("out_port"));
+  });
+
+  it("pushes unshared copies outside the choice row", () => {
+    // given: the same choice, opted out of sharing
+    const pair = choice(["hold", "skip"], ["hold", "skip"]);
+    const trio = choice(["hold", "skip", "send"], ["hold", "skip", "send"]);
+    const fusion = new Set(["switch"]);
+    // when: the layout places the copies
+    const paired = fusionLayout(pair, fusion, unshared);
+    const three = fusionLayout(trio, fusion, unshared);
+    const dot = netToDot(pair, {decorations: unshared});
+    // then: a run of two is copy, siblings, copy, and the middle of three goes left
+    assert.equal(fusionCopy(paired, "switch", "hold"), "switch@hold");
+    assert.equal(fusionCopy(paired, "switch", "skip"), "switch@skip");
+    assert.deepEqual(paired.rows, [["switch@hold", "hold", "skip", "switch@skip"]]);
+    assert.deepEqual(three.rows, [["switch@hold", "hold", "switch@send", "send", "skip", "switch@skip"]]);
+    assert.equal(dot.includes("switch@hold+skip"), false);
+    assert.ok(dot.includes('    "switch@hold" -> "hold" -> "skip" -> "switch@skip" [style=invis];'));
+  });
+
+  function leaseChoice() {
+    const consume = (place, transition, type) => ({
+      from: {place},
+      to: {transition},
+      consume: {type, mode: "consume", weight: 1},
+    });
+    const produce = (transition, place, type) => ({
+      from: {transition},
+      to: {place},
+      produce: {type, destination: place},
+    });
+    const read = (transition) => ({
+      from: {place: "clock"},
+      to: {transition},
+      consume: {type: "now", mode: "read", weight: 1},
+    });
+    return {
+      name: "lease_choice",
+      places: [
+        {name: "idle", accepts: ["job"]},
+        {name: "lease", accepts: ["permit"]},
+        {name: "working", accepts: ["job"]},
+        {name: "done", accepts: ["job"]},
+        {name: "clock", accepts: ["now"], annotations: {fusion: true}},
+      ],
+      transitions: [{name: "acquire"}, {name: "commit"}, {name: "expire"}],
+      arcs: [
+        consume("idle", "acquire", "job"),
+        consume("lease", "acquire", "permit"),
+        produce("acquire", "working", "job"),
+        consume("working", "commit", "job"),
+        produce("commit", "done", "job"),
+        produce("commit", "lease", "permit"),
+        consume("working", "expire", "job"),
+        produce("expire", "idle", "job"),
+        produce("expire", "lease", "permit"),
+        read("acquire"),
+        read("commit"),
+        read("expire"),
+      ],
+    };
+  }
+
+  it("draws lease_choice as two clock copies outside commit and expire", () => {
+    // given: commit and expire are one choice; the clock is beside unshared
+    const net = leaseChoice();
+    const decorations = {
+      nodes: {"place:clock": {beside: true, besideShare: false}},
+      arcs: {},
+      quietColors: [],
+      shownFields: {},
+    };
+    // when: the layout and the drawing place the copies
+    const layout = fusionLayout(net, new Set(["clock"]), decorations);
+    const dot = netToDot(net, {decorations});
+    // then: no shared clock node, and the row is copy, commit, expire, copy
+    assert.deepEqual(layout.rows, [
+      ["clock@acquire", "acquire"],
+      ["clock@commit", "commit", "expire", "clock@expire"],
+    ]);
+    assert.equal(dot.includes("clock@commit+expire"), false);
+    assert.equal(dot.split('"clock@commit" [shape=ellipse').length - 1, 1);
+    assert.equal(dot.split('"clock@expire" [shape=ellipse').length - 1, 1);
+    assert.ok(
+      dot.includes('    "clock@commit" -> "commit" -> "expire" -> "clock@expire" [style=invis];'),
+    );
+  });
+
+  it("keeps one unshared copy per transition when the view positions them", () => {
+    // given: the clock is beside unshared, and the view pins each choice copy
+    const net = leaseChoice();
+    const decorations = {
+      nodes: {"place:clock": {beside: true, besideShare: false}},
+      arcs: {},
+      quietColors: [],
+      shownFields: {},
+    };
+    const model = netRenderModel(net, {decorations});
+    // when: those copies have their own positions
+    const dot = applyView(
+      model,
+      lanes({
+        "transition:commit": {x: 0, y: 0},
+        "transition:expire": {x: 200, y: 0},
+        "place:clock@transition:commit": {x: -40, y: 0},
+        "place:clock@transition:expire": {x: 240, y: 0},
+      }),
+      "lanes",
+    );
+    // then: one node per transition, each on its own point
+    assert.notEqual(model.copyLines.get("clock\0commit"), model.copyLines.get("clock\0expire"));
+    assert.equal(dot.includes("clock@commit+expire"), false);
+    assert.ok(dot.includes('pos="-40,0!"'));
+    assert.ok(dot.includes('pos="240,0!"'));
   });
 
   it("pins a view through the structural index", () => {
@@ -204,5 +463,489 @@ describe("net rendering", () => {
     assert.ok(dot.includes("layout=neato;"));
     assert.ok(dot.includes("splines=ortho;"));
     assert.throws(() => applyView(model, raw, "missing"), ViewApplicationError);
+  });
+
+  function coord(value) {
+    return Number.isInteger(value) ? String(value) : String(value);
+  }
+
+  function placeWidth(name, color) {
+    return nodeWidth([[name, NAME_POINT], [`⟨${color}⟩`, SMALL_POINT]]);
+  }
+
+  function transitionWidth(name) {
+    return nodeWidth([[name, NAME_POINT]]);
+  }
+
+  function gap(transition, place, color) {
+    return besideGap(transitionWidth(transition), placeWidth(place, color));
+  }
+
+  function lanes(positions) {
+    return {
+      annotations: {
+        "petrinet.dsl/v1": {
+          views: {lanes: {positions, routes: {}}},
+          arcHandles: {},
+        },
+      },
+    };
+  }
+
+  function nodeLine(dot, name) {
+    const matches = dot.split("\n").filter((line) => line.startsWith(`    "${name}" [`));
+    assert.equal(matches.length, 1, name);
+    return matches[0];
+  }
+
+  function arc(from, to, kind) {
+    if (kind === "produce") {
+      return {
+        from: {transition: from},
+        to: {place: to.place},
+        produce: {type: to.type, destination: to.place},
+      };
+    }
+    return {
+      from: {place: from},
+      to: {transition: to},
+      consume: {type: kind, mode: kind === "job" ? "consume" : "read", weight: 1},
+    };
+  }
+
+  it("places each lease-lock copy beside its pinned transition", () => {
+    // given: one fusion lock used by two workers, beside left, transitions pinned
+    const places = [{name: "lock", accepts: ["permit"], annotations: {fusion: true}}];
+    const transitions = [];
+    const arcs = [];
+    for (const worker of ["a", "b"]) {
+      places.push(
+        {name: `ready_${worker}`, accepts: ["job"]},
+        {name: `held_${worker}`, accepts: ["job"]},
+        {name: `done_${worker}`, accepts: ["job"]},
+      );
+      transitions.push({name: `acquire_${worker}`}, {name: `release_${worker}`});
+      arcs.push(
+        arc(`ready_${worker}`, `acquire_${worker}`, "job"),
+        {
+          from: {place: "lock"},
+          to: {transition: `acquire_${worker}`},
+          consume: {type: "permit", mode: "consume", weight: 1},
+        },
+        arc(`acquire_${worker}`, {place: `held_${worker}`, type: "job"}, "produce"),
+        arc(`held_${worker}`, `release_${worker}`, "job"),
+        arc(`release_${worker}`, {place: `done_${worker}`, type: "job"}, "produce"),
+        arc(`release_${worker}`, {place: "lock", type: "permit"}, "produce"),
+      );
+    }
+    const net = {name: "lease_lock", places, transitions, arcs};
+    const decorations = {
+      nodes: {"place:lock": {beside: true, besideSide: "left"}},
+      arcs: {},
+      quietColors: [],
+      shownFields: {},
+    };
+    // when: the view is applied
+    const dot = applyView(
+      netRenderModel(net, {decorations}),
+      lanes({
+        "transition:acquire_a": {x: 0, y: 300},
+        "transition:release_a": {x: 0, y: 100},
+        "transition:acquire_b": {from: "transition:acquire_a", delta: {x: 300, y: 0}},
+        "transition:release_b": {from: "transition:release_a", delta: {x: 300, y: 0}},
+      }),
+      "lanes",
+    );
+    // then: each copy sits one gap to the left of its own transition
+    const lockGap = gap("acquire_a", "lock", "permit");
+    assert.ok(nodeLine(dot, "lock@acquire_a").includes(`pos="-${coord(lockGap)},300!"`));
+    assert.ok(nodeLine(dot, "lock@release_a").includes(`pos="-${coord(lockGap)},100!"`));
+    assert.ok(nodeLine(dot, "lock@acquire_b").includes(`pos="${coord(300 - lockGap)},300!"`));
+    assert.ok(nodeLine(dot, "lock@release_b").includes(`pos="${coord(300 - lockGap)},100!"`));
+    assert.ok(dot.includes("layout=neato;"));
+    assert.equal(dot.includes("cluster_beside"), false);
+    assert.equal(dot.includes("style=invis"), false);
+  });
+
+  it("steps copies on one side out by one gap", () => {
+    // given: two left copies at one transition. Structural order is budget, then switch.
+    const net = {
+      name: "stacked",
+      places: [
+        {name: "queued", accepts: ["job"]},
+        {name: "switch", accepts: ["job"], annotations: {fusion: true}},
+        {name: "budget", accepts: ["job"], annotations: {fusion: true}},
+      ],
+      transitions: [{name: "start"}],
+      arcs: [
+        arc("queued", "start", "job"),
+        arc("switch", "start", "flag"),
+        arc("budget", "start", "flag"),
+      ],
+    };
+    const decorations = {
+      nodes: {
+        "place:switch": {beside: true, besideSide: "left"},
+        "place:budget": {beside: true, besideSide: "left"},
+      },
+      arcs: {},
+      quietColors: [],
+      shownFields: {},
+    };
+    // when: the view pins start
+    const dot = applyView(
+      netRenderModel(net, {decorations}),
+      lanes({"transition:start": {x: 0, y: 0}}),
+      "lanes",
+    );
+    // then: budget, first in the structural order, is nearest, and switch is one gap farther
+    const step = gap("start", "switch", "job");
+    assert.ok(nodeLine(dot, "budget@start").includes(`pos="-${coord(step)},0!"`));
+    assert.ok(nodeLine(dot, "switch@start").includes(`pos="-${coord(2 * step)},0!"`));
+  });
+
+  it("places a shared beside copy between two pinned transitions", () => {
+    // given: hold and skip share one beside copy
+    const pair = choice(["hold", "skip"], ["hold", "skip"]);
+    const model = netRenderModel(pair, {decorations: beside});
+    // when: both transitions are pinned, and when only the left one is
+    const both = applyView(
+      model,
+      lanes({
+        "transition:hold": {x: 0, y: 0},
+        "transition:skip": {x: 300, y: 0},
+      }),
+      "lanes",
+    );
+    const one = applyView(model, lanes({"transition:hold": {x: 0, y: 0}}), "lanes");
+    // then: both pins put the copy at the midpoint, and one pin puts it one gap right
+    assert.ok(nodeLine(both, "switch@hold+skip").includes('pos="150,0!"'));
+    assert.ok(nodeLine(one, "switch@hold+skip").includes(`pos="${coord(gap("hold", "switch", "job"))},0!"`));
+  });
+
+  it("places the beside conformance net the way lanes and lanes_lock ask", () => {
+    // given: the 20-decoration-beside net, with a pinned view and a lanes_lock view
+    const net = {
+      name: "beside",
+      places: [
+        {name: "queued", accepts: ["job"]},
+        {name: "running", accepts: ["job"]},
+        {name: "done", accepts: ["job"]},
+        {name: "switch", accepts: ["flag"], annotations: {fusion: true}},
+        {name: "budget", accepts: ["credit"], annotations: {fusion: true}},
+      ],
+      transitions: [{name: "start"}, {name: "finish"}],
+      arcs: [
+        arc("queued", "start", "job"),
+        arc("start", {place: "running", type: "job"}, "produce"),
+        arc("running", "finish", "job"),
+        arc("finish", {place: "done", type: "job"}, "produce"),
+        arc("switch", "start", "flag"),
+        arc("switch", "finish", "flag"),
+        arc("budget", "start", "flag"),
+      ],
+    };
+    const decorations = {
+      nodes: {
+        "place:switch": {beside: true, besideSide: "left"},
+        "place:budget": {beside: true},
+      },
+      arcs: {},
+      quietColors: [],
+      shownFields: {},
+    };
+    const model = netRenderModel(net, {decorations});
+    const start = gap("start", "switch", "flag");
+    const finish = gap("finish", "switch", "flag");
+    const budget = gap("start", "budget", "credit");
+    // when: lanes pins the transitions
+    const lanesDot = applyView(
+      model,
+      lanes({
+        "transition:start": {x: 0, y: 200},
+        "transition:finish": {from: "transition:start", delta: {x: 0, y: -200}},
+      }),
+      "lanes",
+    );
+    // then: switch is left of each transition and budget is right of start
+    assert.ok(nodeLine(lanesDot, "switch@start").includes(`pos="-${coord(start)},200!"`));
+    assert.ok(nodeLine(lanesDot, "switch@finish").includes(`pos="-${coord(finish)},0!"`));
+    assert.ok(nodeLine(lanesDot, "budget@start").includes(`pos="${coord(budget)},200!"`));
+    assert.ok(lanesDot.includes("constraint=false"));
+    // when: lanes_lock also positions switch, and done is relative to it
+    const locked = applyView(
+      model,
+      lanes({
+        "transition:start": {x: 0, y: 200},
+        "transition:finish": {from: "transition:start", delta: {x: 0, y: -200}},
+        "place:switch": {x: 40, y: 0},
+        "place:done": {from: "place:switch", delta: {x: 80, y: 0}},
+      }),
+      "lanes",
+    );
+    // then: the place point lands on each switch copy, and done uses that anchor
+    assert.ok(nodeLine(locked, "switch@start").includes('pos="40,0!"'));
+    assert.ok(nodeLine(locked, "switch@finish").includes('pos="40,0!"'));
+    assert.ok(nodeLine(locked, "done").includes('pos="120,0!"'));
+    // and: budget has no place position, so beside still places it
+    assert.ok(nodeLine(locked, "budget@start").includes(`pos="${coord(budget)},200!"`));
+  });
+
+  it("lets a whole-place position beat beside and anchor relative", () => {
+    // given: a fusion lock with beside, a place position, and one pinned transition
+    const net = {
+      name: "lease_lock",
+      places: [
+        {name: "lock", accepts: ["permit"], annotations: {fusion: true}},
+        {name: "ready", accepts: ["job"]},
+      ],
+      transitions: [{name: "acquire"}, {name: "release"}],
+      arcs: [
+        arc("ready", "acquire", "job"),
+        {
+          from: {place: "lock"},
+          to: {transition: "acquire"},
+          consume: {type: "permit", mode: "consume", weight: 1},
+        },
+        arc("release", {place: "lock", type: "permit"}, "produce"),
+      ],
+    };
+    const decorations = {
+      nodes: {"place:lock": {beside: true, besideSide: "left"}},
+      arcs: {},
+      quietColors: [],
+      shownFields: {},
+    };
+    // when: the view is applied
+    const dot = applyView(
+      netRenderModel(net, {decorations}),
+      lanes({
+        "transition:acquire": {x: 0, y: 0},
+        "place:lock": {x: 10, y: 20},
+        "place:ready": {from: "place:lock", delta: {x: 10, y: 0}},
+      }),
+      "lanes",
+    );
+    // then: both copies take the place point, and ready uses that anchor
+    assert.ok(nodeLine(dot, "lock@acquire").includes('pos="10,20!"'));
+    assert.ok(nodeLine(dot, "lock@release").includes('pos="10,20!"'));
+    assert.ok(nodeLine(dot, "ready").includes('pos="20,20!"'));
+  });
+
+  it("lets a copy position beat the place, which beats beside", () => {
+    // given: beside lock, a place position, one copy position, and a relative base
+    const places = [{name: "lock", accepts: ["permit"], annotations: {fusion: true}}];
+    const transitions = [];
+    const arcs = [];
+    for (const worker of ["a", "b"]) {
+      places.push(
+        {name: `ready_${worker}`, accepts: ["job"]},
+        {name: `held_${worker}`, accepts: ["job"]},
+        {name: `done_${worker}`, accepts: ["job"]},
+      );
+      transitions.push({name: `acquire_${worker}`}, {name: `release_${worker}`});
+      arcs.push(
+        arc(`ready_${worker}`, `acquire_${worker}`, "job"),
+        {
+          from: {place: "lock"},
+          to: {transition: `acquire_${worker}`},
+          consume: {type: "permit", mode: "consume", weight: 1},
+        },
+        arc(`acquire_${worker}`, {place: `held_${worker}`, type: "job"}, "produce"),
+        arc(`held_${worker}`, `release_${worker}`, "job"),
+        arc(`release_${worker}`, {place: `done_${worker}`, type: "job"}, "produce"),
+        arc(`release_${worker}`, {place: "lock", type: "permit"}, "produce"),
+      );
+    }
+    const decorations = {
+      nodes: {"place:lock": {beside: true, besideSide: "left"}},
+      arcs: {},
+      quietColors: [],
+      shownFields: {},
+    };
+    const model = netRenderModel(
+      {name: "lease_lock", places, transitions, arcs},
+      {decorations},
+    );
+    // when: the view is applied
+    const dot = applyView(
+      model,
+      lanes({
+        "transition:acquire_a": {x: 0, y: 0},
+        "transition:release_a": {x: 200, y: 0},
+        "place:lock": {x: 10, y: 20},
+        "place:lock@transition:acquire_a": {
+          from: "transition:acquire_a",
+          delta: {x: -70, y: 0},
+        },
+        "place:ready_a": {
+          from: "place:lock@transition:acquire_a",
+          delta: {x: 5, y: 0},
+        },
+      }),
+      "lanes",
+    );
+    // then: the copy entry wins, the other copy takes the place, and ready_a
+    // sits on the copy's rendered point
+    assert.notEqual(
+      model.copyLines.get("lock\0acquire_a"),
+      model.copyLines.get("lock\0release_a"),
+    );
+    assert.ok(nodeLine(dot, "lock@acquire_a").includes('pos="-70,0!"'));
+    assert.ok(nodeLine(dot, "lock@release_a").includes('pos="10,20!"'));
+    assert.ok(nodeLine(dot, "ready_a").includes('pos="-65,0!"'));
+  });
+
+  it("places a shared copy from its one agreed entry", () => {
+    // given: hold and skip share one beside copy
+    const pair = choice(["hold", "skip"], ["hold", "skip"]);
+    const model = netRenderModel(pair, {decorations: beside});
+    // when: both names of the shared copy carry the same point
+    const dot = applyView(
+      model,
+      lanes({
+        "transition:hold": {x: 0, y: 0},
+        "transition:skip": {x: 300, y: 0},
+        "place:switch": {x: 10, y: 10},
+        "place:switch@transition:hold": {x: 40, y: 80},
+        "place:switch@transition:skip": {x: 40, y: 80},
+        "place:pending": {
+          from: "place:switch@transition:skip",
+          delta: {x: 0, y: -10},
+        },
+      }),
+      "lanes",
+    );
+    // then: one line, the agreed point, and pending uses that rendered point
+    assert.equal(model.copyLines.get("switch\0hold"), model.copyLines.get("switch\0skip"));
+    assert.ok(nodeLine(dot, "switch@hold+skip").includes('pos="40,80!"'));
+    assert.equal(nodeLine(dot, "switch@hold+skip").includes('pos="150,0!"'), false);
+    assert.ok(nodeLine(dot, "pending").includes('pos="40,70!"'));
+    assert.throws(
+      () =>
+        applyView(
+          model,
+          lanes({
+            "place:switch@transition:hold": {x: 1, y: 1},
+            "place:switch@transition:skip": {x: 2, y: 2},
+          }),
+          "lanes",
+        ),
+      (error) => error instanceof ViewApplicationError && /shared copy of place 'switch'/.test(error.message),
+    );
+  });
+
+  function sixLock() {
+    const places = [{name: "lock", accepts: ["permit"], annotations: {fusion: true}}];
+    const transitions = [];
+    const arcs = [];
+    for (const worker of ["a", "b", "c"]) {
+      places.push(
+        {name: `ready_${worker}`, accepts: ["job"]},
+        {name: `held_${worker}`, accepts: ["job"]},
+        {name: `done_${worker}`, accepts: ["job"]},
+      );
+      transitions.push({name: `acquire_${worker}`}, {name: `release_${worker}`});
+      arcs.push(
+        arc(`ready_${worker}`, `acquire_${worker}`, "job"),
+        {
+          from: {place: "lock"},
+          to: {transition: `acquire_${worker}`},
+          consume: {type: "permit", mode: "consume", weight: 1},
+        },
+        arc(`acquire_${worker}`, {place: `held_${worker}`, type: "job"}, "produce"),
+        arc(`held_${worker}`, `release_${worker}`, "job"),
+        arc(`release_${worker}`, {place: `done_${worker}`, type: "job"}, "produce"),
+        arc(`release_${worker}`, {place: "lock", type: "permit"}, "produce"),
+      );
+    }
+    return {name: "lease_lock", places, transitions, arcs};
+  }
+
+  function sixPositions() {
+    const positions = {"place:lock": {x: 9999, y: 9999}};
+    for (const [index, worker] of ["a", "b", "c"].entries()) {
+      const origin = index * 640;
+      positions[`transition:acquire_${worker}`] = {x: origin, y: 560};
+      positions[`transition:release_${worker}`] = {x: origin, y: 0};
+      positions[`place:lock@transition:acquire_${worker}`] = {x: origin - 220, y: 560};
+      positions[`place:lock@transition:release_${worker}`] = {x: origin - 220, y: 0};
+      positions[`place:held_${worker}`] = {x: origin, y: 280};
+      positions[`place:done_${worker}`] = {x: origin, y: -280};
+      if (worker === "a") {
+        positions["place:ready_a"] = {
+          from: "place:lock@transition:acquire_a",
+          delta: {x: 0, y: 280},
+        };
+      } else {
+        positions[`place:ready_${worker}`] = {x: origin, y: 840};
+      }
+    }
+    return positions;
+  }
+
+  it("pins six lock copies without stacking or scaling", () => {
+    // given: three workers and a position for every copy
+    const decorations = {
+      nodes: {"place:lock": {beside: true, besideSide: "left"}},
+      arcs: {},
+      quietColors: [],
+      shownFields: {},
+    };
+    const dot = applyView(
+      netRenderModel(sixLock(), {decorations}),
+      lanes(sixPositions()),
+      "lanes",
+    );
+    const copies = ["a", "b", "c"].flatMap((worker) => [
+      `lock@acquire_${worker}`,
+      `lock@release_${worker}`,
+    ]);
+    // when: the golden is read, and neato lays the drawing out
+    const golden = readFileSync(
+      join(dirname(fileURLToPath(import.meta.url)), "../../fixtures/lease-lock-six-copies.dot"),
+      "utf8",
+    );
+    const points = copies.map((name) => {
+      const line = nodeLine(dot, name);
+      const start = line.indexOf('pos="') + 5;
+      return line.slice(start, line.indexOf("!", start));
+    });
+    const plain = execFileSync("dot", ["-Tplain"], {input: dot, encoding: "utf8"});
+    const header = plain.split("\n")[0].split(" ");
+    const found = new Map();
+    for (const line of plain.split("\n")) {
+      const parts = line.split(" ");
+      if (parts[0] === "node") {
+        found.set(parts[1].replaceAll('"', ""), [Number(parts[2]), Number(parts[3])]);
+      }
+    }
+    // then: the drawing matches Python, no two copies share a point, and
+    // overlap=scale leaves the pins. Plain coordinates are shifted to the
+    // layout corner; the distances between copies stay the authored ones.
+    assert.equal(dot, golden);
+    assert.equal(new Set(points).size, 6);
+    assert.equal(dot.includes("9999,9999"), false);
+    assert.ok(nodeLine(dot, "ready_a").includes('pos="-220,840!"'));
+    assert.equal(Number(header[1]), 1);
+    const anchor = found.get("lock@acquire_a");
+    assert.ok(anchor);
+    const shift = [anchor[0] - (-220 / 72), anchor[1] - (560 / 72)];
+    for (const [index, worker] of ["a", "b", "c"].entries()) {
+      const origin = index * 640;
+      for (const [name, point] of [
+        [`lock@acquire_${worker}`, [origin - 220, 560]],
+        [`lock@release_${worker}`, [origin - 220, 0]],
+      ]) {
+        const node = found.get(name);
+        assert.ok(node, name);
+        assert.ok(Math.abs(node[0] - (point[0] / 72 + shift[0])) < 0.02, name);
+        assert.ok(Math.abs(node[1] - (point[1] / 72 + shift[1])) < 0.02, name);
+      }
+    }
+    const ready = found.get("ready_a");
+    const copy = found.get("lock@acquire_a");
+    assert.ok(ready && copy);
+    assert.ok(Math.abs(ready[1] - copy[1] - 280 / 72) < 0.02);
   });
 });

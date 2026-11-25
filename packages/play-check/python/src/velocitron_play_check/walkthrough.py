@@ -49,6 +49,7 @@ from velocitron_viz import (
     member_label,
     net_render_model,
     net_twin_dots,
+    read_fusion_modes,
     view_setting,
 )
 
@@ -676,6 +677,11 @@ class _Renderer:
             marking=marking,
             style=self.style,
             decorations=self.decorations,
+            fusion_modes=(
+                read_fusion_modes(self.view, DEFAULT_VIEW)
+                if self.view is not None
+                else {}
+            ),
         )
         if self.view is not None:
             return apply_view(model, self.view, DEFAULT_VIEW)
@@ -1049,8 +1055,10 @@ def _markdown(document: Mapping[str, Any]) -> str:
     if stage["prose_md"]:
         blocks.append(stage["prose_md"])
     for step in document["steps"]:
-        mark = " · assumed" if step["status"] == "assumed" else (
-            " ✗" if step["status"] == "failed" else ""
+        mark = (
+            " · assumed"
+            if step["status"] == "assumed"
+            else (" ✗" if step["status"] == "failed" else "")
         )
         blocks.append(f"## {step['heading']}{mark}")
         if "before_dot" in step:

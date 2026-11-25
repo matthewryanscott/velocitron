@@ -7,9 +7,28 @@
  * discover which line belongs to which place.
  */
 
-import type {RenderModel} from "./render.js";
+import type {BesidePlacement, RenderModel} from "./render.js";
 
 export const DEFAULT_VIEW = "default";
+// Shared with the Python renderer (ADR 0067). Helvetica's average advance
+// is half the point size. Names are 14pt; color and behavior lines are 9pt.
+export const NAME_POINT = 14;
+export const SMALL_POINT = 9;
+export const NODE_PAD = 20;
+export const BESIDE_MARGIN = 24;
+
+export function textWidth(text: string, pointSize: number): number {
+  return (text.length * pointSize) / 2;
+}
+
+export function nodeWidth(lines: readonly (readonly [string, number])[]): number {
+  const widest = lines.reduce((width, [text, size]) => Math.max(width, textWidth(text, size)), 0);
+  return widest + NODE_PAD;
+}
+
+export function besideGap(transitionWidth: number, copyWidth: number): number {
+  return (transitionWidth + copyWidth) / 2 + BESIDE_MARGIN;
+}
 const VIEW_SPLINES = ["ortho", "spline", "curved", "polyline", "line"] as const;
 
 export class ViewApplicationError extends Error {
@@ -27,6 +46,9 @@ export interface Decoration {
   readonly summary?: string | null;
   readonly beside?: boolean;
   readonly besideSide?: string | null;
+  /** False is `beside unshared`: one copy per transition (ADR 0070). */
+  readonly besideShare?: boolean;
+  readonly single?: boolean;
   readonly failure?: boolean;
   readonly faded?: boolean;
 }
@@ -88,6 +110,8 @@ export function readDecorations(raw: unknown): Decorations {
       summary: optionalText(rawEntry.summary),
       beside: isRecord(beside),
       besideSide: isRecord(beside) ? optionalText(beside.side) : null,
+      besideShare: isRecord(beside) ? beside.share !== false : true,
+      single: rawEntry.single === true,
     };
     if (kind === "place" || kind === "transition") nodes[subject] = decoration;
     else if (kind === "arc") {
@@ -109,6 +133,36 @@ export function readDecorations(raw: unknown): Decorations {
     }
   }
   return {nodes, arcs, quietColors, shownFields};
+}
+
+export function fusionModesOf(view: Readonly<Record<string, unknown>>): Record<string, string> {
+  const raw = view.fusion ?? {};
+  if (raw === null || (isRecord(raw) && Object.keys(raw).length === 0)) return {};
+  if (!isRecord(raw)) throw new ViewApplicationError("invalid view fusion");
+  const modes: Record<string, string> = {};
+  for (const [subject, mode] of Object.entries(raw)) {
+    const place = subject.startsWith("place:") ? subject.slice("place:".length) : "";
+    if (place.length === 0 || (mode !== "single" && mode !== "copies")) {
+      throw new ViewApplicationError(`invalid view fusion ${pyStr(subject)}`);
+    }
+    modes[place] = mode;
+  }
+  return modes;
+}
+
+export function readFusionModes(raw: unknown, viewName: string): Record<string, string> {
+  const view = viewOf(raw, viewName);
+  return view === undefined ? {} : fusionModesOf(view);
+}
+
+export function resolveFusionMode(
+  place: string,
+  decorations: Decorations,
+  fusionModes: Readonly<Record<string, string>>,
+): "single" | "copies" {
+  const mode = fusionModes[place];
+  if (mode === "single" || mode === "copies") return mode;
+  return decorations.nodes[`place:${place}`]?.single === true ? "single" : "copies";
 }
 
 export function resolvePositions(
@@ -160,6 +214,14 @@ export function resolvePositions(
   return resolved;
 }
 
+function drawnOnce(model: RenderModel, place: string): boolean {
+  for (const key of model.copyLines.keys()) {
+    if (key.startsWith(`${place}\0`)) return false;
+  }
+  const lines = model.nodeLines[`place:${place}`];
+  return lines !== undefined && lines.length > 0;
+}
+
 export function applyView(model: RenderModel, raw: unknown, viewName: string): string {
   const facts = viewFacts(raw, viewName);
   const resolved = resolvePositions(viewName, facts.positions);
@@ -171,7 +233,35 @@ export function applyView(model: RenderModel, raw: unknown, viewName: string): s
   const routeByArc = validateRoutes(viewName, facts.routes, handles);
   const lines = model.dot.split("\n");
   if (lines.at(-1) === "") lines.pop();
+  // Copy entry, then the whole place, then beside (ADR 0072).
+  const pinned = new Set<number>();
+  const copyPoints = new Map<number, readonly [number, number]>();
   for (const [subject, pointValue] of Object.entries(resolved)) {
+    const parsed = copyTarget(subject);
+    if (parsed === undefined) continue;
+    const lineIndex = model.copyLines.get(copyLineKey(parsed[0], parsed[1]));
+    if (lineIndex === undefined) {
+      // A place drawn as one node has no copies. The copy fact does not
+      // apply; lint reports it (ADR 0071, ADR 0072).
+      if (drawnOnce(model, parsed[0])) continue;
+      throw new ViewApplicationError(
+        `view ${pyStr(viewName)} positions unknown subject ${pyStr(subject)}`,
+      );
+    }
+    const previous = copyPoints.get(lineIndex);
+    if (previous !== undefined && (previous[0] !== pointValue[0] || previous[1] !== pointValue[1])) {
+      throw new ViewApplicationError(
+        `view ${pyStr(viewName)} gives the shared copy of place ${pyStr(parsed[0])} two positions`,
+      );
+    }
+    copyPoints.set(lineIndex, pointValue);
+  }
+  for (const [lineIndex, pointValue] of copyPoints) {
+    paint(lines, lineIndex, `${pointValue[0]},${pointValue[1]}!`);
+    pinned.add(lineIndex);
+  }
+  for (const [subject, pointValue] of Object.entries(resolved)) {
+    if (copyTarget(subject) !== undefined) continue;
     validateSubject(subject, viewName);
     const lineIndexes = model.nodeLines[subject];
     if (lineIndexes === undefined || lineIndexes.length === 0) {
@@ -181,13 +271,9 @@ export function applyView(model: RenderModel, raw: unknown, viewName: string): s
     }
     const rendered = `${pointValue[0]},${pointValue[1]}!`;
     for (const lineIndex of lineIndexes) {
-      const line = lines[lineIndex];
-      if (line === undefined) {
-        throw new ViewApplicationError(
-          `view ${pyStr(viewName)} positions unknown subject ${pyStr(subject)}`,
-        );
-      }
-      lines[lineIndex] = posStatementLine(line, rendered);
+      if (pinned.has(lineIndex)) continue;
+      paint(lines, lineIndex, rendered);
+      pinned.add(lineIndex);
     }
   }
   for (const [arcIndexText, route] of routeByArc) {
@@ -226,6 +312,10 @@ export function applyView(model: RenderModel, raw: unknown, viewName: string): s
       "    overlap=scale;",
       ...graphAttrs,
     ];
+    // Rank clusters are for `dot`. `neato` ignores them, and the invisible
+    // edges would stay as springs. Beside places a copy the view did not
+    // position.
+    pinBeside(lines, model, resolved, pinned);
     for (const lineIndex of [...model.besideLines].sort((left, right) => right - left)) {
       lines.splice(lineIndex, 1);
     }
@@ -272,6 +362,72 @@ function validateRoutes(
   return routeByArc;
 }
 
+function pinBeside(
+  lines: string[],
+  model: RenderModel,
+  resolved: Readonly<Record<string, readonly [number, number]>>,
+  pinned: Set<number>,
+): void {
+  for (const placement of model.besidePlacements ?? []) {
+    if (pinned.has(placement.line)) continue;
+    const point = besidePoint(placement, resolved);
+    if (point === undefined) continue;
+    paint(lines, placement.line, `${formatCoord(point[0])},${formatCoord(point[1])}!`);
+    pinned.add(placement.line);
+  }
+}
+
+function paint(lines: string[], lineIndex: number, rendered: string): void {
+  const line = lines[lineIndex];
+  if (line === undefined) {
+    throw new ViewApplicationError(
+      `render model statement line does not end a statement: ${pyStr("")}`,
+    );
+  }
+  lines[lineIndex] = posStatementLine(line, rendered);
+}
+
+function copyLineKey(place: string, transition: string): string {
+  // Same key as `copyKey` in render.ts. Kept here so view does not import render.
+  return `${place}\0${transition}`;
+}
+
+function copyTarget(subject: string): readonly [string, string] | undefined {
+  const marker = "@transition:";
+  if (!subject.startsWith("place:") || !subject.includes(marker)) return undefined;
+  const body = subject.slice("place:".length);
+  const splitAt = body.indexOf(marker);
+  if (splitAt <= 0) return undefined;
+  const place = body.slice(0, splitAt);
+  const transition = body.slice(splitAt + marker.length);
+  if (!place || !transition) return undefined;
+  return [place, transition];
+}
+
+function besidePoint(
+  placement: BesidePlacement,
+  resolved: Readonly<Record<string, readonly [number, number]>>,
+): readonly [number, number] | undefined {
+  const anchor = resolved[placement.anchor];
+  const other = placement.also === undefined ? undefined : resolved[placement.also];
+  if (placement.also !== undefined && anchor !== undefined && other !== undefined) {
+    const fraction = (placement.betweenIndex + 1) / (placement.betweenCount + 1);
+    return [
+      anchor[0] + fraction * (other[0] - anchor[0]),
+      anchor[1] + fraction * (other[1] - anchor[1]),
+    ];
+  }
+  if (anchor !== undefined) return [anchor[0] + placement.slots * placement.gap, anchor[1]];
+  if (other !== undefined && placement.alsoSlots !== undefined && placement.alsoGap !== undefined) {
+    return [other[0] + placement.alsoSlots * placement.alsoGap, other[1]];
+  }
+  return undefined;
+}
+
+function formatCoord(value: number): string {
+  return Number.isInteger(value) ? String(value) : String(value);
+}
+
 function posStatementLine(line: string, rendered: string): string {
   if (line.endsWith("];")) return `${line.slice(0, -2)}, pos="${rendered}"];`;
   if (line.endsWith(";")) return `${line.slice(0, -1)} [pos="${rendered}"];`;
@@ -291,12 +447,13 @@ function point(value: unknown, context: string): readonly [number, number] {
 }
 
 function validateSubject(subject: string, viewName: string): void {
+  if (copyTarget(subject) !== undefined) return;
   const separator = subject.indexOf(":");
   const kind = separator === -1 ? subject : subject.slice(0, separator);
   const name = separator === -1 ? "" : subject.slice(separator + 1);
   if (!name || (kind !== "place" && kind !== "transition")) {
     throw new ViewApplicationError(
-      `view ${pyStr(viewName)} has invalid view subject ${pyStr(subject)} (expected 'place:<name>' or 'transition:<name>')`,
+      `view ${pyStr(viewName)} has invalid view subject ${pyStr(subject)} (expected 'place:<name>', 'transition:<name>', or 'place:<name>@transition:<name>')`,
     );
   }
 }

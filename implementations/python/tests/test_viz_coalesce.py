@@ -1,6 +1,5 @@
 # Shared fusion copies between neighbor siblings (viz.py, ADR 0035).
 
-import json
 import shutil
 import subprocess
 from pathlib import Path
@@ -64,54 +63,55 @@ def test_sibling_groups_are_transitions_with_the_same_one_input_place() -> None:
     )
     # when: the siblings are discovered
     groups = sibling_groups(net, _fusion(net))
-    # then: the choice in arc order; a fusion input does not count, a second
-    # drawn input does, and a lone transition makes no group
-    assert groups == [("hold", "skip", "send")]
+    # then: the choice in structural order; a fusion input does not count, a
+    # second drawn input does, and a lone transition makes no group
+    assert groups == [("hold", "send", "skip")]
 
 
 def test_two_neighbor_siblings_share_one_copy_between_them() -> None:
-    # given: hold and skip both read switch, beside with no side
+    # given: hold and send both read switch. In structural order send sits
+    # between hold and skip, so hold and send are the neighbors.
     net, decorations = _compile(
-        "(switch) -switch->? [hold]\n(switch) -switch->? [skip]\n",
+        "(switch) -switch->? [hold]\n(switch) -switch->? [send]\n",
         "decorate (switch) beside\n",
     )
     # when
     layout = fusion_layout(net, _fusion(net), decorations)
     # then: one copy for both, drawn between them in one row
     assert layout.copies == {
-        ("switch", "hold"): "switch@hold+skip",
-        ("switch", "skip"): "switch@hold+skip",
+        ("switch", "hold"): "switch@hold+send",
+        ("switch", "send"): "switch@hold+send",
     }
-    assert layout.rows == (("hold", "switch@hold+skip", "skip"),)
+    assert layout.rows == (("hold", "switch@hold+send", "send"),)
 
 
 def test_both_arcs_go_to_the_shared_copy_with_their_own_labels() -> None:
     # given
     net, decorations = _compile(
         "@h: (switch) -switch->? [hold]\n@h predicate cel \"owner == 'a'\"\n"
-        "@s: (switch) -switch->? [skip]\n@s predicate cel \"owner == 'b'\"\n",
+        "@s: (switch) -switch->? [send]\n@s predicate cel \"owner == 'b'\"\n",
         "decorate (switch) beside\n",
     )
     # when
     dot = net_to_dot(net, decorations=decorations)
     # then: the copy is drawn once, and each arc keeps its own label
-    assert dot.count('"switch@hold+skip" [shape=ellipse') == 1
+    assert dot.count('"switch@hold+send" [shape=ellipse') == 1
     hold_arc = [
         line
         for line in dot.splitlines()
-        if line.startswith('    "switch@hold+skip" -> "hold" [label')
+        if line.startswith('    "switch@hold+send" -> "hold" [label')
     ]
-    skip_arc = [
+    send_arc = [
         line
         for line in dot.splitlines()
-        if line.startswith('    "switch@hold+skip" -> "skip" [label')
+        if line.startswith('    "switch@hold+send" -> "send" [label')
     ]
-    assert len(hold_arc) == 1 and len(skip_arc) == 1
-    assert "owner == 'a'" in hold_arc[0] and "owner == 'b'" in skip_arc[0]
+    assert len(hold_arc) == 1 and len(send_arc) == 1
+    assert "owner == 'a'" in hold_arc[0] and "owner == 'b'" in send_arc[0]
     # and: the row is ranked as one, without dot's last crossing pass
     assert "    newrank=true;" in dot.splitlines()
     assert "    remincross=false;" in dot.splitlines()
-    assert '    "hold" -> "switch@hold+skip" -> "skip" [style=invis];' in dot
+    assert '    "hold" -> "switch@hold+send" -> "send" [style=invis];' in dot
 
 
 def test_a_run_of_three_pairs_from_the_left_and_the_last_copy_goes_right() -> None:
@@ -123,8 +123,9 @@ def test_a_run_of_three_pairs_from_the_left_and_the_last_copy_goes_right() -> No
     )
     # when
     layout = fusion_layout(net, _fusion(net), decorations)
-    # then: hold and skip share a copy; send keeps its own, on its far side
-    assert layout.rows == (("hold", "switch@hold+skip", "skip", "send", "switch@send"),)
+    # then: hold and send share a copy; skip, last in the structural order,
+    # keeps its own on its far side
+    assert layout.rows == (("hold", "switch@hold+send", "send", "skip", "switch@skip"),)
 
 
 def test_own_copies_balance_against_the_shared_copy() -> None:
@@ -137,31 +138,31 @@ def test_own_copies_balance_against_the_shared_copy() -> None:
     )
     # when
     layout = fusion_layout(net, _fusion(net), decorations)
-    # then: hold's verdicts goes left, away from the shared copy; send's
-    # switch goes right (the run's last), so its verdicts goes left
+    # then: hold and send are neighbors, so they share both places; skip,
+    # last in the structural order, keeps its own switch on the right
     assert layout.rows == (
         (
-            "verdicts@hold",
             "hold",
-            "switch@hold+skip",
-            "skip",
-            "verdicts@send",
+            "switch@hold+send",
+            "verdicts@hold+send",
             "send",
-            "switch@send",
+            "skip",
+            "switch@skip",
         ),
     )
 
 
 def test_copies_on_siblings_that_are_not_neighbors_stay_apart() -> None:
-    # given: hold and send read switch; skip, between them, does not
+    # given: hold and skip read switch; send, between them in structural
+    # order, does not
     net, decorations = _compile(
-        "(switch) -switch->? [hold]\n(switch) -switch->? [send]\n",
+        "(switch) -switch->? [hold]\n(switch) -switch->? [skip]\n",
         "decorate (switch) beside\n",
     )
     # when
     layout = fusion_layout(net, _fusion(net), decorations)
     # then: one copy each, in a row of its own
-    assert layout.rows == (("switch@hold", "hold"), ("switch@send", "send"))
+    assert layout.rows == (("switch@hold", "hold"), ("switch@skip", "skip"))
 
 
 def test_a_place_beside_one_side_or_not_beside_keeps_one_copy_per_transition() -> None:
@@ -179,20 +180,21 @@ def test_a_place_beside_one_side_or_not_beside_keeps_one_copy_per_transition() -
 
 
 def test_consume_and_inhibit_arcs_share_a_copy_too() -> None:
-    # given: hold consumes a switch token; skip requires there is none
+    # given: hold consumes a switch token; send, its structural neighbor,
+    # requires there is none
     net, decorations = _compile(
-        "(switch) -switch-> [hold]\n(switch) -switch->0 [skip]\n",
+        "(switch) -switch-> [hold]\n(switch) -switch->0 [send]\n",
         "decorate (switch) beside\n",
     )
     # when
     dot = net_to_dot(net, decorations=decorations)
     # then
-    assert '    "switch@hold+skip" -> "hold" [' in dot
-    assert '    "switch@hold+skip" -> "skip" [' in dot
+    assert '    "switch@hold+send" -> "hold" [' in dot
+    assert '    "switch@hold+send" -> "send" [' in dot
 
 
 _PLAY_NET = _CHOICE + (
-    "(switch) -switch->? [hold]\n(switch) -switch->? [skip]\n"
+    "(switch) -switch->? [hold]\n(switch) -switch->? [send]\n"
     "(switch) annotation fusion true\n"
     "decorate (switch) beside\n"
     "marking initial (pending) <- $d1\nmarking initial (pending) <- $d2\n"
@@ -205,7 +207,7 @@ def _walkthrough(tmp_path: Path) -> dict[str, Any]:
     play = parse_play(
         'play s\nnet "choice.petrinet"\n'
         'inject (switch) <- switch {"owner": "annex"}\n'
-        "fire [hold]\nfire [skip]\n",
+        "fire [hold]\nfire [send]\n",
         origin=tmp_path,
     )
     trace = check_play(play).trace("trunk")
@@ -216,12 +218,12 @@ def _walkthrough(tmp_path: Path) -> dict[str, Any]:
 def test_a_walkthrough_draws_the_shared_copy_once_with_its_marking(
     tmp_path: Path,
 ) -> None:
-    # when: the subnet scope draws hold and skip in every step
+    # when: the subnet scope draws hold and send in every step
     document = _walkthrough(tmp_path)
     injection = document["steps"][0]
     # then: one switch copy, and its injected token shows once
     for dot in (injection["before_dot"], injection["after_dot"]):
-        assert dot.count('"switch@hold+skip" [shape=ellipse') == 1
+        assert dot.count('"switch@hold+send" [shape=ellipse') == 1
         assert '"switch@hold" ' not in dot
     assert injection["after_dot"].count("<i>injected</i>") == 1
 
@@ -232,18 +234,96 @@ def test_twin_graphs_with_a_shared_copy_get_one_layout(tmp_path: Path) -> None:
     steps: list[dict[str, str]] = _walkthrough(tmp_path)["steps"]
 
     def layout(dot: str) -> dict[str, tuple[str, str, str]]:
+        # plain text: Graphviz 2.42's -Tjson can embed raw image bytes.
         out = subprocess.run(
-            ["dot", "-Tjson"], input=dot, capture_output=True, text=True, check=True
+            ["dot", "-Tplain"], input=dot, capture_output=True, text=True, check=True
         ).stdout
-        return {
-            o["name"]: (o["pos"], o["width"], o["height"])
-            for o in json.loads(out)["objects"]
-            if "pos" in o
-        }
+        found: dict[str, tuple[str, str, str]] = {}
+        for line in out.splitlines():
+            parts = line.split()
+            if parts and parts[0] == "node":
+                name = parts[1].strip('"')
+                found[name] = (f"{parts[2]},{parts[3]}", parts[4], parts[5])
+        return found
 
     # when / then: every step's halves are laid out alike, the copy between
     for step in steps:
         before, after = layout(step["before_dot"]), layout(step["after_dot"])
         assert before == after
         x = {name: float(pos.split(",")[0]) for name, (pos, _, _) in before.items()}
-        assert x["hold"] < x["switch@hold+skip"] < x["skip"]
+        assert x["hold"] < x["switch@hold+send"] < x["send"]
+
+
+def test_an_unshared_run_pushes_copies_outside_the_row() -> None:
+    # given: hold and send read one beside place that never shares. In
+    # structural order they are neighbors; skip sits after them.
+    net, decorations = _compile(
+        "(switch) -switch->? [hold]\n(switch) -switch->? [send]\n",
+        "decorate (switch) beside unshared\n",
+    )
+    # when
+    layout = fusion_layout(net, _fusion(net), decorations)
+    # then: one copy each, outside the siblings
+    assert layout.rows == (("switch@hold", "hold", "send", "switch@send"),)
+    assert "hold+send" not in "".join(layout.copies.values())
+
+
+def test_an_unshared_run_of_three_balances_the_middle_to_the_left() -> None:
+    # given: hold, skip and send all read the unshared place
+    net, decorations = _compile(
+        "(switch) -switch->? [hold]\n(switch) -switch->? [skip]\n"
+        "(switch) -switch->? [send]\n",
+        "decorate (switch) beside unshared\n",
+    )
+    # when
+    layout = fusion_layout(net, _fusion(net), decorations)
+    # then: the ends go outward and the middle copy, a tie, goes left
+    assert layout.rows == (
+        ("switch@hold", "hold", "switch@send", "send", "skip", "switch@skip"),
+    )
+
+
+_LEASE_CHOICE = """\
+// A holder either commits its work or loses the lease; both read the clock.
+// (clock) is supplied from outside (fusion), so it's drawn as copies.
+net lease_choice "One holder: commit or expire"
+
+(idle) -job-> [acquire]
+(lease) -permit-> [acquire]
+[acquire] -job-> (working)
+(working) -job-> [commit]
+[commit] -job-> (done)
+[commit] -permit-> (lease)
+(working) -job-> [expire]
+[expire] -job-> (idle)
+[expire] -permit-> (lease)
+
+(clock) -now->? [acquire]
+(clock) -now->? [commit]
+(clock) -now->? [expire]
+
+(clock) annotation fusion true
+decorate (clock) beside unshared
+"""
+
+
+def test_lease_choice_unshared_draws_two_clock_copies_outside_the_row() -> None:
+    # given: commit and expire are a choice, and the clock is beside unshared
+    document = compile_petrinet_text(_LEASE_CHOICE, "lease_choice.petrinet")
+    net = parse_net(document)
+    decorations = read_decorations(document)
+    # when: the layout and the drawing place the copies
+    layout = fusion_layout(net, _fusion(net), decorations)
+    dot = net_to_dot(net, decorations=decorations)
+    # then: no shared clock node, and the choice row is copy, commit, expire, copy
+    assert layout.rows == (
+        ("clock@acquire", "acquire"),
+        ("clock@commit", "commit", "expire", "clock@expire"),
+    )
+    assert "clock@commit+expire" not in dot
+    assert dot.count('"clock@commit" [shape=ellipse') == 1
+    assert dot.count('"clock@expire" [shape=ellipse') == 1
+    assert (
+        '    "clock@commit" -> "commit" -> "expire" -> "clock@expire" [style=invis];'
+        in dot
+    )
